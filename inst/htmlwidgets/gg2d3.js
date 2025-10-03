@@ -28,13 +28,136 @@ HTMLWidgets.widget({
     }
 
     function makeScale(desc, range) {
-      if (!desc || !desc.type) return d3.scaleLinear().domain([0, 1]).range(range);
-      if (desc.type === "continuous") return d3.scaleLinear().domain(desc.domain || [0, 1]).range(range);
-      if (desc.type === "time") {
-        const dom = (desc.domain || []).map(d => (d instanceof Date ? d : new Date(d)));
-        return d3.scaleTime().domain(dom).range(range);
+      const rng = Array.isArray(range) ? range : [0, 1];
+      if (!desc) return d3.scaleLinear().domain([0, 1]).range(rng);
+
+      const type = typeof desc.type === "string" ? desc.type.toLowerCase() : desc.type;
+      const transform = typeof desc.transform === "string"
+        ? desc.transform.toLowerCase()
+        : (typeof desc.trans === "string" ? desc.trans.toLowerCase() : undefined);
+      const domainArr = Array.isArray(desc.domain) ? desc.domain : [];
+      const numericValues = domainArr
+        .map(d => (typeof d === "number" ? d : +d))
+        .filter(v => Number.isFinite(v));
+      const hasNumericDomain = domainArr.length && numericValues.length === domainArr.length;
+      const numericDomain = numericValues.length ? numericValues : [0, 1];
+      const dateDomain = (() => {
+        const parsed = domainArr
+          .map(d => (d instanceof Date ? d : new Date(d)))
+          .filter(d => d instanceof Date && !Number.isNaN(+d));
+        return parsed.length ? parsed : [new Date(0), new Date(1)];
+      })();
+
+      const buildScale = kind => {
+        switch (kind) {
+          case "continuous":
+          case "linear":
+          case "identity":
+            return d3.scaleLinear().domain(numericDomain).range(rng);
+
+          case "log":
+          case "logarithmic":
+          case "log10":
+          case "log2": {
+            const positive = numericDomain.filter(v => v > 0);
+            const domain = positive.length ? positive : [1, 10];
+            const scale = d3.scaleLog().domain(domain).range(rng);
+            const base = desc.base || (kind === "log2" ? 2 : kind === "log10" ? 10 : null);
+            if (base) scale.base(base);
+            return scale;
+          }
+
+          case "sqrt":
+          case "square-root":
+            return d3.scaleSqrt().domain(numericDomain).range(rng);
+
+          case "pow":
+          case "power": {
+            const exponent = [desc.exponent, desc.power, desc.exp]
+              .map(v => (v == null ? null : +v))
+              .find(v => Number.isFinite(v));
+            const scale = d3.scalePow().exponent(exponent != null ? exponent : 1).domain(numericDomain).range(rng);
+            return scale;
+          }
+
+          case "symlog":
+          case "sym-log": {
+            const scale = d3.scaleSymlog().domain(numericDomain).range(rng);
+            if (desc.constant != null && Number.isFinite(+desc.constant)) scale.constant(+desc.constant);
+            return scale;
+          }
+
+          case "time":
+          case "date":
+          case "datetime":
+            return d3.scaleTime().domain(dateDomain).range(rng);
+
+          case "utc":
+          case "time-utc":
+            return d3.scaleUtc().domain(dateDomain).range(rng);
+
+          case "band":
+          case "categorical":
+          case "ordinal":
+          case "discrete": {
+            const band = d3.scaleBand().domain(domainArr).range(rng);
+            if (desc.paddingInner != null || desc.paddingOuter != null) {
+              if (desc.paddingInner != null && Number.isFinite(+desc.paddingInner)) band.paddingInner(+desc.paddingInner);
+              if (desc.paddingOuter != null && Number.isFinite(+desc.paddingOuter)) band.paddingOuter(+desc.paddingOuter);
+            } else if (desc.padding != null && Number.isFinite(+desc.padding)) {
+              band.padding(+desc.padding);
+            } else {
+              band.padding(0.1);
+            }
+            if (desc.align != null && Number.isFinite(+desc.align)) band.align(+desc.align);
+            return band;
+          }
+
+          case "point": {
+            const point = d3.scalePoint().domain(domainArr).range(rng);
+            if (desc.padding != null && Number.isFinite(+desc.padding)) point.padding(+desc.padding);
+            if (desc.align != null && Number.isFinite(+desc.align)) point.align(+desc.align);
+            return point;
+          }
+
+          case "quantize":
+            if (Array.isArray(desc.range)) {
+              return d3.scaleQuantize().domain(numericDomain).range(desc.range);
+            }
+            return null;
+
+          case "quantile":
+            if (Array.isArray(desc.range)) {
+              return d3.scaleQuantile().domain(numericDomain).range(desc.range);
+            }
+            return null;
+
+          case "threshold":
+            if (Array.isArray(desc.range)) {
+              return d3.scaleThreshold().domain(numericDomain).range(desc.range);
+            }
+            return null;
+
+          default:
+            return null;
+        }
+      };
+
+      const fromType = buildScale(type);
+      if (fromType) return fromType;
+
+      if (transform) {
+        const fromTransform = buildScale(transform);
+        if (fromTransform) return fromTransform;
       }
-      return d3.scaleBand().domain(desc.domain || []).range(range).padding(0.1);
+
+      if (!domainArr.length) return d3.scaleLinear().domain(numericDomain).range(rng);
+
+      if (hasNumericDomain) {
+        return d3.scaleLinear().domain(numericDomain).range(rng);
+      }
+
+      return d3.scaleBand().domain(domainArr).range(rng).padding(0.1);
     }
 
     // ---------- draw ----------
@@ -55,8 +178,13 @@ HTMLWidgets.widget({
       let yScale = makeScale(ir.scales && ir.scales.y, flip ? [0, w] : [h, 0]);
 
       // Axes
-      g.append("g").attr("transform", `translate(0,${h})`).call(d3.axisBottom(xScale));
-      g.append("g").call(d3.axisLeft(yScale));
+      if (flip) {
+        g.append("g").call(d3.axisLeft(xScale));
+        g.append("g").attr("transform", `translate(0,${h})`).call(d3.axisBottom(yScale));
+      } else {
+        g.append("g").attr("transform", `translate(0,${h})`).call(d3.axisBottom(xScale));
+        g.append("g").call(d3.axisLeft(yScale));
+      }
 
       // Title
       if (ir.title) {
