@@ -1,0 +1,89 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# gg2d3
+
+<!-- badges: start -->
+<!-- [![R-CMD-check](https://github.com/DavidZenz/gg2d3/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DavidZenz/gg2d3/actions/workflows/R-CMD-check.yaml) -->
+<!-- [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html) -->
+<!-- badges: end -->
+
+**gg2d3** renders **ggplot2** objects with **D3** in the browser (via
+**htmlwidgets**).  
+Under the hood, gg2d3 converts a ggplot into a small intermediate
+representation (IR) and draws it in SVG with D3.
+
+## Installation
+
+Install the development version from GitHub:
+
+``` r
+# install.packages("devtools")
+# not run
+devtools::install_github("DavidZenz/gg2d3")
+```
+
+## Quick start
+
+``` r
+library(ggplot2)
+library(gg2d3)
+
+p <- ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) +
+  geom_point() +
+  ggtitle("mpg vs wt")
+
+gg2d3(p)
+```
+
+## What it supports today (MVP)
+
+- Geoms: `point`, `line`/`path`, `bar`/`col`, `rect`, `text`
+- Continuous & categorical x/y scales, axes, titles
+- Colors from ggplot (hex in `colour`) or simple palettes
+- `coord_flip` basic support
+
+*Planned next:* legends, facets, time scales, stacking/dodging, themes.
+
+## Troubleshooting
+
+- **Blank widget / only axes**  
+  Ensure D3 is bundled correctly in the package
+  (`inst/htmlwidgets/lib/d3/d3.v7.min.js`) and
+  `inst/htmlwidgets/gg2d3.yaml` declares it.
+
+- **Console says “no marks drawn”**  
+  Your layer may be missing a recognized `geom` or data columns. Start
+  with a simple scatter and inspect the IR:
+
+  ``` r
+  ir <- gg2d3:::as_d3_ir(p)
+  str(ir$layers[[1]], max.level = 1)
+  ```
+
+## Development (for contributors)
+
+Vendor D3 v7 locally:
+
+``` r
+dir.create("inst/htmlwidgets/lib/d3", recursive = TRUE, showWarnings = FALSE)
+download.file(
+  "https://d3js.org/d3.v7.min.js",
+  destfile = "inst/htmlwidgets/lib/d3/d3.v7.min.js",
+  mode = "wb"
+)
+```
+
+Iterate:
+
+``` r
+devtools::document()
+devtools::load_all()
+```
+
+Then re-run the quick start example.
+
+------------------------------------------------------------------------
+
+*Note:* `README.md` is generated from `README.Rmd`. Use
+`devtools::build_readme()` to re-render.

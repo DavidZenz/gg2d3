@@ -1,0 +1,12 @@
+# inst/htmlwidgets/gg2d3.yaml
+name: gg2d3
+version: 0.0.1
+src: htmlwidgets
+script: gg2d3.js
+
+dependencies:
+  - name: d3
+    version: "7"
+    src: htmlwidgets/lib/d3
+    script: d3.v7.min.js
+

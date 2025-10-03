@@ -1,0 +1,17 @@
+Package: gg2d3
+Title: gg2d3: Render ggplot2 with D3
+Version: 0.0.0.9000
+Authors@R: 
+    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Translates ggplot2 objects into a small intermediate
+    representation and renders them with D3 via htmlwidgets.
+License: MIT + file LICENSE
+URL: https://github.com/<you>/gg2d3
+BugReports: https://github.com/<you>/gg2d3/issues
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
