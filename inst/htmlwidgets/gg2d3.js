@@ -177,12 +177,21 @@ HTMLWidgets.widget({
       let xScale = makeScale(ir.scales && ir.scales.x, flip ? [h, 0] : [0, w]);
       let yScale = makeScale(ir.scales && ir.scales.y, flip ? [0, w] : [h, 0]);
 
-      // Axes
+      // Axes - position x-axis at y=0 if 0 is in domain
       if (flip) {
         g.append("g").call(d3.axisLeft(xScale));
         g.append("g").attr("transform", `translate(0,${h})`).call(d3.axisBottom(yScale));
       } else {
-        g.append("g").attr("transform", `translate(0,${h})`).call(d3.axisBottom(xScale));
+        // Check if y-scale includes 0 and position x-axis accordingly
+        let xAxisY = h;
+        if (typeof yScale.bandwidth !== "function") {
+          const yDomain = yScale.domain();
+          const [yMin, yMax] = d3.extent(yDomain);
+          if (yMin <= 0 && yMax >= 0) {
+            xAxisY = yScale(0);
+          }
+        }
+        g.append("g").attr("transform", `translate(0,${xAxisY})`).call(d3.axisBottom(xScale));
         g.append("g").call(d3.axisLeft(yScale));
       }
 
@@ -209,14 +218,26 @@ HTMLWidgets.widget({
         const aes = layer.aes || {};
         const get = (d, k) => (k && d != null) ? d[k] : null;
 
-        const col = d => {
+        // Get stroke/border color
+        const strokeColor = d => {
           if (aes.color) {
             const v = val(get(d, aes.color));
             if (isHexColor(v)) return v;           // ggplot already mapped to hex
             const mapped = colorScale(v);
-            return mapped || "currentColor";
+            return mapped || (layer.params && layer.params.colour) || "currentColor";
           }
-          return "currentColor";
+          return (layer.params && layer.params.colour) || "currentColor";
+        };
+
+        // Get fill color
+        const fillColor = d => {
+          if (aes.fill) {
+            const v = val(get(d, aes.fill));
+            if (isHexColor(v)) return v;
+            const mapped = colorScale(v);
+            return mapped || (layer.params && layer.params.fill) || "grey35";
+          }
+          return (layer.params && layer.params.fill) || "grey35";
         };
         const opa = d => {
           if (aes.alpha) {
@@ -227,29 +248,63 @@ HTMLWidgets.widget({
         };
 
         if (layer.geom === "point") {
-          const pts = dat.filter(d => num(get(d, aes.x)) != null && num(get(d, aes.y)) != null);
+          const isXBand = typeof xScale.bandwidth === "function";
+          const isYBand = typeof yScale.bandwidth === "function";
+
+          const pts = dat.filter(d => {
+            const xVal = isXBand ? val(get(d, aes.x)) : num(get(d, aes.x));
+            const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
+            return xVal != null && yVal != null;
+          });
+          const defaultSize = (layer.params && layer.params.size) || 1.5;
+
           const sel = g.append("g").selectAll("circle").data(pts);
           sel.enter().append("circle")
-            .attr("cx", d => xScale(num(get(d, aes.x))))
-            .attr("cy", d => yScale(num(get(d, aes.y))))
-            .attr("r", d => Math.max(1.8, +(val(get(d, aes.size))) || 2))
-            .attr("fill", d => col(d))
+            .attr("cx", d => {
+              const xVal = isXBand ? val(get(d, aes.x)) : num(get(d, aes.x));
+              return xScale(xVal);
+            })
+            .attr("cy", d => {
+              const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
+              return yScale(yVal);
+            })
+            .attr("r", d => {
+              if (aes.size) {
+                return Math.max(0.5, +(val(get(d, aes.size))) || defaultSize);
+              }
+              return defaultSize;
+            })
+            .attr("fill", d => fillColor(d))
+            .attr("stroke", d => strokeColor(d))
+            .attr("stroke-width", 0.5)
             .attr("opacity", d => opa(d));
           drawn += pts.length;
 
         } else if (layer.geom === "line" || layer.geom === "path") {
+          const isXBand = typeof xScale.bandwidth === "function";
+          const isYBand = typeof yScale.bandwidth === "function";
+
           const grouped = d3.group(dat, d => val(get(d, "group")) ?? 1);
           grouped.forEach(arr => {
-            const pts = arr
-              .map(d => ({ x: num(get(d, aes.x)), y: num(get(d, aes.y)), d }))
-              .filter(p => p.x != null && p.y != null)
-              .sort((a, b) => d3.ascending(a.x, b.x));
+            let pts = arr
+              .map(d => {
+                const xVal = isXBand ? val(get(d, aes.x)) : num(get(d, aes.x));
+                const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
+                return { x: xVal, y: yVal, d };
+              })
+              .filter(p => p.x != null && p.y != null);
+
+            // Only sort for geom_line (and only if x is numeric)
+            if (layer.geom === "line" && !isXBand) {
+              pts = pts.sort((a, b) => d3.ascending(a.x, b.x));
+            }
+
             if (pts.length >= 2) {
               const line = d3.line().x(p => xScale(p.x)).y(p => yScale(p.y));
               g.append("path")
                 .attr("d", line(pts))
                 .attr("fill", "none")
-                .attr("stroke", col(pts[0].d))
+                .attr("stroke", strokeColor(pts[0].d))
                 .attr("stroke-width", 1.5)
                 .attr("opacity", opa(pts[0].d));
               drawn += 1;
@@ -259,42 +314,118 @@ HTMLWidgets.widget({
         } else if (layer.geom === "bar" || layer.geom === "col") {
           const isBand = typeof xScale.bandwidth === "function";
           const bw = isBand ? xScale.bandwidth() : Math.max(4, w / Math.max(1, dat.length));
-          const bars = dat.filter(d => num(get(d, aes.x)) != null && num(get(d, aes.y)) != null);
+
+          // For categorical x, use val(); for continuous, use num()
+          const bars = dat.filter(d => {
+            const xVal = isBand ? val(get(d, aes.x)) : num(get(d, aes.x));
+            const yVal = num(get(d, aes.y));
+            return xVal != null && yVal != null;
+          });
+
+          // Check if data has ymin/ymax (for stacked bars)
+          const hasStack = bars.length > 0 && get(bars[0], "ymin") != null && get(bars[0], "ymax") != null;
+
+          // Calculate baseline: use 0 if in domain, else use domain min
+          let baseline;
+          if (!hasStack) {
+            const yDomain = yScale.domain();
+            if (typeof yScale.bandwidth === "function") {
+              baseline = h;
+            } else {
+              const [yMin, yMax] = d3.extent(yDomain);
+              if (yMin <= 0 && yMax >= 0) {
+                baseline = yScale(0);
+              } else {
+                baseline = yScale(yMin);
+              }
+            }
+          }
+
           const sel = g.append("g").selectAll("rect").data(bars);
           sel.enter().append("rect")
             .attr("x", d => (isBand ? xScale(val(get(d, aes.x))) : xScale(num(get(d, aes.x))) - bw / 2))
-            .attr("y", d => yScale(num(get(d, aes.y))))
+            .attr("y", d => {
+              if (hasStack) {
+                // Use ymax for top of bar segment
+                return yScale(num(get(d, "ymax")));
+              } else {
+                const yPos = yScale(num(get(d, aes.y)));
+                return Math.min(yPos, baseline);
+              }
+            })
             .attr("width", bw)
-            .attr("height", d => Math.max(0, (yScale(0) ?? h) - yScale(num(get(d, aes.y)))))
-            .attr("fill", d => col(d))
+            .attr("height", d => {
+              if (hasStack) {
+                // Height from ymin to ymax
+                const yMinPos = yScale(num(get(d, "ymin")));
+                const yMaxPos = yScale(num(get(d, "ymax")));
+                return Math.abs(yMaxPos - yMinPos);
+              } else {
+                return Math.abs(yScale(num(get(d, aes.y))) - baseline);
+              }
+            })
+            .attr("fill", d => fillColor(d))
             .attr("opacity", d => opa(d));
           drawn += bars.length;
 
         } else if (layer.geom === "rect") {
           const rects = dat.filter(d =>
-            num(get(d, aes.xmin)) != null && num(get(d, aes.xmax)) != null &&
-            num(get(d, aes.ymin)) != null && num(get(d, aes.ymax)) != null
+            get(d, aes.xmin) != null && get(d, aes.xmax) != null &&
+            get(d, aes.ymin) != null && get(d, aes.ymax) != null
           );
+
+          const isXBand = typeof xScale.bandwidth === "function";
+          const isYBand = typeof yScale.bandwidth === "function";
+
           const sel = g.append("g").selectAll("rect").data(rects);
           sel.enter().append("rect")
-            .attr("x", d => xScale(num(get(d, aes.xmin))))
-            .attr("y", d => yScale(num(get(d, aes.ymax))))
-            .attr("width", d => Math.max(0, xScale(num(get(d, aes.xmax))) - xScale(num(get(d, aes.xmin)))))
-            .attr("height", d => Math.max(0, yScale(num(get(d, aes.ymin))) - yScale(num(get(d, aes.ymax)))))
-            .attr("fill", d => col(d))
+            .attr("x", d => {
+              const xmin = isXBand ? val(get(d, aes.xmin)) : num(get(d, aes.xmin));
+              return xScale(xmin);
+            })
+            .attr("y", d => {
+              const ymax = isYBand ? val(get(d, aes.ymax)) : num(get(d, aes.ymax));
+              return yScale(ymax);
+            })
+            .attr("width", d => {
+              if (isXBand) return xScale.bandwidth();
+              const x1 = xScale(num(get(d, aes.xmin)));
+              const x2 = xScale(num(get(d, aes.xmax)));
+              return Math.abs(x2 - x1);
+            })
+            .attr("height", d => {
+              if (isYBand) return yScale.bandwidth();
+              const y1 = yScale(num(get(d, aes.ymin)));
+              const y2 = yScale(num(get(d, aes.ymax)));
+              return Math.abs(y2 - y1);
+            })
+            .attr("fill", d => fillColor(d))
             .attr("opacity", d => opa(d));
           drawn += rects.length;
 
         } else if (layer.geom === "text") {
-          const txt = dat.filter(d => num(get(d, aes.x)) != null && num(get(d, aes.y)) != null);
+          const isXBand = typeof xScale.bandwidth === "function";
+          const isYBand = typeof yScale.bandwidth === "function";
+
+          const txt = dat.filter(d => {
+            const xVal = isXBand ? val(get(d, aes.x)) : num(get(d, aes.x));
+            const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
+            return xVal != null && yVal != null;
+          });
           const sel = g.append("g").selectAll("text").data(txt);
           sel.enter().append("text")
-            .attr("x", d => xScale(num(get(d, aes.x))))
-            .attr("y", d => yScale(num(get(d, aes.y))))
+            .attr("x", d => {
+              const xVal = isXBand ? val(get(d, aes.x)) : num(get(d, aes.x));
+              return xScale(xVal);
+            })
+            .attr("y", d => {
+              const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
+              return yScale(yVal);
+            })
             .attr("dominant-baseline", "middle")
             .attr("text-anchor", "middle")
             .text(d => val(get(d, aes.label)))
-            .attr("fill", d => col(d))
+            .attr("fill", d => strokeColor(d))
             .attr("opacity", d => opa(d))
             .style("font-size", "10px");
           drawn += txt.length;

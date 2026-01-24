@@ -34,8 +34,53 @@ as_d3_ir <- function(p, width = 640, height = 400,
     rows
   }
 
+  # Extract scale objects early (needed for mapping discrete values)
+  xscale_obj <- b$layout$panel_scales_x[[1]]
+  yscale_obj <- b$layout$panel_scales_y[[1]]
+
+  # Helper to map discrete x/y values to labels
+  map_discrete <- function(values, scale_obj) {
+    if (inherits(scale_obj, "ScaleDiscrete") && is.numeric(values)) {
+      labels <- scale_obj$get_limits()
+      # Only map if values are integer indices (not continuous)
+      # Check if all non-NA values are whole numbers
+      non_na <- !is.na(values)
+      if (all(values[non_na] == floor(values[non_na]))) {
+        # Values are integers, safe to use as indices
+        result <- rep(NA_character_, length(values))
+        result[non_na] <- labels[values[non_na]]
+        result
+      } else {
+        # Values are continuous, don't map
+        values
+      }
+    } else {
+      values
+    }
+  }
+
   layers <- lapply(seq_along(b$data), function(i) {
     df <- b$data[[i]]
+
+    # Map discrete x/y values to their labels (only if column exists and has values)
+    if ("x" %in% names(df) && !all(is.na(df$x))) {
+      df$x <- map_discrete(df$x, xscale_obj)
+    }
+    if ("y" %in% names(df) && !all(is.na(df$y))) {
+      df$y <- map_discrete(df$y, yscale_obj)
+    }
+    if ("xmin" %in% names(df) && !all(is.na(df$xmin))) {
+      df$xmin <- map_discrete(df$xmin, xscale_obj)
+    }
+    if ("xmax" %in% names(df) && !all(is.na(df$xmax))) {
+      df$xmax <- map_discrete(df$xmax, xscale_obj)
+    }
+    if ("ymin" %in% names(df) && !all(is.na(df$ymin))) {
+      df$ymin <- map_discrete(df$ymin, yscale_obj)
+    }
+    if ("ymax" %in% names(df) && !all(is.na(df$ymax))) {
+      df$ymax <- map_discrete(df$ymax, yscale_obj)
+    }
 
     # --- robust geom name ---
     gobj  <- b$plot$layers[[i]]$geom
@@ -119,21 +164,35 @@ as_d3_ir <- function(p, width = 640, height = 400,
     )
   })
 
-  # domains directly from built data to preserve numeric
+  # Check if scale is discrete and get proper domain
+  get_scale_info <- function(scale_obj, data_values) {
+    if (inherits(scale_obj, "ScaleDiscrete")) {
+      # Discrete scale: get labels from scale object
+      domain <- scale_obj$get_limits()
+      list(type = "categorical", domain = unname(domain))
+    } else {
+      # Continuous scale: get range from data
+      if (is.null(data_values) || length(data_values) == 0) {
+        list(type = "continuous", domain = c(0, 1))
+      } else {
+        list(type = "continuous", domain = unname(range(data_values, finite = TRUE)))
+      }
+    }
+  }
+
   allx <- unlist(lapply(b$data, function(df) if ("x" %in% names(df)) df$x))
   ally <- unlist(lapply(b$data, function(df) if ("y" %in% names(df)) df$y))
   allc <- unlist(lapply(b$data, function(df) if ("colour" %in% names(df)) df$colour))
 
+  # Helper for color domain
   dom <- function(v) {
     if (is.null(v) || length(v) == 0) return(numeric(0))
     if (is.numeric(v)) range(v, finite = TRUE) else unique(v)
   }
 
   scales <- list(
-    x = list(type = if (is.numeric(allx)) "continuous" else "categorical",
-             domain = unname(dom(allx))),
-    y = list(type = if (is.numeric(ally)) "continuous" else "categorical",
-             domain = unname(dom(ally)))
+    x = get_scale_info(xscale_obj, allx),
+    y = get_scale_info(yscale_obj, ally)
   )
   if (length(allc)) {
     scales$color <- list(
