@@ -171,11 +171,17 @@ as_d3_ir <- function(p, width = 640, height = 400,
       domain <- scale_obj$get_limits()
       list(type = "categorical", domain = unname(domain))
     } else {
-      # Continuous scale: get range from data
+      # Continuous scale: get range from scale object's limits
       if (is.null(data_values) || length(data_values) == 0) {
         list(type = "continuous", domain = c(0, 1))
       } else {
-        list(type = "continuous", domain = unname(range(data_values, finite = TRUE)))
+        # Get the actual scale range (which includes ggplot2's expansion)
+        # scale_obj$get_limits() returns the computed scale range
+        scale_range <- tryCatch(
+          scale_obj$get_limits(),
+          error = function(e) range(data_values, finite = TRUE)
+        )
+        list(type = "continuous", domain = unname(scale_range))
       }
     }
   }
