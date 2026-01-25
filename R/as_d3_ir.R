@@ -186,7 +186,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
     # columns we keep
     keep_aes <- c(
       "PANEL","x","y","xend","yend","xmin","xmax","ymin","ymax",
-      "colour","fill","size","alpha","group","label"
+      "colour","fill","size","alpha","group","label",
+      "stroke","shape","linewidth","linetype","lineend"
     )
 
     # coerce + rowize (same as your latest version)
