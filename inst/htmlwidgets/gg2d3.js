@@ -157,49 +157,221 @@ HTMLWidgets.widget({
         return d3.scaleLinear().domain(numericDomain).range(rng);
       }
 
-      return d3.scaleBand().domain(domainArr).range(rng).padding(0.1);
+      // Use paddingOuter for edge spacing (matches ggplot2's 0.6 units)
+      // Use paddingInner for spacing between bars
+      return d3.scaleBand().domain(domainArr).range(rng)
+        .paddingInner(0.2)
+        .paddingOuter(0.6);
+    }
+
+    // Convert R color names to CSS hex values
+    function convertColor(color) {
+      if (!color || typeof color !== 'string') return color;
+
+      // R uses grey0-grey100 scale - convert to hex
+      // grey0 = #000000 (black), grey100 = #FFFFFF (white)
+      // greyN = RGB(N*2.55, N*2.55, N*2.55)
+      const greyMatch = color.match(/^grey(\d+)$/);
+      if (greyMatch) {
+        const value = parseInt(greyMatch[1]);
+        const rgb = Math.round(value * 2.55);
+        const hex = rgb.toString(16).padStart(2, '0');
+        return `#${hex}${hex}${hex}`;
+      }
+
+      return color;
+    }
+
+    // Apply theme styling to axes
+    function applyAxisStyle(axisGroup, textSpec, lineSpec, tickSpec) {
+      // Style axis text (tick labels)
+      if (textSpec && textSpec.type === "text") {
+        axisGroup.selectAll("text")
+          .style("fill", convertColor(textSpec.colour) || "#4D4D4D")
+          .style("font-size", textSpec.size ? `${textSpec.size}px` : "8.8px")
+          .style("font-family", textSpec.family || "sans-serif")
+          .style("font-weight", textSpec.face === "bold" ? "bold" : "normal")
+          .style("font-style", textSpec.face === "italic" ? "italic" : "normal");
+      }
+
+      // Hide axis line if element_blank (theme_gray default)
+      if (lineSpec && lineSpec.type === "blank") {
+        axisGroup.select(".domain").attr("stroke", "none");
+      } else if (lineSpec && lineSpec.type === "line") {
+        axisGroup.select(".domain")
+          .attr("stroke", convertColor(lineSpec.colour) || "black")
+          .attr("stroke-width", lineSpec.linewidth || 1.89);
+      }
+
+      // Style tick marks
+      if (tickSpec && tickSpec.type === "line") {
+        axisGroup.selectAll(".tick line")
+          .attr("stroke", convertColor(tickSpec.colour) || "#333333")
+          .attr("stroke-width", tickSpec.linewidth || 1.89);
+      }
     }
 
     // ---------- draw ----------
     function draw(ir, elW, elH) {
       d3.select(el).selectAll("*").remove();
 
-      const pad = ir.padding || { top: 20, right: 20, bottom: 40, left: 50 };
       const innerW = ir.width || elW || 640;
       const innerH = ir.height || elH || 400;
+
+      // Default theme values (matching ggplot2 theme_gray)
+      const defaultTheme = {
+        panel: {
+          background: { type: "rect", fill: "#EBEBEB", colour: null },
+          border: { type: "blank" }
+        },
+        plot: {
+          background: { type: "rect", fill: "white", colour: "white" },
+          margin: { type: "margin", top: 7.3, right: 7.3, bottom: 7.3, left: 7.3 }
+        },
+        grid: {
+          major: { type: "line", colour: "white", linewidth: 1.89 },
+          minor: { type: "line", colour: "white", linewidth: 0.945 }
+        },
+        axis: {
+          line: { type: "blank" },
+          text: { type: "text", colour: "#4D4D4D", size: 8.8 },
+          title: { type: "text", colour: "black", size: 11 },
+          ticks: { type: "line", colour: "#333333", linewidth: 1.89 }
+        },
+        text: {
+          title: { type: "text", colour: "black", size: 13.2 }
+        }
+      };
+
+      // Merge provided theme with defaults
+      const theme = ir.theme || {};
+      const getTheme = (path) => {
+        const parts = path.split(".");
+        let val = theme;
+        let def = defaultTheme;
+        for (const p of parts) {
+          val = val && val[p];
+          def = def && def[p];
+        }
+        return val || def || null;
+      };
+
+      // Calculate padding from theme plot.margin or fallback to ir.padding or defaults
+      const plotMargin = getTheme("plot.margin");
+      let pad;
+      if (plotMargin && plotMargin.type === "margin") {
+        // Use theme margin plus additional space for axes/labels
+        pad = {
+          top: plotMargin.top + 30,
+          right: plotMargin.right + 20,
+          bottom: plotMargin.bottom + 40,
+          left: plotMargin.left + 50
+        };
+      } else {
+        pad = ir.padding || { top: 40, right: 20, bottom: 50, left: 60 };
+      }
+
       const w = Math.max(10, innerW - pad.left - pad.right);
       const h = Math.max(10, innerH - pad.top - pad.bottom);
 
       const root = d3.select(el).append("svg").attr("width", innerW).attr("height", innerH);
+
+      // Plot background (full SVG area)
+      const plotBg = getTheme("plot.background");
+      if (plotBg && plotBg.type === "rect" && plotBg.fill) {
+        root.insert("rect", ":first-child")
+          .attr("x", 0)
+          .attr("y", 0)
+          .attr("width", innerW)
+          .attr("height", innerH)
+          .attr("fill", convertColor(plotBg.fill))
+          .attr("stroke", "none");
+      }
+
       const g = root.append("g").attr("transform", `translate(${pad.left},${pad.top})`);
+
+      // Panel background (plot area)
+      const panelBg = getTheme("panel.background");
+      if (panelBg && panelBg.type === "rect" && panelBg.fill) {
+        g.insert("rect", ":first-child")
+          .attr("x", 0)
+          .attr("y", 0)
+          .attr("width", w)
+          .attr("height", h)
+          .attr("fill", convertColor(panelBg.fill))
+          .attr("stroke", convertColor(panelBg.colour) || "none")
+          .attr("stroke-width", panelBg.linewidth || 0);
+      }
 
       const flip = !!(ir.coord && ir.coord.flip);
       let xScale = makeScale(ir.scales && ir.scales.x, flip ? [h, 0] : [0, w]);
       let yScale = makeScale(ir.scales && ir.scales.y, flip ? [0, w] : [h, 0]);
 
-      // Axes - position x-axis at y=0 if 0 is in domain
-      if (flip) {
-        g.append("g").call(d3.axisLeft(xScale));
-        g.append("g").attr("transform", `translate(0,${h})`).call(d3.axisBottom(yScale));
-      } else {
-        // Check if y-scale includes 0 and position x-axis accordingly
-        let xAxisY = h;
-        if (typeof yScale.bandwidth !== "function") {
-          const yDomain = yScale.domain();
-          const [yMin, yMax] = d3.extent(yDomain);
-          if (yMin <= 0 && yMax >= 0) {
-            xAxisY = yScale(0);
+      // Grid lines (must render before axes for proper layering)
+      const gridMajor = getTheme("grid.major");
+
+      // Helper to draw grid
+      const drawGrid = (scale, orientation, gridSpec, breaks) => {
+        if (!gridSpec || gridSpec.type === "blank") return;
+
+        const isBand = typeof scale.bandwidth === "function";
+        // Use ggplot2's breaks if provided, otherwise fall back to D3 default
+        const ticks = breaks || (isBand ? scale.domain() : scale.ticks());
+
+        ticks.forEach(tick => {
+          const pos = scale(tick);
+          if (orientation === "vertical") {
+            g.insert("line", ".axis")
+              .attr("x1", pos)
+              .attr("x2", pos)
+              .attr("y1", 0)
+              .attr("y2", h)
+              .attr("stroke", convertColor(gridSpec.colour) || "white")
+              .attr("stroke-width", gridSpec.linewidth || 1.89)
+              .attr("opacity", 0.8);
+          } else {
+            g.insert("line", ".axis")
+              .attr("x1", 0)
+              .attr("x2", w)
+              .attr("y1", pos)
+              .attr("y2", pos)
+              .attr("stroke", convertColor(gridSpec.colour) || "white")
+              .attr("stroke-width", gridSpec.linewidth || 1.89)
+              .attr("opacity", 0.8);
           }
+        });
+      };
+
+      // Draw minor grid first (so major grid draws over it)
+      const gridMinor = getTheme("grid.minor");
+      if (gridMinor && gridMinor.type !== "blank") {
+        const xMinorBreaks = ir.scales && ir.scales.x && ir.scales.x.minor_breaks;
+        const yMinorBreaks = ir.scales && ir.scales.y && ir.scales.y.minor_breaks;
+        if (xMinorBreaks || yMinorBreaks) {
+          drawGrid(xScale, "vertical", gridMinor, xMinorBreaks);
+          drawGrid(yScale, "horizontal", gridMinor, yMinorBreaks);
         }
-        g.append("g").attr("transform", `translate(0,${xAxisY})`).call(d3.axisBottom(xScale));
-        g.append("g").call(d3.axisLeft(yScale));
+      }
+
+      // Draw major grid using ggplot2's break positions
+      if (gridMajor && gridMajor.type !== "blank") {
+        const xBreaks = ir.scales && ir.scales.x && ir.scales.x.breaks;
+        const yBreaks = ir.scales && ir.scales.y && ir.scales.y.breaks;
+        drawGrid(xScale, "vertical", gridMajor, xBreaks);
+        drawGrid(yScale, "horizontal", gridMajor, yBreaks);
       }
 
       // Title
+      const titleSpec = getTheme("text.title");
       if (ir.title) {
         root.append("text")
-          .attr("x", innerW / 2).attr("y", Math.max(14, pad.top * 0.6))
-          .attr("text-anchor", "middle").style("font-weight", 600)
+          .attr("x", innerW / 2)
+          .attr("y", Math.max(14, pad.top * 0.6))
+          .attr("text-anchor", "middle")
+          .style("font-size", titleSpec && titleSpec.size ? `${titleSpec.size}px` : "13.2px")
+          .style("fill", convertColor(titleSpec && titleSpec.colour) || "black")
+          .style("font-weight", titleSpec && titleSpec.face === "bold" ? "bold" : "normal")
+          .style("font-family", titleSpec && titleSpec.family || "sans-serif")
           .text(ir.title);
       }
 
@@ -431,6 +603,32 @@ HTMLWidgets.widget({
           drawn += txt.length;
         }
       });
+
+      // Axes - render AFTER data so they appear on top
+      const axisText = getTheme("axis.text");
+      const axisLine = getTheme("axis.line");
+      const axisTicks = getTheme("axis.ticks");
+
+      if (flip) {
+        const yAxis = g.append("g").attr("class", "axis").call(d3.axisLeft(xScale));
+        const xAxis = g.append("g").attr("class", "axis").attr("transform", `translate(0,${h})`).call(d3.axisBottom(yScale));
+        applyAxisStyle(yAxis, axisText, axisLine, axisTicks);
+        applyAxisStyle(xAxis, axisText, axisLine, axisTicks);
+      } else {
+        // Check if y-scale includes 0 and position x-axis accordingly
+        let xAxisY = h;
+        if (typeof yScale.bandwidth !== "function") {
+          const yDomain = yScale.domain();
+          const [yMin, yMax] = d3.extent(yDomain);
+          if (yMin <= 0 && yMax >= 0) {
+            xAxisY = yScale(0);
+          }
+        }
+        const xAxis = g.append("g").attr("class", "axis").attr("transform", `translate(0,${xAxisY})`).call(d3.axisBottom(xScale));
+        const yAxis = g.append("g").attr("class", "axis").call(d3.axisLeft(yScale));
+        applyAxisStyle(xAxis, axisText, axisLine, axisTicks);
+        applyAxisStyle(yAxis, axisText, axisLine, axisTicks);
+      }
 
       if (!drawn) {
         console.warn("gg2d3: no marks drawn — check aes names and data types", ir);

@@ -59,6 +59,76 @@ as_d3_ir <- function(p, width = 640, height = 400,
     }
   }
 
+  # Extract a single theme element as a plain list for JSON serialization
+  extract_theme_element <- function(element_name, theme) {
+    calc <- ggplot2:::calc_element(element_name, theme)
+
+    if (is.null(calc)) {
+      return(NULL)
+    }
+
+    if (inherits(calc, "element_blank")) {
+      return(list(type = "blank"))
+    }
+
+    if (inherits(calc, "element_rect")) {
+      # Convert linewidth from mm to pixels (1mm = 96/25.4 px at 96 DPI)
+      linewidth_px <- if (!is.null(calc$linewidth)) calc$linewidth * 3.7795275591 else NULL
+
+      return(list(
+        type = "rect",
+        fill = if (is.na(calc$fill)) NULL else calc$fill,
+        colour = if (is.na(calc$colour)) NULL else calc$colour,
+        linewidth = linewidth_px,
+        linetype = calc$linetype
+      ))
+    }
+
+    if (inherits(calc, "element_line")) {
+      # Convert linewidth from mm to pixels (1mm = 96/25.4 px at 96 DPI)
+      linewidth_px <- if (!is.null(calc$linewidth)) calc$linewidth * 3.7795275591 else NULL
+
+      return(list(
+        type = "line",
+        colour = if (is.na(calc$colour)) NULL else calc$colour,
+        linewidth = linewidth_px,
+        linetype = calc$linetype,
+        lineend = calc$lineend
+      ))
+    }
+
+    if (inherits(calc, "element_text")) {
+      return(list(
+        type = "text",
+        colour = if (is.na(calc$colour)) NULL else calc$colour,
+        size = calc$size,
+        face = calc$face,
+        family = calc$family,
+        hjust = calc$hjust,
+        vjust = calc$vjust,
+        angle = calc$angle
+      ))
+    }
+
+    # Handle margin elements (plot.margin)
+    if (inherits(calc, "margin")) {
+      # Convert margin to pixels using grid::convertUnit
+      # First convert to inches, then to pixels (96 DPI web standard)
+      inches <- grid::convertUnit(calc, "inches", valueOnly = TRUE)
+      pixels <- inches * 96
+
+      return(list(
+        type = "margin",
+        top = pixels[1],
+        right = pixels[2],
+        bottom = pixels[3],
+        left = pixels[4]
+      ))
+    }
+
+    return(NULL)
+  }
+
   layers <- lapply(seq_along(b$data), function(i) {
     df <- b$data[[i]]
 
@@ -171,17 +241,28 @@ as_d3_ir <- function(p, width = 640, height = 400,
       domain <- scale_obj$get_limits()
       list(type = "categorical", domain = unname(domain))
     } else {
-      # Continuous scale: get range from scale object's limits
+      # Continuous scale: get range and apply ggplot2's default 5% expansion
       if (is.null(data_values) || length(data_values) == 0) {
         list(type = "continuous", domain = c(0, 1))
       } else {
-        # Get the actual scale range (which includes ggplot2's expansion)
-        # scale_obj$get_limits() returns the computed scale range
+        # Get the base scale range
         scale_range <- tryCatch(
           scale_obj$get_limits(),
           error = function(e) range(data_values, finite = TRUE)
         )
-        list(type = "continuous", domain = unname(scale_range))
+
+        # Apply ggplot2's default expansion (5% on each side)
+        range_span <- diff(scale_range)
+        expansion <- range_span * 0.05
+        expanded_range <- c(scale_range[1] - expansion, scale_range[2] + expansion)
+
+        # For scales that include 0, don't expand below 0 if data is all positive
+        # (matches ggplot2 behavior for bar charts)
+        if (scale_range[1] >= 0 && expanded_range[1] < 0) {
+          expanded_range[1] <- 0
+        }
+
+        list(type = "continuous", domain = unname(expanded_range))
       }
     }
   }
@@ -196,14 +277,60 @@ as_d3_ir <- function(p, width = 640, height = 400,
     if (is.numeric(v)) range(v, finite = TRUE) else unique(v)
   }
 
+  # Extract grid breaks from panel params
+  x_breaks <- b$layout$panel_params[[1]]$x$breaks
+  y_breaks <- b$layout$panel_params[[1]]$y$breaks
+  x_minor_breaks <- b$layout$panel_params[[1]]$x$minor_breaks
+  y_minor_breaks <- b$layout$panel_params[[1]]$y$minor_breaks
+
+  # Remove NA values (ggplot2 adds NAs at the edges)
+  x_breaks <- x_breaks[!is.na(x_breaks)]
+  y_breaks <- y_breaks[!is.na(y_breaks)]
+  x_minor_breaks <- if (!is.null(x_minor_breaks)) x_minor_breaks[!is.na(x_minor_breaks)] else NULL
+  y_minor_breaks <- if (!is.null(y_minor_breaks)) y_minor_breaks[!is.na(y_minor_breaks)] else NULL
+
   scales <- list(
-    x = get_scale_info(xscale_obj, allx),
-    y = get_scale_info(yscale_obj, ally)
+    x = c(get_scale_info(xscale_obj, allx), list(
+      breaks = unname(x_breaks),
+      minor_breaks = if (!is.null(x_minor_breaks)) unname(x_minor_breaks) else NULL
+    )),
+    y = c(get_scale_info(yscale_obj, ally), list(
+      breaks = unname(y_breaks),
+      minor_breaks = if (!is.null(y_minor_breaks)) unname(y_minor_breaks) else NULL
+    ))
   )
   if (length(allc)) {
     scales$color <- list(
       type = if (is.numeric(allc)) "continuous" else "categorical",
       domain = unname(dom(allc))
+    )
+  }
+
+  # Extract theme information
+  theme_ir <- NULL
+  if (!is.null(b$plot$theme)) {
+    theme_ir <- list(
+      panel = list(
+        background = extract_theme_element("panel.background", b$plot$theme),
+        border = extract_theme_element("panel.border", b$plot$theme)
+      ),
+      plot = list(
+        background = extract_theme_element("plot.background", b$plot$theme),
+        margin = extract_theme_element("plot.margin", b$plot$theme)
+      ),
+      grid = list(
+        major = extract_theme_element("panel.grid.major", b$plot$theme),
+        minor = extract_theme_element("panel.grid.minor", b$plot$theme)
+      ),
+      axis = list(
+        line = extract_theme_element("axis.line", b$plot$theme),
+        text = extract_theme_element("axis.text", b$plot$theme),
+        title = extract_theme_element("axis.title", b$plot$theme),
+        ticks = extract_theme_element("axis.ticks", b$plot$theme)
+      ),
+      text = list(
+        title = extract_theme_element("plot.title", b$plot$theme)
+      )
     )
   }
 
@@ -219,6 +346,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
                   layout = data.frame(panel = 1, row = 1, col = 1)),
     scales = scales,
     layers = layers,
-    legend = list(enabled = TRUE)
+    legend = list(enabled = TRUE),
+    theme = theme_ir
   )
 }
