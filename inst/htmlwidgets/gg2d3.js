@@ -9,6 +9,16 @@ HTMLWidgets.widget({
     function num(v) { v = val(v); if (v == null || v === "") return null; const n = +v; return Number.isFinite(n) ? n : null; }
     function isHexColor(s) { return typeof s === "string" && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(s); }
 
+    // Check if string is a valid CSS color (hex or named)
+    function isValidColor(s) {
+      if (!s || typeof s !== "string") return false;
+      if (isHexColor(s)) return true;
+      // Check if it's a valid CSS named color
+      const testElem = document.createElement("div");
+      testElem.style.color = s;
+      return testElem.style.color !== "";
+    }
+
     // Convert column-oriented object {col:[...], ...} to row array [{col:..}, ...]
     function asRows(dat) {
       if (Array.isArray(dat)) return dat;                 // already rows
@@ -394,7 +404,9 @@ HTMLWidgets.widget({
         const strokeColor = d => {
           if (aes.color) {
             const v = val(get(d, aes.color));
-            if (isHexColor(v)) return v;           // ggplot already mapped to hex
+            // If it's already a valid color (hex or named like "black"), use it directly
+            if (isValidColor(v)) return convertColor(v);
+            // Otherwise map through color scale
             const mapped = colorScale(v);
             return mapped || (layer.params && layer.params.colour) || "currentColor";
           }
@@ -405,7 +417,9 @@ HTMLWidgets.widget({
         const fillColor = d => {
           if (aes.fill) {
             const v = val(get(d, aes.fill));
-            if (isHexColor(v)) return v;
+            // If it's already a valid color (hex or named), use it directly
+            if (isValidColor(v)) return convertColor(v);
+            // Otherwise map through color scale
             const mapped = colorScale(v);
             return mapped || (layer.params && layer.params.fill) || "grey35";
           }
@@ -430,6 +444,14 @@ HTMLWidgets.widget({
           });
           const defaultSize = (layer.params && layer.params.size) || 1.5;
 
+          // Convert ggplot2 size (mm) to SVG radius (pixels)
+          // ggplot2 size is in mm and represents diameter
+          // Formula: radius_px = (size_mm * 3.78) / 2
+          // where 3.78 = 96 DPI / 25.4 mm/inch
+          const mmToPxRadius = (size_mm) => {
+            return (size_mm * 3.7795275591) / 2;
+          };
+
           const sel = g.append("g").selectAll("circle").data(pts);
           sel.enter().append("circle")
             .attr("cx", d => {
@@ -442,13 +464,31 @@ HTMLWidgets.widget({
             })
             .attr("r", d => {
               if (aes.size) {
-                return Math.max(0.5, +(val(get(d, aes.size))) || defaultSize);
+                const size_mm = +(val(get(d, aes.size))) || defaultSize;
+                return Math.max(0.5, mmToPxRadius(size_mm));
               }
-              return defaultSize;
+              return mmToPxRadius(defaultSize);
             })
-            .attr("fill", d => fillColor(d))
-            .attr("stroke", d => strokeColor(d))
-            .attr("stroke-width", 0.5)
+            .attr("fill", d => {
+              // ggplot2 behavior: if fill is NA, use colour for solid points
+              const fillVal = val(get(d, "fill"));
+              if (fillVal == null || fillVal === "NA") {
+                return strokeColor(d);  // Use colour for fill
+              }
+              return fillColor(d);
+            })
+            .attr("stroke", d => {
+              // For solid points (fill=NA), no visible stroke unless explicitly set
+              const fillVal = val(get(d, "fill"));
+              if (fillVal == null || fillVal === "NA") {
+                return "none";
+              }
+              return strokeColor(d);
+            })
+            .attr("stroke-width", d => {
+              const strokeVal = val(get(d, "stroke"));
+              return strokeVal != null ? strokeVal : 0.5;
+            })
             .attr("opacity", d => opa(d));
           drawn += pts.length;
 
@@ -473,12 +513,17 @@ HTMLWidgets.widget({
 
             if (pts.length >= 2) {
               const line = d3.line().x(p => xScale(p.x)).y(p => yScale(p.y));
+              const firstPoint = pts[0].d;
+              const linewidthVal = val(get(firstPoint, "linewidth"));
+              // ggplot2 default linewidth: 0.5mm = 1.89px
+              const strokeWidth = linewidthVal != null ? linewidthVal * 3.78 : 1.89;
+
               g.append("path")
                 .attr("d", line(pts))
                 .attr("fill", "none")
-                .attr("stroke", strokeColor(pts[0].d))
-                .attr("stroke-width", 1.5)
-                .attr("opacity", opa(pts[0].d));
+                .attr("stroke", strokeColor(firstPoint))
+                .attr("stroke-width", strokeWidth)
+                .attr("opacity", opa(firstPoint));
               drawn += 1;
             }
           });
@@ -537,6 +582,19 @@ HTMLWidgets.widget({
               }
             })
             .attr("fill", d => fillColor(d))
+            .attr("stroke", d => {
+              // ggplot2 bar default: colour=NA (no outline)
+              const colourVal = val(get(d, "colour"));
+              if (colourVal == null || colourVal === "NA") {
+                return "none";
+              }
+              return strokeColor(d);
+            })
+            .attr("stroke-width", d => {
+              const linewidthVal = val(get(d, "linewidth"));
+              // Convert mm to pixels: 0.5mm = 1.89px
+              return linewidthVal != null ? linewidthVal * 3.78 : 1.89;
+            })
             .attr("opacity", d => opa(d));
           drawn += bars.length;
 
