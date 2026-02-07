@@ -11,28 +11,28 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 1 of 11 (Foundation Refactoring)
-Plan: 2 of 5 in current phase
+Plan: 4 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-07 — Completed 01-02-PLAN.md (Theme System Extraction)
+Last activity: 2026-02-07 — Completed 01-04-PLAN.md (IR Validation)
 
-Progress: [█░░░░░░░░░] 4% (2/51 plans complete)
+Progress: [███░░░░░░░] 8% (4/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 32.0 min
+- Total plans completed: 4
+- Average duration: 16.5 min
 - Total execution time: 1.1 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-refactoring | 2/5 | 64.0 min | 32.0 min |
+| 01-foundation-refactoring | 4/5 | 68.0 min | 17.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (1.9 min), 01-02 (62 min)
-- Trend: Execution ramping up
+- Last 5 plans: 01-01 (1.9 min), 01-02 (62 min), 01-03 (2 min), 01-04 (2 min)
+- Trend: High variance (TDD plans faster, extraction plans slower)
 
 *Updated after each plan completion*
 
@@ -61,6 +61,14 @@ Recent decisions affecting current work:
 | theme-deep-merge | Theme module uses deep merge for user overrides | Nested objects merge at all levels instead of replacing entire objects | Enables partial theme customization without losing defaults |
 | helpers-in-constants | Shared utilities in constants.js instead of separate file | Both Plan 01-01 and 01-02 needed same helpers; avoids duplication | All modules share utilities via window.gg2d3.helpers namespace |
 
+**From Plan 01-04:**
+
+| Decision ID | Title | Rationale | Impact |
+|-------------|-------|-----------|--------|
+| validate-before-js | Validate IR in R before JavaScript | Catch errors early with clear R messages instead of cryptic JS failures | Better developer experience, easier debugging |
+| warnings-for-non-critical | Use warnings for non-critical issues (empty data, unknown geoms) | Allows experimentation while alerting to potential problems | More flexible, less brittle |
+| invisible-return | validate_ir() returns IR invisibly | Enables chaining and maintains original IR unchanged | Clean integration into pipeline |
+
 ### Pending Todos
 
 None yet.
@@ -87,8 +95,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 01-02 (Theme System Extraction)
-Resume file: .planning/phases/01-foundation-refactoring/01-02-SUMMARY.md
+Stopped at: Completed 01-04 (IR Validation)
+Resume file: .planning/phases/01-foundation-refactoring/01-04-SUMMARY.md
 
 ---
 *State initialized: 2026-02-07*
