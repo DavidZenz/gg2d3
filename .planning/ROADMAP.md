@@ -40,14 +40,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Scale factory creates D3 scale objects from IR descriptors consistently
   5. Theme system merges extracted theme with defaults without hardcoded values
 
-**Plans**: TBD
+**Plans:** 5 plans in 3 waves
 
 Plans:
-- [ ] 01-01: Extract geom registry from monolithic renderer
-- [ ] 01-02: Centralize unit conversion utilities
-- [ ] 01-03: Create scale factory module
-- [ ] 01-04: Refactor theme system for modularity
-- [ ] 01-05: Add IR validation before JSON serialization
+- [ ] 01-01-PLAN.md -- Constants module + scale factory (Wave 1)
+- [ ] 01-02-PLAN.md -- Theme module + shared helpers (Wave 1)
+- [ ] 01-03-PLAN.md -- Geom registry + renderer extraction (Wave 2)
+- [ ] 01-04-PLAN.md -- IR validation with TDD (Wave 1)
+- [ ] 01-05-PLAN.md -- Integration wiring + visual verification (Wave 3)
 
 ### Phase 2: Core Scale System
 **Goal**: Full continuous and discrete scale support including transforms and expansions
@@ -278,11 +278,11 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11
 
 | Phase | Plans | Status | Completed |
 |-------|-------|--------|-----------|
-| 1. Foundation Refactoring | 0/5 | Not started | - |
+| 1. Foundation Refactoring | 0/5 | Planning complete | - |
 | 2. Core Scale System | 0/4 | Not started | - |
 | 3. Coordinate Systems | 0/3 | Not started | - |
 | 4. Essential Geoms | 0/5 | Not started | - |
