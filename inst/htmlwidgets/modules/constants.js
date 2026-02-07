@@ -152,6 +152,74 @@
   };
 
   /**
+   * Extract single value from array or return value as-is.
+   * Returns first element if array, null if empty array, otherwise the value itself.
+   * @param {*} v - Value or array
+   * @returns {*} Single value or null
+   */
+  function val(v) {
+    return Array.isArray(v) ? (v.length ? v[0] : null) : v;
+  }
+
+  /**
+   * Convert value to number with null handling.
+   * @param {*} v - Value to convert
+   * @returns {number|null} Finite number or null
+   */
+  function num(v) {
+    v = val(v);
+    if (v == null || v === "") return null;
+    const n = +v;
+    return Number.isFinite(n) ? n : null;
+  }
+
+  /**
+   * Check if string is a valid hex color.
+   * @param {string} s - String to check
+   * @returns {boolean} True if valid hex color (#RGB or #RRGGBB)
+   */
+  function isHexColor(s) {
+    return typeof s === "string" && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(s);
+  }
+
+  /**
+   * Check if string is a valid CSS color (hex or named).
+   * @param {string} s - String to check
+   * @returns {boolean} True if valid CSS color
+   */
+  function isValidColor(s) {
+    if (!s || typeof s !== "string") return false;
+    if (isHexColor(s)) return true;
+    // Check if it's a valid CSS named color
+    const testElem = document.createElement("div");
+    testElem.style.color = s;
+    return testElem.style.color !== "";
+  }
+
+  /**
+   * Convert column-oriented object to row array.
+   * Transforms {col:[...], ...} to [{col:..}, ...].
+   * @param {Object|Array} dat - Column-oriented object or row array
+   * @returns {Array} Array of row objects
+   */
+  function asRows(dat) {
+    if (Array.isArray(dat)) return dat;  // already rows
+    if (dat && typeof dat === "object") {
+      const keys = Object.keys(dat);
+      if (!keys.length) return [];
+      const len = (dat[keys[0]] || []).length;
+      const rows = new Array(len);
+      for (let i = 0; i < len; i++) {
+        const r = {};
+        for (const k of keys) r[k] = dat[k] ? dat[k][i] : null;
+        rows[i] = r;
+      }
+      return rows;
+    }
+    return [];
+  }
+
+  /**
    * Exported constants and functions
    */
   window.gg2d3.constants = {
@@ -169,5 +237,16 @@
 
     // ggplot2 defaults
     GGPLOT_DEFAULTS: GGPLOT_DEFAULTS
+  };
+
+  /**
+   * Shared helper utilities
+   */
+  window.gg2d3.helpers = {
+    val: val,
+    num: num,
+    isHexColor: isHexColor,
+    isValidColor: isValidColor,
+    asRows: asRows
   };
 })();
