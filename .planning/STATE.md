@@ -11,28 +11,28 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 1 of 11 (Foundation Refactoring)
-Plan: 1 of 5 in current phase
+Plan: 2 of 5 in current phase
 Status: In progress
-Last activity: 2026-02-07 — Completed 01-01-PLAN.md (Foundation Modules)
+Last activity: 2026-02-07 — Completed 01-02-PLAN.md (Theme System Extraction)
 
-Progress: [█░░░░░░░░░] 2% (1/51 plans complete)
+Progress: [█░░░░░░░░░] 4% (2/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 1.9 min
-- Total execution time: 0.03 hours
+- Total plans completed: 2
+- Average duration: 32.0 min
+- Total execution time: 1.1 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-refactoring | 1/5 | 1.9 min | 1.9 min |
+| 01-foundation-refactoring | 2/5 | 64.0 min | 32.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (1.9 min)
-- Trend: Starting execution
+- Last 5 plans: 01-01 (1.9 min), 01-02 (62 min)
+- Trend: Execution ramping up
 
 *Updated after each plan completion*
 
@@ -53,6 +53,13 @@ Recent decisions affecting current work:
 | Decision ID | Title | Rationale | Impact |
 |-------------|-------|-----------|--------|
 | namespace-pattern | Use window.gg2d3 namespace for module exports | HTMLWidgets loads scripts in order; global namespace enables module communication | All future modules follow this pattern |
+
+**From Plan 01-02:**
+
+| Decision ID | Title | Rationale | Impact |
+|-------------|-------|-----------|--------|
+| theme-deep-merge | Theme module uses deep merge for user overrides | Nested objects merge at all levels instead of replacing entire objects | Enables partial theme customization without losing defaults |
+| helpers-in-constants | Shared utilities in constants.js instead of separate file | Both Plan 01-01 and 01-02 needed same helpers; avoids duplication | All modules share utilities via window.gg2d3.helpers namespace |
 
 ### Pending Todos
 
@@ -80,8 +87,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 01-01 (Foundation Modules)
-Resume file: .planning/phases/01-foundation-refactoring/01-01-SUMMARY.md
+Stopped at: Completed 01-02 (Theme System Extraction)
+Resume file: .planning/phases/01-foundation-refactoring/01-02-SUMMARY.md
 
 ---
 *State initialized: 2026-02-07*
