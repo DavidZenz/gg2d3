@@ -5,7 +5,7 @@ test_that("validate_ir passes valid IR unchanged", {
       y = list(type = "continuous", domain = c(0, 100))
     ),
     layers = list(
-      list(geom = "point", data = list(), aes = list(), params = list())
+      list(geom = "point", data = list(list(x = 1, y = 2)), aes = list(), params = list())
     )
   )
 
