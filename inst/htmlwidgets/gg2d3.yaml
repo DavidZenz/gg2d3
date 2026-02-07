@@ -2,7 +2,17 @@
 name: gg2d3
 version: 0.0.1
 src: htmlwidgets
-script: gg2d3.js
+script:
+  - modules/constants.js
+  - modules/scales.js
+  - modules/theme.js
+  - modules/geom-registry.js
+  - modules/geoms/point.js
+  - modules/geoms/line.js
+  - modules/geoms/bar.js
+  - modules/geoms/rect.js
+  - modules/geoms/text.js
+  - gg2d3.js
 
 dependencies:
   - name: d3
