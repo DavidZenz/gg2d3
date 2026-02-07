@@ -12,7 +12,7 @@ gg2d3 transforms from a working 8-geom prototype into a production-ready R packa
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation Refactoring** - Modularize existing codebase, centralize conversions
+- [x] **Phase 1: Foundation Refactoring** - Modularize existing codebase, centralize conversions
 - [ ] **Phase 2: Core Scale System** - Complete scale infrastructure for all rendering
 - [ ] **Phase 3: Coordinate Systems** - Fix coord_flip, add coord_fixed
 - [ ] **Phase 4: Essential Geoms** - Area, ribbon, segment, reference lines
@@ -43,11 +43,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 5 plans in 3 waves
 
 Plans:
-- [ ] 01-01-PLAN.md -- Constants module + scale factory (Wave 1)
-- [ ] 01-02-PLAN.md -- Theme module + shared helpers (Wave 1)
-- [ ] 01-03-PLAN.md -- Geom registry + renderer extraction (Wave 2)
-- [ ] 01-04-PLAN.md -- IR validation with TDD (Wave 1)
-- [ ] 01-05-PLAN.md -- Integration wiring + visual verification (Wave 3)
+- [x] 01-01-PLAN.md -- Constants module + scale factory (Wave 1)
+- [x] 01-02-PLAN.md -- Theme module + shared helpers (Wave 1)
+- [x] 01-03-PLAN.md -- Geom registry + renderer extraction (Wave 2)
+- [x] 01-04-PLAN.md -- IR validation with TDD (Wave 1)
+- [x] 01-05-PLAN.md -- Integration wiring + visual verification (Wave 3)
 
 ### Phase 2: Core Scale System
 **Goal**: Full continuous and discrete scale support including transforms and expansions
@@ -282,7 +282,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Plans | Status | Completed |
 |-------|-------|--------|-----------|
-| 1. Foundation Refactoring | 0/5 | Planning complete | - |
+| 1. Foundation Refactoring | 5/5 | Complete | 2026-02-07 |
 | 2. Core Scale System | 0/4 | Not started | - |
 | 3. Coordinate Systems | 0/3 | Not started | - |
 | 4. Essential Geoms | 0/5 | Not started | - |
