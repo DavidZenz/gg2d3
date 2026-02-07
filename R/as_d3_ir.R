@@ -335,7 +335,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
     )
   }
 
-  list(
+  ir <- list(
     width = width, height = height, padding = padding,
     coord  = list(type = "cartesian", flip = inherits(b$plot$coordinates, "CoordFlip")),
     title  = b$plot$labels$title %||% "",
@@ -350,4 +350,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
     legend = list(enabled = TRUE),
     theme = theme_ir
   )
+
+  # Validate IR structure before returning
+  validate_ir(ir)
 }

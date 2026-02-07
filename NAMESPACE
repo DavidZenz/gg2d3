@@ -2,3 +2,4 @@
 
 export(as_d3_ir)
 export(gg2d3)
+export(validate_ir)
