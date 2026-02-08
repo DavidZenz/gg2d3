@@ -235,41 +235,94 @@ as_d3_ir <- function(p, width = 640, height = 400,
     )
   })
 
+  # Extract scale transformation metadata for IR
+  get_scale_transform <- function(scale_obj) {
+    if (is.null(scale_obj$trans)) {
+      return(NULL)
+    }
+
+    trans_name <- scale_obj$trans$name
+
+    # Map ggplot2 trans names to D3 equivalents
+    result <- list()
+
+    if (trans_name == "identity") {
+      # No transform needed
+      return(NULL)
+    } else if (trans_name == "log-10") {
+      result$transform <- "log10"
+      result$base <- 10
+    } else if (trans_name == "log-2") {
+      result$transform <- "log2"
+      result$base <- 2
+    } else if (trans_name == "log") {
+      result$transform <- "log"
+      result$base <- exp(1)
+    } else if (trans_name == "sqrt") {
+      result$transform <- "sqrt"
+    } else if (trans_name == "reverse") {
+      result$transform <- "reverse"
+    } else if (trans_name == "pseudo_log") {
+      result$transform <- "symlog"
+    } else {
+      # Unknown transform, pass through name
+      result$transform <- trans_name
+    }
+
+    result
+  }
+
   # Check if scale is discrete and get proper domain
-  get_scale_info <- function(scale_obj, data_values) {
+  get_scale_info <- function(scale_obj, panel_params_axis) {
     if (inherits(scale_obj, "ScaleDiscrete")) {
       # Discrete scale: get labels from scale object
       domain <- scale_obj$get_limits()
       list(type = "categorical", domain = unname(domain))
     } else {
-      # Continuous scale: get range and apply ggplot2's default 5% expansion
-      if (is.null(data_values) || length(data_values) == 0) {
-        list(type = "continuous", domain = c(0, 1))
-      } else {
-        # Get the base scale range
-        scale_range <- tryCatch(
-          scale_obj$get_limits(),
-          error = function(e) range(data_values, finite = TRUE)
-        )
+      # Continuous scale: extract already-expanded domain from panel_params
+      # The panel_params contain ggplot2's pre-computed expanded range
 
-        # Apply ggplot2's default expansion (5% on each side)
-        range_span <- diff(scale_range)
-        expansion <- range_span * 0.05
-        expanded_range <- c(scale_range[1] - expansion, scale_range[2] + expansion)
+      # Try to get the continuous_range (already expanded by ggplot2)
+      expanded_range <- NULL
 
-        # For scales that include 0, don't expand below 0 if data is all positive
-        # (matches ggplot2 behavior for bar charts)
-        if (scale_range[1] >= 0 && expanded_range[1] < 0) {
-          expanded_range[1] <- 0
+      if (!is.null(panel_params_axis)) {
+        # First try: direct .range field (some ggplot2 versions)
+        if (!is.null(panel_params_axis$continuous_range)) {
+          expanded_range <- panel_params_axis$continuous_range
+        } else if (!is.null(panel_params_axis$range)) {
+          # Try range field if continuous_range doesn't exist
+          expanded_range <- panel_params_axis$range
         }
-
-        list(type = "continuous", domain = unname(expanded_range))
       }
+
+      # Fallback: if we couldn't get range from panel_params, use scale limits
+      if (is.null(expanded_range) || length(expanded_range) != 2) {
+        warning("Could not extract range from panel_params, falling back to scale limits")
+        expanded_range <- tryCatch(
+          scale_obj$get_limits(),
+          error = function(e) c(0, 1)
+        )
+        # Apply manual 5% expansion as last resort
+        if (!is.null(expanded_range) && length(expanded_range) == 2) {
+          range_span <- diff(expanded_range)
+          expansion <- range_span * 0.05
+          expanded_range <- c(expanded_range[1] - expansion, expanded_range[2] + expansion)
+        }
+      }
+
+      # Build result with transform info
+      result <- list(type = "continuous", domain = unname(expanded_range))
+
+      # Add transformation metadata if present
+      transform_info <- get_scale_transform(scale_obj)
+      if (!is.null(transform_info)) {
+        result <- c(result, transform_info)
+      }
+
+      result
     }
   }
 
-  allx <- unlist(lapply(b$data, function(df) if ("x" %in% names(df)) df$x))
-  ally <- unlist(lapply(b$data, function(df) if ("y" %in% names(df)) df$y))
   allc <- unlist(lapply(b$data, function(df) if ("colour" %in% names(df)) df$colour))
 
   # Helper for color domain
@@ -291,11 +344,11 @@ as_d3_ir <- function(p, width = 640, height = 400,
   y_minor_breaks <- if (!is.null(y_minor_breaks)) y_minor_breaks[!is.na(y_minor_breaks)] else NULL
 
   scales <- list(
-    x = c(get_scale_info(xscale_obj, allx), list(
+    x = c(get_scale_info(xscale_obj, b$layout$panel_params[[1]]$x), list(
       breaks = unname(x_breaks),
       minor_breaks = if (!is.null(x_minor_breaks)) unname(x_minor_breaks) else NULL
     )),
-    y = c(get_scale_info(yscale_obj, ally), list(
+    y = c(get_scale_info(yscale_obj, b$layout$panel_params[[1]]$y), list(
       breaks = unname(y_breaks),
       minor_breaks = if (!is.null(y_minor_breaks)) unname(y_minor_breaks) else NULL
     ))
