@@ -62,11 +62,11 @@
     sel.enter().append("circle")
       .attr("cx", d => {
         const xVal = isXBand ? val(get(d, aes.x)) : num(get(d, aes.x));
-        return xScale(xVal);
+        return isXBand ? xScale(xVal) + xScale.bandwidth() / 2 : xScale(xVal);
       })
       .attr("cy", d => {
         const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
-        return yScale(yVal);
+        return isYBand ? yScale(yVal) + yScale.bandwidth() / 2 : yScale(yVal);
       })
       .attr("r", d => {
         if (aes.size) {

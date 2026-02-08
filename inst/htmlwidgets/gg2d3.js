@@ -154,15 +154,8 @@ HTMLWidgets.widget({
         window.gg2d3.theme.applyAxisStyle(yAxis, axisText, axisLine, axisTicks);
         window.gg2d3.theme.applyAxisStyle(xAxis, axisText, axisLine, axisTicks);
       } else {
-        // Check if y-scale includes 0 and position x-axis accordingly
-        let xAxisY = h;
-        if (typeof yScale.bandwidth !== "function") {
-          const yDomain = yScale.domain();
-          const [yMin, yMax] = d3.extent(yDomain);
-          if (yMin <= 0 && yMax >= 0) {
-            xAxisY = yScale(0);
-          }
-        }
+        // ggplot2 always places x-axis at the bottom of the panel
+        const xAxisY = h;
 
         const xAxisGen = d3.axisBottom(xScale);
         const yAxisGen = d3.axisLeft(yScale);
