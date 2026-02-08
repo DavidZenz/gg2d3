@@ -6,22 +6,22 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 
-**Current focus:** Phase 2 - Core Scale System (next)
+**Current focus:** Phase 2 - Core Scale System (in progress)
 
 ## Current Position
 
-Phase: 1 of 11 COMPLETE (Foundation Refactoring)
-Plan: Phase 1 complete (5/5 plans). Phase 2 not yet started.
-Status: Between phases — Phase 1 complete, Phase 2 pending
-Last activity: 2026-02-07 — Completed 01-05-PLAN.md (Module Integration and Visual Verification). Phase 1 fully complete.
+Phase: 2 of 11 (Core Scale System)
+Plan: 2 of 3 in Phase 2 complete
+Status: In progress — Phase 2 executing
+Last activity: 2026-02-08 — Completed 02-02-PLAN.md (Transform-Aware Scale Rendering). 1 plan remaining in Phase 2.
 
-Progress: [████░░░░░░] 10% (5/51 plans complete)
+Progress: [█░░░░░░░░░] 12% (6/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 14.1 min
+- Total plans completed: 6
+- Average duration: 12.1 min
 - Total execution time: 1.2 hours
 
 **By Phase:**
@@ -29,9 +29,10 @@ Progress: [████░░░░░░] 10% (5/51 plans complete)
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-refactoring | 5/5 | 70.4 min | 14.1 min |
+| 02-core-scale-system | 1/3 | 2 min | 2.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (1.9 min), 01-02 (62 min), 01-03 (2.4 min), 01-04 (2 min), 01-05 (~3 min)
+- Last 5 plans: 01-02 (62 min), 01-03 (2.4 min), 01-04 (2 min), 01-05 (~3 min), 02-02 (2 min)
 - Trend: Most plans execute quickly (2-3 min), except TDD/extraction intensive plans
 
 *Updated after each plan completion*
@@ -77,6 +78,14 @@ Recent decisions affecting current work:
 | warnings-for-non-critical | Use warnings for non-critical issues (empty data, unknown geoms) | Allows experimentation while alerting to potential problems | More flexible, less brittle |
 | invisible-return | validate_ir() returns IR invisibly | Enables chaining and maintains original IR unchanged | Clean integration into pipeline |
 
+**From Plan 02-02:**
+
+| Decision ID | Title | Rationale | Impact |
+|-------------|-------|-----------|--------|
+| transform-first-dispatch | Transform field takes priority over type field in scale descriptors | Ensures {type: "continuous", transform: "log10"} creates log scale, not linear | All scale creation checks transform before type |
+| ir-breaks-as-ticks | Use IR breaks instead of D3 auto-generated ticks | D3's log ticks too dense and don't match ggplot2; ggplot2 pre-computes correct breaks | Axis ticks now match ggplot2 exactly |
+| clean-tick-formatting | Apply d3.format('.4~g') for transformed scales | Avoid scientific notation (1e+3) on log/sqrt/pow scales; show clean numbers (1000) | Better readability, matches ggplot2 output |
+
 ### Pending Todos
 
 None.
@@ -112,10 +121,10 @@ These issues were identified during the 01-05 visual verification checkpoint. Th
 
 ## Session Continuity
 
-Last session: 2026-02-07
-Stopped at: Completed Phase 1 (all 5 plans). 01-05 (Module Integration and Visual Verification) was final plan.
-Resume file: .planning/phases/01-foundation-refactoring/01-05-SUMMARY.md
-Next action: Begin Phase 2 (Core Scale System) — research and planning needed.
+Last session: 2026-02-08
+Stopped at: Completed 02-02 (Transform-Aware Scale Rendering). 1 plan remaining in Phase 2.
+Resume file: .planning/phases/02-core-scale-system/02-02-SUMMARY.md
+Next action: Execute 02-03 (final plan in Phase 2) or proceed to Phase 3.
 
 ---
 *State initialized: 2026-02-07*
