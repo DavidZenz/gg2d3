@@ -416,9 +416,17 @@ as_d3_ir <- function(p, width = 640, height = 400,
       ),
       axis = list(
         line = extract_theme_element("axis.line", b$plot$theme),
+        line.x = extract_theme_element("axis.line.x", b$plot$theme),
+        line.y = extract_theme_element("axis.line.y", b$plot$theme),
         text = extract_theme_element("axis.text", b$plot$theme),
+        text.x = extract_theme_element("axis.text.x", b$plot$theme),
+        text.y = extract_theme_element("axis.text.y", b$plot$theme),
         title = extract_theme_element("axis.title", b$plot$theme),
-        ticks = extract_theme_element("axis.ticks", b$plot$theme)
+        title.x = extract_theme_element("axis.title.x", b$plot$theme),
+        title.y = extract_theme_element("axis.title.y", b$plot$theme),
+        ticks = extract_theme_element("axis.ticks", b$plot$theme),
+        ticks.x = extract_theme_element("axis.ticks.x", b$plot$theme),
+        ticks.y = extract_theme_element("axis.ticks.y", b$plot$theme)
       ),
       text = list(
         title = extract_theme_element("plot.title", b$plot$theme)
@@ -426,13 +434,31 @@ as_d3_ir <- function(p, width = 640, height = 400,
     )
   }
 
+  # Coord detection: CoordFlip, CoordFixed, or default CoordCartesian
+
+  is_flip  <- inherits(b$plot$coordinates, "CoordFlip")
+  is_fixed <- inherits(b$plot$coordinates, "CoordFixed")
+
+  coord_type  <- if (is_flip) "flip" else if (is_fixed) "fixed" else "cartesian"
+  coord_ratio <- if (is_fixed) (b$plot$coordinates$ratio %||% 1) else NULL
+
+  # Axis labels: swap for coord_flip so x-aesthetic title goes to left visual axis
+
+  if (is_flip) {
+    x_label <- b$plot$labels$y %||% ""
+    y_label <- b$plot$labels$x %||% ""
+  } else {
+    x_label <- b$plot$labels$x %||% ""
+    y_label <- b$plot$labels$y %||% ""
+  }
+
   ir <- list(
     width = width, height = height, padding = padding,
-    coord  = list(type = "cartesian", flip = inherits(b$plot$coordinates, "CoordFlip")),
+    coord  = list(type = coord_type, flip = is_flip, ratio = coord_ratio),
     title  = b$plot$labels$title %||% "",
     axes   = list(
-      x = list(orientation = "bottom", label = b$plot$labels$x %||% ""),
-      y = list(orientation = "left",  label = b$plot$labels$y %||% "")
+      x = list(orientation = "bottom", label = x_label),
+      y = list(orientation = "left",  label = y_label)
     ),
     facets = list(type = "grid", rows = 1, cols = 1,
                   layout = data.frame(panel = 1, row = 1, col = 1)),
