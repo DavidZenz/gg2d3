@@ -5,6 +5,16 @@ as_d3_ir <- function(p, width = 640, height = 400,
   stopifnot(inherits(p, "ggplot"))
   b <- ggplot2::ggplot_build(p)
 
+  # Detect coord_trans (not yet supported - Phase 3)
+  if (inherits(b$plot$coordinates, "CoordTrans")) {
+    warning(
+      "coord_trans() is not yet supported by gg2d3. ",
+      "Scale transformations (e.g., scale_x_log10()) provide equivalent visual output ",
+      "for most cases. coord_trans() support is planned for Phase 3.",
+      call. = FALSE
+    )
+  }
+
   `%||%` <- function(x, y) if (is.null(x)) y else x
 
   keep_aes <- c(
@@ -235,6 +245,31 @@ as_d3_ir <- function(p, width = 640, height = 400,
     )
   })
 
+  # Validate log scale domains (must be strictly positive)
+  validate_log_domain <- function(scale_obj, domain, axis_name) {
+    trans <- scale_obj$trans
+    if (is.null(trans)) return(invisible(TRUE))
+
+    is_log <- grepl("log", trans$name, ignore.case = TRUE) &&
+              !grepl("pseudo_log|symlog", trans$name, ignore.case = TRUE)
+
+    if (is_log && any(domain <= 0)) {
+      stop(sprintf(
+        paste0(
+          "Log scale on %s-axis has non-positive domain [%.4g, %.4g].\n",
+          "Log scales require strictly positive values.\n",
+          "Consider:\n",
+          "  - scale_%s_continuous(trans = 'pseudo_log') for data including zero\n",
+          "  - Filtering data to positive values\n",
+          "  - Using a linear scale"
+        ),
+        axis_name, domain[1], domain[2], axis_name
+      ), call. = FALSE)
+    }
+
+    invisible(TRUE)
+  }
+
   # Extract scale transformation metadata for IR
   get_scale_transform <- function(scale_obj) {
     if (is.null(scale_obj$trans)) {
@@ -273,7 +308,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
   }
 
   # Check if scale is discrete and get proper domain
-  get_scale_info <- function(scale_obj, panel_params_axis) {
+  get_scale_info <- function(scale_obj, panel_params_axis, axis_name) {
     if (inherits(scale_obj, "ScaleDiscrete")) {
       # Discrete scale: get labels from scale object
       domain <- scale_obj$get_limits()
@@ -310,6 +345,9 @@ as_d3_ir <- function(p, width = 640, height = 400,
         }
       }
 
+      # Validate log domains before building result
+      validate_log_domain(scale_obj, expanded_range, axis_name)
+
       # Build result with transform info
       result <- list(type = "continuous", domain = unname(expanded_range))
 
@@ -344,11 +382,11 @@ as_d3_ir <- function(p, width = 640, height = 400,
   y_minor_breaks <- if (!is.null(y_minor_breaks)) y_minor_breaks[!is.na(y_minor_breaks)] else NULL
 
   scales <- list(
-    x = c(get_scale_info(xscale_obj, b$layout$panel_params[[1]]$x), list(
+    x = c(get_scale_info(xscale_obj, b$layout$panel_params[[1]]$x, "x"), list(
       breaks = unname(x_breaks),
       minor_breaks = if (!is.null(x_minor_breaks)) unname(x_minor_breaks) else NULL
     )),
-    y = c(get_scale_info(yscale_obj, b$layout$panel_params[[1]]$y), list(
+    y = c(get_scale_info(yscale_obj, b$layout$panel_params[[1]]$y, "y"), list(
       breaks = unname(y_breaks),
       minor_breaks = if (!is.null(y_minor_breaks)) unname(y_minor_breaks) else NULL
     ))

@@ -72,6 +72,20 @@ validate_ir <- function(ir) {
     }
   }
 
+  # Validate log scale domains
+  for (axis in c("x", "y")) {
+    scale <- ir$scales[[axis]]
+    if (!is.null(scale$transform) && grepl("log", scale$transform, ignore.case = TRUE) &&
+        !grepl("symlog", scale$transform, ignore.case = TRUE)) {
+      if (any(scale$domain <= 0)) {
+        stop(sprintf(
+          "IR scale %s has log transform but non-positive domain [%s, %s]",
+          axis, scale$domain[1], scale$domain[2]
+        ), call. = FALSE)
+      }
+    }
+  }
+
   # Return IR unchanged (invisibly)
   invisible(ir)
 }
