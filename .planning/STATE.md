@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 
-**Current focus:** Phase 3 - Coordinate Systems (not started)
+**Current focus:** Phase 3 - Coordinate Systems (plan 1 of 3 complete)
 
 ## Current Position
 
 Phase: 3 of 11 (Coordinate Systems)
-Plan: 0 of 3 in Phase 3
-Status: Ready to plan — Phase 2 complete
-Last activity: 2026-02-08 — Completed Phase 2 (Core Scale System). All 3 plans executed, visual checkpoint approved.
+Plan: 1 of 3 in Phase 3
+Status: In progress
+Last activity: 2026-02-08 — Completed 03-01-PLAN.md (coord_flip + coord_fixed)
 
-Progress: [██░░░░░░░░] 16% (8/51 plans complete)
+Progress: [██░░░░░░░░] 18% (9/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: ~10 min
-- Total execution time: ~1.5 hours
+- Total plans completed: 9
+- Average duration: ~9 min
+- Total execution time: ~1.6 hours
 
 **By Phase:**
 
@@ -30,6 +30,7 @@ Progress: [██░░░░░░░░] 16% (8/51 plans complete)
 |-------|-------|-------|----------|
 | 01-foundation-refactoring | 5/5 | 70.4 min | 14.1 min |
 | 02-core-scale-system | 3/3 | ~20 min | ~6.7 min |
+| 03-coordinate-systems | 1/3 | 4.6 min | 4.6 min |
 
 *Updated after each plan completion*
 
@@ -66,13 +67,20 @@ Recent decisions affecting current work:
 | band-scale-centering | Offset band scale positions by bandwidth/2 | D3 band scales return left edge; ggplot2 centers everything | Grid/geom alignment matches ggplot2 |
 | axis-at-panel-bottom | X-axis always at panel bottom (y=h) | ggplot2 doesn't move axis to y=0 | Consistent axis positioning |
 
+**From Phase 3:**
+
+| Decision ID | Title | Rationale | Impact |
+|-------------|-------|-----------|--------|
+| r-side-label-swap | Swap axis labels in R IR for coord_flip | JS always renders x-label at bottom, y-label at left; R handles the swap | Simplifies D3 rendering code |
+| xy-specific-theme-fallback | Extract axis.text.x/y etc. with fallback to generic | Enables per-axis styling while maintaining backward compat | x/y theme elements work end-to-end |
+
 ### Pending Todos
 
 None.
 
 ### Pre-existing Issues (from Phase 1 verification)
 
-- **coord_flip rendering broken** — Axes on wrong sides after flip (Phase 3, Plan 03-01)
+- ~~**coord_flip rendering broken** — Axes on wrong sides after flip (Phase 3, Plan 03-01)~~ FIXED in 03-01
 - **rect geom out of bounds / grid issues** — rect/tile edge cases with rendering (Phase 3)
 
 ### Blockers/Concerns
@@ -81,9 +89,8 @@ None.
 **Phase 2 (Scales) — COMPLETE**
 
 **Remaining concerns:**
-- Monolithic as_d3_ir() function (353 lines) needs modularization before adding features
+- Monolithic as_d3_ir() function (~380 lines) needs modularization before adding features
 - Private API dependency on ggplot2:::calc_element() creates fragility
-- coord_flip axes on wrong sides (documented bug, Phase 3)
 - ggplot2 private API usage may break on updates (mitigation: wrap in try-catch)
 - Statistical transformations must pre-compute in R (Phase 5)
 - Facet layout complexity (Phase 8-9)
@@ -91,9 +98,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Phase 2 complete. Ready to plan Phase 3 (Coordinate Systems).
-Resume file: .planning/phases/02-core-scale-system/VERIFICATION.md
-Next action: Plan Phase 3 when user is ready (`/gsd:plan-phase 3`).
+Stopped at: Phase 3, Plan 1 complete. Ready for Plan 03-02 (coord_trans).
+Resume file: .planning/phases/03-coordinate-systems/03-01-SUMMARY.md
+Next action: Execute Plan 03-02 when ready.
 
 ---
 *State initialized: 2026-02-07*
