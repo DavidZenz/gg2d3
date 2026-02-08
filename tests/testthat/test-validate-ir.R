@@ -183,3 +183,48 @@ test_that("validate_ir accepts all known geom types", {
     expect_silent(validate_ir(ir))
   }
 })
+
+test_that("validate_ir errors on log scale with non-positive domain", {
+  invalid_ir <- list(
+    scales = list(
+      x = list(type = "continuous", transform = "log10", domain = c(0, 100)),
+      y = list(type = "continuous", domain = c(0, 100))
+    ),
+    layers = list(
+      list(geom = "point", data = list(list(x = 1, y = 2)), aes = list(), params = list())
+    )
+  )
+
+  expect_error(
+    validate_ir(invalid_ir),
+    "IR scale x has log transform but non-positive domain"
+  )
+})
+
+test_that("validate_ir passes log scale with positive domain", {
+  valid_ir <- list(
+    scales = list(
+      x = list(type = "continuous", transform = "log10", domain = c(1, 100)),
+      y = list(type = "continuous", domain = c(0, 100))
+    ),
+    layers = list(
+      list(geom = "point", data = list(list(x = 1, y = 2)), aes = list(), params = list())
+    )
+  )
+
+  expect_silent(validate_ir(valid_ir))
+})
+
+test_that("validate_ir passes symlog scale with negative domain", {
+  valid_ir <- list(
+    scales = list(
+      x = list(type = "continuous", transform = "symlog", domain = c(-10, 100)),
+      y = list(type = "continuous", domain = c(0, 100))
+    ),
+    layers = list(
+      list(geom = "point", data = list(list(x = 1, y = 2)), aes = list(), params = list())
+    )
+  )
+
+  expect_silent(validate_ir(valid_ir))
+})

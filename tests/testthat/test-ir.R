@@ -108,3 +108,40 @@ test_that("log2 transformation extracted correctly", {
   expect_equal(ir$scales$x$transform, "log2")
   expect_equal(ir$scales$x$base, 2)
 })
+
+test_that("log scale with zero data throws informative error", {
+  library(ggplot2)
+
+  p <- ggplot(data.frame(x = 0:10, y = 1:11), aes(x, y)) +
+    geom_point() +
+    scale_x_log10()
+
+  expect_error(
+    as_d3_ir(p),
+    "Log scale on x-axis has non-positive domain"
+  )
+
+  expect_error(
+    as_d3_ir(p),
+    "pseudo_log"
+  )
+})
+
+test_that("coord_trans produces warning", {
+  library(ggplot2)
+
+  # coord_trans with log transformation
+  p <- ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() +
+    coord_trans(x = "log10")
+
+  expect_warning(
+    as_d3_ir(p),
+    "coord_trans\\(\\) is not yet supported"
+  )
+
+  expect_warning(
+    as_d3_ir(p),
+    "Phase 3"
+  )
+})
