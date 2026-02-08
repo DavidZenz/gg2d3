@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation Refactoring** - Modularize existing codebase, centralize conversions
 - [x] **Phase 2: Core Scale System** - Complete scale infrastructure for all rendering
-- [ ] **Phase 3: Coordinate Systems** - Fix coord_flip, add coord_fixed
+- [x] **Phase 3: Coordinate Systems** - Fix coord_flip, add coord_fixed
 - [ ] **Phase 4: Essential Geoms** - Area, ribbon, segment, reference lines
 - [ ] **Phase 5: Statistical Geoms** - Boxplot, violin, density, smooth
 - [ ] **Phase 6: Layout Engine** - Centralized spatial math for multi-panel layouts
@@ -87,9 +87,9 @@ Plans:
 **Plans:** 3 plans in 3 waves
 
 Plans:
-- [ ] 03-01-PLAN.md -- Fix coord_flip: R-side coord extraction + D3 axis/grid/title rendering (Wave 1)
-- [ ] 03-02-PLAN.md -- Implement coord_fixed aspect ratio constraints with resize support (Wave 2)
-- [ ] 03-03-PLAN.md -- Coordinate system unit tests + visual verification checkpoint (Wave 3)
+- [x] 03-01-PLAN.md -- Fix coord_flip: R-side coord extraction + D3 axis/grid/title rendering (Wave 1)
+- [x] 03-02-PLAN.md -- Implement coord_fixed aspect ratio constraints with resize support (Wave 2)
+- [x] 03-03-PLAN.md -- Coordinate system unit tests + visual verification checkpoint (Wave 3)
 
 ### Phase 4: Essential Geoms
 **Goal**: Add critical geometric layers for complete basic plots (area, ribbon, segment, reference lines)
@@ -105,14 +105,13 @@ Plans:
   4. Reference lines (hline, vline, abline) appear at specified positions with correct styling
   5. All new geoms respect theme styling (colors, line widths, alpha)
 
-**Plans**: TBD
+**Plans:** 4 plans in 3 waves
 
 Plans:
-- [ ] 04-01: Implement geom_area with d3.area() path generator
-- [ ] 04-02: Implement geom_ribbon with ymin/ymax support
-- [ ] 04-03: Implement geom_segment for arbitrary line segments
-- [ ] 04-04: Implement reference lines (hline, vline, abline)
-- [ ] 04-05: Add polygon geom for filled shapes
+- [ ] 04-01-PLAN.md -- R-side IR extraction + YAML + placeholder JS for new geom types (Wave 1)
+- [ ] 04-02-PLAN.md -- Implement geom_area and geom_ribbon with d3.area() (Wave 2)
+- [ ] 04-03-PLAN.md -- Implement geom_segment and reference lines (hline/vline/abline) (Wave 2)
+- [ ] 04-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 3)
 
 ### Phase 5: Statistical Geoms
 **Goal**: Add statistical visualization layers (boxplot, violin, density, smooth)
@@ -283,8 +282,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 |-------|-------|--------|-----------|
 | 1. Foundation Refactoring | 5/5 | Complete | 2026-02-07 |
 | 2. Core Scale System | 3/3 | Complete | 2026-02-08 |
-| 3. Coordinate Systems | 0/3 | Not started | - |
-| 4. Essential Geoms | 0/5 | Not started | - |
+| 3. Coordinate Systems | 3/3 | Complete | 2026-02-08 |
+| 4. Essential Geoms | 0/4 | In progress | - |
 | 5. Statistical Geoms | 0/5 | Not started | - |
 | 6. Layout Engine | 0/4 | Not started | - |
 | 7. Legend System | 0/5 | Not started | - |
@@ -296,4 +295,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 ---
 *Roadmap created: 2026-02-07*
 *Total phases: 11 (comprehensive depth)*
-*Total plans: 50 (estimated)*
+*Total plans: 49 (estimated)*
