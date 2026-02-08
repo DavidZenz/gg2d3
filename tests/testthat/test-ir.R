@@ -182,3 +182,81 @@ test_that("discrete scale handles NA values", {
   # Should not crash; domain should not include NA as a level
   expect_true(is.character(ir$scales$x$domain))
 })
+
+# --- Coordinate System Tests ---
+
+test_that("coord_flip produces correct IR", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(factor(cyl), mpg)) + geom_col() + coord_flip()
+  ir <- as_d3_ir(p)
+
+  expect_equal(ir$coord$type, "flip")
+  expect_true(ir$coord$flip)
+  expect_null(ir$coord$ratio)
+})
+
+test_that("coord_flip swaps axis labels", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(factor(cyl), mpg)) +
+    geom_col() +
+    coord_flip() +
+    labs(x = "Cylinders", y = "Miles per Gallon")
+  ir <- as_d3_ir(p)
+
+  # After flip, the visual bottom axis shows the y-aesthetic label
+  # and the visual left axis shows the x-aesthetic label
+  # R-side swaps: ir$axes$x$label gets the y aesthetic, ir$axes$y$label gets the x aesthetic
+  expect_equal(ir$axes$x$label, "Miles per Gallon")
+  expect_equal(ir$axes$y$label, "Cylinders")
+})
+
+test_that("coord_fixed produces correct IR with ratio", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg)) + geom_point() + coord_fixed(ratio = 2)
+  ir <- as_d3_ir(p)
+
+  expect_equal(ir$coord$type, "fixed")
+  expect_false(ir$coord$flip)
+  expect_equal(ir$coord$ratio, 2)
+})
+
+test_that("coord_fixed with default ratio=1", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg)) + geom_point() + coord_fixed()
+  ir <- as_d3_ir(p)
+
+  expect_equal(ir$coord$type, "fixed")
+  expect_equal(ir$coord$ratio, 1)
+})
+
+test_that("default coord is cartesian", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
+  ir <- as_d3_ir(p)
+
+  expect_equal(ir$coord$type, "cartesian")
+  expect_false(ir$coord$flip)
+  expect_null(ir$coord$ratio)
+})
+
+test_that("coord_flip preserves scale types", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(factor(cyl), mpg)) + geom_col() + coord_flip()
+  ir <- as_d3_ir(p)
+
+  # Scale types should be unchanged by coord_flip
+  expect_equal(ir$scales$x$type, "categorical")
+  expect_equal(ir$scales$y$type, "continuous")
+})
+
+test_that("coord_fixed preserves scale domains", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg)) + geom_point() + coord_fixed(ratio = 1)
+  ir <- as_d3_ir(p)
+
+  # Domains should still cover the data range
+  expect_true(ir$scales$x$domain[1] <= min(mtcars$wt))
+  expect_true(ir$scales$x$domain[2] >= max(mtcars$wt))
+  expect_true(ir$scales$y$domain[1] <= min(mtcars$mpg))
+  expect_true(ir$scales$y$domain[2] >= max(mtcars$mpg))
+})
