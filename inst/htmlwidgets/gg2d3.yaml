@@ -22,3 +22,7 @@ dependencies:
       - geoms/bar.js
       - geoms/rect.js
       - geoms/text.js
+      - geoms/area.js
+      - geoms/ribbon.js
+      - geoms/segment.js
+      - geoms/reference.js
