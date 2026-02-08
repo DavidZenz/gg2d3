@@ -47,6 +47,7 @@
 
     const isXBand = typeof xScale.bandwidth === "function";
     const isYBand = typeof yScale.bandwidth === "function";
+    const flip = !!options.flip;
 
     // Filter valid points
     const pts = dat.filter(d => {
@@ -57,16 +58,30 @@
 
     const defaultSize = params.size || 1.5;
 
+    // Helper: get pixel position from scale + value, centering for band scales
+    function scalePos(scale, v, isBand) {
+      return isBand ? scale(v) + scale.bandwidth() / 2 : scale(v);
+    }
+
     // Render circles
+    // When flip: cx uses yScale(yVal) [horizontal], cy uses xScale(xVal) [vertical]
     const sel = g.append("g").selectAll("circle").data(pts);
     sel.enter().append("circle")
       .attr("cx", d => {
+        if (flip) {
+          const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
+          return scalePos(yScale, yVal, isYBand);
+        }
         const xVal = isXBand ? val(get(d, aes.x)) : num(get(d, aes.x));
-        return isXBand ? xScale(xVal) + xScale.bandwidth() / 2 : xScale(xVal);
+        return scalePos(xScale, xVal, isXBand);
       })
       .attr("cy", d => {
+        if (flip) {
+          const xVal = isXBand ? val(get(d, aes.x)) : num(get(d, aes.x));
+          return scalePos(xScale, xVal, isXBand);
+        }
         const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
-        return isYBand ? yScale(yVal) + yScale.bandwidth() / 2 : yScale(yVal);
+        return scalePos(yScale, yVal, isYBand);
       })
       .attr("r", d => {
         if (aes.size) {
