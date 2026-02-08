@@ -63,13 +63,12 @@ Plans:
   4. Data points never touch axis edges unless expansion explicitly disabled
   5. Discrete scales handle reordered factors, dropped levels, and subsetted data correctly
 
-**Plans**: TBD
+**Plans:** 3 plans in 2 waves
 
 Plans:
-- [ ] 02-01: Implement scale transformations (log, sqrt, pow, reverse)
-- [ ] 02-02: Implement proper scale expansion logic
-- [ ] 02-03: Robust discrete scale mapping with edge cases
-- [ ] 02-04: Scale domain validation and error handling
+- [ ] 02-01-PLAN.md -- R-side scale extraction: transforms + expansion from panel_params (Wave 1)
+- [ ] 02-02-PLAN.md -- D3 scale factory transform dispatch + axis tick rendering (Wave 1)
+- [ ] 02-03-PLAN.md -- Domain validation, discrete edge cases, and visual verification (Wave 2)
 
 ### Phase 3: Coordinate Systems
 **Goal**: Fix coord_flip and add coord_fixed for proper aspect ratios
@@ -283,7 +282,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | Phase | Plans | Status | Completed |
 |-------|-------|--------|-----------|
 | 1. Foundation Refactoring | 5/5 | Complete | 2026-02-07 |
-| 2. Core Scale System | 0/4 | Not started | - |
+| 2. Core Scale System | 0/3 | Planning | - |
 | 3. Coordinate Systems | 0/3 | Not started | - |
 | 4. Essential Geoms | 0/5 | Not started | - |
 | 5. Statistical Geoms | 0/5 | Not started | - |
@@ -297,4 +296,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 ---
 *Roadmap created: 2026-02-07*
 *Total phases: 11 (comprehensive depth)*
-*Total plans: 51 (estimated)*
+*Total plans: 50 (estimated)*
