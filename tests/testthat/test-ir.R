@@ -145,3 +145,40 @@ test_that("coord_trans produces warning", {
     "Phase 3"
   )
 })
+
+test_that("discrete scale preserves custom factor order", {
+  library(ggplot2)
+  df <- data.frame(x = factor(c("C", "A", "B"), levels = c("C", "A", "B")), y = 1:3)
+  p <- ggplot(df, aes(x, y)) + geom_point()
+  ir <- as_d3_ir(p)
+  expect_equal(ir$scales$x$domain, c("C", "A", "B"))
+})
+
+test_that("discrete scale with drop=TRUE shows only present levels", {
+  library(ggplot2)
+  df <- data.frame(x = factor(c("A", "B"), levels = c("A", "B", "C", "D", "E")), y = 1:2)
+  p <- ggplot(df, aes(x, y)) + geom_point()
+  ir <- as_d3_ir(p)
+  # Default drop=TRUE: should show only A and B
+  expect_equal(length(ir$scales$x$domain), 2)
+  expect_true(all(c("A", "B") %in% ir$scales$x$domain))
+})
+
+test_that("discrete scale with drop=FALSE shows all factor levels", {
+  library(ggplot2)
+  df <- data.frame(x = factor(c("A", "B"), levels = c("A", "B", "C", "D", "E")), y = 1:2)
+  p <- ggplot(df, aes(x, y)) + geom_point() +
+       scale_x_discrete(drop = FALSE)
+  ir <- as_d3_ir(p)
+  # drop=FALSE: should show all 5 levels
+  expect_equal(length(ir$scales$x$domain), 5)
+})
+
+test_that("discrete scale handles NA values", {
+  library(ggplot2)
+  df <- data.frame(x = c("A", "B", NA, "A"), y = 1:4)
+  p <- ggplot(df, aes(x, y)) + geom_point()
+  ir <- as_d3_ir(p)
+  # Should not crash; domain should not include NA as a level
+  expect_true(is.character(ir$scales$x$domain))
+})
