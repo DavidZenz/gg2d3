@@ -62,12 +62,14 @@ HTMLWidgets.widget({
       const gridMinor = theme.get("grid.minor");
 
       // Draw minor grid first (so major grid draws over it)
+      // When flipped: xScale maps vertical, so x-breaks draw horizontal lines;
+      //               yScale maps horizontal, so y-breaks draw vertical lines
       if (gridMinor && gridMinor.type !== "blank") {
         const xMinorBreaks = ir.scales && ir.scales.x && ir.scales.x.minor_breaks;
         const yMinorBreaks = ir.scales && ir.scales.y && ir.scales.y.minor_breaks;
         if (xMinorBreaks || yMinorBreaks) {
-          window.gg2d3.theme.drawGrid(g, xScale, "vertical", gridMinor, xMinorBreaks, w, h, convertColor);
-          window.gg2d3.theme.drawGrid(g, yScale, "horizontal", gridMinor, yMinorBreaks, w, h, convertColor);
+          window.gg2d3.theme.drawGrid(g, xScale, flip ? "horizontal" : "vertical", gridMinor, xMinorBreaks, w, h, convertColor);
+          window.gg2d3.theme.drawGrid(g, yScale, flip ? "vertical" : "horizontal", gridMinor, yMinorBreaks, w, h, convertColor);
         }
       }
 
@@ -75,8 +77,8 @@ HTMLWidgets.widget({
       if (gridMajor && gridMajor.type !== "blank") {
         const xBreaks = ir.scales && ir.scales.x && ir.scales.x.breaks;
         const yBreaks = ir.scales && ir.scales.y && ir.scales.y.breaks;
-        window.gg2d3.theme.drawGrid(g, xScale, "vertical", gridMajor, xBreaks, w, h, convertColor);
-        window.gg2d3.theme.drawGrid(g, yScale, "horizontal", gridMajor, yBreaks, w, h, convertColor);
+        window.gg2d3.theme.drawGrid(g, xScale, flip ? "horizontal" : "vertical", gridMajor, xBreaks, w, h, convertColor);
+        window.gg2d3.theme.drawGrid(g, yScale, flip ? "vertical" : "horizontal", gridMajor, yBreaks, w, h, convertColor);
       }
 
       // Title
@@ -129,30 +131,32 @@ HTMLWidgets.widget({
       const cleanFormat = d3.format(".4~g");
 
       if (flip) {
-        // For flip: xScale uses yBreaks (left axis), yScale uses xBreaks (bottom axis)
-        const yAxisGen = d3.axisLeft(xScale);
-        const xAxisGen = d3.axisBottom(yScale);
+        // For flip: xScale is the x-aesthetic mapped to vertical range [h,0] -> LEFT axis
+        //           yScale is the y-aesthetic mapped to horizontal range [0,w] -> BOTTOM axis
+        // x-breaks go to left axis (xScale), y-breaks go to bottom axis (yScale)
+        const leftAxisGen = d3.axisLeft(xScale);
+        const bottomAxisGen = d3.axisBottom(yScale);
 
-        // Set tick values if breaks available and scale is continuous
-        if (yBreaks && typeof xScale.bandwidth !== "function") {
-          yAxisGen.tickValues(yBreaks);
+        // Set tick values: xBreaks for left axis (x-aesthetic), yBreaks for bottom axis (y-aesthetic)
+        if (xBreaks && typeof xScale.bandwidth !== "function") {
+          leftAxisGen.tickValues(xBreaks);
         }
-        if (xBreaks && typeof yScale.bandwidth !== "function") {
-          xAxisGen.tickValues(xBreaks);
+        if (yBreaks && typeof yScale.bandwidth !== "function") {
+          bottomAxisGen.tickValues(yBreaks);
         }
 
         // Set tick format for transformed scales
         if (xTransform && xTransform !== "identity" && typeof xScale.bandwidth !== "function") {
-          yAxisGen.tickFormat(cleanFormat);
+          leftAxisGen.tickFormat(cleanFormat);
         }
         if (yTransform && yTransform !== "identity" && typeof yScale.bandwidth !== "function") {
-          xAxisGen.tickFormat(cleanFormat);
+          bottomAxisGen.tickFormat(cleanFormat);
         }
 
-        const yAxis = g.append("g").attr("class", "axis").call(yAxisGen);
-        const xAxis = g.append("g").attr("class", "axis").attr("transform", `translate(0,${h})`).call(xAxisGen);
-        window.gg2d3.theme.applyAxisStyle(yAxis, axisText, axisLine, axisTicks);
-        window.gg2d3.theme.applyAxisStyle(xAxis, axisText, axisLine, axisTicks);
+        const leftAxis = g.append("g").attr("class", "axis").call(leftAxisGen);
+        const bottomAxis = g.append("g").attr("class", "axis").attr("transform", `translate(0,${h})`).call(bottomAxisGen);
+        window.gg2d3.theme.applyAxisStyle(leftAxis, axisText, axisLine, axisTicks);
+        window.gg2d3.theme.applyAxisStyle(bottomAxis, axisText, axisLine, axisTicks);
       } else {
         // ggplot2 always places x-axis at the bottom of the panel
         const xAxisY = h;
