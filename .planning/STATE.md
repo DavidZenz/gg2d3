@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 
-**Current focus:** Phase 3 - Coordinate Systems (plan 2 of 3 complete)
+**Current focus:** Phase 4 - Geom Expansion (next up)
 
 ## Current Position
 
-Phase: 3 of 11 (Coordinate Systems)
-Plan: 2 of 3 in Phase 3
+Phase: 4 of 11 (Essential Geoms)
+Plan: 1 of 6 in Phase 4
 Status: In progress
-Last activity: 2026-02-08 — Completed 03-02-PLAN.md (coord_fixed aspect ratio)
+Last activity: 2026-02-08 — Completed 04-01 (R-side IR infrastructure for new geoms)
 
-Progress: [██░░░░░░░░] 20% (10/51 plans complete)
+Progress: [██░░░░░░░░] 24% (12/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: ~8.5 min
-- Total execution time: ~1.6 hours
+- Total plans completed: 12
+- Average duration: ~7.6 min
+- Total execution time: ~1.7 hours
 
 **By Phase:**
 
@@ -30,7 +30,8 @@ Progress: [██░░░░░░░░] 20% (10/51 plans complete)
 |-------|-------|-------|----------|
 | 01-foundation-refactoring | 5/5 | 70.4 min | 14.1 min |
 | 02-core-scale-system | 3/3 | ~20 min | ~6.7 min |
-| 03-coordinate-systems | 2/3 | 7.1 min | 3.5 min |
+| 03-coordinate-systems | 3/3 | ~22 min | ~7.3 min |
+| 04-essential-geoms | 1/6 | 2 min | 2 min |
 
 *Updated after each plan completion*
 
@@ -75,6 +76,15 @@ Recent decisions affecting current work:
 | xy-specific-theme-fallback | Extract axis.text.x/y etc. with fallback to generic | Enables per-axis styling while maintaining backward compat | x/y theme elements work end-to-end |
 | data-range-aware-aspect | Panel aspect uses ratio * (yRange/xRange) for coord_fixed | Matches ggplot2 behavior where ratio=1 means equal pixel length per data unit | Correct panel sizing for unequal data ranges |
 | stored-ir-resize | Store IR in currentIR for resize redraw | Enables responsive widget behavior | Resize recalculates panel while maintaining aspect ratio |
+| unswap-panel-params | Un-swap coord_flip panel_params in R to realign with scales | ggplot_build swaps panel_params x↔y but not panel_scales or data | Correct breaks/domains for all coord_flip plots |
+| flip-via-options | Pass flip flag to geom renderers via options object | Each geom needs to swap scale-to-attribute mapping | All 5 geom types support coord_flip |
+
+**From Phase 4:**
+
+| Decision ID | Title | Rationale | Impact |
+|-------------|-------|-----------|--------|
+| reference-line-data-in-rows | Reference line position data stored in layer data rows | ggplot_build() computes reference line positions as data frame columns, not params | JS renderers read position from data rows, not layer.params |
+| placeholder-geom-modules | Create placeholder JS modules that register but return 0 | Prevents widget load errors before Wave 2 implements actual rendering | All Phase 4 geoms can be added to IR/validation/YAML immediately |
 
 ### Pending Todos
 
@@ -89,6 +99,8 @@ None.
 
 **Phase 1 (Foundation) — COMPLETE**
 **Phase 2 (Scales) — COMPLETE**
+**Phase 3 (Coordinates) — COMPLETE**
+**Phase 4 (Essential Geoms) — IN PROGRESS (1/6 complete)**
 
 **Remaining concerns:**
 - Monolithic as_d3_ir() function (~380 lines) needs modularization before adding features
@@ -100,11 +112,13 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Phase 3, Plan 2 complete. Ready for Plan 03-03 (coord_trans).
-Resume file: .planning/phases/03-coordinate-systems/03-02-SUMMARY.md
-Next action: Execute Plan 03-03 when ready.
+Stopped at: Phase 4 Plan 1 complete (R-side infrastructure for new geoms).
+Resume file: .planning/phases/04-essential-geoms/04-01-SUMMARY.md
+Next action: Continue with Phase 4 Plan 2+ (implement JS renderers for new geoms).
 
 ---
 *State initialized: 2026-02-07*
 *Phase 1 completed: 2026-02-07*
 *Phase 2 completed: 2026-02-08*
+*Phase 3 completed: 2026-02-08*
+*Phase 4 started: 2026-02-08*
