@@ -117,9 +117,21 @@ HTMLWidgets.widget({
       });
 
       // Axes - render AFTER data so they appear on top
+      // Generic axis theme elements (fallback)
       const axisText = theme.get("axis.text");
       const axisLine = theme.get("axis.line");
       const axisTicks = theme.get("axis.ticks");
+
+      // x/y-specific theme elements with fallback to generic
+      const axisTextX = theme.get("axis.text.x") || axisText;
+      const axisTextY = theme.get("axis.text.y") || axisText;
+      const axisLineX = theme.get("axis.line.x") || axisLine;
+      const axisLineY = theme.get("axis.line.y") || axisLine;
+      const axisTicksX = theme.get("axis.ticks.x") || axisTicks;
+      const axisTicksY = theme.get("axis.ticks.y") || axisTicks;
+
+      // Axis title theme
+      const axisTitleSpec = theme.get("axis.title");
 
       // Extract breaks and transforms for axis tick positioning (reuse from grid section above)
       const xBreaks = ir.scales && ir.scales.x && ir.scales.x.breaks;
@@ -155,8 +167,9 @@ HTMLWidgets.widget({
 
         const leftAxis = g.append("g").attr("class", "axis").call(leftAxisGen);
         const bottomAxis = g.append("g").attr("class", "axis").attr("transform", `translate(0,${h})`).call(bottomAxisGen);
-        window.gg2d3.theme.applyAxisStyle(leftAxis, axisText, axisLine, axisTicks);
-        window.gg2d3.theme.applyAxisStyle(bottomAxis, axisText, axisLine, axisTicks);
+        // In flip: x-aesthetic themes apply to left axis, y-aesthetic themes to bottom axis
+        window.gg2d3.theme.applyAxisStyle(leftAxis, axisTextX, axisLineX, axisTicksX);
+        window.gg2d3.theme.applyAxisStyle(bottomAxis, axisTextY, axisLineY, axisTicksY);
       } else {
         // ggplot2 always places x-axis at the bottom of the panel
         const xAxisY = h;
@@ -182,8 +195,37 @@ HTMLWidgets.widget({
 
         const xAxis = g.append("g").attr("class", "axis").attr("transform", `translate(0,${xAxisY})`).call(xAxisGen);
         const yAxis = g.append("g").attr("class", "axis").call(yAxisGen);
-        window.gg2d3.theme.applyAxisStyle(xAxis, axisText, axisLine, axisTicks);
-        window.gg2d3.theme.applyAxisStyle(yAxis, axisText, axisLine, axisTicks);
+        // In normal: x-aesthetic themes apply to bottom axis, y-aesthetic themes to left axis
+        window.gg2d3.theme.applyAxisStyle(xAxis, axisTextX, axisLineX, axisTicksX);
+        window.gg2d3.theme.applyAxisStyle(yAxis, axisTextY, axisLineY, axisTicksY);
+      }
+
+      // Axis titles
+      // ir.axes.x.label and ir.axes.y.label are already swapped for coord_flip in R
+      // x label always goes below the bottom axis, y label always goes left of the left axis
+      const xTitle = ir.axes && ir.axes.x && ir.axes.x.label;
+      if (xTitle) {
+        root.append("text")
+          .attr("x", pad.left + w / 2)
+          .attr("y", pad.top + h + pad.bottom - 5)
+          .attr("text-anchor", "middle")
+          .style("font-size", axisTitleSpec && axisTitleSpec.size ? `${axisTitleSpec.size}px` : "11px")
+          .style("fill", convertColor(axisTitleSpec && axisTitleSpec.colour) || "black")
+          .style("font-family", axisTitleSpec && axisTitleSpec.family || "sans-serif")
+          .text(xTitle);
+      }
+
+      const yTitle = ir.axes && ir.axes.y && ir.axes.y.label;
+      if (yTitle) {
+        root.append("text")
+          .attr("x", 12)
+          .attr("y", pad.top + h / 2)
+          .attr("text-anchor", "middle")
+          .attr("transform", `rotate(-90, 12, ${pad.top + h / 2})`)
+          .style("font-size", axisTitleSpec && axisTitleSpec.size ? `${axisTitleSpec.size}px` : "11px")
+          .style("fill", convertColor(axisTitleSpec && axisTitleSpec.colour) || "black")
+          .style("font-family", axisTitleSpec && axisTitleSpec.family || "sans-serif")
+          .text(yTitle);
       }
 
       // Fallback indicator if no marks drawn
