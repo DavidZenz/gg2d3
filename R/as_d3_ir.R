@@ -19,7 +19,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
   keep_aes <- c(
     "PANEL","x","y","xend","yend","xmin","xmax","ymin","ymax",
-    "colour","fill","size","alpha","group","label"
+    "colour","fill","size","alpha","group","label",
+    "slope","intercept","xintercept","yintercept"
   )
 
   # coerce to plain base types (no factors), then row-wise list with scalars
@@ -181,6 +182,10 @@ as_d3_ir <- function(p, width = 640, height = 400,
                     GeomViolin = "violin",
                     GeomBoxplot= "boxplot",
                     GeomSmooth = "path",
+                    GeomHline  = "hline",
+                    GeomVline  = "vline",
+                    GeomAbline = "abline",
+                    GeomPolygon= "polygon",
                     # Fallbacks
                     {
                       if (!is.null(gobj$objname)) {
@@ -197,7 +202,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
     keep_aes <- c(
       "PANEL","x","y","xend","yend","xmin","xmax","ymin","ymax",
       "colour","fill","size","alpha","group","label",
-      "stroke","shape","linewidth","linetype","lineend"
+      "stroke","shape","linewidth","linetype","lineend",
+      "slope","intercept","xintercept","yintercept"
     )
 
     # coerce + rowize (same as your latest version)
@@ -234,7 +240,11 @@ as_d3_ir <- function(p, width = 640, height = 400,
       size  = if ("size"  %in% cols) "size"  else NULL,
       alpha = if ("alpha" %in% cols) "alpha" else NULL,
       group = if ("group" %in% cols) "group" else NULL,
-      label = if ("label" %in% cols) "label" else NULL
+      label = if ("label" %in% cols) "label" else NULL,
+      slope = if ("slope" %in% cols) "slope" else NULL,
+      intercept = if ("intercept" %in% cols) "intercept" else NULL,
+      xintercept = if ("xintercept" %in% cols) "xintercept" else NULL,
+      yintercept = if ("yintercept" %in% cols) "yintercept" else NULL
     )
 
     list(
