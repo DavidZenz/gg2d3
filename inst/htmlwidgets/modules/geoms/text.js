@@ -56,11 +56,11 @@
     sel.enter().append("text")
       .attr("x", d => {
         const xVal = isXBand ? val(get(d, aes.x)) : num(get(d, aes.x));
-        return xScale(xVal);
+        return isXBand ? xScale(xVal) + xScale.bandwidth() / 2 : xScale(xVal);
       })
       .attr("y", d => {
         const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
-        return yScale(yVal);
+        return isYBand ? yScale(yVal) + yScale.bandwidth() / 2 : yScale(yVal);
       })
       .attr("dominant-baseline", "middle")
       .attr("text-anchor", "middle")

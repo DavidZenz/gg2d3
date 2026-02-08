@@ -68,7 +68,9 @@
       }
 
       if (pts.length >= 2) {
-        const line = d3.line().x(p => xScale(p.x)).y(p => yScale(p.y));
+        const xOff = isXBand ? xScale.bandwidth() / 2 : 0;
+        const yOff = isYBand ? yScale.bandwidth() / 2 : 0;
+        const line = d3.line().x(p => xScale(p.x) + xOff).y(p => yScale(p.y) + yOff);
         const firstPoint = pts[0].d;
         const linewidthVal = val(get(firstPoint, "linewidth"));
         // ggplot2 default linewidth: 0.5mm = 1.89px

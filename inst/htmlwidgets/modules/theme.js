@@ -143,7 +143,7 @@
     const ticks = breaks || (isBand ? scale.domain() : scale.ticks());
 
     ticks.forEach(tick => {
-      const pos = scale(tick);
+      const pos = isBand ? scale(tick) + scale.bandwidth() / 2 : scale(tick);
       if (orientation === "vertical") {
         g.insert("line", ".axis")
           .attr("x1", pos)
