@@ -119,9 +119,38 @@ HTMLWidgets.widget({
       const axisLine = theme.get("axis.line");
       const axisTicks = theme.get("axis.ticks");
 
+      // Extract breaks and transforms for axis tick positioning (reuse from grid section above)
+      const xBreaks = ir.scales && ir.scales.x && ir.scales.x.breaks;
+      const yBreaks = ir.scales && ir.scales.y && ir.scales.y.breaks;
+      const xTransform = ir.scales && ir.scales.x && ir.scales.x.transform;
+      const yTransform = ir.scales && ir.scales.y && ir.scales.y.transform;
+
+      // Create tick format for transformed scales
+      const cleanFormat = d3.format(".4~g");
+
       if (flip) {
-        const yAxis = g.append("g").attr("class", "axis").call(d3.axisLeft(xScale));
-        const xAxis = g.append("g").attr("class", "axis").attr("transform", `translate(0,${h})`).call(d3.axisBottom(yScale));
+        // For flip: xScale uses yBreaks (left axis), yScale uses xBreaks (bottom axis)
+        const yAxisGen = d3.axisLeft(xScale);
+        const xAxisGen = d3.axisBottom(yScale);
+
+        // Set tick values if breaks available and scale is continuous
+        if (yBreaks && typeof xScale.bandwidth !== "function") {
+          yAxisGen.tickValues(yBreaks);
+        }
+        if (xBreaks && typeof yScale.bandwidth !== "function") {
+          xAxisGen.tickValues(xBreaks);
+        }
+
+        // Set tick format for transformed scales
+        if (xTransform && xTransform !== "identity" && typeof xScale.bandwidth !== "function") {
+          yAxisGen.tickFormat(cleanFormat);
+        }
+        if (yTransform && yTransform !== "identity" && typeof yScale.bandwidth !== "function") {
+          xAxisGen.tickFormat(cleanFormat);
+        }
+
+        const yAxis = g.append("g").attr("class", "axis").call(yAxisGen);
+        const xAxis = g.append("g").attr("class", "axis").attr("transform", `translate(0,${h})`).call(xAxisGen);
         window.gg2d3.theme.applyAxisStyle(yAxis, axisText, axisLine, axisTicks);
         window.gg2d3.theme.applyAxisStyle(xAxis, axisText, axisLine, axisTicks);
       } else {
@@ -134,8 +163,28 @@ HTMLWidgets.widget({
             xAxisY = yScale(0);
           }
         }
-        const xAxis = g.append("g").attr("class", "axis").attr("transform", `translate(0,${xAxisY})`).call(d3.axisBottom(xScale));
-        const yAxis = g.append("g").attr("class", "axis").call(d3.axisLeft(yScale));
+
+        const xAxisGen = d3.axisBottom(xScale);
+        const yAxisGen = d3.axisLeft(yScale);
+
+        // Set tick values if breaks available and scale is continuous
+        if (xBreaks && typeof xScale.bandwidth !== "function") {
+          xAxisGen.tickValues(xBreaks);
+        }
+        if (yBreaks && typeof yScale.bandwidth !== "function") {
+          yAxisGen.tickValues(yBreaks);
+        }
+
+        // Set tick format for transformed scales
+        if (xTransform && xTransform !== "identity" && typeof xScale.bandwidth !== "function") {
+          xAxisGen.tickFormat(cleanFormat);
+        }
+        if (yTransform && yTransform !== "identity" && typeof yScale.bandwidth !== "function") {
+          yAxisGen.tickFormat(cleanFormat);
+        }
+
+        const xAxis = g.append("g").attr("class", "axis").attr("transform", `translate(0,${xAxisY})`).call(xAxisGen);
+        const yAxis = g.append("g").attr("class", "axis").call(yAxisGen);
         window.gg2d3.theme.applyAxisStyle(xAxis, axisText, axisLine, axisTicks);
         window.gg2d3.theme.applyAxisStyle(yAxis, axisText, axisLine, axisTicks);
       }
