@@ -249,10 +249,10 @@ as_d3_ir <- function(p, width = 640, height = 400,
     if (trans_name == "identity") {
       # No transform needed
       return(NULL)
-    } else if (trans_name == "log-10") {
+    } else if (trans_name == "log-10" || trans_name == "log10") {
       result$transform <- "log10"
       result$base <- 10
-    } else if (trans_name == "log-2") {
+    } else if (trans_name == "log-2" || trans_name == "log2") {
       result$transform <- "log2"
       result$base <- 2
     } else if (trans_name == "log") {
