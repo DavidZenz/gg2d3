@@ -84,12 +84,12 @@ Plans:
   4. coord_fixed maintains specified aspect ratio during resize
   5. Coordinate transformations apply to all geoms consistently
 
-**Plans**: TBD
+**Plans:** 3 plans in 3 waves
 
 Plans:
-- [ ] 03-01: Fix coord_flip axis positioning
-- [ ] 03-02: Implement coord_fixed aspect ratio constraints
-- [ ] 03-03: Coordinate system tests across all geoms
+- [ ] 03-01-PLAN.md -- Fix coord_flip: R-side coord extraction + D3 axis/grid/title rendering (Wave 1)
+- [ ] 03-02-PLAN.md -- Implement coord_fixed aspect ratio constraints with resize support (Wave 2)
+- [ ] 03-03-PLAN.md -- Coordinate system unit tests + visual verification checkpoint (Wave 3)
 
 ### Phase 4: Essential Geoms
 **Goal**: Add critical geometric layers for complete basic plots (area, ribbon, segment, reference lines)
