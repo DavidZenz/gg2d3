@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 4 of 11 (Essential Geoms)
-Plan: 1 of 6 in Phase 4
+Plan: 2 of 6 in Phase 4
 Status: In progress
-Last activity: 2026-02-08 — Completed 04-01 (R-side IR infrastructure for new geoms)
+Last activity: 2026-02-08 — Completed 04-02 (Area and Ribbon geom renderers)
 
-Progress: [██░░░░░░░░] 24% (12/51 plans complete)
+Progress: [██░░░░░░░░] 25% (13/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
-- Average duration: ~7.6 min
-- Total execution time: ~1.7 hours
+- Total plans completed: 13
+- Average duration: ~11.8 min
+- Total execution time: ~2.7 hours
 
 **By Phase:**
 
@@ -31,7 +31,7 @@ Progress: [██░░░░░░░░] 24% (12/51 plans complete)
 | 01-foundation-refactoring | 5/5 | 70.4 min | 14.1 min |
 | 02-core-scale-system | 3/3 | ~20 min | ~6.7 min |
 | 03-coordinate-systems | 3/3 | ~22 min | ~7.3 min |
-| 04-essential-geoms | 1/6 | 2 min | 2 min |
+| 04-essential-geoms | 2/6 | 63 min | 31.5 min |
 
 *Updated after each plan completion*
 
@@ -85,6 +85,8 @@ Recent decisions affecting current work:
 |-------------|-------|-----------|--------|
 | reference-line-data-in-rows | Reference line position data stored in layer data rows | ggplot_build() computes reference line positions as data frame columns, not params | JS renderers read position from data rows, not layer.params |
 | placeholder-geom-modules | Create placeholder JS modules that register but return 0 | Prevents widget load errors before Wave 2 implements actual rendering | All Phase 4 geoms can be added to IR/validation/YAML immediately |
+| area-baseline-calculation | Calculate area baseline as: zero if in domain, else domain min | Matches ggplot2 behavior for non-stacked areas | Area geom renders with correct baseline |
+| area-vs-ribbon-distinction | Area uses baseline, ribbon always uses ymin/ymax from data | Reflects ggplot2's semantic difference between the two geoms | Clear separation of concerns between area and ribbon renderers |
 
 ### Pending Todos
 
@@ -100,7 +102,7 @@ None.
 **Phase 1 (Foundation) — COMPLETE**
 **Phase 2 (Scales) — COMPLETE**
 **Phase 3 (Coordinates) — COMPLETE**
-**Phase 4 (Essential Geoms) — IN PROGRESS (1/6 complete)**
+**Phase 4 (Essential Geoms) — IN PROGRESS (2/6 complete)**
 
 **Remaining concerns:**
 - Monolithic as_d3_ir() function (~380 lines) needs modularization before adding features
@@ -112,9 +114,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Phase 4 Plan 1 complete (R-side infrastructure for new geoms).
-Resume file: .planning/phases/04-essential-geoms/04-01-SUMMARY.md
-Next action: Continue with Phase 4 Plan 2+ (implement JS renderers for new geoms).
+Stopped at: Phase 4 Plan 2 complete (Area and Ribbon geom renderers).
+Resume file: .planning/phases/04-essential-geoms/04-02-SUMMARY.md
+Next action: Continue with Phase 4 Plan 3+ (implement remaining Wave 2 geom renderers: hline/vline, abline, segment, polygon, smooth).
 
 ---
 *State initialized: 2026-02-07*
