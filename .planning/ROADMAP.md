@@ -13,7 +13,7 @@ gg2d3 transforms from a working 8-geom prototype into a production-ready R packa
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation Refactoring** - Modularize existing codebase, centralize conversions
-- [ ] **Phase 2: Core Scale System** - Complete scale infrastructure for all rendering
+- [x] **Phase 2: Core Scale System** - Complete scale infrastructure for all rendering
 - [ ] **Phase 3: Coordinate Systems** - Fix coord_flip, add coord_fixed
 - [ ] **Phase 4: Essential Geoms** - Area, ribbon, segment, reference lines
 - [ ] **Phase 5: Statistical Geoms** - Boxplot, violin, density, smooth
@@ -66,9 +66,9 @@ Plans:
 **Plans:** 3 plans in 2 waves
 
 Plans:
-- [ ] 02-01-PLAN.md -- R-side scale extraction: transforms + expansion from panel_params (Wave 1)
-- [ ] 02-02-PLAN.md -- D3 scale factory transform dispatch + axis tick rendering (Wave 1)
-- [ ] 02-03-PLAN.md -- Domain validation, discrete edge cases, and visual verification (Wave 2)
+- [x] 02-01-PLAN.md -- R-side scale extraction: transforms + expansion from panel_params (Wave 1)
+- [x] 02-02-PLAN.md -- D3 scale factory transform dispatch + axis tick rendering (Wave 1)
+- [x] 02-03-PLAN.md -- Domain validation, discrete edge cases, and visual verification (Wave 2)
 
 ### Phase 3: Coordinate Systems
 **Goal**: Fix coord_flip and add coord_fixed for proper aspect ratios
@@ -282,7 +282,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | Phase | Plans | Status | Completed |
 |-------|-------|--------|-----------|
 | 1. Foundation Refactoring | 5/5 | Complete | 2026-02-07 |
-| 2. Core Scale System | 0/3 | Planning | - |
+| 2. Core Scale System | 3/3 | Complete | 2026-02-08 |
 | 3. Coordinate Systems | 0/3 | Not started | - |
 | 4. Essential Geoms | 0/5 | Not started | - |
 | 5. Statistical Geoms | 0/5 | Not started | - |
