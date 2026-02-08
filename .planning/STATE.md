@@ -6,22 +6,22 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 
-**Current focus:** Phase 3 - Coordinate Systems (plan 1 of 3 complete)
+**Current focus:** Phase 3 - Coordinate Systems (plan 2 of 3 complete)
 
 ## Current Position
 
 Phase: 3 of 11 (Coordinate Systems)
-Plan: 1 of 3 in Phase 3
+Plan: 2 of 3 in Phase 3
 Status: In progress
-Last activity: 2026-02-08 — Completed 03-01-PLAN.md (coord_flip + coord_fixed)
+Last activity: 2026-02-08 — Completed 03-02-PLAN.md (coord_fixed aspect ratio)
 
-Progress: [██░░░░░░░░] 18% (9/51 plans complete)
+Progress: [██░░░░░░░░] 20% (10/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: ~9 min
+- Total plans completed: 10
+- Average duration: ~8.5 min
 - Total execution time: ~1.6 hours
 
 **By Phase:**
@@ -30,7 +30,7 @@ Progress: [██░░░░░░░░] 18% (9/51 plans complete)
 |-------|-------|-------|----------|
 | 01-foundation-refactoring | 5/5 | 70.4 min | 14.1 min |
 | 02-core-scale-system | 3/3 | ~20 min | ~6.7 min |
-| 03-coordinate-systems | 1/3 | 4.6 min | 4.6 min |
+| 03-coordinate-systems | 2/3 | 7.1 min | 3.5 min |
 
 *Updated after each plan completion*
 
@@ -73,6 +73,8 @@ Recent decisions affecting current work:
 |-------------|-------|-----------|--------|
 | r-side-label-swap | Swap axis labels in R IR for coord_flip | JS always renders x-label at bottom, y-label at left; R handles the swap | Simplifies D3 rendering code |
 | xy-specific-theme-fallback | Extract axis.text.x/y etc. with fallback to generic | Enables per-axis styling while maintaining backward compat | x/y theme elements work end-to-end |
+| data-range-aware-aspect | Panel aspect uses ratio * (yRange/xRange) for coord_fixed | Matches ggplot2 behavior where ratio=1 means equal pixel length per data unit | Correct panel sizing for unequal data ranges |
+| stored-ir-resize | Store IR in currentIR for resize redraw | Enables responsive widget behavior | Resize recalculates panel while maintaining aspect ratio |
 
 ### Pending Todos
 
@@ -98,9 +100,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Phase 3, Plan 1 complete. Ready for Plan 03-02 (coord_trans).
-Resume file: .planning/phases/03-coordinate-systems/03-01-SUMMARY.md
-Next action: Execute Plan 03-02 when ready.
+Stopped at: Phase 3, Plan 2 complete. Ready for Plan 03-03 (coord_trans).
+Resume file: .planning/phases/03-coordinate-systems/03-02-SUMMARY.md
+Next action: Execute Plan 03-03 when ready.
 
 ---
 *State initialized: 2026-02-07*
