@@ -4,6 +4,43 @@ HTMLWidgets.widget({
 
   factory: function (el, width, height) {
 
+    // Store IR for resize support
+    let currentIR = null;
+
+    // Calculate panel dimensions with optional coord_fixed aspect ratio constraint
+    // ratio: coord_fixed ratio (y data units per x data unit in pixel space)
+    // xRange/yRange: data range extents for proper unit-aware aspect ratio
+    function calculatePanelSize(availW, availH, ratio, xRange, yRange) {
+      if (!ratio || ratio <= 0) {
+        return { w: availW, h: availH, offsetX: 0, offsetY: 0 };
+      }
+
+      // coord_fixed(ratio=N) means N data units on y per 1 data unit on x
+      // should occupy equal pixel length. So the pixel aspect ratio is:
+      //   panelH / panelW = ratio * (yRange / xRange)
+      // This ensures 1 unit of x data and 1 unit of y data have the correct
+      // relative pixel sizes.
+      var dataRatio = (yRange && xRange && xRange > 0) ? (yRange / xRange) : 1;
+      var targetAspect = ratio * dataRatio; // desired panelH / panelW
+
+      var panelW, panelH;
+      if (availH / availW > targetAspect) {
+        // Width-limited: use full width, constrain height
+        panelW = availW;
+        panelH = availW * targetAspect;
+      } else {
+        // Height-limited: use full height, constrain width
+        panelH = availH;
+        panelW = availH / targetAspect;
+      }
+
+      // Center panel in available space
+      var offsetX = (availW - panelW) / 2;
+      var offsetY = (availH - panelH) / 2;
+
+      return { w: panelW, h: panelH, offsetX: offsetX, offsetY: offsetY };
+    }
+
     // ---------- draw ----------
     function draw(ir, elW, elH) {
       d3.select(el).selectAll("*").remove();
@@ -20,8 +57,26 @@ HTMLWidgets.widget({
       // Calculate padding from theme
       const pad = window.gg2d3.theme.calculatePadding(theme, ir.padding);
 
-      const w = Math.max(10, innerW - pad.left - pad.right);
-      const h = Math.max(10, innerH - pad.top - pad.bottom);
+      const availW = Math.max(10, innerW - pad.left - pad.right);
+      const availH = Math.max(10, innerH - pad.top - pad.bottom);
+
+      // Apply coord_fixed aspect ratio constraint if present
+      const coordRatio = ir.coord && ir.coord.ratio;
+      // Extract data ranges for proper unit-aware aspect ratio
+      var xDataRange = 0, yDataRange = 0;
+      if (coordRatio) {
+        var xs = ir.scales && ir.scales.x;
+        var ys = ir.scales && ir.scales.y;
+        if (xs && xs.domain && xs.domain.length === 2) {
+          xDataRange = Math.abs(xs.domain[1] - xs.domain[0]);
+        }
+        if (ys && ys.domain && ys.domain.length === 2) {
+          yDataRange = Math.abs(ys.domain[1] - ys.domain[0]);
+        }
+      }
+      const panel = calculatePanelSize(availW, availH, coordRatio, xDataRange, yDataRange);
+      const w = panel.w;
+      const h = panel.h;
 
       const root = d3.select(el).append("svg").attr("width", innerW).attr("height", innerH);
 
@@ -37,7 +92,8 @@ HTMLWidgets.widget({
           .attr("stroke", "none");
       }
 
-      const g = root.append("g").attr("transform", `translate(${pad.left},${pad.top})`);
+      const g = root.append("g").attr("transform",
+        `translate(${pad.left + panel.offsetX},${pad.top + panel.offsetY})`);
 
       // Panel background (plot area)
       const panelBg = theme.get("panel.background");
@@ -206,8 +262,8 @@ HTMLWidgets.widget({
       const xTitle = ir.axes && ir.axes.x && ir.axes.x.label;
       if (xTitle) {
         root.append("text")
-          .attr("x", pad.left + w / 2)
-          .attr("y", pad.top + h + pad.bottom - 5)
+          .attr("x", pad.left + panel.offsetX + w / 2)
+          .attr("y", pad.top + panel.offsetY + h + pad.bottom - panel.offsetY - 5)
           .attr("text-anchor", "middle")
           .style("font-size", axisTitleSpec && axisTitleSpec.size ? `${axisTitleSpec.size}px` : "11px")
           .style("fill", convertColor(axisTitleSpec && axisTitleSpec.colour) || "black")
@@ -217,11 +273,12 @@ HTMLWidgets.widget({
 
       const yTitle = ir.axes && ir.axes.y && ir.axes.y.label;
       if (yTitle) {
+        const yTitleX = Math.max(12, pad.left + panel.offsetX - 35);
         root.append("text")
-          .attr("x", 12)
-          .attr("y", pad.top + h / 2)
+          .attr("x", yTitleX)
+          .attr("y", pad.top + panel.offsetY + h / 2)
           .attr("text-anchor", "middle")
-          .attr("transform", `rotate(-90, 12, ${pad.top + h / 2})`)
+          .attr("transform", `rotate(-90, ${yTitleX}, ${pad.top + panel.offsetY + h / 2})`)
           .style("font-size", axisTitleSpec && axisTitleSpec.size ? `${axisTitleSpec.size}px` : "11px")
           .style("fill", convertColor(axisTitleSpec && axisTitleSpec.colour) || "black")
           .style("font-family", axisTitleSpec && axisTitleSpec.family || "sans-serif")
@@ -249,9 +306,16 @@ HTMLWidgets.widget({
             .append("rect").attr("x", 20).attr("y", 20).attr("width", 200).attr("height", 100).attr("fill", "tomato");
           return;
         }
+        currentIR = ir;
         draw(ir, width, height);
       },
-      resize: function () { /* store & redraw if needed */ }
+      resize: function (newWidth, newHeight) {
+        width = newWidth;
+        height = newHeight;
+        if (currentIR) {
+          draw(currentIR, newWidth, newHeight);
+        }
+      }
     };
   }
 });
