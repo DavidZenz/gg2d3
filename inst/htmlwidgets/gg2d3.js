@@ -167,7 +167,7 @@ HTMLWidgets.widget({
           g,
           xScale,
           yScale,
-          { colorScale, plotWidth: w, plotHeight: h }
+          { colorScale, plotWidth: w, plotHeight: h, flip }
         );
         drawn += count;
       });

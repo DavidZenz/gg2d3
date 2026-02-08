@@ -47,6 +47,7 @@
 
     const isXBand = typeof xScale.bandwidth === "function";
     const isYBand = typeof yScale.bandwidth === "function";
+    const flip = !!options.flip;
 
     // Group by 'group' aesthetic (default to single group)
     const grouped = d3.group(dat, d => val(get(d, "group")) ?? 1);
@@ -70,7 +71,10 @@
       if (pts.length >= 2) {
         const xOff = isXBand ? xScale.bandwidth() / 2 : 0;
         const yOff = isYBand ? yScale.bandwidth() / 2 : 0;
-        const line = d3.line().x(p => xScale(p.x) + xOff).y(p => yScale(p.y) + yOff);
+        // When flip: cx=yScale(y), cy=xScale(x)
+        const line = flip
+          ? d3.line().x(p => yScale(p.y) + yOff).y(p => xScale(p.x) + xOff)
+          : d3.line().x(p => xScale(p.x) + xOff).y(p => yScale(p.y) + yOff);
         const firstPoint = pts[0].d;
         const linewidthVal = val(get(firstPoint, "linewidth"));
         // ggplot2 default linewidth: 0.5mm = 1.89px

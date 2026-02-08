@@ -43,6 +43,12 @@
 
     const isXBand = typeof xScale.bandwidth === "function";
     const isYBand = typeof yScale.bandwidth === "function";
+    const flip = !!options.flip;
+
+    // Helper: get pixel position from scale + value, centering for band scales
+    function scalePos(scale, v, isBand) {
+      return isBand ? scale(v) + scale.bandwidth() / 2 : scale(v);
+    }
 
     // Filter valid text elements
     const txt = dat.filter(d => {
@@ -52,15 +58,24 @@
     });
 
     // Render text elements
+    // When flip: x attr uses yScale(yVal), y attr uses xScale(xVal)
     const sel = g.append("g").selectAll("text").data(txt);
     sel.enter().append("text")
       .attr("x", d => {
+        if (flip) {
+          const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
+          return scalePos(yScale, yVal, isYBand);
+        }
         const xVal = isXBand ? val(get(d, aes.x)) : num(get(d, aes.x));
-        return isXBand ? xScale(xVal) + xScale.bandwidth() / 2 : xScale(xVal);
+        return scalePos(xScale, xVal, isXBand);
       })
       .attr("y", d => {
+        if (flip) {
+          const xVal = isXBand ? val(get(d, aes.x)) : num(get(d, aes.x));
+          return scalePos(xScale, xVal, isXBand);
+        }
         const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
-        return isYBand ? yScale(yVal) + yScale.bandwidth() / 2 : yScale(yVal);
+        return scalePos(yScale, yVal, isYBand);
       })
       .attr("dominant-baseline", "middle")
       .attr("text-anchor", "middle")

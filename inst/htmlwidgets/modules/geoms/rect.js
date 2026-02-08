@@ -49,32 +49,64 @@
 
     const isXBand = typeof xScale.bandwidth === "function";
     const isYBand = typeof yScale.bandwidth === "function";
+    const flip = !!options.flip;
 
     // Render rectangles
+    // When flip: xScale maps vertical, yScale maps horizontal
+    // x-aesthetic bounds (xmin/xmax) use xScale for vertical positioning
+    // y-aesthetic bounds (ymin/ymax) use yScale for horizontal positioning
     const sel = g.append("g").selectAll("rect").data(rects);
-    sel.enter().append("rect")
-      .attr("x", d => {
-        const xmin = isXBand ? val(get(d, aes.xmin)) : num(get(d, aes.xmin));
-        return xScale(xmin);
-      })
-      .attr("y", d => {
-        const ymax = isYBand ? val(get(d, aes.ymax)) : num(get(d, aes.ymax));
-        return yScale(ymax);
-      })
-      .attr("width", d => {
-        if (isXBand) return xScale.bandwidth();
-        const x1 = xScale(num(get(d, aes.xmin)));
-        const x2 = xScale(num(get(d, aes.xmax)));
-        return Math.abs(x2 - x1);
-      })
-      .attr("height", d => {
-        if (isYBand) return yScale.bandwidth();
-        const y1 = yScale(num(get(d, aes.ymin)));
-        const y2 = yScale(num(get(d, aes.ymax)));
-        return Math.abs(y2 - y1);
-      })
+    if (flip) {
+      sel.enter().append("rect")
+        .attr("x", d => {
+          const ymax = isYBand ? val(get(d, aes.ymax)) : num(get(d, aes.ymax));
+          const ymin = isYBand ? val(get(d, aes.ymin)) : num(get(d, aes.ymin));
+          return Math.min(yScale(ymax), yScale(ymin));
+        })
+        .attr("y", d => {
+          const xmin = isXBand ? val(get(d, aes.xmin)) : num(get(d, aes.xmin));
+          const xmax = isXBand ? val(get(d, aes.xmax)) : num(get(d, aes.xmax));
+          return Math.min(xScale(xmin), xScale(xmax));
+        })
+        .attr("width", d => {
+          if (isYBand) return yScale.bandwidth();
+          const y1 = yScale(num(get(d, aes.ymin)));
+          const y2 = yScale(num(get(d, aes.ymax)));
+          return Math.abs(y2 - y1);
+        })
+        .attr("height", d => {
+          if (isXBand) return xScale.bandwidth();
+          const x1 = xScale(num(get(d, aes.xmin)));
+          const x2 = xScale(num(get(d, aes.xmax)));
+          return Math.abs(x2 - x1);
+        })
+        .attr("fill", d => fillColor(d))
+        .attr("opacity", d => opacity(d));
+    } else {
+      sel.enter().append("rect")
+        .attr("x", d => {
+          const xmin = isXBand ? val(get(d, aes.xmin)) : num(get(d, aes.xmin));
+          return xScale(xmin);
+        })
+        .attr("y", d => {
+          const ymax = isYBand ? val(get(d, aes.ymax)) : num(get(d, aes.ymax));
+          return yScale(ymax);
+        })
+        .attr("width", d => {
+          if (isXBand) return xScale.bandwidth();
+          const x1 = xScale(num(get(d, aes.xmin)));
+          const x2 = xScale(num(get(d, aes.xmax)));
+          return Math.abs(x2 - x1);
+        })
+        .attr("height", d => {
+          if (isYBand) return yScale.bandwidth();
+          const y1 = yScale(num(get(d, aes.ymin)));
+          const y2 = yScale(num(get(d, aes.ymax)));
+          return Math.abs(y2 - y1);
+        })
       .attr("fill", d => fillColor(d))
       .attr("opacity", d => opacity(d));
+    }
 
     return rects.length;
   }

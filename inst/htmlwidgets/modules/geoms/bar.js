@@ -46,6 +46,7 @@
     // Helper to get column value from row
     const get = (d, k) => (k && d != null) ? d[k] : null;
 
+    const flip = !!options.flip;
     const isBand = typeof xScale.bandwidth === "function";
     const bw = isBand
       ? xScale.bandwidth()
@@ -62,11 +63,13 @@
     const hasStack = bars.length > 0 && get(bars[0], "ymin") != null && get(bars[0], "ymax") != null;
 
     // Calculate baseline: use 0 if in domain, else use domain min
+    // When flip: the value axis is yScale (horizontal), baseline is horizontal
+    const valScale = flip ? yScale : yScale;
     let baseline;
     if (!hasStack) {
       const yDomain = yScale.domain();
       if (typeof yScale.bandwidth === "function") {
-        baseline = options.plotHeight;
+        baseline = flip ? 0 : options.plotHeight;
       } else {
         const [yMin, yMax] = d3.extent(yDomain);
         if (yMin <= 0 && yMax >= 0) {
@@ -79,28 +82,64 @@
 
     // Render rectangles
     const sel = g.append("g").selectAll("rect").data(bars);
-    sel.enter().append("rect")
-      .attr("x", d => (isBand ? xScale(val(get(d, aes.x))) : xScale(num(get(d, aes.x))) - bw / 2))
-      .attr("y", d => {
-        if (hasStack) {
-          // Use ymax for top of bar segment
-          return yScale(num(get(d, "ymax")));
-        } else {
-          const yPos = yScale(num(get(d, aes.y)));
-          return Math.min(yPos, baseline);
-        }
-      })
-      .attr("width", bw)
-      .attr("height", d => {
-        if (hasStack) {
-          // Height from ymin to ymax
-          const yMinPos = yScale(num(get(d, "ymin")));
-          const yMaxPos = yScale(num(get(d, "ymax")));
-          return Math.abs(yMaxPos - yMinPos);
-        } else {
-          return Math.abs(yScale(num(get(d, aes.y))) - baseline);
-        }
-      })
+
+    if (flip) {
+      // Horizontal bars: xScale=category (vertical), yScale=value (horizontal)
+      sel.enter().append("rect")
+        .attr("y", d => (isBand ? xScale(val(get(d, aes.x))) : xScale(num(get(d, aes.x))) - bw / 2))
+        .attr("x", d => {
+          if (hasStack) {
+            const yMinPos = yScale(num(get(d, "ymin")));
+            const yMaxPos = yScale(num(get(d, "ymax")));
+            return Math.min(yMinPos, yMaxPos);
+          } else {
+            const yPos = yScale(num(get(d, aes.y)));
+            return Math.min(yPos, baseline);
+          }
+        })
+        .attr("height", bw)
+        .attr("width", d => {
+          if (hasStack) {
+            const yMinPos = yScale(num(get(d, "ymin")));
+            const yMaxPos = yScale(num(get(d, "ymax")));
+            return Math.abs(yMaxPos - yMinPos);
+          } else {
+            return Math.abs(yScale(num(get(d, aes.y))) - baseline);
+          }
+        })
+        .attr("fill", d => fillColor(d))
+        .attr("stroke", d => {
+          const colourVal = val(get(d, "colour"));
+          if (colourVal == null || colourVal === "NA") { return "none"; }
+          return strokeColor(d);
+        })
+        .attr("stroke-width", d => {
+          const linewidthVal = val(get(d, "linewidth"));
+          return linewidthVal != null ? mmToPxLinewidth(linewidthVal) : 1.89;
+        })
+        .attr("opacity", d => opacity(d));
+    } else {
+      // Normal vertical bars
+      sel.enter().append("rect")
+        .attr("x", d => (isBand ? xScale(val(get(d, aes.x))) : xScale(num(get(d, aes.x))) - bw / 2))
+        .attr("y", d => {
+          if (hasStack) {
+            return yScale(num(get(d, "ymax")));
+          } else {
+            const yPos = yScale(num(get(d, aes.y)));
+            return Math.min(yPos, baseline);
+          }
+        })
+        .attr("width", bw)
+        .attr("height", d => {
+          if (hasStack) {
+            const yMinPos = yScale(num(get(d, "ymin")));
+            const yMaxPos = yScale(num(get(d, "ymax")));
+            return Math.abs(yMaxPos - yMinPos);
+          } else {
+            return Math.abs(yScale(num(get(d, aes.y))) - baseline);
+          }
+        })
       .attr("fill", d => fillColor(d))
       .attr("stroke", d => {
         // ggplot2 bar default: colour=NA (no outline)
@@ -116,6 +155,7 @@
         return linewidthVal != null ? mmToPxLinewidth(linewidthVal) : 1.89;
       })
       .attr("opacity", d => opacity(d));
+    }
 
     return bars.length;
   }

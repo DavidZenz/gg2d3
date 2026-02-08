@@ -369,11 +369,24 @@ as_d3_ir <- function(p, width = 640, height = 400,
     if (is.numeric(v)) range(v, finite = TRUE) else unique(v)
   }
 
+  # Detect coord_flip early (needed for panel_params alignment)
+  is_flip_early <- inherits(b$plot$coordinates, "CoordFlip")
+
   # Extract grid breaks from panel params
-  x_breaks <- b$layout$panel_params[[1]]$x$breaks
-  y_breaks <- b$layout$panel_params[[1]]$y$breaks
-  x_minor_breaks <- b$layout$panel_params[[1]]$x$minor_breaks
-  y_minor_breaks <- b$layout$panel_params[[1]]$y$minor_breaks
+  # NOTE: coord_flip swaps panel_params (x<->y) but NOT panel_scales or data.
+  # We un-swap panel_params here to realign with the original scale objects.
+  if (is_flip_early) {
+    pp_x <- b$layout$panel_params[[1]]$y  # un-swap: original x is in y after flip
+    pp_y <- b$layout$panel_params[[1]]$x  # un-swap: original y is in x after flip
+  } else {
+    pp_x <- b$layout$panel_params[[1]]$x
+    pp_y <- b$layout$panel_params[[1]]$y
+  }
+
+  x_breaks <- pp_x$breaks
+  y_breaks <- pp_y$breaks
+  x_minor_breaks <- pp_x$minor_breaks
+  y_minor_breaks <- pp_y$minor_breaks
 
   # Remove NA values (ggplot2 adds NAs at the edges)
   x_breaks <- x_breaks[!is.na(x_breaks)]
@@ -382,11 +395,11 @@ as_d3_ir <- function(p, width = 640, height = 400,
   y_minor_breaks <- if (!is.null(y_minor_breaks)) y_minor_breaks[!is.na(y_minor_breaks)] else NULL
 
   scales <- list(
-    x = c(get_scale_info(xscale_obj, b$layout$panel_params[[1]]$x, "x"), list(
+    x = c(get_scale_info(xscale_obj, pp_x, "x"), list(
       breaks = unname(x_breaks),
       minor_breaks = if (!is.null(x_minor_breaks)) unname(x_minor_breaks) else NULL
     )),
-    y = c(get_scale_info(yscale_obj, b$layout$panel_params[[1]]$y, "y"), list(
+    y = c(get_scale_info(yscale_obj, pp_y, "y"), list(
       breaks = unname(y_breaks),
       minor_breaks = if (!is.null(y_minor_breaks)) unname(y_minor_breaks) else NULL
     ))
