@@ -135,6 +135,10 @@
           return scale;
         }
 
+        case "reverse":
+          // Reverse flips the domain direction; still a linear scale
+          return d3.scaleLinear().domain([...numericDomain].reverse()).range(rng);
+
         case "time":
         case "date":
         case "datetime":
@@ -191,13 +195,14 @@
       }
     };
 
-    const fromType = buildScale(type);
-    if (fromType) return fromType;
-
-    if (transform) {
+    // Transform takes priority over type for continuous scales
+    if (transform && transform !== 'identity') {
       const fromTransform = buildScale(transform);
       if (fromTransform) return fromTransform;
     }
+
+    const fromType = buildScale(type);
+    if (fromType) return fromType;
 
     if (!domainArr.length) return d3.scaleLinear().domain(numericDomain).range(rng);
 
