@@ -10,19 +10,19 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 ## Current Position
 
-Phase: 6 of 11 (Layout Engine)
-Plan: 3 of 3 in Phase 6
-Status: Complete
-Last activity: 2026-02-09 — Completed plan 06-03 (Layout Testing and Verification). Phase 6 complete.
+Phase: 7 of 11 (Legend System)
+Plan: 1 of 4 in Phase 7
+Status: In Progress
+Last activity: 2026-02-09 — Completed plan 07-01 (Guide IR Extraction).
 
-Progress: [█████░░░░░] 49% (25/51 plans complete)
+Progress: [█████░░░░░] 51% (26/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 25
-- Average duration: ~9.6 min
-- Total execution time: ~4.1 hours
+- Total plans completed: 26
+- Average duration: ~9.5 min
+- Total execution time: ~4.2 hours
 
 **By Phase:**
 
@@ -34,6 +34,7 @@ Progress: [█████░░░░░] 49% (25/51 plans complete)
 | 04-essential-geoms | 4/4 | ~80 min | ~20 min |
 | 05-statistical-geoms | 4/4 | ~22 min | ~5.5 min |
 | 06-layout-engine | 3/3 | 19 min | 6.3 min |
+| 07-legend-system | 2/4 | ~4 min | ~2 min |
 
 *Updated after each plan completion*
 
@@ -118,6 +119,14 @@ Recent decisions affecting current work:
 | legend-space-zero-default | Legend width/height default to 0 until Phase 7 | Prevents empty gaps when legend rendering doesn't exist yet | No visual changes in Phase 6; space reserved when Phase 7 provides dimensions |
 | layout-single-source-truth | Layout engine is sole source of positioning data for all components | Eliminates scattered calculations, magic numbers, and hardcoded offsets throughout codebase | All rendering code reads positions from layout object; easier debugging and maintenance |
 
+**From Phase 7:**
+
+| Decision ID | Title | Rationale | Impact |
+|-------------|-------|-----------|--------|
+| shape-fill-vs-stroke | Filled shapes use fill, open shapes use stroke | ggplot2 shape codes 0-5 are open (stroke only), 15-19 are filled | Legend shape rendering matches ggplot2 visual appearance |
+| colorbar-gradient-direction | Colorbar gradient goes bottom-to-top | ggplot2 colorbars render low values at bottom, high at top | SVG linearGradient y1=100% to y2=0% for correct orientation |
+| merged-guide-aesthetics | Single guide can represent multiple aesthetics | ggplot2 merges guides when guides(colour = guide_legend()) specified | renderDiscreteLegend checks guide.aesthetics array and combines symbols |
+
 ### Pending Todos
 
 None.
@@ -144,9 +153,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed plan 06-03 (Layout Testing and Verification). Phase 6 complete.
-Resume file: .planning/phases/06-layout-engine/06-03-SUMMARY.md
-Next action: Begin Phase 7 (Legend System) - Execute plan 07-01.
+Stopped at: Completed plan 07-02 (D3 Legend Renderers). Phase 7 in progress.
+Resume file: .planning/phases/07-legend-system/07-02-SUMMARY.md
+Next action: Execute plan 07-03 (Layout Integration).
 
 ---
 *State initialized: 2026-02-07*
