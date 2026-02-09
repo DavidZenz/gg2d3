@@ -26,3 +26,7 @@ dependencies:
       - geoms/ribbon.js
       - geoms/segment.js
       - geoms/reference.js
+      - geoms/boxplot.js
+      - geoms/violin.js
+      - geoms/density.js
+      - geoms/smooth.js
