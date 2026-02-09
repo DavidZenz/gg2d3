@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation Refactoring** - Modularize existing codebase, centralize conversions
 - [x] **Phase 2: Core Scale System** - Complete scale infrastructure for all rendering
 - [x] **Phase 3: Coordinate Systems** - Fix coord_flip, add coord_fixed
-- [ ] **Phase 4: Essential Geoms** - Area, ribbon, segment, reference lines
+- [x] **Phase 4: Essential Geoms** - Area, ribbon, segment, reference lines
 - [ ] **Phase 5: Statistical Geoms** - Boxplot, violin, density, smooth
 - [ ] **Phase 6: Layout Engine** - Centralized spatial math for multi-panel layouts
 - [ ] **Phase 7: Legend System** - Automatic legend generation for all aesthetics
@@ -108,10 +108,10 @@ Plans:
 **Plans:** 4 plans in 3 waves
 
 Plans:
-- [ ] 04-01-PLAN.md -- R-side IR extraction + YAML + placeholder JS for new geom types (Wave 1)
-- [ ] 04-02-PLAN.md -- Implement geom_area and geom_ribbon with d3.area() (Wave 2)
-- [ ] 04-03-PLAN.md -- Implement geom_segment and reference lines (hline/vline/abline) (Wave 2)
-- [ ] 04-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 3)
+- [x] 04-01-PLAN.md -- R-side IR extraction + YAML + placeholder JS for new geom types (Wave 1)
+- [x] 04-02-PLAN.md -- Implement geom_area and geom_ribbon with d3.area() (Wave 2)
+- [x] 04-03-PLAN.md -- Implement geom_segment and reference lines (hline/vline/abline) (Wave 2)
+- [x] 04-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 3)
 
 ### Phase 5: Statistical Geoms
 **Goal**: Add statistical visualization layers (boxplot, violin, density, smooth)
@@ -283,7 +283,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 1. Foundation Refactoring | 5/5 | Complete | 2026-02-07 |
 | 2. Core Scale System | 3/3 | Complete | 2026-02-08 |
 | 3. Coordinate Systems | 3/3 | Complete | 2026-02-08 |
-| 4. Essential Geoms | 0/4 | In progress | - |
+| 4. Essential Geoms | 4/4 | Complete | 2026-02-09 |
 | 5. Statistical Geoms | 0/5 | Not started | - |
 | 6. Layout Engine | 0/4 | Not started | - |
 | 7. Legend System | 0/5 | Not started | - |
