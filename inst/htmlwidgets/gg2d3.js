@@ -92,6 +92,11 @@ HTMLWidgets.widget({
           .attr("stroke", "none");
       }
 
+      // Create clip-path for panel area (prevents geoms like abline from exceeding panel bounds)
+      const clipId = "panel-clip-" + Math.random().toString(36).slice(2, 9);
+      root.append("defs").append("clipPath").attr("id", clipId)
+        .append("rect").attr("width", w).attr("height", h);
+
       const g = root.append("g").attr("transform",
         `translate(${pad.left + panel.offsetX},${pad.top + panel.offsetY})`);
 
@@ -159,12 +164,15 @@ HTMLWidgets.widget({
             : d3.scaleOrdinal(d3.schemeTableau10).domain(cdesc.domain || []))
         : () => null;
 
-      // Render data layers using geom registry
+      // Create a clipped sub-group for data layers (after grid, so geoms render on top of grid)
+      const gClipped = g.append("g").attr("clip-path", `url(#${clipId})`);
+
+      // Render data layers using geom registry (inside clipped group)
       let drawn = 0;
       (ir.layers || []).forEach(layer => {
         const count = window.gg2d3.geomRegistry.render(
           layer,
-          g,
+          gClipped,
           xScale,
           yScale,
           { colorScale, plotWidth: w, plotHeight: h, flip }

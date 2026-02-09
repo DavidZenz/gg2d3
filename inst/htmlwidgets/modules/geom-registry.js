@@ -146,11 +146,14 @@
         const v = val(get(d, aes.color));
         // If it's already a valid color (hex or named like "black"), use it directly
         if (isValidColor(v)) return convertColor(v);
+        // Try R color conversion (e.g., "grey50" -> "#7F7F7F")
+        const converted = convertColor(v);
+        if (converted !== v) return converted;
         // Otherwise map through color scale
         const mapped = colorScale(v);
-        return mapped || params.colour || "currentColor";
+        return mapped || convertColor(params.colour) || "currentColor";
       }
-      return params.colour || "currentColor";
+      return convertColor(params.colour) || "currentColor";
     };
 
     /**
@@ -162,11 +165,14 @@
         const v = val(get(d, aes.fill));
         // If it's already a valid color (hex or named), use it directly
         if (isValidColor(v)) return convertColor(v);
+        // Try R color conversion (e.g., "grey70" -> "#B3B3B3")
+        const converted = convertColor(v);
+        if (converted !== v) return converted;
         // Otherwise map through color scale
         const mapped = colorScale(v);
-        return mapped || params.fill || "grey35";
+        return mapped || convertColor(params.fill) || "grey35";
       }
-      return params.fill || "grey35";
+      return convertColor(params.fill) || "grey35";
     };
 
     /**

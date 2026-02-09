@@ -20,6 +20,7 @@
   const num = window.gg2d3.helpers.num;
   const asRows = window.gg2d3.helpers.asRows;
   const mmToPxLinewidth = window.gg2d3.constants.mmToPxLinewidth;
+  const convertColor = window.gg2d3.scales.convertColor;
 
   /**
    * Convert ggplot2 linetype to SVG stroke-dasharray.
@@ -71,7 +72,7 @@
     // Render lines
     lines.forEach(d => {
       const yintercept = num(get(d, aes.yintercept || "yintercept"));
-      const colour = val(get(d, "colour")) || "black";
+      const colour = convertColor(val(get(d, "colour")) || "black");
       const linewidth = num(get(d, "linewidth")) || 0.5;
       const linetype = val(get(d, "linetype"));
       const alpha = num(get(d, "alpha")) || 1;
@@ -133,7 +134,7 @@
     // Render lines
     lines.forEach(d => {
       const xintercept = num(get(d, aes.xintercept || "xintercept"));
-      const colour = val(get(d, "colour")) || "black";
+      const colour = convertColor(val(get(d, "colour")) || "black");
       const linewidth = num(get(d, "linewidth")) || 0.5;
       const linetype = val(get(d, "linetype"));
       const alpha = num(get(d, "alpha")) || 1;
@@ -197,7 +198,7 @@
     lines.forEach(d => {
       const slope = num(get(d, aes.slope || "slope"));
       const intercept = num(get(d, aes.intercept || "intercept"));
-      const colour = val(get(d, "colour")) || "black";
+      const colour = convertColor(val(get(d, "colour")) || "black");
       const linewidth = num(get(d, "linewidth")) || 0.5;
       const linetype = val(get(d, "linetype"));
       const alpha = num(get(d, "alpha")) || 1;
