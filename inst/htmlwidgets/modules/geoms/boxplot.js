@@ -69,16 +69,23 @@
       // Get x position (categorical or numeric)
       const xVal = val(get(d, aes.x));
 
-      // Calculate center position and box width
+      // Calculate center position and box width from xmin/xmax
+      // ggplot2 pre-computes xmin/xmax in ggplot_build() based on the width parameter
       let centerPos, boxWidth;
+      const xmin = num(d.xmin);
+      const xmax = num(d.xmax);
       if (isXBand) {
         centerPos = xScale(xVal) + xScale.bandwidth() / 2;
-        boxWidth = xScale.bandwidth() * (d.width || 0.75);
+        // xmin/xmax are in continuous position space (1,2,3,...); scale proportionally to bandwidth
+        boxWidth = (xmax != null && xmin != null)
+          ? xScale.bandwidth() * (xmax - xmin)
+          : xScale.bandwidth() * 0.75;
       } else {
         centerPos = xScale(num(xVal));
-        // For continuous x, use data width or fallback
-        const spacing = options.plotWidth / boxes.length;
-        boxWidth = spacing * (d.width || 0.5);
+        // For continuous x, use xmin/xmax directly in pixel space
+        boxWidth = (xmax != null && xmin != null)
+          ? Math.abs(xScale(xmax) - xScale(xmin))
+          : (options.plotWidth / boxes.length) * 0.5;
       }
 
       // Get stat values
@@ -118,8 +125,8 @@
         .attr('stroke-width', linewidthPx)
         .attr('opacity', opacity(d));
 
-      // 2. Draw median line (thicker for visual weight, like ggplot2)
-      const medianLinewidth = linewidthPx * 2;
+      // 2. Draw median line (same linewidth as box border, matching ggplot2)
+      const medianLinewidth = linewidthPx;
       if (flip) {
         g.append('line')
           .attr('x1', yScale(middle))
@@ -158,25 +165,7 @@
             .attr('stroke-width', linewidthPx);
         }
 
-        // Upper whisker endcap (staple)
-        const stapleWidth = boxWidth * 0.5;
-        if (flip) {
-          g.append('line')
-            .attr('x1', yScale(ymax))
-            .attr('x2', yScale(ymax))
-            .attr('y1', centerPos - stapleWidth / 2)
-            .attr('y2', centerPos + stapleWidth / 2)
-            .attr('stroke', strokeColor(d))
-            .attr('stroke-width', linewidthPx);
-        } else {
-          g.append('line')
-            .attr('x1', centerPos - stapleWidth / 2)
-            .attr('x2', centerPos + stapleWidth / 2)
-            .attr('y1', yScale(ymax))
-            .attr('y2', yScale(ymax))
-            .attr('stroke', strokeColor(d))
-            .attr('stroke-width', linewidthPx);
-        }
+        // ggplot2 default staple.width = 0 (no endcaps on whiskers)
       }
 
       // 4. Draw lower whisker (from box bottom to ymin)
@@ -199,25 +188,7 @@
             .attr('stroke-width', linewidthPx);
         }
 
-        // Lower whisker endcap (staple)
-        const stapleWidth = boxWidth * 0.5;
-        if (flip) {
-          g.append('line')
-            .attr('x1', yScale(ymin))
-            .attr('x2', yScale(ymin))
-            .attr('y1', centerPos - stapleWidth / 2)
-            .attr('y2', centerPos + stapleWidth / 2)
-            .attr('stroke', strokeColor(d))
-            .attr('stroke-width', linewidthPx);
-        } else {
-          g.append('line')
-            .attr('x1', centerPos - stapleWidth / 2)
-            .attr('x2', centerPos + stapleWidth / 2)
-            .attr('y1', yScale(ymin))
-            .attr('y2', yScale(ymin))
-            .attr('stroke', strokeColor(d))
-            .attr('stroke-width', linewidthPx);
-        }
+        // ggplot2 default staple.width = 0 (no endcaps on whiskers)
       }
 
       // 5. Draw outliers as circles

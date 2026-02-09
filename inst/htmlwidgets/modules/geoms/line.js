@@ -77,8 +77,8 @@
           : d3.line().x(p => xScale(p.x) + xOff).y(p => yScale(p.y) + yOff);
         const firstPoint = pts[0].d;
         const linewidthVal = val(get(firstPoint, "linewidth"));
-        // ggplot2 default linewidth: 0.5mm = 1.89px
-        const strokeWidth = linewidthVal != null ? mmToPxLinewidth(linewidthVal) : 1.89;
+        // ggplot2 default linewidth: 0.5mm ≈ 1.42px (0.5 * 72.27/25.4)
+        const strokeWidth = linewidthVal != null ? mmToPxLinewidth(linewidthVal) : 1.42;
 
         g.append("path")
           .attr("d", line(pts))
