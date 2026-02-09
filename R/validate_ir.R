@@ -74,6 +74,31 @@ validate_ir <- function(ir) {
     }
   }
 
+  # Validate guides structure (optional - may not exist for older IR)
+  if (!is.null(ir$guides) && length(ir$guides) > 0) {
+    for (i in seq_along(ir$guides)) {
+      guide <- ir$guides[[i]]
+
+      # Check required fields
+      if (!"type" %in% names(guide)) {
+        stop(sprintf("Guide %d is missing required 'type' field", i), call. = FALSE)
+      }
+
+      if (!guide$type %in% c("legend", "colorbar")) {
+        warning(sprintf("Guide %d has unrecognized type '%s'", i, guide$type), call. = FALSE)
+      }
+
+      if (!"keys" %in% names(guide) || length(guide$keys) == 0) {
+        warning(sprintf("Guide %d (type='%s') has no keys", i, guide$type), call. = FALSE)
+      }
+
+      # Colorbar must have colors array
+      if (guide$type == "colorbar" && (is.null(guide$colors) || length(guide$colors) < 2)) {
+        warning(sprintf("Guide %d is colorbar but has insufficient colors array", i), call. = FALSE)
+      }
+    }
+  }
+
   # Validate log scale domains
   for (axis in c("x", "y")) {
     scale <- ir$scales[[axis]]
