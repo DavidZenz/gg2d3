@@ -126,6 +126,8 @@ Recent decisions affecting current work:
 | shape-fill-vs-stroke | Filled shapes use fill, open shapes use stroke | ggplot2 shape codes 0-5 are open (stroke only), 15-19 are filled | Legend shape rendering matches ggplot2 visual appearance |
 | colorbar-gradient-direction | Colorbar gradient goes bottom-to-top | ggplot2 colorbars render low values at bottom, high at top | SVG linearGradient y1=100% to y2=0% for correct orientation |
 | merged-guide-aesthetics | Single guide can represent multiple aesthetics | ggplot2 merges guides when guides(colour = guide_legend()) specified | renderDiscreteLegend checks guide.aesthetics array and combines symbols |
+| get-guide-data-extraction | Use ggplot2::get_guide_data() for guide extraction | ggplot2 already computes all legend keys, labels, and aesthetic values through guide training | All guide extraction delegates to ggplot2; gg2d3 only serializes to IR |
+| colorbar-30-stops | Generate 30 interpolated color stops for continuous colorbars | get_guide_data() returns breaks (~5 values); smooth gradients need more stops to avoid banding | Colorbar guides include colors array with 30 hex values for SVG gradients |
 
 ### Pending Todos
 
@@ -153,9 +155,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed plan 07-02 (D3 Legend Renderers). Phase 7 in progress.
-Resume file: .planning/phases/07-legend-system/07-02-SUMMARY.md
-Next action: Execute plan 07-03 (Layout Integration).
+Stopped at: Completed plan 07-01 (Guide IR Extraction). Phase 7 in progress.
+Resume file: .planning/phases/07-legend-system/07-01-SUMMARY.md
+Next action: Execute plan 07-02 (D3 Legend Renderers).
 
 ---
 *State initialized: 2026-02-07*
