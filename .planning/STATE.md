@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 
-**Current focus:** Phase 4 - Geom Expansion (next up)
+**Current focus:** Phase 5 - Statistical Geoms (next up)
 
 ## Current Position
 
-Phase: 4 of 11 (Essential Geoms)
-Plan: 3 of 6 in Phase 4
-Status: In progress
-Last activity: 2026-02-08 — Completed 04-03 (Segment and Reference Line geom renderers)
+Phase: 5 of 11 (Statistical Geoms)
+Plan: 0 of 5 in Phase 5
+Status: Not started
+Last activity: 2026-02-09 — Completed Phase 4 (Essential Geoms)
 
-Progress: [██░░░░░░░░] 27% (14/51 plans complete)
+Progress: [███░░░░░░░] 33% (18/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: ~11.2 min
-- Total execution time: ~2.8 hours
+- Total plans completed: 18
+- Average duration: ~11.5 min
+- Total execution time: ~3.5 hours
 
 **By Phase:**
 
@@ -31,7 +31,7 @@ Progress: [██░░░░░░░░] 27% (14/51 plans complete)
 | 01-foundation-refactoring | 5/5 | 70.4 min | 14.1 min |
 | 02-core-scale-system | 3/3 | ~20 min | ~6.7 min |
 | 03-coordinate-systems | 3/3 | ~22 min | ~7.3 min |
-| 04-essential-geoms | 3/6 | 65 min | 21.7 min |
+| 04-essential-geoms | 4/4 | ~80 min | ~20 min |
 
 *Updated after each plan completion*
 
@@ -89,6 +89,9 @@ Recent decisions affecting current work:
 | area-vs-ribbon-distinction | Area uses baseline, ribbon always uses ymin/ymax from data | Reflects ggplot2's semantic difference between the two geoms | Clear separation of concerns between area and ribbon renderers |
 | svg-line-elements-for-segments | Use SVG line elements (not path) for segment/reference geoms | Segments and reference lines are single line elements, not multi-point paths | More semantic and efficient than path elements for two-point lines |
 | linetype-to-dasharray | Convert ggplot2 linetype to SVG stroke-dasharray | Maps linetype names and integers to corresponding dash patterns | Reference lines support all ggplot2 linetype options |
+| panel-clip-path | SVG clipPath on panel group clips geom elements to panel bounds | abline and other geoms can extend beyond panel; clip prevents visual overflow | All geoms render within panel area |
+| convert-r-colors-everywhere | Use convertColor() for all R color names in geom renderers | R colors like "grey50" are not valid CSS; must convert to hex | Consistent color rendering across all geoms |
+| gClipped-after-grid | Create clipped data group after grid lines for correct z-order | SVG renders later children on top; grid must be below data layers | Grid behind data, data behind axes |
 
 ### Pending Todos
 
@@ -104,7 +107,7 @@ None.
 **Phase 1 (Foundation) — COMPLETE**
 **Phase 2 (Scales) — COMPLETE**
 **Phase 3 (Coordinates) — COMPLETE**
-**Phase 4 (Essential Geoms) — IN PROGRESS (3/6 complete)**
+**Phase 4 (Essential Geoms) — COMPLETE**
 
 **Remaining concerns:**
 - Monolithic as_d3_ir() function (~380 lines) needs modularization before adding features
@@ -115,10 +118,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-08
-Stopped at: Phase 4 Plan 3 complete (Segment and Reference Line geom renderers).
-Resume file: .planning/phases/04-essential-geoms/04-03-SUMMARY.md
-Next action: Continue with Phase 4 Plan 4+ (implement remaining Wave 2 geom renderers: polygon, smooth).
+Last session: 2026-02-09
+Stopped at: Phase 4 complete. All essential geoms implemented and verified.
+Resume file: .planning/phases/04-essential-geoms/04-04-SUMMARY.md
+Next action: Plan and execute Phase 5 (Statistical Geoms: boxplot, violin, density, smooth).
 
 ---
 *State initialized: 2026-02-07*
@@ -126,3 +129,4 @@ Next action: Continue with Phase 4 Plan 4+ (implement remaining Wave 2 geom rend
 *Phase 2 completed: 2026-02-08*
 *Phase 3 completed: 2026-02-08*
 *Phase 4 started: 2026-02-08*
+*Phase 4 completed: 2026-02-09*
