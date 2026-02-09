@@ -181,7 +181,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
                     GeomRibbon = "ribbon",
                     GeomViolin = "violin",
                     GeomBoxplot= "boxplot",
-                    GeomSmooth = "path",
+                    GeomDensity= "density",
+                    GeomSmooth = "smooth",
                     GeomHline  = "hline",
                     GeomVline  = "vline",
                     GeomAbline = "abline",
@@ -203,7 +204,11 @@ as_d3_ir <- function(p, width = 640, height = 400,
       "PANEL","x","y","xend","yend","xmin","xmax","ymin","ymax",
       "colour","fill","size","alpha","group","label",
       "stroke","shape","linewidth","linetype","lineend",
-      "slope","intercept","xintercept","yintercept"
+      "slope","intercept","xintercept","yintercept",
+      # Statistical geom computed columns
+      "lower","middle","upper","outliers","notchupper","notchlower",
+      "width","violinwidth","density","scaled","count","ncount","ndensity",
+      "weight"
     )
 
     # coerce + rowize (same as your latest version)
@@ -214,6 +219,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
         if (is.factor(col)) as.character(col)
         else if (inherits(col, c("POSIXct","POSIXt"))) as.numeric(col) * 1000
         else if (inherits(col, "Date")) as.numeric(col) * 86400000
+        else if (is.list(col)) I(col)  # preserve list-columns (e.g., boxplot outliers)
         else col
       })
       rows <- vector("list", nrow(df))
