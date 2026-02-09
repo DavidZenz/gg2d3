@@ -13,6 +13,7 @@ validate_ir <- function(ir) {
   known_geoms <- c(
     "point", "line", "path", "bar", "col", "area",
     "text", "rect", "segment", "ribbon", "violin", "boxplot",
+    "density", "smooth",
     "hline", "vline", "abline", "polygon"
   )
 
