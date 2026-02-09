@@ -29,7 +29,9 @@
       ticks: { type: "line", colour: "#333333", linewidth: 1.89 }
     },
     text: {
-      title: { type: "text", colour: "black", size: 13.2 }
+      title: { type: "text", colour: "black", size: 13.2 },
+      subtitle: { type: "text", colour: "#4D4D4D", size: 11 },
+      caption: { type: "text", colour: "#4D4D4D", size: 8.8 }
     }
   };
 
@@ -101,13 +103,20 @@
     }
   }
 
+  let _padDeprecated = false;
+
   /**
    * Calculate padding from theme plot.margin with additional space for axes/labels.
+   * @deprecated Use window.gg2d3.layout.calculateLayout() instead.
    * @param {Object} themeAccessor - Theme accessor with get() method
    * @param {Object} irPadding - Fallback padding from IR object
    * @returns {Object} Padding object with top, right, bottom, left
    */
   function calculatePadding(themeAccessor, irPadding) {
+    if (!_padDeprecated) {
+      console.warn('gg2d3: calculatePadding() is deprecated. Use window.gg2d3.layout.calculateLayout() instead.');
+      _padDeprecated = true;
+    }
     const plotMargin = themeAccessor.get("plot.margin");
     let pad;
     if (plotMargin && plotMargin.type === "margin") {
