@@ -127,14 +127,13 @@ Plans:
   4. Smooth lines (loess, lm) match ggplot2's stat_smooth computations
   5. Statistical computations happen in R layer (pre-computed, not JavaScript)
 
-**Plans**: TBD
+**Plans:** 4 plans in 3 waves
 
 Plans:
-- [ ] 05-01: Extract stat layer computed data from ggplot_build()
-- [ ] 05-02: Implement geom_boxplot renderer
-- [ ] 05-03: Implement geom_violin renderer
-- [ ] 05-04: Implement geom_density and geom_smooth renderers
-- [ ] 05-05: Histogram and frequency polygon support
+- [ ] 05-01-PLAN.md -- R-side IR extraction + validation + YAML + placeholder JS for stat geom types (Wave 1)
+- [ ] 05-02-PLAN.md -- Implement geom_boxplot and geom_violin D3 renderers (Wave 2)
+- [ ] 05-03-PLAN.md -- Implement geom_density and geom_smooth D3 renderers (Wave 2)
+- [ ] 05-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 3)
 
 ### Phase 6: Layout Engine
 **Goal**: Centralized spatial calculation system for panel positioning, legend placement, and axis positioning
@@ -284,7 +283,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 2. Core Scale System | 3/3 | Complete | 2026-02-08 |
 | 3. Coordinate Systems | 3/3 | Complete | 2026-02-08 |
 | 4. Essential Geoms | 4/4 | Complete | 2026-02-09 |
-| 5. Statistical Geoms | 0/5 | Not started | - |
+| 5. Statistical Geoms | 0/4 | Not started | - |
 | 6. Layout Engine | 0/4 | Not started | - |
 | 7. Legend System | 0/5 | Not started | - |
 | 8. Basic Faceting | 0/5 | Not started | - |
