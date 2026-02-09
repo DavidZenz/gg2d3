@@ -152,9 +152,9 @@ Plans:
 **Plans:** 3 plans in 3 waves
 
 Plans:
-- [ ] 06-01-PLAN.md -- R-side IR layout metadata + layout.js module with calculateLayout() (Wave 1)
-- [ ] 06-02-PLAN.md -- Refactor gg2d3.js to consume layout engine + deprecate calculatePadding (Wave 2)
-- [ ] 06-03-PLAN.md -- Unit tests + visual verification checkpoint (Wave 3)
+- [x] 06-01-PLAN.md -- R-side IR layout metadata + layout.js module with calculateLayout() (Wave 1)
+- [x] 06-02-PLAN.md -- Refactor gg2d3.js to consume layout engine + deprecate calculatePadding (Wave 2)
+- [x] 06-03-PLAN.md -- Unit tests + visual verification checkpoint (Wave 3)
 
 ### Phase 7: Legend System
 **Goal**: Automatic legend generation for all aesthetic mappings (color, fill, size, shape, alpha)
@@ -283,7 +283,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 3. Coordinate Systems | 3/3 | Complete | 2026-02-08 |
 | 4. Essential Geoms | 4/4 | Complete | 2026-02-09 |
 | 5. Statistical Geoms | 4/4 | Complete | 2026-02-09 |
-| 6. Layout Engine | 0/3 | Not started | - |
+| 6. Layout Engine | 3/3 | Complete | 2026-02-09 |
 | 7. Legend System | 0/5 | Not started | - |
 | 8. Basic Faceting | 0/5 | Not started | - |
 | 9. Advanced Faceting | 0/5 | Not started | - |
