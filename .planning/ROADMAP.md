@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Coordinate Systems** - Fix coord_flip, add coord_fixed
 - [x] **Phase 4: Essential Geoms** - Area, ribbon, segment, reference lines
 - [x] **Phase 5: Statistical Geoms** - Boxplot, violin, density, smooth
-- [ ] **Phase 6: Layout Engine** - Centralized spatial math for multi-panel layouts
+- [x] **Phase 6: Layout Engine** - Centralized spatial math for multi-panel layouts
 - [ ] **Phase 7: Legend System** - Automatic legend generation for all aesthetics
 - [ ] **Phase 8: Basic Faceting** - facet_wrap with fixed scales
 - [ ] **Phase 9: Advanced Faceting** - facet_grid, free scales, complex layouts
@@ -170,14 +170,13 @@ Plans:
   4. Multiple aesthetics merge into single legend when appropriate
   5. Continuous aesthetics show gradient colorbars with tick marks
 
-**Plans**: TBD
+**Plans:** 4 plans in 3 waves
 
 Plans:
-- [ ] 07-01: Extract guide specifications from ggplot_build()
-- [ ] 07-02: Build guide IR with keys, labels, and aesthetic values
-- [ ] 07-03: Implement D3 legend renderer for discrete aesthetics
-- [ ] 07-04: Implement colorbar renderer for continuous aesthetics
-- [ ] 07-05: Legend merging and positioning integration
+- [ ] 07-01-PLAN.md -- R-side guide extraction with get_guide_data() + IR schema (Wave 1)
+- [ ] 07-02-PLAN.md -- D3 legend.js module: discrete + colorbar renderers (Wave 1)
+- [ ] 07-03-PLAN.md -- Wire legend system into gg2d3.js + layout engine integration (Wave 2)
+- [ ] 07-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 3)
 
 ### Phase 8: Basic Faceting
 **Goal**: facet_wrap with fixed scales for small multiples
@@ -284,7 +283,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 4. Essential Geoms | 4/4 | Complete | 2026-02-09 |
 | 5. Statistical Geoms | 4/4 | Complete | 2026-02-09 |
 | 6. Layout Engine | 3/3 | Complete | 2026-02-09 |
-| 7. Legend System | 0/5 | Not started | - |
+| 7. Legend System | 0/4 | Not started | - |
 | 8. Basic Faceting | 0/5 | Not started | - |
 | 9. Advanced Faceting | 0/5 | Not started | - |
 | 10. Interactivity Foundation | 0/5 | Not started | - |
@@ -293,4 +292,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 ---
 *Roadmap created: 2026-02-07*
 *Total phases: 11 (comprehensive depth)*
-*Total plans: 48 (estimated)*
+*Total plans: 47 (estimated)*
