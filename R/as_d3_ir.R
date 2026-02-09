@@ -458,7 +458,9 @@ as_d3_ir <- function(p, width = 640, height = 400,
         ticks.y = extract_theme_element("axis.ticks.y", b$plot$theme)
       ),
       text = list(
-        title = extract_theme_element("plot.title", b$plot$theme)
+        title = extract_theme_element("plot.title", b$plot$theme),
+        subtitle = extract_theme_element("plot.subtitle", b$plot$theme),
+        caption = extract_theme_element("plot.caption", b$plot$theme)
       )
     )
   }
@@ -481,19 +483,59 @@ as_d3_ir <- function(p, width = 640, height = 400,
     y_label <- b$plot$labels$y %||% ""
   }
 
+  # Extract axis tick labels as strings for JS layout text measurement
+  # Use the un-swapped panel_params (pp_x, pp_y) already computed above
+  x_tick_labels <- tryCatch({
+    labs <- pp_x$get_labels()
+    labs <- labs[!is.na(labs)]
+    as.character(labs)
+  }, error = function(e) character(0))
+
+  y_tick_labels <- tryCatch({
+    labs <- pp_y$get_labels()
+    labs <- labs[!is.na(labs)]
+    as.character(labs)
+  }, error = function(e) character(0))
+
+  # Detect secondary axes (Phase 6 reserves space, future phases render)
+  has_sec_x <- tryCatch({
+    sec <- b$layout$panel_scales_x[[1]]$secondary.axis
+    !is.null(sec) && !inherits(sec, "waiver")
+  }, error = function(e) FALSE)
+
+  has_sec_y <- tryCatch({
+    sec <- b$layout$panel_scales_y[[1]]$secondary.axis
+    !is.null(sec) && !inherits(sec, "waiver")
+  }, error = function(e) FALSE)
+
+  # Extract legend position from theme for layout engine
+  legend_position <- tryCatch({
+    complete_theme <- ggplot2::theme_get() + b$plot$theme
+    pos <- ggplot2:::calc_element("legend.position", complete_theme)
+    if (is.character(pos)) pos else "right"
+  }, error = function(e) "right")
+
+  # Extract subtitle and caption from plot labels
+  subtitle_text <- b$plot$labels$subtitle %||% ""
+  caption_text <- b$plot$labels$caption %||% ""
+
   ir <- list(
     width = width, height = height, padding = padding,
     coord  = list(type = coord_type, flip = is_flip, ratio = coord_ratio),
     title  = b$plot$labels$title %||% "",
+    subtitle = subtitle_text,
+    caption = caption_text,
     axes   = list(
-      x = list(orientation = "bottom", label = x_label),
-      y = list(orientation = "left",  label = y_label)
+      x = list(orientation = "bottom", label = x_label, tickLabels = x_tick_labels),
+      y = list(orientation = "left",  label = y_label, tickLabels = y_tick_labels),
+      x2 = if (has_sec_x) list(enabled = TRUE) else NULL,
+      y2 = if (has_sec_y) list(enabled = TRUE) else NULL
     ),
     facets = list(type = "grid", rows = 1, cols = 1,
                   layout = data.frame(panel = 1, row = 1, col = 1)),
     scales = scales,
     layers = layers,
-    legend = list(enabled = TRUE),
+    legend = list(enabled = TRUE, position = legend_position),
     theme = theme_ir
   )
 
