@@ -9,3 +9,36 @@ docs
 .Rproj
 test_output/
 test_*_files/
+
+# macOS
+.DS_Store
+
+# R default plot output
+Rplots.pdf
+
+# claude-mem auto-generated context
+CLAUDE.md
+**/CLAUDE.md
+
+# GSD agent state
+.planning/agent-history.json
+
+# Root-level debug/test artifacts
+/debug_*.R
+/check_*.R
+/compare_*.R
+/inspect_*.R
+/verify_*.R
+/measure_*.R
+/empirical_*.R
+/final_*.R
+/test_*.R
+/test_*.html
+/generate_*.R
+
+# Root-level HTML/PNG/PDF outputs
+/d3_*.html
+/ggplot_*.png
+/ggplot2_*.png
+/*.png
+/*.html
