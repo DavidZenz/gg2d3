@@ -100,7 +100,7 @@
       .attr("stroke", d => strokeColor(d))
       .attr("stroke-width", d => {
         const linewidthVal = val(get(d, "linewidth"));
-        return linewidthVal != null ? mmToPxLinewidth(linewidthVal) : 1.89;
+        return linewidthVal != null ? mmToPxLinewidth(linewidthVal) : 1.42;
       })
       .attr("opacity", d => opacity(d));
 

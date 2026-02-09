@@ -115,8 +115,8 @@
               .defined(p => p.x != null && p.y != null);
 
         const linewidthVal = val(get(firstPoint, "linewidth"));
-        // ggplot2 default linewidth for smooth: 1mm = 3.78px (thicker than regular lines)
-        const strokeWidth = linewidthVal != null ? mmToPxLinewidth(linewidthVal) : 3.78;
+        // ggplot2 default linewidth for smooth: 1mm ≈ 2.85px (1.0 * 72.27/25.4)
+        const strokeWidth = linewidthVal != null ? mmToPxLinewidth(linewidthVal) : 2.85;
 
         // Line styling: use strokeColor, default blue #3366FF, fully opaque
         g.append("path")

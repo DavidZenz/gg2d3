@@ -28,6 +28,11 @@
   const PX_PER_MM = DPI / MM_PER_INCH;    // 96 / 25.4 ≈ 3.7795275591
   const PX_PER_PT = DPI / PT_PER_INCH;    // 96 / 72 = 1.333...
 
+  // ggplot2 .pt constant: converts ggplot2 linewidth (mm) to grid lwd (≈ device pixels)
+  // In ggplot2: grid::gpar(lwd = linewidth * .pt) where .pt = 72.27/25.4
+  // Grid lwd maps ~1:1 to device pixels at standard DPI
+  const GGPLOT_PT = 72.27 / MM_PER_INCH;  // 72.27 / 25.4 ≈ 2.845276
+
   /**
    * Convert ggplot2 size (mm diameter) to SVG radius (pixels)
    * ggplot2's 'size' aesthetic represents diameter in millimeters
@@ -57,7 +62,9 @@
    * mmToPxLinewidth(0.5) // ≈ 1.89 pixels
    */
   function mmToPxLinewidth(linewidth_mm) {
-    return linewidth_mm * PX_PER_MM;
+    // ggplot2 applies .pt factor (72.27/25.4) when converting linewidth to grid lwd,
+    // NOT the CSS px/mm factor (96/25.4). Using PX_PER_MM would render ~33% too thick.
+    return linewidth_mm * GGPLOT_PT;
   }
 
   /**
