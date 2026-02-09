@@ -21,6 +21,11 @@ HTMLWidgets.widget({
       const theme = window.gg2d3.theme.createTheme(ir.theme);
       const flip = !!(ir.coord && ir.coord.flip);
 
+      // Estimate legend dimensions from IR guides
+      const legendDims = (ir.guides && ir.guides.length > 0)
+        ? window.gg2d3.legend.estimateLegendDimensions(ir.guides, theme)
+        : { width: 0, height: 0 };
+
       // Extract data ranges for coord_fixed
       var xDataRange = 0, yDataRange = 0;
       if (ir.coord && ir.coord.ratio) {
@@ -58,8 +63,8 @@ HTMLWidgets.widget({
         },
         legend: {
           position: (ir.legend && ir.legend.position) || "none",
-          width: 0,   // Phase 7 will provide actual dimensions
-          height: 0
+          width: legendDims.width,
+          height: legendDims.height
         },
         coord: {
           type: (ir.coord && ir.coord.type) || "cartesian",
@@ -311,6 +316,11 @@ HTMLWidgets.widget({
           .style("fill", convertColor(axisTitleSpec && axisTitleSpec.colour) || "black")
           .style("font-family", axisTitleSpec && axisTitleSpec.family || "sans-serif")
           .text(yTitle);
+      }
+
+      // Render legends (after panel content, using layout-computed positions)
+      if (ir.guides && ir.guides.length > 0 && layout.legend.position !== "none") {
+        window.gg2d3.legend.renderLegends(root, ir.guides, layout, theme);
       }
 
       // Fallback indicator if no marks drawn
