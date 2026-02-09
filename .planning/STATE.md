@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 6 of 11 (Layout Engine)
-Plan: 0 of 4 in Phase 6
-Status: Not started
-Last activity: 2026-02-09 — Completed Phase 5 (Statistical Geoms)
+Plan: 1 of 3 in Phase 6
+Status: In progress
+Last activity: 2026-02-09 — Completed plan 06-01 (Layout Engine Foundation)
 
-Progress: [████░░░░░░] 43% (22/51 plans complete)
+Progress: [████░░░░░░] 45% (23/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
-- Average duration: ~10.2 min
-- Total execution time: ~3.7 hours
+- Total plans completed: 23
+- Average duration: ~10.0 min
+- Total execution time: ~3.8 hours
 
 **By Phase:**
 
@@ -33,6 +33,7 @@ Progress: [████░░░░░░] 43% (22/51 plans complete)
 | 03-coordinate-systems | 3/3 | ~22 min | ~7.3 min |
 | 04-essential-geoms | 4/4 | ~80 min | ~20 min |
 | 05-statistical-geoms | 4/4 | ~22 min | ~5.5 min |
+| 06-layout-engine | 1/3 | 4 min | 4.0 min |
 
 *Updated after each plan completion*
 
@@ -108,6 +109,14 @@ Recent decisions affecting current work:
 | boxplot-xmin-xmax-width | Calculate box width from xmin/xmax data columns | ggplot_build pre-computes xmin/xmax from width param; d.width doesn't exist | geom_boxplot(width=0.1) works correctly for overlay plots |
 | no-default-staples | No whisker endcaps by default | ggplot2 default staple.width=0 means no endcaps | Boxplots match ggplot2 appearance |
 
+**From Phase 6:**
+
+| Decision ID | Title | Rationale | Impact |
+|-------------|-------|-----------|--------|
+| estimation-based-layout | Use font-size-based text estimation instead of DOM measurement | Layout engine must be pure function; estimation is fast and accurate enough for typical numeric labels | calculateLayout() has no DOM dependency, can run before rendering |
+| secondary-axis-detection | Detect secondary axes via scale.secondary.axis field, not panel_params | panel_params always has .sec ViewScale objects; only scales with actual secondary.axis are enabled | Correctly reserves space only when secondary axes are present |
+| legend-space-zero-default | Legend width/height default to 0 until Phase 7 | Prevents empty gaps when legend rendering doesn't exist yet | No visual changes in Phase 6; space reserved when Phase 7 provides dimensions |
+
 ### Pending Todos
 
 None.
@@ -134,9 +143,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Phase 5 complete. All statistical geoms implemented and verified.
-Resume file: .planning/phases/05-statistical-geoms/05-04-SUMMARY.md
-Next action: Plan and execute Phase 6 (Layout Engine).
+Stopped at: Completed plan 06-01 (Layout Engine Foundation). Layout metadata extracted in IR, calculateLayout() module created.
+Resume file: .planning/phases/06-layout-engine/06-01-SUMMARY.md
+Next action: Execute plan 06-02 (integrate layout engine into gg2d3.js rendering).
 
 ---
 *State initialized: 2026-02-07*
