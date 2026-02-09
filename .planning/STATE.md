@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 5 of 11 (Statistical Geoms)
-Plan: 0 of 5 in Phase 5
-Status: Not started
-Last activity: 2026-02-09 — Completed Phase 4 (Essential Geoms)
+Plan: 1 of 4 in Phase 5
+Status: In progress
+Last activity: 2026-02-09 — Completed Plan 05-01 (Statistical Geoms IR Foundation)
 
-Progress: [███░░░░░░░] 33% (18/51 plans complete)
+Progress: [████░░░░░░] 37% (19/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
-- Average duration: ~11.5 min
-- Total execution time: ~3.5 hours
+- Total plans completed: 19
+- Average duration: ~10.9 min
+- Total execution time: ~3.6 hours
 
 **By Phase:**
 
@@ -32,6 +32,7 @@ Progress: [███░░░░░░░] 33% (18/51 plans complete)
 | 02-core-scale-system | 3/3 | ~20 min | ~6.7 min |
 | 03-coordinate-systems | 3/3 | ~22 min | ~7.3 min |
 | 04-essential-geoms | 4/4 | ~80 min | ~20 min |
+| 05-statistical-geoms | 1/4 | 2.5 min | 2.5 min |
 
 *Updated after each plan completion*
 
@@ -93,6 +94,14 @@ Recent decisions affecting current work:
 | convert-r-colors-everywhere | Use convertColor() for all R color names in geom renderers | R colors like "grey50" are not valid CSS; must convert to hex | Consistent color rendering across all geoms |
 | gClipped-after-grid | Create clipped data group after grid lines for correct z-order | SVG renders later children on top; grid must be below data layers | Grid behind data, data behind axes |
 
+**From Phase 5:**
+
+| Decision ID | Title | Rationale | Impact |
+|-------------|-------|-----------|--------|
+| smooth-dedicated-geom | Map GeomSmooth to 'smooth' (not 'path') | geom_smooth produces fitted line + confidence ribbon; needs dedicated renderer | Wave 2 smooth renderer can draw line and ribbon separately |
+| list-column-serialization | Add I() wrapper for list-columns in inner to_rows() | Boxplot outliers are list-column with vector per row; without I(), lists flatten/drop | Outliers serialize correctly to JSON arrays |
+| placeholder-stat-geoms | Create no-op placeholder modules for stat geoms | Prevents widget load errors before full implementations | Incremental development, package loads cleanly |
+
 ### Pending Todos
 
 None.
@@ -119,9 +128,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Phase 4 complete. All essential geoms implemented and verified.
-Resume file: .planning/phases/04-essential-geoms/04-04-SUMMARY.md
-Next action: Plan and execute Phase 5 (Statistical Geoms: boxplot, violin, density, smooth).
+Stopped at: Plan 05-01 complete. R-side IR extraction for statistical geoms implemented.
+Resume file: .planning/phases/05-statistical-geoms/05-01-SUMMARY.md
+Next action: Execute Plan 05-02 (Boxplot D3 renderer implementation).
 
 ---
 *State initialized: 2026-02-07*
