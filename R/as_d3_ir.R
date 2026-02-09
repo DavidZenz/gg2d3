@@ -519,6 +519,227 @@ as_d3_ir <- function(p, width = 640, height = 400,
   subtitle_text <- b$plot$labels$subtitle %||% ""
   caption_text <- b$plot$labels$caption %||% ""
 
+  # Extract guide specifications for legends
+  guides_ir <- list()
+
+  if (legend_position != "none") {
+    # Get all scales that can produce guides
+    all_scales <- b$plot$scales$scales
+
+    # Identify aesthetics that should have legends
+    legend_aesthetics <- c()
+
+    for (scale in all_scales) {
+      # Check if this scale produces a legend
+      aes_names <- scale$aesthetics
+
+      # Only include aesthetics that produce legends
+      for (aes_name in aes_names) {
+        if (aes_name %in% c("colour", "color", "fill", "size", "shape", "alpha")) {
+          # Check if guide is not disabled
+          guide_obj <- scale$guide
+          if (!inherits(guide_obj, "GuideNone") &&
+              !identical(guide_obj, "none") &&
+              !identical(guide_obj, FALSE)) {
+            legend_aesthetics <- c(legend_aesthetics, aes_name)
+          }
+        }
+      }
+    }
+
+    # Remove duplicates and normalize color/colour
+    legend_aesthetics <- unique(legend_aesthetics)
+    if ("color" %in% legend_aesthetics) {
+      legend_aesthetics <- setdiff(legend_aesthetics, "color")
+      if (!"colour" %in% legend_aesthetics) {
+        legend_aesthetics <- c(legend_aesthetics, "colour")
+      }
+    }
+
+    # Extract guide data for each aesthetic
+    for (aes_name in legend_aesthetics) {
+      guide_data <- tryCatch(
+        ggplot2::get_guide_data(p, aesthetic = aes_name),
+        error = function(e) NULL
+      )
+
+      if (is.null(guide_data) || nrow(guide_data) == 0) {
+        next
+      }
+
+      # Get the scale object
+      scale_obj <- b$plot$scales$get_scales(aes_name)
+      if (is.null(scale_obj)) next
+
+      # Determine guide type
+      is_continuous <- inherits(scale_obj, "ScaleContinuous")
+      guide_type <- if (is_continuous) "colorbar" else "legend"
+
+      # Get title from scale name or plot labels
+      title <- scale_obj$name
+      if (is.null(title) || identical(title, waiver())) {
+        title <- b$plot$labels[[aes_name]] %||% aes_name
+      }
+
+      # Convert guide_data to list of keys
+      keys_list <- list()
+      for (i in seq_len(nrow(guide_data))) {
+        key <- list()
+
+        # Add standard fields
+        if (".value" %in% names(guide_data)) {
+          key$value <- guide_data[[".value"]][i]
+        }
+        if (".label" %in% names(guide_data)) {
+          key$label <- as.character(guide_data[[".label"]][i])
+        }
+
+        # Add aesthetic-specific values
+        if (aes_name %in% names(guide_data)) {
+          key[[aes_name]] <- guide_data[[aes_name]][i]
+        }
+        # Also check for normalized names
+        if ("colour" %in% names(guide_data)) {
+          key$colour <- guide_data$colour[i]
+        }
+        if ("fill" %in% names(guide_data)) {
+          key$fill <- guide_data$fill[i]
+        }
+        if ("size" %in% names(guide_data)) {
+          key$size <- guide_data$size[i]
+        }
+        if ("shape" %in% names(guide_data)) {
+          key$shape <- guide_data$shape[i]
+        }
+        if ("alpha" %in% names(guide_data)) {
+          key$alpha <- guide_data$alpha[i]
+        }
+
+        keys_list[[i]] <- key
+      }
+
+      # For colorbar, generate additional color stops for smooth gradient
+      colors_array <- NULL
+      if (guide_type == "colorbar") {
+        # Get domain from scale
+        scale_domain <- tryCatch(
+          scale_obj$get_limits(),
+          error = function(e) c(0, 1)
+        )
+
+        # Generate 30 evenly-spaced values for smooth gradient
+        color_values <- seq(scale_domain[1], scale_domain[2], length.out = 30)
+
+        # Map through scale to get colors
+        colors_array <- tryCatch(
+          scale_obj$map(color_values),
+          error = function(e) NULL
+        )
+      }
+
+      # Build guide specification
+      guide_spec <- list(
+        aesthetic = aes_name,
+        aesthetics = list(aes_name),  # Will be updated if merged
+        type = guide_type,
+        title = as.character(title),
+        keys = keys_list,
+        colors = colors_array
+      )
+
+      guides_ir[[length(guides_ir) + 1]] <- guide_spec
+    }
+
+    # Detect and handle merged guides (same title)
+    if (length(guides_ir) > 1) {
+      guide_titles <- sapply(guides_ir, function(g) g$title)
+      duplicates <- duplicated(guide_titles) | duplicated(guide_titles, fromLast = TRUE)
+
+      if (any(duplicates)) {
+        merged_guides <- list()
+        processed_titles <- character(0)
+
+        for (i in seq_along(guides_ir)) {
+          guide <- guides_ir[[i]]
+          title <- guide$title
+
+          if (title %in% processed_titles) {
+            next  # Already processed as part of a merge
+          }
+
+          # Find all guides with this title
+          matching_indices <- which(guide_titles == title)
+
+          if (length(matching_indices) > 1) {
+            # Merge guides with same title
+            merged_guide <- guide
+            merged_aesthetics <- list()
+
+            for (idx in matching_indices) {
+              merged_aesthetics[[length(merged_aesthetics) + 1]] <- guides_ir[[idx]]$aesthetic
+
+              # Merge key columns from all aesthetics
+              if (idx > matching_indices[1]) {
+                other_guide <- guides_ir[[idx]]
+                for (j in seq_along(merged_guide$keys)) {
+                  if (j <= length(other_guide$keys)) {
+                    # Add columns from other guide's keys
+                    other_key <- other_guide$keys[[j]]
+                    for (col_name in names(other_key)) {
+                      if (!(col_name %in% names(merged_guide$keys[[j]]))) {
+                        merged_guide$keys[[j]][[col_name]] <- other_key[[col_name]]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            merged_guide$aesthetics <- merged_aesthetics
+            merged_guides[[length(merged_guides) + 1]] <- merged_guide
+            processed_titles <- c(processed_titles, title)
+          } else {
+            # Single guide with unique title
+            merged_guides[[length(merged_guides) + 1]] <- guide
+            processed_titles <- c(processed_titles, title)
+          }
+        }
+
+        guides_ir <- merged_guides
+      }
+    }
+  }
+
+  # Extract additional legend theme elements
+  legend_theme <- NULL
+  if (!is.null(b$plot$theme)) {
+    # Extract legend.key.size (unit to pixels conversion)
+    key_size <- tryCatch({
+      complete_theme <- ggplot2::theme_get() + b$plot$theme
+      key_size_elem <- ggplot2:::calc_element("legend.key.size", complete_theme)
+      if (!is.null(key_size_elem)) {
+        # Convert unit to pixels
+        inches <- grid::convertUnit(key_size_elem, "inches", valueOnly = TRUE)
+        inches * 96  # Convert to pixels
+      } else {
+        NULL
+      }
+    }, error = function(e) NULL)
+
+    legend_theme <- list(
+      key.size = key_size,
+      text = extract_theme_element("legend.text", b$plot$theme),
+      title = extract_theme_element("legend.title", b$plot$theme),
+      background = extract_theme_element("legend.background", b$plot$theme),
+      key = extract_theme_element("legend.key", b$plot$theme)
+    )
+  }
+
+  # Add legend theme elements to theme_ir
+  if (!is.null(theme_ir) && !is.null(legend_theme)) {
+    theme_ir$legend <- legend_theme
+  }
+
   ir <- list(
     width = width, height = height, padding = padding,
     coord  = list(type = coord_type, flip = is_flip, ratio = coord_ratio),
@@ -535,6 +756,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
                   layout = data.frame(panel = 1, row = 1, col = 1)),
     scales = scales,
     layers = layers,
+    guides = guides_ir,
     legend = list(enabled = TRUE, position = legend_position),
     theme = theme_ir
   )
