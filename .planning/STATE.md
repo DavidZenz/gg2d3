@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 5 of 11 (Statistical Geoms)
-Plan: 1 of 4 in Phase 5
+Plan: 3 of 4 in Phase 5
 Status: In progress
-Last activity: 2026-02-09 — Completed Plan 05-01 (Statistical Geoms IR Foundation)
+Last activity: 2026-02-09 — Completed Plan 05-03 (Density and Smooth D3 Renderers)
 
-Progress: [████░░░░░░] 37% (19/51 plans complete)
+Progress: [████░░░░░░] 39% (20/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
-- Average duration: ~10.9 min
-- Total execution time: ~3.6 hours
+- Total plans completed: 20
+- Average duration: ~10.6 min
+- Total execution time: ~3.5 hours
 
 **By Phase:**
 
@@ -32,7 +32,7 @@ Progress: [████░░░░░░] 37% (19/51 plans complete)
 | 02-core-scale-system | 3/3 | ~20 min | ~6.7 min |
 | 03-coordinate-systems | 3/3 | ~22 min | ~7.3 min |
 | 04-essential-geoms | 4/4 | ~80 min | ~20 min |
-| 05-statistical-geoms | 1/4 | 2.5 min | 2.5 min |
+| 05-statistical-geoms | 3/4 | 6.5 min | 2.2 min |
 
 *Updated after each plan completion*
 
@@ -101,6 +101,9 @@ Recent decisions affecting current work:
 | smooth-dedicated-geom | Map GeomSmooth to 'smooth' (not 'path') | geom_smooth produces fitted line + confidence ribbon; needs dedicated renderer | Wave 2 smooth renderer can draw line and ribbon separately |
 | list-column-serialization | Add I() wrapper for list-columns in inner to_rows() | Boxplot outliers are list-column with vector per row; without I(), lists flatten/drop | Outliers serialize correctly to JSON arrays |
 | placeholder-stat-geoms | Create no-op placeholder modules for stat geoms | Prevents widget load errors before full implementations | Incremental development, package loads cleanly |
+| density-two-path-rendering | Density renders both fill and stroke as two separate SVG paths | GeomDensity extends GeomArea but adds visible outline; two paths (area + line) achieves this | Density curves have clear borders unlike basic area geoms |
+| smooth-opaque-line | Smooth line always fully opaque (opacity 1.0) regardless of ribbon transparency | In ggplot2, geom_smooth line always opaque even when confidence band has alpha < 1.0 | Fitted line clearly visible against semi-transparent ribbon |
+| smooth-thick-linewidth | Smooth default linewidth 1mm (3.78px) thicker than regular lines (0.5mm) | ggplot2 default for geom_smooth emphasizes fitted curve over raw data | Smooth lines stand out from raw data lines |
 
 ### Pending Todos
 
@@ -128,9 +131,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Plan 05-01 complete. R-side IR extraction for statistical geoms implemented.
-Resume file: .planning/phases/05-statistical-geoms/05-01-SUMMARY.md
-Next action: Execute Plan 05-02 (Boxplot D3 renderer implementation).
+Stopped at: Plan 05-03 complete. Density and smooth D3 renderers implemented.
+Resume file: .planning/phases/05-statistical-geoms/05-03-SUMMARY.md
+Next action: Execute Plan 05-04 (Violin D3 renderer implementation).
 
 ---
 *State initialized: 2026-02-07*
