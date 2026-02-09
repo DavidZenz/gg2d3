@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Core Scale System** - Complete scale infrastructure for all rendering
 - [x] **Phase 3: Coordinate Systems** - Fix coord_flip, add coord_fixed
 - [x] **Phase 4: Essential Geoms** - Area, ribbon, segment, reference lines
-- [ ] **Phase 5: Statistical Geoms** - Boxplot, violin, density, smooth
+- [x] **Phase 5: Statistical Geoms** - Boxplot, violin, density, smooth
 - [ ] **Phase 6: Layout Engine** - Centralized spatial math for multi-panel layouts
 - [ ] **Phase 7: Legend System** - Automatic legend generation for all aesthetics
 - [ ] **Phase 8: Basic Faceting** - facet_wrap with fixed scales
@@ -130,10 +130,10 @@ Plans:
 **Plans:** 4 plans in 3 waves
 
 Plans:
-- [ ] 05-01-PLAN.md -- R-side IR extraction + validation + YAML + placeholder JS for stat geom types (Wave 1)
-- [ ] 05-02-PLAN.md -- Implement geom_boxplot and geom_violin D3 renderers (Wave 2)
-- [ ] 05-03-PLAN.md -- Implement geom_density and geom_smooth D3 renderers (Wave 2)
-- [ ] 05-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 3)
+- [x] 05-01-PLAN.md -- R-side IR extraction + validation + YAML + placeholder JS for stat geom types (Wave 1)
+- [x] 05-02-PLAN.md -- Implement geom_boxplot and geom_violin D3 renderers (Wave 2)
+- [x] 05-03-PLAN.md -- Implement geom_density and geom_smooth D3 renderers (Wave 2)
+- [x] 05-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 3)
 
 ### Phase 6: Layout Engine
 **Goal**: Centralized spatial calculation system for panel positioning, legend placement, and axis positioning
@@ -283,7 +283,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 2. Core Scale System | 3/3 | Complete | 2026-02-08 |
 | 3. Coordinate Systems | 3/3 | Complete | 2026-02-08 |
 | 4. Essential Geoms | 4/4 | Complete | 2026-02-09 |
-| 5. Statistical Geoms | 0/4 | Not started | - |
+| 5. Statistical Geoms | 4/4 | Complete | 2026-02-09 |
 | 6. Layout Engine | 0/4 | Not started | - |
 | 7. Legend System | 0/5 | Not started | - |
 | 8. Basic Faceting | 0/5 | Not started | - |
