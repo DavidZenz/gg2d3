@@ -16,6 +16,7 @@ dependencies:
       - constants.js
       - scales.js
       - theme.js
+      - layout.js
       - geom-registry.js
       - geoms/point.js
       - geoms/line.js
