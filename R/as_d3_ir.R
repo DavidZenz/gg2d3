@@ -571,9 +571,10 @@ as_d3_ir <- function(p, width = 640, height = 400,
       scale_obj <- b$plot$scales$get_scales(aes_name)
       if (is.null(scale_obj)) next
 
-      # Determine guide type
+      # Determine guide type: only colour/fill continuous scales get colorbar
       is_continuous <- inherits(scale_obj, "ScaleContinuous")
-      guide_type <- if (is_continuous) "colorbar" else "legend"
+      is_color_aes <- aes_name %in% c("colour", "fill")
+      guide_type <- if (is_continuous && is_color_aes) "colorbar" else "legend"
 
       # Get title from scale name or plot labels
       title <- scale_obj$name

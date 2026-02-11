@@ -49,9 +49,10 @@
       titleSpacing: ptToPx(5.5),
 
       // Backgrounds
-      keyBackground: convertColor(keyTheme.fill || "#FFFFFF"),
-      keyStroke: convertColor(keyTheme.colour || "grey80"),
-      legendBackground: bgTheme.type !== "blank" ? convertColor(bgTheme.fill || "transparent") : "transparent",
+      keyBackground: convertColor(keyTheme.fill || "white"),
+      keyStroke: keyTheme.colour && keyTheme.colour !== "NA" ? convertColor(keyTheme.colour) : "none",
+      legendBackground: bgTheme.type !== "blank" ? convertColor(bgTheme.fill || "white") : "transparent",
+      legendStroke: bgTheme.colour && bgTheme.colour !== "NA" ? convertColor(bgTheme.colour) : "none",
 
       // Margin: ggplot2 default legend.margin = 5.5pt all sides
       margin: ptToPx(5.5)
@@ -105,11 +106,12 @@
    * @param {Object} theme - Theme accessor
    * @returns {Object} {width, height} in pixels
    */
-  function estimateLegendDimensions(guides, theme) {
+  function estimateLegendDimensions(guides, theme, position) {
     if (!guides || guides.length === 0) {
       return { width: 0, height: 0 };
     }
 
+    position = position || "right";
     const defaults = getThemeDefaults(theme);
     const estimateTextWidth = window.gg2d3.layout.estimateTextWidth;
     const estimateTextHeight = window.gg2d3.layout.estimateTextHeight;
@@ -117,8 +119,6 @@
     let totalWidth = 0;
     let totalHeight = 0;
 
-    // Get legend position (default "right")
-    const position = guides[0].position || "right";
     const isVertical = position === "right" || position === "left";
 
     guides.forEach((guide, idx) => {
@@ -127,14 +127,34 @@
       const titleHeight = guide.title ?
         estimateTextHeight(defaults.titleSize) + defaults.titleSpacing : 0;
 
+      // Title width (may be wider than keys)
+      const titleWidth = guide.title ?
+        estimateTextWidth(guide.title, defaults.titleSize) + defaults.margin * 2 : 0;
+
       if (guide.type === "legend") {
         // Discrete legend
         const nKeys = guide.keys ? guide.keys.length : 0;
-        const maxLabelWidth = guide.keys ?
-          Math.max(...guide.keys.map(k => estimateTextWidth(String(k.label || ""), defaults.textSize))) : 0;
+        let width, height;
 
-        const width = defaults.keySize + defaults.keySpacing + maxLabelWidth + defaults.margin * 2;
-        const height = titleHeight + (nKeys * (defaults.keySize + defaults.keySpacing)) + defaults.margin * 2;
+        if (isVertical) {
+          // Vertical: keys stacked, labels to the right
+          const maxLabelWidth = guide.keys ?
+            Math.max(...guide.keys.map(k => estimateTextWidth(String(k.label || ""), defaults.textSize))) : 0;
+          const keysWidth = defaults.keySize + defaults.keySpacing + maxLabelWidth + defaults.margin * 2;
+          width = Math.max(keysWidth, titleWidth);
+          height = titleHeight + (nKeys * (defaults.keySize + defaults.keySpacing)) + defaults.margin * 2;
+        } else {
+          // Horizontal: title left, then keys in a row, labels below keys
+          const maxLabelWidth = guide.keys ?
+            Math.max(...guide.keys.map(k => estimateTextWidth(String(k.label || ""), defaults.textSize))) : 0;
+          const colWidth = Math.max(defaults.keySize, maxLabelWidth) + defaults.keySpacing;
+          const nk = guide.keys ? guide.keys.length : 0;
+          const inlineTitleWidth = guide.title ?
+            estimateTextWidth(guide.title, defaults.titleSize) + defaults.keySpacing : 0;
+          width = defaults.margin + inlineTitleWidth + nk * colWidth + defaults.margin;
+          // Height: single row of keys + labels below, no title row
+          height = defaults.keySize + defaults.textSize + defaults.margin * 2;
+        }
 
         if (isVertical) {
           totalWidth = Math.max(totalWidth, width);
@@ -144,13 +164,16 @@
           totalHeight = Math.max(totalHeight, height);
         }
       } else if (guide.type === "colorbar") {
-        // Colorbar
+        // Colorbar — only min/max labels shown
         const barWidth = defaults.keySize;
         const barHeight = 5 * defaults.keySize;
-        const maxLabelWidth = guide.keys ?
-          Math.max(...guide.keys.map(k => estimateTextWidth(String(k.label || ""), defaults.textSize))) : 0;
+        const endLabels = guide.keys && guide.keys.length > 0 ?
+          [guide.keys[0], guide.keys[guide.keys.length - 1]] : [];
+        const maxLabelWidth = endLabels.length > 0 ?
+          Math.max(...endLabels.map(k => estimateTextWidth(String(k.label || ""), defaults.textSize))) : 0;
 
-        const width = barWidth + 3 + maxLabelWidth + defaults.margin * 2;
+        const barContentWidth = barWidth + 5 + maxLabelWidth + defaults.margin * 2;
+        const width = Math.max(barContentWidth, titleWidth);
         const height = titleHeight + barHeight + defaults.margin * 2;
 
         if (isVertical) {
@@ -187,67 +210,80 @@
    * @param {number} x - X position
    * @param {number} y - Y position
    * @param {Object} theme - Theme accessor
+   * @param {string} direction - "vertical" or "horizontal" key layout
    * @returns {d3.Selection} Legend group element
    */
-  function renderDiscreteLegend(svg, guide, x, y, theme) {
+  function renderDiscreteLegend(svg, guide, x, y, theme, direction) {
+    direction = direction || "vertical";
     const defaults = getThemeDefaults(theme);
     const convertColor = window.gg2d3.scales.convertColor;
     const mmToPxRadius = window.gg2d3.constants.mmToPxRadius;
+    const estimateTextWidth = window.gg2d3.layout.estimateTextWidth;
 
     // Create legend group
     const g = svg.append("g")
       .attr("class", "gg2d3-legend")
       .attr("transform", `translate(${x}, ${y})`);
 
-    // Draw background if not blank
-    if (defaults.legendBackground !== "transparent") {
-      // Calculate dimensions for background
-      const nKeys = guide.keys ? guide.keys.length : 0;
-      const titleHeight = guide.title ?
-        window.gg2d3.layout.estimateTextHeight(defaults.titleSize) + defaults.titleSpacing : 0;
-      const bgWidth = 100; // Will be adjusted after text rendering
-      const bgHeight = titleHeight + (nKeys * (defaults.keySize + defaults.keySpacing)) + defaults.margin * 2;
-
-      g.append("rect")
-        .attr("class", "legend-background")
-        .attr("x", 0)
-        .attr("y", 0)
-        .attr("width", bgWidth)
-        .attr("height", bgHeight)
-        .attr("fill", defaults.legendBackground)
-        .attr("stroke", "none");
-    }
-
     let currentY = defaults.margin;
 
-    // Draw title if present
-    if (guide.title) {
-      g.append("text")
-        .attr("class", "legend-title")
-        .attr("x", defaults.margin)
-        .attr("y", currentY + defaults.titleSize * 0.8)
-        .attr("fill", defaults.titleColour)
-        .style("font-size", `${defaults.titleSize}px`)
-        .style("font-weight", "bold")
-        .style("font-family", "sans-serif")
-        .text(guide.title);
+    // Determine which aesthetics this guide represents
+    const hasColour = guide.aesthetics && guide.aesthetics.includes("colour");
+    const hasFill = guide.aesthetics && guide.aesthetics.includes("fill");
+    const hasSize = guide.aesthetics && guide.aesthetics.includes("size");
+    const hasShape = guide.aesthetics && guide.aesthetics.includes("shape");
 
-      currentY += defaults.titleSize + defaults.titleSpacing;
+    // Pre-compute uniform column width for horizontal layout
+    let columnWidth = defaults.keySize;
+    if (direction === "horizontal" && guide.keys && guide.keys.length > 0) {
+      const maxLabelW = Math.max(...guide.keys.map(k =>
+        estimateTextWidth(String(k.label || ""), defaults.textSize)));
+      columnWidth = Math.max(defaults.keySize, maxLabelW) + defaults.keySpacing;
     }
 
-    // Draw keys
+    // Draw title
+    let titleElement = null;
+    let currentX = defaults.margin;
+    if (guide.title) {
+      if (direction === "horizontal") {
+        // Horizontal: title to the left of keys, vertically centered with key row
+        titleElement = g.append("text")
+          .attr("class", "legend-title")
+          .attr("x", defaults.margin)
+          .attr("y", currentY + defaults.keySize / 2)
+          .attr("dy", "0.35em")
+          .attr("fill", defaults.titleColour)
+          .style("font-size", `${defaults.titleSize}px`)
+          .style("font-weight", "normal")
+          .style("font-family", "sans-serif")
+          .text(guide.title);
+        currentX = defaults.margin + estimateTextWidth(guide.title, defaults.titleSize) + defaults.keySpacing;
+      } else {
+        // Vertical: title above keys
+        titleElement = g.append("text")
+          .attr("class", "legend-title")
+          .attr("x", defaults.margin)
+          .attr("y", currentY + defaults.titleSize * 0.8)
+          .attr("fill", defaults.titleColour)
+          .style("font-size", `${defaults.titleSize}px`)
+          .style("font-weight", "normal")
+          .style("font-family", "sans-serif")
+          .text(guide.title);
+        currentY += defaults.titleSize + defaults.titleSpacing;
+      }
+    }
     if (guide.keys && guide.keys.length > 0) {
       guide.keys.forEach((key, idx) => {
-        const keyY = currentY + idx * (defaults.keySize + defaults.keySpacing);
-        const keyX = defaults.margin;
+        let keyX, keyY;
+        if (direction === "horizontal") {
+          keyX = currentX + (columnWidth - defaults.keySize) / 2; // center key in column
+          keyY = currentY;
+        } else {
+          keyX = defaults.margin;
+          keyY = currentY + idx * (defaults.keySize + defaults.keySpacing);
+        }
 
-        // Determine which aesthetics this guide represents
-        const hasColour = guide.aesthetics && guide.aesthetics.includes("colour");
-        const hasFill = guide.aesthetics && guide.aesthetics.includes("fill");
-        const hasSize = guide.aesthetics && guide.aesthetics.includes("size");
-        const hasShape = guide.aesthetics && guide.aesthetics.includes("shape");
-
-        // Draw key background
+        // Draw key background (ggplot2 default: grey92 fill, no border)
         g.append("rect")
           .attr("class", "legend-key-bg")
           .attr("x", keyX)
@@ -256,18 +292,17 @@
           .attr("height", defaults.keySize)
           .attr("fill", defaults.keyBackground)
           .attr("stroke", defaults.keyStroke)
-          .attr("stroke-width", 0.5);
+          .attr("stroke-width", defaults.keyStroke === "none" ? 0 : 0.5);
 
         // Draw key symbol
-        const centerX = keyX + defaults.keySize / 2;
-        const centerY = keyY + defaults.keySize / 2;
+        const cX = keyX + defaults.keySize / 2;
+        const cY = keyY + defaults.keySize / 2;
 
         if (hasShape) {
-          // Shape symbol
           const shapeCode = key.shape !== undefined ? key.shape : 19;
           const symbolGenerator = d3.symbol()
             .type(getD3Symbol(shapeCode))
-            .size(64); // Standard symbol size
+            .size(64);
 
           const fillColor = hasFill ? convertColor(key.fill || "black") :
                            hasColour ? convertColor(key.colour || "black") : "black";
@@ -275,27 +310,25 @@
 
           g.append("path")
             .attr("class", "legend-key-shape")
-            .attr("transform", `translate(${centerX}, ${centerY})`)
+            .attr("transform", `translate(${cX}, ${cY})`)
             .attr("d", symbolGenerator)
             .attr("fill", isFilledShape(shapeCode) ? fillColor : "none")
             .attr("stroke", isFilledShape(shapeCode) ? "none" : strokeColor)
             .attr("stroke-width", 1);
 
         } else if (hasSize) {
-          // Size circle
           const sizeValue = key.size !== undefined ? key.size : 1.5;
           const radius = mmToPxRadius(sizeValue);
 
           g.append("circle")
             .attr("class", "legend-key-size")
-            .attr("cx", centerX)
-            .attr("cy", centerY)
+            .attr("cx", cX)
+            .attr("cy", cY)
             .attr("r", radius)
             .attr("fill", "black")
             .attr("stroke", "none");
 
         } else if (hasColour || hasFill) {
-          // Color/fill swatch
           const fillValue = hasFill ? (key.fill || "#4D4D4D") :
                            hasColour ? (key.colour || "#4D4D4D") : "#4D4D4D";
 
@@ -307,20 +340,77 @@
             .attr("height", defaults.keySize)
             .attr("fill", convertColor(fillValue))
             .attr("stroke", defaults.keyStroke)
-            .attr("stroke-width", 0.5);
+            .attr("stroke-width", defaults.keyStroke === "none" ? 0 : 0.5);
         }
 
         // Draw label
-        g.append("text")
-          .attr("class", "legend-key-label")
-          .attr("x", keyX + defaults.keySize + defaults.keySpacing)
-          .attr("y", centerY)
-          .attr("dy", "0.35em") // Vertically center with key
-          .attr("fill", defaults.textColour)
-          .style("font-size", `${defaults.textSize}px`)
-          .style("font-family", "sans-serif")
-          .text(String(key.label || ""));
+        if (direction === "horizontal") {
+          // Label below key, centered on column
+          g.append("text")
+            .attr("class", "legend-key-label")
+            .attr("x", currentX + columnWidth / 2)
+            .attr("y", keyY + defaults.keySize + defaults.textSize * 0.9)
+            .attr("text-anchor", "middle")
+            .attr("fill", defaults.textColour)
+            .style("font-size", `${defaults.textSize}px`)
+            .style("font-family", "sans-serif")
+            .text(String(key.label || ""));
+
+          // Advance X for next key (uniform column width)
+          currentX += columnWidth;
+        } else {
+          // Label to right of key for vertical layout
+          g.append("text")
+            .attr("class", "legend-key-label")
+            .attr("x", keyX + defaults.keySize + defaults.keySpacing)
+            .attr("y", cY)
+            .attr("dy", "0.35em")
+            .attr("fill", defaults.textColour)
+            .style("font-size", `${defaults.textSize}px`)
+            .style("font-family", "sans-serif")
+            .text(String(key.label || ""));
+        }
       });
+    }
+
+    // Compute content width for background and title positioning
+    const nKeys = guide.keys ? guide.keys.length : 0;
+    let contentWidth;
+
+    if (direction === "horizontal") {
+      contentWidth = currentX + defaults.margin;
+    } else {
+      const maxLabelWidth = guide.keys ?
+        Math.max(...guide.keys.map(k => estimateTextWidth(String(k.label || ""), defaults.textSize))) : 0;
+      contentWidth = defaults.keySize + defaults.keySpacing + maxLabelWidth + defaults.margin * 2;
+    }
+
+    // For vertical layout, ensure at least as wide as title
+    if (direction === "vertical") {
+      const titleW = guide.title ?
+        estimateTextWidth(guide.title, defaults.titleSize) + defaults.margin * 2 : 0;
+      contentWidth = Math.max(contentWidth, titleW);
+    }
+
+    // Draw legend background behind all content (insert as first child)
+    if (defaults.legendBackground !== "transparent") {
+      let bgHeight;
+      if (direction === "horizontal") {
+        bgHeight = currentY + defaults.keySize + defaults.textSize + defaults.margin;
+      } else {
+        const lastKeyY = currentY + (nKeys > 0 ? (nKeys - 1) * (defaults.keySize + defaults.keySpacing) : 0);
+        bgHeight = lastKeyY + defaults.keySize + defaults.margin;
+      }
+
+      g.insert("rect", ":first-child")
+        .attr("class", "legend-background")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", contentWidth)
+        .attr("height", bgHeight)
+        .attr("fill", defaults.legendBackground)
+        .attr("stroke", defaults.legendStroke)
+        .attr("stroke-width", defaults.legendStroke === "none" ? 0 : 0.5);
     }
 
     return g;
@@ -359,7 +449,7 @@
         .attr("y", currentY + defaults.titleSize * 0.8)
         .attr("fill", defaults.titleColour)
         .style("font-size", `${defaults.titleSize}px`)
-        .style("font-weight", "bold")
+        .style("font-weight", "normal")
         .style("font-family", "sans-serif")
         .text(guide.title);
 
@@ -402,21 +492,21 @@
       .attr("stroke", convertColor("grey50"))
       .attr("stroke-width", 0.5);
 
-    // Draw tick marks and labels
+    // Draw tick marks and labels (only min and max)
     if (guide.keys && guide.keys.length > 0) {
-      // Get domain range for positioning
       const domain = guide.keys.map(k => parseFloat(k.value || 0));
       const minVal = Math.min(...domain);
       const maxVal = Math.max(...domain);
       const range = maxVal - minVal;
 
-      guide.keys.forEach(key => {
+      // Only show first and last key (min/max)
+      const endKeys = [guide.keys[0], guide.keys[guide.keys.length - 1]];
+
+      endKeys.forEach(key => {
         const value = parseFloat(key.value || 0);
-        // Position proportionally within bar height (inverted because y increases downward)
         const proportion = range !== 0 ? (value - minVal) / range : 0;
         const tickY = barY + barHeight - (proportion * barHeight);
 
-        // Draw tick mark
         g.append("line")
           .attr("class", "colorbar-tick")
           .attr("x1", barX + barWidth)
@@ -426,7 +516,6 @@
           .attr("stroke", defaults.textColour)
           .attr("stroke-width", 0.5);
 
-        // Draw label
         g.append("text")
           .attr("class", "colorbar-label")
           .attr("x", barX + barWidth + 5)
@@ -465,29 +554,42 @@
     // Get theme defaults for spacing
     const guideSpacing = window.gg2d3.constants.ptToPx(11);
 
-    // Starting position within legend box
-    let currentX = legendBox.x;
-    let currentY = legendBox.y;
+    const isVertical = legendBox.position === "right" || legendBox.position === "left";
+
+    // Compute total legend content size for centering (ggplot2 justification = "center")
+    const totalDims = estimateLegendDimensions(guides, theme, legendBox.position);
+
+    // Center legend within allocated box
+    let currentX, currentY;
+    if (isVertical) {
+      // Vertically center for right/left positions
+      currentX = legendBox.x;
+      currentY = legendBox.y + Math.max(0, (legendBox.h - totalDims.height) / 2);
+    } else {
+      // Horizontally center for top/bottom positions
+      currentX = legendBox.x + Math.max(0, (legendBox.w - totalDims.width) / 2);
+      currentY = legendBox.y;
+    }
+
+    // Key direction: vertical for right/left, horizontal for top/bottom
+    const keyDirection = isVertical ? "vertical" : "horizontal";
 
     guides.forEach((guide, idx) => {
       if (!guide || guide.position === "none") return;
 
       if (guide.type === "legend") {
-        renderDiscreteLegend(svg, guide, currentX, currentY, theme);
+        renderDiscreteLegend(svg, guide, currentX, currentY, theme, keyDirection);
       } else if (guide.type === "colorbar") {
         renderColorbar(svg, guide, currentX, currentY, theme);
       }
 
       // Advance position for next guide
-      const isVertical = legendBox.position === "right" || legendBox.position === "left";
       if (idx < guides.length - 1) {
         if (isVertical) {
-          // Stack vertically
-          const dims = estimateLegendDimensions([guide], theme);
+          const dims = estimateLegendDimensions([guide], theme, legendBox.position);
           currentY += dims.height + guideSpacing;
         } else {
-          // Stack horizontally
-          const dims = estimateLegendDimensions([guide], theme);
+          const dims = estimateLegendDimensions([guide], theme, legendBox.position);
           currentX += dims.width + guideSpacing;
         }
       }

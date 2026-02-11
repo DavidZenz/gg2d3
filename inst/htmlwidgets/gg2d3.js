@@ -22,8 +22,9 @@ HTMLWidgets.widget({
       const flip = !!(ir.coord && ir.coord.flip);
 
       // Estimate legend dimensions from IR guides
-      const legendDims = (ir.guides && ir.guides.length > 0)
-        ? window.gg2d3.legend.estimateLegendDimensions(ir.guides, theme)
+      const legendPosition = (ir.legend && ir.legend.position) || "none";
+      const legendDims = (ir.guides && ir.guides.length > 0 && legendPosition !== "none")
+        ? window.gg2d3.legend.estimateLegendDimensions(ir.guides, theme, legendPosition)
         : { width: 0, height: 0 };
 
       // Extract data ranges for coord_fixed
