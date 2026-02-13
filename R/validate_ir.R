@@ -99,6 +99,43 @@ validate_ir <- function(ir) {
     }
   }
 
+  # Validate facets structure
+  if (!is.null(ir$facets)) {
+    if (!"type" %in% names(ir$facets)) {
+      stop("IR facets must contain a 'type' field", call. = FALSE)
+    }
+    if (!ir$facets$type %in% c("null", "wrap", "grid")) {
+      warning(sprintf("Unrecognized facet type '%s'", ir$facets$type), call. = FALSE)
+    }
+    if (ir$facets$type == "wrap") {
+      if (is.null(ir$facets$layout) || length(ir$facets$layout) == 0) {
+        stop("facet_wrap IR must have non-empty layout", call. = FALSE)
+      }
+      if (is.null(ir$facets$strips)) {
+        warning("facet_wrap IR has no strips", call. = FALSE)
+      }
+      if (is.null(ir$facets$nrow) || is.null(ir$facets$ncol)) {
+        warning("facet_wrap IR missing nrow/ncol", call. = FALSE)
+      }
+    }
+  }
+
+  # Validate panels array
+  if (!is.null(ir$panels) && length(ir$panels) > 0) {
+    for (i in seq_along(ir$panels)) {
+      panel <- ir$panels[[i]]
+      if (is.null(panel$PANEL)) {
+        warning(sprintf("Panel %d missing PANEL identifier", i), call. = FALSE)
+      }
+      if (is.null(panel$x_range) || length(panel$x_range) != 2) {
+        warning(sprintf("Panel %d has invalid x_range", i), call. = FALSE)
+      }
+      if (is.null(panel$y_range) || length(panel$y_range) != 2) {
+        warning(sprintf("Panel %d has invalid y_range", i), call. = FALSE)
+      }
+    }
+  }
+
   # Validate log scale domains
   for (axis in c("x", "y")) {
     scale <- ir$scales[[axis]]
