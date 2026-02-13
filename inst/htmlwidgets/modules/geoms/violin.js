@@ -115,6 +115,7 @@
 
         g.append('path')
           .datum(sortedPoints)
+          .attr('class', 'geom-violin')
           .attr('d', area)
           .attr('fill', fillColor(firstPoint))
           .attr('stroke', strokeColor(firstPoint))
@@ -136,6 +137,7 @@
 
         g.append('path')
           .datum(sortedPoints)
+          .attr('class', 'geom-violin')
           .attr('d', area)
           .attr('fill', fillColor(firstPoint))
           .attr('stroke', strokeColor(firstPoint))

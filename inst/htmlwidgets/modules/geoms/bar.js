@@ -86,6 +86,7 @@
     if (flip) {
       // Horizontal bars: xScale=category (vertical), yScale=value (horizontal)
       sel.enter().append("rect")
+        .attr("class", "geom-bar")
         .attr("y", d => (isBand ? xScale(val(get(d, aes.x))) : xScale(num(get(d, aes.x))) - bw / 2))
         .attr("x", d => {
           if (hasStack) {
@@ -121,6 +122,7 @@
     } else {
       // Normal vertical bars
       sel.enter().append("rect")
+        .attr("class", "geom-bar")
         .attr("x", d => (isBand ? xScale(val(get(d, aes.x))) : xScale(num(get(d, aes.x))) - bw / 2))
         .attr("y", d => {
           if (hasStack) {

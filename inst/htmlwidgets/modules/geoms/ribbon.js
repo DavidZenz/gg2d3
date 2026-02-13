@@ -88,6 +88,7 @@
         const firstPoint = pts[0].d;
 
         g.append("path")
+          .attr("class", "geom-ribbon")
           .attr("d", area(pts))
           .attr("fill", fillColor(firstPoint))
           .attr("stroke", "none")

@@ -65,6 +65,7 @@
     // When flip: x uses yScale, y uses xScale
     const sel = g.append("g").selectAll("line").data(segs);
     sel.enter().append("line")
+      .attr("class", "geom-segment")
       .attr("x1", d => {
         if (flip) {
           const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));

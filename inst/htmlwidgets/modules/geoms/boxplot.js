@@ -116,6 +116,7 @@
 
       // 1. Draw IQR box (rectangle from lower to upper)
       g.append('rect')
+        .attr('class', 'geom-boxplot-box')
         .attr('x', boxAttrs.x)
         .attr('y', boxAttrs.y)
         .attr('width', boxAttrs.width)
@@ -129,6 +130,7 @@
       const medianLinewidth = linewidthPx;
       if (flip) {
         g.append('line')
+          .attr('class', 'geom-boxplot-median')
           .attr('x1', yScale(middle))
           .attr('x2', yScale(middle))
           .attr('y1', centerPos - boxWidth / 2)
@@ -137,6 +139,7 @@
           .attr('stroke-width', medianLinewidth);
       } else {
         g.append('line')
+          .attr('class', 'geom-boxplot-median')
           .attr('x1', centerPos - boxWidth / 2)
           .attr('x2', centerPos + boxWidth / 2)
           .attr('y1', yScale(middle))
@@ -149,6 +152,7 @@
       if (ymax != null) {
         if (flip) {
           g.append('line')
+            .attr('class', 'geom-boxplot-whisker')
             .attr('x1', yScale(upper))
             .attr('x2', yScale(ymax))
             .attr('y1', centerPos)
@@ -157,6 +161,7 @@
             .attr('stroke-width', linewidthPx);
         } else {
           g.append('line')
+            .attr('class', 'geom-boxplot-whisker')
             .attr('x1', centerPos)
             .attr('x2', centerPos)
             .attr('y1', yScale(upper))
@@ -172,6 +177,7 @@
       if (ymin != null) {
         if (flip) {
           g.append('line')
+            .attr('class', 'geom-boxplot-whisker')
             .attr('x1', yScale(lower))
             .attr('x2', yScale(ymin))
             .attr('y1', centerPos)
@@ -180,6 +186,7 @@
             .attr('stroke-width', linewidthPx);
         } else {
           g.append('line')
+            .attr('class', 'geom-boxplot-whisker')
             .attr('x1', centerPos)
             .attr('x2', centerPos)
             .attr('y1', yScale(lower))
@@ -200,6 +207,7 @@
           if (outlierY != null) {
             if (flip) {
               g.append('circle')
+                .attr('class', 'geom-boxplot-outlier')
                 .attr('cx', yScale(outlierY))
                 .attr('cy', centerPos)
                 .attr('r', outlierRadius)
@@ -207,6 +215,7 @@
                 .attr('stroke', 'none');
             } else {
               g.append('circle')
+                .attr('class', 'geom-boxplot-outlier')
                 .attr('cx', centerPos)
                 .attr('cy', yScale(outlierY))
                 .attr('r', outlierRadius)

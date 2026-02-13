@@ -61,6 +61,7 @@
     // When flip: x attr uses yScale(yVal), y attr uses xScale(xVal)
     const sel = g.append("g").selectAll("text").data(txt);
     sel.enter().append("text")
+      .attr("class", "geom-text")
       .attr("x", d => {
         if (flip) {
           const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
