@@ -7,6 +7,111 @@ HTMLWidgets.widget({
     // Store IR for resize support
     let currentIR = null;
 
+    // ---------- renderPanel helper ----------
+    function renderPanel(root, parentGroup, panelBox, panelData, ir, theme, convertColor, flip, panelNum, isFaceted) {
+      const w = panelBox.w;
+      const h = panelBox.h;
+      const clipId = panelBox.clipId;
+
+      // Create panel group translated to panel position
+      const g = parentGroup.append("g")
+        .attr("class", "panel panel-" + panelNum)
+        .attr("transform", "translate(" + panelBox.x + "," + panelBox.y + ")");
+
+      // Clip path definition
+      root.select("defs").append("clipPath").attr("id", clipId)
+        .append("rect").attr("width", w).attr("height", h);
+
+      // Panel background
+      const panelBg = theme.get("panel.background");
+      if (panelBg && panelBg.type === "rect" && panelBg.fill) {
+        g.append("rect")
+          .attr("x", 0).attr("y", 0)
+          .attr("width", w).attr("height", h)
+          .attr("fill", convertColor(panelBg.fill))
+          .attr("stroke", convertColor(panelBg.colour) || "none")
+          .attr("stroke-width", panelBg.linewidth || 0);
+      }
+
+      // Create scales for this panel using panel-specific ranges
+      const xRange = panelData.x_range || (ir.scales && ir.scales.x && ir.scales.x.domain);
+      const yRange = panelData.y_range || (ir.scales && ir.scales.y && ir.scales.y.domain);
+
+      // Build scale descriptors with panel-specific domains but same type/transform
+      const xScaleDesc = Object.assign({}, ir.scales && ir.scales.x, { domain: xRange });
+      const yScaleDesc = Object.assign({}, ir.scales && ir.scales.y, { domain: yRange });
+
+      const xScale = window.gg2d3.scales.createScale(xScaleDesc, flip ? [h, 0] : [0, w]);
+      const yScale = window.gg2d3.scales.createScale(yScaleDesc, flip ? [0, w] : [h, 0]);
+
+      // Grid - use panel-specific breaks
+      const gridMajor = theme.get("grid.major");
+      const gridMinor = theme.get("grid.minor");
+
+      const xBreaks = panelData.x_breaks || (ir.scales && ir.scales.x && ir.scales.x.breaks);
+      const yBreaks = panelData.y_breaks || (ir.scales && ir.scales.y && ir.scales.y.breaks);
+      const xMinorBreaks = ir.scales && ir.scales.x && ir.scales.x.minor_breaks;
+      const yMinorBreaks = ir.scales && ir.scales.y && ir.scales.y.minor_breaks;
+
+      // Minor grid
+      if (gridMinor && gridMinor.type !== "blank") {
+        if (xMinorBreaks || yMinorBreaks) {
+          window.gg2d3.theme.drawGrid(g, xScale, flip ? "horizontal" : "vertical", gridMinor, xMinorBreaks, w, h, convertColor);
+          window.gg2d3.theme.drawGrid(g, yScale, flip ? "vertical" : "horizontal", gridMinor, yMinorBreaks, w, h, convertColor);
+        }
+      }
+
+      // Major grid
+      if (gridMajor && gridMajor.type !== "blank") {
+        window.gg2d3.theme.drawGrid(g, xScale, flip ? "horizontal" : "vertical", gridMajor, xBreaks, w, h, convertColor);
+        window.gg2d3.theme.drawGrid(g, yScale, flip ? "vertical" : "horizontal", gridMajor, yBreaks, w, h, convertColor);
+      }
+
+      // Clipped group for data
+      const gClipped = g.append("g").attr("clip-path", "url(#" + clipId + ")");
+
+      // Color scale (same for all panels)
+      const cdesc = ir.scales && ir.scales.color;
+      const colorScale = cdesc
+        ? (cdesc.type === "continuous"
+            ? d3.scaleSequential(d3.interpolateTurbo).domain(d3.extent(cdesc.domain || [0, 1]))
+            : d3.scaleOrdinal(d3.schemeTableau10).domain(cdesc.domain || []))
+        : function() { return null; };
+
+      // Render layers - filter by PANEL
+      let drawn = 0;
+      (ir.layers || []).forEach(function(layer) {
+        // Create a copy of the layer with filtered data for this panel
+        const filteredData = isFaceted
+          ? layer.data.filter(function(d) { return d.PANEL === panelNum; })
+          : layer.data;  // non-faceted: use all data
+
+        const filteredLayer = Object.assign({}, layer, { data: filteredData });
+
+        const count = window.gg2d3.geomRegistry.render(
+          filteredLayer,
+          gClipped,
+          xScale,
+          yScale,
+          { colorScale: colorScale, plotWidth: w, plotHeight: h, flip: flip }
+        );
+        drawn += count;
+      });
+
+      // Panel border (on top of geom layers)
+      const panelBorder = theme.get("panel.border");
+      if (panelBorder && panelBorder.type === "rect" && panelBorder.colour) {
+        g.append("rect")
+          .attr("x", 0).attr("y", 0)
+          .attr("width", w).attr("height", h)
+          .attr("fill", "none")
+          .attr("stroke", convertColor(panelBorder.colour))
+          .attr("stroke-width", panelBorder.linewidth || 1);
+      }
+
+      return drawn;
+    }
+
     // ---------- draw ----------
     function draw(ir, elW, elH) {
       d3.select(el).selectAll("*").remove();
@@ -73,12 +178,19 @@ HTMLWidgets.widget({
           ratio: (ir.coord && ir.coord.ratio) || null,
           xRange: xDataRange,
           yRange: yDataRange
-        }
+        },
+        facets: ir.facets && ir.facets.type === "wrap" ? {
+          type: ir.facets.type,
+          nrow: ir.facets.nrow,
+          ncol: ir.facets.ncol,
+          layout: ir.facets.layout,
+          strips: ir.facets.strips,
+          spacing: ir.facets.spacing || 7.3
+        } : null
       };
 
       const layout = window.gg2d3.layout.calculateLayout(layoutConfig);
-      const w = layout.panel.w;
-      const h = layout.panel.h;
+      const isFaceted = layout.panels && layout.panels.length > 1;
 
       const root = d3.select(el).append("svg").attr("width", innerW).attr("height", innerH);
 
@@ -94,53 +206,78 @@ HTMLWidgets.widget({
           .attr("stroke", "none");
       }
 
-      // Create clip-path for panel area (prevents geoms like abline from exceeding panel bounds)
-      const clipId = layout.clipId;
-      root.append("defs").append("clipPath").attr("id", clipId)
-        .append("rect").attr("width", w).attr("height", h);
+      // Create defs group for clip paths
+      root.append("defs");
 
-      const g = root.append("g").attr("transform",
-        `translate(${layout.panel.x},${layout.panel.y})`);
+      let totalDrawn = 0;
 
-      // Panel background (plot area)
-      const panelBg = theme.get("panel.background");
-      if (panelBg && panelBg.type === "rect" && panelBg.fill) {
-        g.insert("rect", ":first-child")
-          .attr("x", 0)
-          .attr("y", 0)
-          .attr("width", w)
-          .attr("height", h)
-          .attr("fill", convertColor(panelBg.fill))
-          .attr("stroke", convertColor(panelBg.colour) || "none")
-          .attr("stroke-width", panelBg.linewidth || 0);
+      if (isFaceted) {
+        // Multi-panel rendering
+        const panelsGroup = root.append("g").attr("class", "panels");
+
+        layout.panels.forEach(function(panelBox) {
+          // Find panel data from IR
+          const panelData = (ir.panels || []).find(function(p) {
+            return p.PANEL === panelBox.PANEL;
+          }) || {};
+
+          totalDrawn += renderPanel(
+            root, panelsGroup, panelBox, panelData,
+            ir, theme, convertColor, flip, panelBox.PANEL, true
+          );
+        });
+      } else {
+        // Single-panel rendering (existing behavior)
+        const panelBox = {
+          x: layout.panel.x,
+          y: layout.panel.y,
+          w: layout.panel.w,
+          h: layout.panel.h,
+          clipId: layout.clipId
+        };
+        const panelData = ir.panels && ir.panels[0] ? ir.panels[0] : {
+          x_range: ir.scales && ir.scales.x && ir.scales.x.domain,
+          y_range: ir.scales && ir.scales.y && ir.scales.y.domain,
+          x_breaks: ir.scales && ir.scales.x && ir.scales.x.breaks,
+          y_breaks: ir.scales && ir.scales.y && ir.scales.y.breaks
+        };
+
+        totalDrawn = renderPanel(
+          root, root, panelBox, panelData,
+          ir, theme, convertColor, flip, 1, false
+        );
       }
 
-      // Create scales using module
-      let xScale = window.gg2d3.scales.createScale(ir.scales && ir.scales.x, flip ? [h, 0] : [0, w]);
-      let yScale = window.gg2d3.scales.createScale(ir.scales && ir.scales.y, flip ? [0, w] : [h, 0]);
+      // Render strip labels (faceted plots only)
+      if (isFaceted && layout.strips && layout.strips.length > 0) {
+        const stripTheme = window.gg2d3.layout.getStripTheme(theme);
 
-      // Draw grid using theme module
-      const gridMajor = theme.get("grid.major");
-      const gridMinor = theme.get("grid.minor");
+        layout.strips.forEach(function(strip) {
+          const stripGroup = root.append("g")
+            .attr("class", "strip strip-" + strip.PANEL);
 
-      // Draw minor grid first (so major grid draws over it)
-      // When flipped: xScale maps vertical, so x-breaks draw horizontal lines;
-      //               yScale maps horizontal, so y-breaks draw vertical lines
-      if (gridMinor && gridMinor.type !== "blank") {
-        const xMinorBreaks = ir.scales && ir.scales.x && ir.scales.x.minor_breaks;
-        const yMinorBreaks = ir.scales && ir.scales.y && ir.scales.y.minor_breaks;
-        if (xMinorBreaks || yMinorBreaks) {
-          window.gg2d3.theme.drawGrid(g, xScale, flip ? "horizontal" : "vertical", gridMinor, xMinorBreaks, w, h, convertColor);
-          window.gg2d3.theme.drawGrid(g, yScale, flip ? "vertical" : "horizontal", gridMinor, yMinorBreaks, w, h, convertColor);
-        }
-      }
+          // Strip background rectangle
+          stripGroup.append("rect")
+            .attr("x", strip.x)
+            .attr("y", strip.y)
+            .attr("width", strip.w)
+            .attr("height", strip.h)
+            .attr("fill", stripTheme.bgFill)
+            .attr("stroke", stripTheme.bgColour || "none")
+            .attr("stroke-width", stripTheme.bgLinewidth);
 
-      // Draw major grid using ggplot2's break positions
-      if (gridMajor && gridMajor.type !== "blank") {
-        const xBreaks = ir.scales && ir.scales.x && ir.scales.x.breaks;
-        const yBreaks = ir.scales && ir.scales.y && ir.scales.y.breaks;
-        window.gg2d3.theme.drawGrid(g, xScale, flip ? "horizontal" : "vertical", gridMajor, xBreaks, w, h, convertColor);
-        window.gg2d3.theme.drawGrid(g, yScale, flip ? "vertical" : "horizontal", gridMajor, yBreaks, w, h, convertColor);
+          // Strip label text (centered in strip box)
+          stripGroup.append("text")
+            .attr("x", strip.x + strip.w / 2)
+            .attr("y", strip.y + strip.h / 2)
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "central")
+            .style("font-size", stripTheme.fontSize + "px")
+            .style("fill", stripTheme.fontColour)
+            .style("font-weight", stripTheme.fontFace === "bold" ? "bold" : "normal")
+            .style("font-family", stripTheme.fontFamily)
+            .text(strip.label);
+        });
       }
 
       // Title
@@ -183,30 +320,6 @@ HTMLWidgets.widget({
           .text(ir.caption);
       }
 
-      // Color scale setup
-      const cdesc = ir.scales && ir.scales.color;
-      const colorScale = cdesc
-        ? (cdesc.type === "continuous"
-            ? d3.scaleSequential(d3.interpolateTurbo).domain(d3.extent(cdesc.domain || [0, 1]))
-            : d3.scaleOrdinal(d3.schemeTableau10).domain(cdesc.domain || []))
-        : () => null;
-
-      // Create a clipped sub-group for data layers (after grid, so geoms render on top of grid)
-      const gClipped = g.append("g").attr("clip-path", `url(#${clipId})`);
-
-      // Render data layers using geom registry (inside clipped group)
-      let drawn = 0;
-      (ir.layers || []).forEach(layer => {
-        const count = window.gg2d3.geomRegistry.render(
-          layer,
-          gClipped,
-          xScale,
-          yScale,
-          { colorScale, plotWidth: w, plotHeight: h, flip }
-        );
-        drawn += count;
-      });
-
       // Axes - render AFTER data so they appear on top
       // Generic axis theme elements (fallback)
       const axisText = theme.get("axis.text");
@@ -224,7 +337,7 @@ HTMLWidgets.widget({
       // Axis title theme
       const axisTitleSpec = theme.get("axis.title");
 
-      // Extract breaks and transforms for axis tick positioning (reuse from grid section above)
+      // Extract breaks and transforms for axis tick positioning
       const xBreaks = ir.scales && ir.scales.x && ir.scales.x.breaks;
       const yBreaks = ir.scales && ir.scales.y && ir.scales.y.breaks;
       const xTransform = ir.scales && ir.scales.x && ir.scales.x.transform;
@@ -233,62 +346,104 @@ HTMLWidgets.widget({
       // Create tick format for transformed scales
       const cleanFormat = d3.format(".4~g");
 
-      if (flip) {
-        // For flip: xScale is the x-aesthetic mapped to vertical range [h,0] -> LEFT axis
-        //           yScale is the y-aesthetic mapped to horizontal range [0,w] -> BOTTOM axis
-        // x-breaks go to left axis (xScale), y-breaks go to bottom axis (yScale)
-        const leftAxisGen = d3.axisLeft(xScale);
-        const bottomAxisGen = d3.axisBottom(yScale);
+      if (isFaceted) {
+        // Per-column x-axes at bottom row
+        const maxRow = Math.max.apply(Math, ir.facets.layout.map(function(l) { return l.ROW; }));
+        const bottomPanels = layout.panels.filter(function(p) {
+          const layoutEntry = ir.facets.layout.find(function(l) { return l.PANEL === p.PANEL; });
+          return layoutEntry && layoutEntry.ROW === maxRow;
+        });
 
-        // Set tick values: xBreaks for left axis (x-aesthetic), yBreaks for bottom axis (y-aesthetic)
-        if (xBreaks && typeof xScale.bandwidth !== "function") {
-          leftAxisGen.tickValues(xBreaks);
-        }
-        if (yBreaks && typeof yScale.bandwidth !== "function") {
-          bottomAxisGen.tickValues(yBreaks);
-        }
+        const panelW = layout.panels[0].w;
+        const panelH = layout.panels[0].h;
 
-        // Set tick format for transformed scales
-        if (xTransform && xTransform !== "identity" && typeof xScale.bandwidth !== "function") {
-          leftAxisGen.tickFormat(cleanFormat);
-        }
-        if (yTransform && yTransform !== "identity" && typeof yScale.bandwidth !== "function") {
-          bottomAxisGen.tickFormat(cleanFormat);
-        }
+        // Create per-panel scales for axes
+        const axisXScale = window.gg2d3.scales.createScale(ir.scales.x, flip ? [panelH, 0] : [0, panelW]);
+        const axisYScale = window.gg2d3.scales.createScale(ir.scales.y, flip ? [0, panelW] : [panelH, 0]);
 
-        const leftAxis = g.append("g").attr("class", "axis").call(leftAxisGen);
-        const bottomAxis = g.append("g").attr("class", "axis").attr("transform", `translate(0,${h})`).call(bottomAxisGen);
-        // In flip: x-aesthetic themes apply to left axis, y-aesthetic themes to bottom axis
-        window.gg2d3.theme.applyAxisStyle(leftAxis, axisTextX, axisLineX, axisTicksX);
-        window.gg2d3.theme.applyAxisStyle(bottomAxis, axisTextY, axisLineY, axisTicksY);
+        bottomPanels.forEach(function(bp) {
+          const ag = root.append("g").attr("transform", "translate(" + bp.x + "," + (bp.y + panelH) + ")");
+          const xAxisGen = d3.axisBottom(axisXScale);
+          if (xBreaks && typeof axisXScale.bandwidth !== "function") xAxisGen.tickValues(xBreaks);
+          if (xTransform && xTransform !== "identity" && typeof axisXScale.bandwidth !== "function") xAxisGen.tickFormat(cleanFormat);
+          const xAxis = ag.append("g").attr("class", "axis").call(xAxisGen);
+          window.gg2d3.theme.applyAxisStyle(xAxis, axisTextX, axisLineX, axisTicksX);
+        });
+
+        // Per-row y-axes at left column
+        const col1Panels = layout.panels.filter(function(p) {
+          const layoutEntry = ir.facets.layout.find(function(l) { return l.PANEL === p.PANEL; });
+          return layoutEntry && layoutEntry.COL === 1;
+        });
+
+        col1Panels.forEach(function(cp) {
+          const ag = root.append("g").attr("transform", "translate(" + cp.x + "," + cp.y + ")");
+          const yAxisGen = d3.axisLeft(axisYScale);
+          if (yBreaks && typeof axisYScale.bandwidth !== "function") yAxisGen.tickValues(yBreaks);
+          if (yTransform && yTransform !== "identity" && typeof axisYScale.bandwidth !== "function") yAxisGen.tickFormat(cleanFormat);
+          const yAxis = ag.append("g").attr("class", "axis").call(yAxisGen);
+          window.gg2d3.theme.applyAxisStyle(yAxis, axisTextY, axisLineY, axisTicksY);
+        });
       } else {
-        // ggplot2 always places x-axis at the bottom of the panel
-        const xAxisY = h;
+        // Single-panel axis rendering
+        const w = layout.panel.w;
+        const h = layout.panel.h;
 
-        const xAxisGen = d3.axisBottom(xScale);
-        const yAxisGen = d3.axisLeft(yScale);
+        // Create scales for axes
+        const axisXScale = window.gg2d3.scales.createScale(ir.scales && ir.scales.x, flip ? [h, 0] : [0, w]);
+        const axisYScale = window.gg2d3.scales.createScale(ir.scales && ir.scales.y, flip ? [0, w] : [h, 0]);
 
-        // Set tick values if breaks available and scale is continuous
-        if (xBreaks && typeof xScale.bandwidth !== "function") {
-          xAxisGen.tickValues(xBreaks);
-        }
-        if (yBreaks && typeof yScale.bandwidth !== "function") {
-          yAxisGen.tickValues(yBreaks);
-        }
+        // Axes group positioned at panel location
+        const axesGroup = root.append("g")
+          .attr("transform", "translate(" + layout.panel.x + "," + layout.panel.y + ")");
 
-        // Set tick format for transformed scales
-        if (xTransform && xTransform !== "identity" && typeof xScale.bandwidth !== "function") {
-          xAxisGen.tickFormat(cleanFormat);
-        }
-        if (yTransform && yTransform !== "identity" && typeof yScale.bandwidth !== "function") {
-          yAxisGen.tickFormat(cleanFormat);
-        }
+        if (flip) {
+          // For flip: xScale is the x-aesthetic mapped to vertical range [h,0] -> LEFT axis
+          //           yScale is the y-aesthetic mapped to horizontal range [0,w] -> BOTTOM axis
+          const leftAxisGen = d3.axisLeft(axisXScale);
+          const bottomAxisGen = d3.axisBottom(axisYScale);
 
-        const xAxis = g.append("g").attr("class", "axis").attr("transform", `translate(0,${xAxisY})`).call(xAxisGen);
-        const yAxis = g.append("g").attr("class", "axis").call(yAxisGen);
-        // In normal: x-aesthetic themes apply to bottom axis, y-aesthetic themes to left axis
-        window.gg2d3.theme.applyAxisStyle(xAxis, axisTextX, axisLineX, axisTicksX);
-        window.gg2d3.theme.applyAxisStyle(yAxis, axisTextY, axisLineY, axisTicksY);
+          if (xBreaks && typeof axisXScale.bandwidth !== "function") {
+            leftAxisGen.tickValues(xBreaks);
+          }
+          if (yBreaks && typeof axisYScale.bandwidth !== "function") {
+            bottomAxisGen.tickValues(yBreaks);
+          }
+
+          if (xTransform && xTransform !== "identity" && typeof axisXScale.bandwidth !== "function") {
+            leftAxisGen.tickFormat(cleanFormat);
+          }
+          if (yTransform && yTransform !== "identity" && typeof axisYScale.bandwidth !== "function") {
+            bottomAxisGen.tickFormat(cleanFormat);
+          }
+
+          const leftAxis = axesGroup.append("g").attr("class", "axis").call(leftAxisGen);
+          const bottomAxis = axesGroup.append("g").attr("class", "axis").attr("transform", "translate(0," + h + ")").call(bottomAxisGen);
+          window.gg2d3.theme.applyAxisStyle(leftAxis, axisTextX, axisLineX, axisTicksX);
+          window.gg2d3.theme.applyAxisStyle(bottomAxis, axisTextY, axisLineY, axisTicksY);
+        } else {
+          const xAxisGen = d3.axisBottom(axisXScale);
+          const yAxisGen = d3.axisLeft(axisYScale);
+
+          if (xBreaks && typeof axisXScale.bandwidth !== "function") {
+            xAxisGen.tickValues(xBreaks);
+          }
+          if (yBreaks && typeof axisYScale.bandwidth !== "function") {
+            yAxisGen.tickValues(yBreaks);
+          }
+
+          if (xTransform && xTransform !== "identity" && typeof axisXScale.bandwidth !== "function") {
+            xAxisGen.tickFormat(cleanFormat);
+          }
+          if (yTransform && yTransform !== "identity" && typeof axisYScale.bandwidth !== "function") {
+            yAxisGen.tickFormat(cleanFormat);
+          }
+
+          const xAxis = axesGroup.append("g").attr("class", "axis").attr("transform", "translate(0," + h + ")").call(xAxisGen);
+          const yAxis = axesGroup.append("g").attr("class", "axis").call(yAxisGen);
+          window.gg2d3.theme.applyAxisStyle(xAxis, axisTextX, axisLineX, axisTicksX);
+          window.gg2d3.theme.applyAxisStyle(yAxis, axisTextY, axisLineY, axisTicksY);
+        }
       }
 
       // Axis titles
@@ -325,7 +480,7 @@ HTMLWidgets.widget({
       }
 
       // Fallback indicator if no marks drawn
-      if (!drawn) {
+      if (!totalDrawn) {
         console.warn("gg2d3: no marks drawn — check aes names and data types", ir);
         root.append("circle").attr("cx", innerW/2).attr("cy", innerH/2).attr("r", 6).attr("fill", "tomato");
       }
