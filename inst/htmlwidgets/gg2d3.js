@@ -184,18 +184,22 @@ HTMLWidgets.widget({
           xRange: xDataRange,
           yRange: yDataRange
         },
-        facets: ir.facets && ir.facets.type === "wrap" ? {
+        facets: ir.facets && (ir.facets.type === "wrap" || ir.facets.type === "grid") ? {
           type: ir.facets.type,
           nrow: ir.facets.nrow,
           ncol: ir.facets.ncol,
           layout: ir.facets.layout,
-          strips: ir.facets.strips,
+          strips: ir.facets.strips || null,            // facet_wrap
+          row_strips: ir.facets.row_strips || null,    // facet_grid
+          col_strips: ir.facets.col_strips || null,    // facet_grid
+          scales: ir.facets.scales || "fixed",
           spacing: ir.facets.spacing || 7.3
         } : null
       };
 
       const layout = window.gg2d3.layout.calculateLayout(layoutConfig);
       const isFaceted = layout.panels && layout.panels.length > 1;
+      const isFacetGrid = ir.facets && ir.facets.type === "grid";
 
       const root = d3.select(el).append("svg").attr("width", innerW).attr("height", innerH);
 
@@ -254,7 +258,8 @@ HTMLWidgets.widget({
       }
 
       // Render strip labels (faceted plots only)
-      if (isFaceted && layout.strips && layout.strips.length > 0) {
+      // facet_wrap strips (one per panel, positioned above each panel)
+      if (!isFacetGrid && isFaceted && layout.strips && layout.strips.length > 0) {
         const stripTheme = window.gg2d3.layout.getStripTheme(theme);
 
         layout.strips.forEach(function(strip) {
@@ -277,6 +282,60 @@ HTMLWidgets.widget({
             .attr("y", strip.y + strip.h / 2)
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "central")
+            .style("font-size", stripTheme.fontSize + "px")
+            .style("fill", stripTheme.fontColour)
+            .style("font-weight", stripTheme.fontFace === "bold" ? "bold" : "normal")
+            .style("font-family", stripTheme.fontFamily)
+            .text(strip.label);
+        });
+      }
+
+      // facet_grid column strips (top of each column, horizontal text)
+      if (isFacetGrid && layout.colStrips && layout.colStrips.length > 0) {
+        const stripTheme = window.gg2d3.layout.getStripTheme(theme);
+        layout.colStrips.forEach(function(strip) {
+          const stripGroup = root.append("g").attr("class", "strip strip-col-" + strip.COL);
+          // Background rect
+          stripGroup.append("rect")
+            .attr("x", strip.x).attr("y", strip.y)
+            .attr("width", strip.w).attr("height", strip.h)
+            .attr("fill", stripTheme.bgFill)
+            .attr("stroke", stripTheme.bgColour || "none")
+            .attr("stroke-width", stripTheme.bgLinewidth);
+          // Label text (horizontal, centered)
+          stripGroup.append("text")
+            .attr("x", strip.x + strip.w / 2)
+            .attr("y", strip.y + strip.h / 2)
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "central")
+            .style("font-size", stripTheme.fontSize + "px")
+            .style("fill", stripTheme.fontColour)
+            .style("font-weight", stripTheme.fontFace === "bold" ? "bold" : "normal")
+            .style("font-family", stripTheme.fontFamily)
+            .text(strip.label);
+        });
+      }
+
+      // facet_grid row strips (right of each row, rotated text)
+      if (isFacetGrid && layout.rowStrips && layout.rowStrips.length > 0) {
+        const stripTheme = window.gg2d3.layout.getStripTheme(theme);
+        layout.rowStrips.forEach(function(strip) {
+          const stripGroup = root.append("g").attr("class", "strip strip-row-" + strip.ROW);
+          // Background rect
+          stripGroup.append("rect")
+            .attr("x", strip.x).attr("y", strip.y)
+            .attr("width", strip.w).attr("height", strip.h)
+            .attr("fill", stripTheme.bgFill)
+            .attr("stroke", stripTheme.bgColour || "none")
+            .attr("stroke-width", stripTheme.bgLinewidth);
+          // Label text (rotated -90 degrees, centered in strip area)
+          var cx = strip.x + strip.w / 2;
+          var cy = strip.y + strip.h / 2;
+          stripGroup.append("text")
+            .attr("x", cx).attr("y", cy)
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "central")
+            .attr("transform", "rotate(-90," + cx + "," + cy + ")")
             .style("font-size", stripTheme.fontSize + "px")
             .style("fill", stripTheme.fontColour)
             .style("font-weight", stripTheme.fontFace === "bold" ? "bold" : "normal")
