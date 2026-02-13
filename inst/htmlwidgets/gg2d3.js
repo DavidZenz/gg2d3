@@ -34,12 +34,17 @@ HTMLWidgets.widget({
       }
 
       // Create scales for this panel using panel-specific ranges
-      const xRange = panelData.x_range || (ir.scales && ir.scales.x && ir.scales.x.domain);
-      const yRange = panelData.y_range || (ir.scales && ir.scales.y && ir.scales.y.domain);
-
-      // Build scale descriptors with panel-specific domains but same type/transform
-      const xScaleDesc = Object.assign({}, ir.scales && ir.scales.x, { domain: xRange });
-      const yScaleDesc = Object.assign({}, ir.scales && ir.scales.y, { domain: yRange });
+      // Only override domain for continuous scales; categorical scales keep their label domain
+      const xDesc = ir.scales && ir.scales.x;
+      const yDesc = ir.scales && ir.scales.y;
+      const xScaleDesc = Object.assign({}, xDesc);
+      const yScaleDesc = Object.assign({}, yDesc);
+      if (xDesc && xDesc.type === "continuous" && panelData.x_range) {
+        xScaleDesc.domain = panelData.x_range;
+      }
+      if (yDesc && yDesc.type === "continuous" && panelData.y_range) {
+        yScaleDesc.domain = panelData.y_range;
+      }
 
       const xScale = window.gg2d3.scales.createScale(xScaleDesc, flip ? [h, 0] : [0, w]);
       const yScale = window.gg2d3.scales.createScale(yScaleDesc, flip ? [0, w] : [h, 0]);
