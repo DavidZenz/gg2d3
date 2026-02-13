@@ -239,6 +239,39 @@
     return ptToPx(11);
   }
 
+  /**
+   * Get strip text font size from theme
+   * @param {Object} theme - Theme accessor
+   * @returns {number} Font size in pixels
+   */
+  function getStripTextSize(theme) {
+    var ptToPx = window.gg2d3.constants.ptToPx;
+    var stripText = theme.get("strip.text");
+    return stripText && stripText.size ? ptToPx(stripText.size) : ptToPx(8.8);
+  }
+
+  /**
+   * Get strip visual styling from theme
+   * @param {Object} theme - Theme accessor
+   * @returns {Object} Strip theme values for rendering
+   */
+  function getStripTheme(theme) {
+    var ptToPx = window.gg2d3.constants.ptToPx;
+    var convertColor = window.gg2d3.scales.convertColor;
+    var stripText = theme.get("strip.text") || {};
+    var stripBg = theme.get("strip.background") || {};
+
+    return {
+      fontSize: stripText.size ? ptToPx(stripText.size) : ptToPx(8.8),
+      fontColour: convertColor(stripText.colour || "black"),
+      fontFace: stripText.face || "normal",
+      fontFamily: stripText.family || "sans-serif",
+      bgFill: stripBg.fill ? convertColor(stripBg.fill) : convertColor("grey85"),
+      bgColour: stripBg.colour ? convertColor(stripBg.colour) : null,
+      bgLinewidth: stripBg.linewidth || 0
+    };
+  }
+
   // =========================================================================
   // Main Layout Calculation Function
   // =========================================================================
@@ -258,7 +291,10 @@
    * @returns {LayoutResult} Complete position data for all components
    */
   function calculateLayout(config) {
-    const { width, height, theme, titles, axes, legend, coord } = config;
+    const { width, height, theme, titles, axes, legend, coord, facets } = config;
+
+    // --- Determine if faceted ---
+    const isFaceted = facets && facets.type === "wrap" && facets.layout && facets.layout.length > 1;
 
     // --- Get theme values ---
     const plotMargin = getPlotMargin(theme);
@@ -267,6 +303,15 @@
     const tickLength = getTickLength(theme);
     const titleSize = getTitleSize(theme);
     const legendSpacing = getLegendBoxSpacing(theme);
+
+    // Strip dimensions (for faceted plots)
+    let stripHeight = 0;
+    if (isFaceted) {
+      const stripTextSize = getStripTextSize(theme);
+      // Strip height = text height + top/bottom margin (4.4pt each = ~5.9px each)
+      const stripMargin = window.gg2d3.constants.ptToPx(4.4);
+      stripHeight = estimateTextHeight(stripTextSize) + stripMargin * 2;
+    }
 
     // --- Compute component sizes ---
     const titleHeight = titles.title ?
@@ -352,8 +397,8 @@
     let panelOffsetX = 0;
     let panelOffsetY = 0;
 
-    // 7. Apply coord_fixed aspect ratio constraint
-    if (coord && coord.ratio && coord.xRange && coord.yRange) {
+    // 7. Apply coord_fixed aspect ratio constraint (not supported with facets)
+    if (!isFaceted && coord && coord.ratio && coord.xRange && coord.yRange) {
       const availW = panel.w;
       const availH = panel.h;
       const dataRatio = coord.yRange / coord.xRange;
@@ -383,7 +428,82 @@
       };
     }
 
-    // Generate unique clip ID
+    // 8. Multi-panel grid calculation for faceted plots
+    let panelsArr = null;
+    let stripsArr = null;
+
+    if (isFaceted) {
+      const nrow = facets.nrow;
+      const ncol = facets.ncol;
+      const spacing = facets.spacing || 7.3;
+
+      // Available space is the computed single-panel area
+      const availX = panel.x;
+      const availY = panel.y;
+      const availW = panel.w;
+      const availH = panel.h;
+
+      // Total spacing between panels
+      const totalSpacingX = (ncol - 1) * spacing;
+      const totalSpacingY = (nrow - 1) * spacing;
+
+      // Total strip height (one strip row per panel row)
+      const totalStripHeight = nrow * stripHeight;
+
+      // Panel dimensions after accounting for spacing and strips
+      const panelW = (availW - totalSpacingX) / ncol;
+      const panelH = (availH - totalSpacingY - totalStripHeight) / nrow;
+
+      // Build panels array from layout data
+      panelsArr = facets.layout.map(function(item) {
+        const col = item.COL - 1;  // 0-indexed
+        const row = item.ROW - 1;
+
+        // Each row occupies: stripHeight + panelH + spacing
+        const rowBlockH = stripHeight + panelH;
+
+        return {
+          PANEL: item.PANEL,
+          x: availX + col * (panelW + spacing),
+          y: availY + row * (rowBlockH + spacing) + stripHeight,
+          w: panelW,
+          h: panelH,
+          clipId: "panel-" + item.PANEL + "-clip-" + Math.random().toString(36).substr(2, 6)
+        };
+      });
+
+      // Build strips array
+      stripsArr = facets.strips.map(function(strip) {
+        // Find corresponding panel layout entry
+        var panelLayout = panelsArr.find(function(p) { return p.PANEL === strip.PANEL; });
+        if (!panelLayout) return null;
+
+        return {
+          PANEL: strip.PANEL,
+          x: panelLayout.x,
+          y: panelLayout.y - stripHeight,  // strip is above its panel
+          w: panelLayout.w,
+          h: stripHeight,
+          label: strip.label
+        };
+      }).filter(Boolean);
+
+      // Update panel bounding box to span the full grid (for axis label centering)
+      if (panelsArr.length > 0) {
+        const minX = Math.min.apply(Math, panelsArr.map(function(p) { return p.x; }));
+        const maxRight = Math.max.apply(Math, panelsArr.map(function(p) { return p.x + p.w; }));
+        const minY = Math.min.apply(Math, panelsArr.map(function(p) { return p.y; }));
+        const maxBottom = Math.max.apply(Math, panelsArr.map(function(p) { return p.y + p.h; }));
+        panel = {
+          x: minX,
+          y: minY,
+          w: maxRight - minX,
+          h: maxBottom - minY
+        };
+      }
+    }
+
+    // Generate unique clip ID (for single-panel case)
     const clipId = "panel-clip-" + Math.random().toString(36).substr(2, 9);
 
     // --- Compute derived positions ---
@@ -440,9 +560,10 @@
         h: legendBox.h,
         position: legend ? legend.position : "none"
       },
-      // Future phases:
-      panels: null,     // Phase 8: [{x, y, w, h}, ...] for facets
-      strips: null,     // Phase 8: [{x, y, w, h, label}, ...] for facet strips
+      // Multi-panel faceting (Phase 8):
+      panels: panelsArr,     // [{PANEL, x, y, w, h, clipId}, ...] or null
+      strips: stripsArr,     // [{PANEL, x, y, w, h, label}, ...] or null
+      stripHeight: stripHeight,  // Height of strip in pixels (0 for non-faceted)
       secondaryAxes: {
         top: topSpace > 0,
         right: rightSpace > 0
@@ -456,6 +577,7 @@
 
   window.gg2d3.layout = {
     calculateLayout: calculateLayout,
+    getStripTheme: getStripTheme,
     // Export utilities for testing
     estimateTextWidth: estimateTextWidth,
     estimateTextHeight: estimateTextHeight,
