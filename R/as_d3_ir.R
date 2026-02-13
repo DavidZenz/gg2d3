@@ -215,13 +215,17 @@ as_d3_ir <- function(p, width = 640, height = 400,
     to_rows <- function(df) {
       if (is.null(df) || !nrow(df)) return(list())
       df <- df[, intersect(keep_aes, names(df)), drop = FALSE]
-      df[] <- lapply(df, function(col) {
-        if (is.factor(col)) as.character(col)
+      col_names <- names(df)
+      df[] <- lapply(col_names, function(colname) {
+        col <- df[[colname]]
+        if (colname == "PANEL") as.integer(col)  # PANEL must be integer
+        else if (is.factor(col)) as.character(col)
         else if (inherits(col, c("POSIXct","POSIXt"))) as.numeric(col) * 1000
         else if (inherits(col, "Date")) as.numeric(col) * 86400000
         else if (is.list(col)) I(col)  # preserve list-columns (e.g., boxplot outliers)
         else col
       })
+      names(df) <- col_names
       rows <- vector("list", nrow(df))
       for (ii in seq_len(nrow(df))) {
         r <- lapply(df[ii, , drop = FALSE], function(v) v[[1]])
@@ -741,6 +745,129 @@ as_d3_ir <- function(p, width = 640, height = 400,
     theme_ir$legend <- legend_theme
   }
 
+  # Extract strip theme elements for facets
+  strip_theme <- NULL
+  if (!is.null(b$plot$theme)) {
+    strip_theme <- list(
+      text = extract_theme_element("strip.text", b$plot$theme),
+      background = extract_theme_element("strip.background", b$plot$theme)
+    )
+  }
+
+  # Add strip to theme_ir
+  if (!is.null(theme_ir) && !is.null(strip_theme)) {
+    theme_ir$strip <- strip_theme
+  }
+
+  # Extract facet metadata
+  facets_ir <- NULL
+  panels_ir <- NULL
+
+  tryCatch({
+    is_facet_wrap <- inherits(b$layout$facet, "FacetWrap")
+
+    if (is_facet_wrap) {
+      # Extract facet_wrap metadata
+      layout_df <- b$layout$layout
+      facet_vars <- names(b$layout$facet$params$facets)
+
+      # Extract strip labels
+      strips <- lapply(seq_len(nrow(layout_df)), function(i) {
+        label_parts <- vapply(facet_vars, function(v) {
+          as.character(layout_df[[v]][i])
+        }, character(1))
+        list(
+          PANEL = as.integer(layout_df$PANEL[i]),
+          label = paste(label_parts, collapse = ", ")
+        )
+      })
+
+      # Extract per-panel scale metadata
+      panels_ir <- lapply(seq_along(b$layout$panel_params), function(p) {
+        pp <- b$layout$panel_params[[p]]
+        if (is_flip_early) {
+          ppx <- pp$y  # un-swap for coord_flip
+          ppy <- pp$x
+        } else {
+          ppx <- pp$x
+          ppy <- pp$y
+        }
+        list(
+          PANEL = as.integer(p),
+          x_range = unname(ppx$continuous_range %||% ppx$range),
+          y_range = unname(ppy$continuous_range %||% ppy$range),
+          x_breaks = unname(ppx$breaks[!is.na(ppx$breaks)]),
+          y_breaks = unname(ppy$breaks[!is.na(ppy$breaks)])
+        )
+      })
+
+      # Extract panel.spacing
+      panel_spacing <- tryCatch({
+        complete_theme <- ggplot2::theme_get() + b$plot$theme
+        spacing <- ggplot2:::calc_element("panel.spacing", complete_theme)
+        if (!is.null(spacing)) {
+          inches <- grid::convertUnit(spacing, "inches", valueOnly = TRUE)
+          inches * 96  # pixels
+        } else {
+          7.3  # default 5.5pt in pixels
+        }
+      }, error = function(e) 7.3)
+
+      # Build facets IR object
+      facets_ir <- list(
+        type = "wrap",
+        vars = facet_vars,
+        nrow = as.integer(max(layout_df$ROW)),
+        ncol = as.integer(max(layout_df$COL)),
+        spacing = panel_spacing,
+        layout = lapply(seq_len(nrow(layout_df)), function(i) {
+          row <- as.list(layout_df[i, , drop = FALSE])
+          row$PANEL <- as.integer(row$PANEL)
+          row$ROW <- as.integer(row$ROW)
+          row$COL <- as.integer(row$COL)
+          row$SCALE_X <- as.integer(row$SCALE_X)
+          row$SCALE_Y <- as.integer(row$SCALE_Y)
+          row
+        }),
+        strips = strips
+      )
+    } else {
+      # Non-faceted plot (default)
+      facets_ir <- list(
+        type = "null",
+        vars = list(),
+        nrow = 1L,
+        ncol = 1L,
+        layout = list(list(PANEL = 1L, ROW = 1L, COL = 1L, SCALE_X = 1L, SCALE_Y = 1L)),
+        strips = list()
+      )
+      panels_ir <- list(list(
+        PANEL = 1L,
+        x_range = unname(scales$x$domain),
+        y_range = unname(scales$y$domain),
+        x_breaks = unname(x_breaks),
+        y_breaks = unname(y_breaks)
+      ))
+    }
+  }, error = function(e) {
+    # Fallback to non-faceted on any error
+    facets_ir <<- list(
+      type = "null",
+      vars = list(),
+      nrow = 1L,
+      ncol = 1L,
+      layout = list(list(PANEL = 1L, ROW = 1L, COL = 1L, SCALE_X = 1L, SCALE_Y = 1L)),
+      strips = list()
+    )
+    panels_ir <<- list(list(
+      PANEL = 1L,
+      x_range = unname(scales$x$domain),
+      y_range = unname(scales$y$domain),
+      x_breaks = unname(x_breaks),
+      y_breaks = unname(y_breaks)
+    ))
+  })
+
   ir <- list(
     width = width, height = height, padding = padding,
     coord  = list(type = coord_type, flip = is_flip, ratio = coord_ratio),
@@ -753,8 +880,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
       x2 = if (has_sec_x) list(enabled = TRUE) else NULL,
       y2 = if (has_sec_y) list(enabled = TRUE) else NULL
     ),
-    facets = list(type = "grid", rows = 1, cols = 1,
-                  layout = data.frame(panel = 1, row = 1, col = 1)),
+    facets = facets_ir,
+    panels = panels_ir,
     scales = scales,
     layers = layers,
     guides = guides_ir,
