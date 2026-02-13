@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 9 of 11 (Advanced Faceting) — IN PROGRESS
-Plan: 1 of 4 in Phase 9
+Plan: 2 of 4 in Phase 9
 Status: In Progress
-Last activity: 2026-02-13 — Completed plan 09-01 (facet_grid IR Extraction).
+Last activity: 2026-02-13 — Completed plan 09-02 (2D Grid Layout Engine).
 
-Progress: [██████░░░░] 63% (32/51 plans complete)
+Progress: [██████░░░░] 65% (33/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 32
-- Average duration: ~8.0 min
-- Total execution time: ~4.5 hours
+- Total plans completed: 33
+- Average duration: ~7.8 min
+- Total execution time: ~4.6 hours
 
 **By Phase:**
 
@@ -36,7 +36,7 @@ Progress: [██████░░░░] 63% (32/51 plans complete)
 | 06-layout-engine | 3/3 | 19 min | 6.3 min |
 | 07-legend-system | 4/4 | ~30 min | ~7.5 min |
 | 08-basic-faceting | 4/4 | 10 min | 2.5 min |
-| 09-advanced-faceting | 1/4 | 2 min | 2.0 min |
+| 09-advanced-faceting | 2/4 | 4 min | 2.0 min |
 
 *Updated after each plan completion*
 
@@ -146,6 +146,9 @@ Recent decisions affecting current work:
 | row-col-separate-vars | Row and column faceting variables stored separately | facet_grid(cyl ~ am) has distinct row vars and col vars, unlike facet_wrap which has single vars array | JavaScript rendering can position row strips (right) and col strips (top) independently |
 | scales-mode-from-free-params | Derive scales mode from free$x and free$y boolean params | ggplot2 stores free scales as list(x=TRUE/FALSE, y=TRUE/FALSE), not as single 'fixed'/'free' string | Map boolean combinations to strings: fixed, free_x, free_y, free for IR clarity |
 | concatenated-multi-var-labels | Multi-variable strip labels concatenated with ', ' separator | Phase 9 scope is basic facet_grid support; hierarchical/nested strip layout deferred to future phase | facet_grid(a + b ~ c) produces strip labels like '4, 0' not nested strips |
+| separate-wrap-grid-calculations | Separate layout calculations for facet_wrap and facet_grid | facet_grid has different strip positioning (top/right) vs facet_wrap (top only) | Clear code separation, easier to maintain distinct layout patterns |
+| strip-width-equals-height | Row strip width equals column strip height for rotated text | Rotated text's visual width equals text height; same font size for both | Consistent visual weight for row and column strips |
+| panel-area-subtraction | Subtract strip dimensions from available area before panel calculation | Reserve space for strips first, then divide remaining area by panel count | Correct panel sizing that accounts for strip space |
 
 ### Pending Todos
 
@@ -173,9 +176,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed plan 09-01 (facet_grid IR Extraction).
-Resume file: .planning/phases/09-advanced-faceting/09-01-SUMMARY.md
-Next action: Execute plan 09-02 (2D Grid Layout Engine) or 09-03 (Per-Panel Rendering).
+Stopped at: Completed plan 09-02 (2D Grid Layout Engine).
+Resume file: .planning/phases/09-advanced-faceting/09-02-SUMMARY.md
+Next action: Execute plan 09-03 (Per-Panel Rendering with Free Scales) or 09-04 (Testing & Visual Verification).
 
 ---
 *State initialized: 2026-02-07*
