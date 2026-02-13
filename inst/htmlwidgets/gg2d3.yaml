@@ -18,6 +18,8 @@ dependencies:
       - theme.js
       - layout.js
       - legend.js
+      - tooltip.js
+      - events.js
       - geom-registry.js
       - geoms/point.js
       - geoms/line.js
