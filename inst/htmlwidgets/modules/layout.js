@@ -294,7 +294,9 @@
     const { width, height, theme, titles, axes, legend, coord, facets } = config;
 
     // --- Determine if faceted ---
-    const isFaceted = facets && facets.type === "wrap" && facets.layout && facets.layout.length > 1;
+    const isFaceted = facets && (facets.type === "wrap" || facets.type === "grid") &&
+                      facets.layout && facets.layout.length > 1;
+    const isFacetGrid = facets && facets.type === "grid";
 
     // --- Get theme values ---
     const plotMargin = getPlotMargin(theme);
@@ -431,8 +433,11 @@
     // 8. Multi-panel grid calculation for faceted plots
     let panelsArr = null;
     let stripsArr = null;
+    let colStripsArr = null;
+    let rowStripsArr = null;
 
-    if (isFaceted) {
+    if (isFaceted && !isFacetGrid) {
+      // facet_wrap layout calculation
       const nrow = facets.nrow;
       const ncol = facets.ncol;
       const spacing = facets.spacing || 7.3;
@@ -487,6 +492,95 @@
           label: strip.label
         };
       }).filter(Boolean);
+
+      // Update panel bounding box to span the full grid (for axis label centering)
+      if (panelsArr.length > 0) {
+        const minX = Math.min.apply(Math, panelsArr.map(function(p) { return p.x; }));
+        const maxRight = Math.max.apply(Math, panelsArr.map(function(p) { return p.x + p.w; }));
+        const minY = Math.min.apply(Math, panelsArr.map(function(p) { return p.y; }));
+        const maxBottom = Math.max.apply(Math, panelsArr.map(function(p) { return p.y + p.h; }));
+        panel = {
+          x: minX,
+          y: minY,
+          w: maxRight - minX,
+          h: maxBottom - minY
+        };
+      }
+    } else if (isFacetGrid) {
+      // facet_grid layout calculation (2D grid with row and column strips)
+      const nrow = facets.nrow;
+      const ncol = facets.ncol;
+      const spacing = facets.spacing || 7.3;
+
+      // Available space is the computed single-panel area
+      const availX = panel.x;
+      const availY = panel.y;
+      const availW = panel.w;
+      const availH = panel.h;
+
+      // Strip dimensions for facet_grid:
+      // - stripHeight: column strip height (already computed above, text height + 2*margin)
+      // - stripWidth: row strip width (rotated text, so width = text height)
+      const stripWidth = stripHeight;  // rotated text width equals text height
+
+      // Reserve space for row strips (right side) and column strips (top)
+      const panelAreaW = availW - stripWidth;    // reserve right for row strips
+      const panelAreaH = availH - stripHeight;   // reserve top for column strips
+
+      // Total spacing between panels
+      const totalSpacingX = (ncol - 1) * spacing;
+      const totalSpacingY = (nrow - 1) * spacing;
+
+      // Panel dimensions after accounting for spacing
+      const panelW = (panelAreaW - totalSpacingX) / ncol;
+      const panelH = (panelAreaH - totalSpacingY) / nrow;
+
+      // Build panels array from layout data
+      panelsArr = facets.layout.map(function(item) {
+        const col = item.COL - 1;  // 0-indexed
+        const row = item.ROW - 1;
+
+        return {
+          PANEL: item.PANEL,
+          x: availX + col * (panelW + spacing),
+          y: availY + stripHeight + row * (panelH + spacing),
+          w: panelW,
+          h: panelH,
+          clipId: "panel-" + item.PANEL + "-clip-" + Math.random().toString(36).substr(2, 6)
+        };
+      });
+
+      // Build column strips array (positioned at top of each column)
+      if (facets.col_strips) {
+        colStripsArr = facets.col_strips.map(function(strip) {
+          const col = strip.COL - 1;
+          return {
+            COL: strip.COL,
+            x: availX + col * (panelW + spacing),
+            y: availY,
+            w: panelW,
+            h: stripHeight,
+            label: strip.label,
+            orientation: "top"
+          };
+        });
+      }
+
+      // Build row strips array (positioned to the right of each row)
+      if (facets.row_strips) {
+        rowStripsArr = facets.row_strips.map(function(strip) {
+          const rowIdx = strip.ROW - 1;
+          return {
+            ROW: strip.ROW,
+            x: availX + panelAreaW,
+            y: availY + stripHeight + rowIdx * (panelH + spacing),
+            w: stripWidth,
+            h: panelH,
+            label: strip.label,
+            orientation: "right"
+          };
+        });
+      }
 
       // Update panel bounding box to span the full grid (for axis label centering)
       if (panelsArr.length > 0) {
@@ -560,9 +654,11 @@
         h: legendBox.h,
         position: legend ? legend.position : "none"
       },
-      // Multi-panel faceting (Phase 8):
-      panels: panelsArr,     // [{PANEL, x, y, w, h, clipId}, ...] or null
-      strips: stripsArr,     // [{PANEL, x, y, w, h, label}, ...] or null
+      // Multi-panel faceting (Phase 8 & 9):
+      panels: panelsArr,       // [{PANEL, x, y, w, h, clipId}, ...] or null
+      strips: stripsArr,       // [{PANEL, x, y, w, h, label}, ...] or null (facet_wrap only)
+      colStrips: colStripsArr, // [{COL, x, y, w, h, label, orientation}, ...] or null (facet_grid only)
+      rowStrips: rowStripsArr, // [{ROW, x, y, w, h, label, orientation}, ...] or null (facet_grid only)
       stripHeight: stripHeight,  // Height of strip in pixels (0 for non-faceted)
       secondaryAxes: {
         top: topSpace > 0,
