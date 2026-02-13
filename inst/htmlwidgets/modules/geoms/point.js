@@ -67,6 +67,7 @@
     // When flip: cx uses yScale(yVal) [horizontal], cy uses xScale(xVal) [vertical]
     const sel = g.append("g").selectAll("circle").data(pts);
     sel.enter().append("circle")
+      .attr("class", "geom-point")
       .attr("cx", d => {
         if (flip) {
           const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));

@@ -58,6 +58,7 @@
     const sel = g.append("g").selectAll("rect").data(rects);
     if (flip) {
       sel.enter().append("rect")
+        .attr("class", "geom-rect")
         .attr("x", d => {
           const ymax = isYBand ? val(get(d, aes.ymax)) : num(get(d, aes.ymax));
           const ymin = isYBand ? val(get(d, aes.ymin)) : num(get(d, aes.ymin));
@@ -84,6 +85,7 @@
         .attr("opacity", d => opacity(d));
     } else {
       sel.enter().append("rect")
+        .attr("class", "geom-rect")
         .attr("x", d => {
           const xmin = isXBand ? val(get(d, aes.xmin)) : num(get(d, aes.xmin));
           return xScale(xmin);

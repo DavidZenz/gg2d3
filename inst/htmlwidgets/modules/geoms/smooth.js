@@ -97,6 +97,7 @@
 
           // Ribbon styling: use fillColor, default grey60 with alpha 0.4
           g.append("path")
+            .attr("class", "geom-smooth-ribbon")
             .attr("d", ribbonArea(pts))
             .attr("fill", fillColor(firstPoint))
             .attr("stroke", "none")
@@ -120,6 +121,7 @@
 
         // Line styling: use strokeColor, default blue #3366FF, fully opaque
         g.append("path")
+          .attr("class", "geom-smooth")
           .attr("d", line(pts))
           .attr("fill", "none")
           .attr("stroke", strokeColor(firstPoint))
