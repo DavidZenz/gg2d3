@@ -192,14 +192,13 @@ Plans:
   4. All panels share same x and y scales (fixed scales)
   5. Panel spacing and strip styling match ggplot2 theme
 
-**Plans**: TBD
+**Plans:** 4 plans in 3 waves
 
 Plans:
-- [ ] 08-01: Extract facet layout metadata from ggplot_build()
-- [ ] 08-02: Build facet IR with panel assignments
-- [ ] 08-03: Extend layout engine for multi-panel grid
-- [ ] 08-04: Implement strip label rendering
-- [ ] 08-05: Per-panel data filtering and rendering loop
+- [ ] 08-01-PLAN.md -- R-side facet IR extraction + validation (Wave 1)
+- [ ] 08-02-PLAN.md -- Layout engine multi-panel grid calculation (Wave 1)
+- [ ] 08-03-PLAN.md -- Multi-panel rendering loop + strip labels (Wave 2)
+- [ ] 08-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 3)
 
 ### Phase 9: Advanced Faceting
 **Goal**: facet_grid and free scales for complex multi-panel layouts
@@ -284,7 +283,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 5. Statistical Geoms | 4/4 | Complete | 2026-02-09 |
 | 6. Layout Engine | 3/3 | Complete | 2026-02-09 |
 | 7. Legend System | 4/4 | Complete | 2026-02-09 |
-| 8. Basic Faceting | 0/5 | Not started | - |
+| 8. Basic Faceting | 0/4 | Not started | - |
 | 9. Advanced Faceting | 0/5 | Not started | - |
 | 10. Interactivity Foundation | 0/5 | Not started | - |
 | 11. Advanced Interactivity | 0/5 | Not started | - |
@@ -292,4 +291,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 ---
 *Roadmap created: 2026-02-07*
 *Total phases: 11 (comprehensive depth)*
-*Total plans: 47 (estimated)*
+*Total plans: 46 (estimated)*
