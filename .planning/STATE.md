@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 
-**Current focus:** Phase 8 - Basic Faceting (complete). Phase 9 - Advanced Faceting next.
+**Current focus:** Phase 9 - Advanced Faceting (in progress).
 
 ## Current Position
 
-Phase: 8 of 11 (Basic Faceting) — COMPLETE
-Plan: 4 of 4 in Phase 8
-Status: Complete
-Last activity: 2026-02-13 — Completed plan 08-04 (Testing & Visual Verification).
+Phase: 9 of 11 (Advanced Faceting) — IN PROGRESS
+Plan: 1 of 4 in Phase 9
+Status: In Progress
+Last activity: 2026-02-13 — Completed plan 09-01 (facet_grid IR Extraction).
 
-Progress: [██████░░░░] 61% (31/51 plans complete)
+Progress: [██████░░░░] 63% (32/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 30
-- Average duration: ~8.8 min
-- Total execution time: ~4.4 hours
+- Total plans completed: 32
+- Average duration: ~8.0 min
+- Total execution time: ~4.5 hours
 
 **By Phase:**
 
@@ -35,7 +35,8 @@ Progress: [██████░░░░] 61% (31/51 plans complete)
 | 05-statistical-geoms | 4/4 | ~22 min | ~5.5 min |
 | 06-layout-engine | 3/3 | 19 min | 6.3 min |
 | 07-legend-system | 4/4 | ~30 min | ~7.5 min |
-| 08-basic-faceting | 3/4 | 10 min | 3.3 min |
+| 08-basic-faceting | 4/4 | 10 min | 2.5 min |
+| 09-advanced-faceting | 1/4 | 2 min | 2.0 min |
 
 *Updated after each plan completion*
 
@@ -138,6 +139,14 @@ Recent decisions affecting current work:
 | panel-bbox-for-axes | Panel bounding box spans full grid for axis label centering | Axis labels need to center across entire facet grid, not individual panels | Panel updated to union of all panel positions after grid calculation |
 | strip-above-panels | One strip row per panel row, positioned above panels | Matches ggplot2 facet_wrap layout pattern | Strip y = panel.y - stripHeight for each panel |
 
+**From Phase 9:**
+
+| Decision ID | Title | Rationale | Impact |
+|-------------|-------|-----------|--------|
+| row-col-separate-vars | Row and column faceting variables stored separately | facet_grid(cyl ~ am) has distinct row vars and col vars, unlike facet_wrap which has single vars array | JavaScript rendering can position row strips (right) and col strips (top) independently |
+| scales-mode-from-free-params | Derive scales mode from free$x and free$y boolean params | ggplot2 stores free scales as list(x=TRUE/FALSE, y=TRUE/FALSE), not as single 'fixed'/'free' string | Map boolean combinations to strings: fixed, free_x, free_y, free for IR clarity |
+| concatenated-multi-var-labels | Multi-variable strip labels concatenated with ', ' separator | Phase 9 scope is basic facet_grid support; hierarchical/nested strip layout deferred to future phase | facet_grid(a + b ~ c) produces strip labels like '4, 0' not nested strips |
+
 ### Pending Todos
 
 None.
@@ -164,9 +173,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Phase 8 complete. All 4 plans executed with visual verification approved.
-Resume file: .planning/phases/08-basic-faceting/08-04-SUMMARY.md
-Next action: Verify Phase 8 goal achievement, then plan Phase 9 (Advanced Faceting).
+Stopped at: Completed plan 09-01 (facet_grid IR Extraction).
+Resume file: .planning/phases/09-advanced-faceting/09-01-SUMMARY.md
+Next action: Execute plan 09-02 (2D Grid Layout Engine) or 09-03 (Per-Panel Rendering).
 
 ---
 *State initialized: 2026-02-07*
