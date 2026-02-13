@@ -236,14 +236,12 @@ Plans:
   4. Event handlers attach without breaking static rendering
   5. Tooltips position dynamically to avoid viewport edges
 
-**Plans**: TBD
+**Plans:** 3 plans in 3 waves
 
 Plans:
-- [ ] 10-01: Create pipe API functions (d3_tooltip, d3_hover)
-- [ ] 10-02: Implement D3 event system core
-- [ ] 10-03: Build tooltip renderer with positioning
-- [ ] 10-04: Message passing between R and D3 for interactivity config
-- [ ] 10-05: Cross-geom event handler integration
+- [ ] 10-01-PLAN.md -- R pipe functions (d3_tooltip, d3_hover) + JS event/tooltip modules (Wave 1)
+- [ ] 10-02-PLAN.md -- YAML wiring + geom class attributes for event targeting (Wave 2)
+- [ ] 10-03-PLAN.md -- Unit tests + visual verification checkpoint (Wave 3)
 
 ### Phase 11: Advanced Interactivity
 **Goal**: Brush, zoom, and linked views for dynamic exploration
@@ -284,7 +282,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 7. Legend System | 4/4 | Complete | 2026-02-09 |
 | 8. Basic Faceting | 4/4 | Complete | 2026-02-13 |
 | 9. Advanced Faceting | 4/4 | Complete | 2026-02-13 |
-| 10. Interactivity Foundation | 0/5 | Not started | - |
+| 10. Interactivity Foundation | 0/3 | Not started | - |
 | 11. Advanced Interactivity | 0/5 | Not started | - |
 
 ---
