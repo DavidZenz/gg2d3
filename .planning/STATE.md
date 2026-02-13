@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 
-**Current focus:** Phase 7 - Legend System (complete). Phase 8 - Basic Faceting next.
+**Current focus:** Phase 8 - Basic Faceting (in progress).
 
 ## Current Position
 
-Phase: 7 of 11 (Legend System) — COMPLETE
-Plan: 4 of 4 in Phase 7
-Status: Complete
-Last activity: 2026-02-09 — Completed plan 07-04 (Testing & Visual Verification).
+Phase: 8 of 11 (Basic Faceting) — IN PROGRESS
+Plan: 2 of 4 in Phase 8
+Status: In progress
+Last activity: 2026-02-13 — Completed plan 08-02 (Multi-Panel Grid Layout Calculation).
 
-Progress: [██████░░░░] 55% (28/51 plans complete)
+Progress: [██████░░░░] 57% (29/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 28
-- Average duration: ~9.2 min
-- Total execution time: ~4.3 hours
+- Total plans completed: 29
+- Average duration: ~9.0 min
+- Total execution time: ~4.4 hours
 
 **By Phase:**
 
@@ -35,6 +35,7 @@ Progress: [██████░░░░] 55% (28/51 plans complete)
 | 05-statistical-geoms | 4/4 | ~22 min | ~5.5 min |
 | 06-layout-engine | 3/3 | 19 min | 6.3 min |
 | 07-legend-system | 4/4 | ~30 min | ~7.5 min |
+| 08-basic-faceting | 1/4 | 2.4 min | 2.4 min |
 
 *Updated after each plan completion*
 
@@ -129,6 +130,14 @@ Recent decisions affecting current work:
 | get-guide-data-extraction | Use ggplot2::get_guide_data() for guide extraction | ggplot2 already computes all legend keys, labels, and aesthetic values through guide training | All guide extraction delegates to ggplot2; gg2d3 only serializes to IR |
 | colorbar-30-stops | Generate 30 interpolated color stops for continuous colorbars | get_guide_data() returns breaks (~5 values); smooth gradients need more stops to avoid banding | Colorbar guides include colors array with 30 hex values for SVG gradients |
 
+**From Phase 8:**
+
+| Decision ID | Title | Rationale | Impact |
+|-------------|-------|-----------|--------|
+| skip-coord-fixed-facets | Skip coord_fixed when faceted | ggplot2 doesn't support coord_fixed with facets | Layout engine skips aspect ratio constraint when isFaceted is true |
+| panel-bbox-for-axes | Panel bounding box spans full grid for axis label centering | Axis labels need to center across entire facet grid, not individual panels | Panel updated to union of all panel positions after grid calculation |
+| strip-above-panels | One strip row per panel row, positioned above panels | Matches ggplot2 facet_wrap layout pattern | Strip y = panel.y - stripHeight for each panel |
+
 ### Pending Todos
 
 None.
@@ -154,10 +163,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-09
-Stopped at: Phase 7 complete. All 4 plans executed with visual verification approved.
-Resume file: .planning/phases/07-legend-system/07-04-SUMMARY.md
-Next action: Plan and execute Phase 8 (Basic Faceting).
+Last session: 2026-02-13
+Stopped at: Completed plan 08-02 (Multi-Panel Grid Layout Calculation).
+Resume file: .planning/phases/08-basic-faceting/08-02-SUMMARY.md
+Next action: Continue Phase 8 - execute plan 08-03 (Render Multi-Panel Grids) or 08-01 (Facet IR Extraction) if not already complete.
 
 ---
 *State initialized: 2026-02-07*
