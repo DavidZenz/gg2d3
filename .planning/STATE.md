@@ -10,19 +10,19 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 ## Current Position
 
-Phase: 9 of 11 (Advanced Faceting) — IN PROGRESS
-Plan: 3 of 4 in Phase 9
-Status: In Progress
-Last activity: 2026-02-13 — Completed plan 09-03 (Per-Panel Rendering with Free Scales).
+Phase: 9 of 11 (Advanced Faceting) — COMPLETE
+Plan: 4 of 4 in Phase 9
+Status: Complete
+Last activity: 2026-02-13 — Completed Phase 9 (Advanced Faceting) with plan 09-04 (Testing & Visual Verification).
 
-Progress: [██████░░░░] 67% (34/51 plans complete)
+Progress: [███████░░░] 69% (35/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 34
-- Average duration: ~7.5 min
-- Total execution time: ~4.7 hours
+- Total plans completed: 35
+- Average duration: ~12 min
+- Total execution time: ~7.2 hours
 
 **By Phase:**
 
@@ -36,7 +36,7 @@ Progress: [██████░░░░] 67% (34/51 plans complete)
 | 06-layout-engine | 3/3 | 19 min | 6.3 min |
 | 07-legend-system | 4/4 | ~30 min | ~7.5 min |
 | 08-basic-faceting | 4/4 | 10 min | 2.5 min |
-| 09-advanced-faceting | 3/4 | 6 min | 2.0 min |
+| 09-advanced-faceting | 4/4 | 159 min | 39.75 min |
 
 *Updated after each plan completion*
 
@@ -149,6 +149,8 @@ Recent decisions affecting current work:
 | separate-wrap-grid-calculations | Separate layout calculations for facet_wrap and facet_grid | facet_grid has different strip positioning (top/right) vs facet_wrap (top only) | Clear code separation, easier to maintain distinct layout patterns |
 | strip-width-equals-height | Row strip width equals column strip height for rotated text | Rotated text's visual width equals text height; same font size for both | Consistent visual weight for row and column strips |
 | panel-area-subtraction | Subtract strip dimensions from available area before panel calculation | Reserve space for strips first, then divide remaining area by panel count | Correct panel sizing that accounts for strip space |
+- [Phase 09-advanced-faceting]: Visual verification confirms facet_grid rendering matches ggplot2 for all test cases
+- [Phase 09-advanced-faceting]: 11 unit tests cover IR structure, strips, SCALE_X/SCALE_Y, free scales, multi-variable facets, missing combos, backward compat
 
 ### Pending Todos
 
@@ -176,9 +178,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed plan 09-03 (Per-Panel Rendering with Free Scales).
-Resume file: .planning/phases/09-advanced-faceting/09-03-SUMMARY.md
-Next action: Execute plan 09-04 (Testing & Visual Verification).
+Stopped at: Completed Phase 9 (Advanced Faceting) with plan 09-04 (Testing & Visual Verification).
+Resume file: .planning/phases/09-advanced-faceting/09-04-SUMMARY.md
+Next action: Begin Phase 10 (Interactive Features).
 
 ---
 *State initialized: 2026-02-07*
