@@ -214,14 +214,13 @@ Plans:
   4. Nested faceting variables create hierarchical panel structure
   5. Strip placement options (top, bottom, left, right) position correctly
 
-**Plans**: TBD
+**Plans:** 4 plans in 4 waves
 
 Plans:
-- [ ] 09-01: Implement facet_grid layout calculations
-- [ ] 09-02: Free scale support with per-panel scale domains
-- [ ] 09-03: Handle missing combinations in facet grid
-- [ ] 09-04: Advanced strip positioning and styling
-- [ ] 09-05: Nested faceting support
+- [ ] 09-01-PLAN.md -- R-side facet_grid IR extraction + validation (Wave 1)
+- [ ] 09-02-PLAN.md -- Layout engine + rendering for facet_grid with strips (Wave 2)
+- [ ] 09-03-PLAN.md -- Free scale support with per-panel axes (Wave 3)
+- [ ] 09-04-PLAN.md -- Testing + visual verification checkpoint (Wave 4)
 
 ### Phase 10: Interactivity Foundation
 **Goal**: Event system and tooltip functionality via pipe-based R API
@@ -284,11 +283,11 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 6. Layout Engine | 3/3 | Complete | 2026-02-09 |
 | 7. Legend System | 4/4 | Complete | 2026-02-09 |
 | 8. Basic Faceting | 4/4 | Complete | 2026-02-13 |
-| 9. Advanced Faceting | 0/5 | Not started | - |
+| 9. Advanced Faceting | 0/4 | Not started | - |
 | 10. Interactivity Foundation | 0/5 | Not started | - |
 | 11. Advanced Interactivity | 0/5 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-07*
 *Total phases: 11 (comprehensive depth)*
-*Total plans: 46 (estimated)*
+*Total plans: 45 (estimated)*
