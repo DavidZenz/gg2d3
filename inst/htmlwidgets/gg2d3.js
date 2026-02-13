@@ -411,42 +411,71 @@ HTMLWidgets.widget({
       const cleanFormat = d3.format(".4~g");
 
       if (isFaceted) {
-        // Per-column x-axes at bottom row
-        const maxRow = Math.max.apply(Math, ir.facets.layout.map(function(l) { return l.ROW; }));
-        const bottomPanels = layout.panels.filter(function(p) {
-          const layoutEntry = ir.facets.layout.find(function(l) { return l.PANEL === p.PANEL; });
-          return layoutEntry && layoutEntry.ROW === maxRow;
-        });
+        // Determine free scale mode
+        const scalesMode = (ir.facets && ir.facets.scales) || "fixed";
+        const isFreeX = scalesMode === "free" || scalesMode === "free_x";
+        const isFreeY = scalesMode === "free" || scalesMode === "free_y";
 
+        const maxRow = Math.max.apply(Math, ir.facets.layout.map(function(l) { return l.ROW; }));
         const panelW = layout.panels[0].w;
         const panelH = layout.panels[0].h;
 
-        // Create per-panel scales for axes
-        const axisXScale = window.gg2d3.scales.createScale(ir.scales.x, flip ? [panelH, 0] : [0, panelW]);
-        const axisYScale = window.gg2d3.scales.createScale(ir.scales.y, flip ? [0, panelW] : [panelH, 0]);
+        // Render axes for each panel based on free scale mode
+        layout.panels.forEach(function(panelBox) {
+          const layoutEntry = ir.facets.layout.find(function(l) { return l.PANEL === panelBox.PANEL; });
+          const panelData = (ir.panels || []).find(function(p) { return p.PANEL === panelBox.PANEL; }) || {};
+          const isBottomRow = layoutEntry.ROW === maxRow;
+          const isLeftCol = layoutEntry.COL === 1;
 
-        bottomPanels.forEach(function(bp) {
-          const ag = root.append("g").attr("transform", "translate(" + bp.x + "," + (bp.y + panelH) + ")");
-          const xAxisGen = d3.axisBottom(axisXScale);
-          if (xBreaks && typeof axisXScale.bandwidth !== "function") xAxisGen.tickValues(xBreaks);
-          if (xTransform && xTransform !== "identity" && typeof axisXScale.bandwidth !== "function") xAxisGen.tickFormat(cleanFormat);
-          const xAxis = ag.append("g").attr("class", "axis").call(xAxisGen);
-          window.gg2d3.theme.applyAxisStyle(xAxis, axisTextX, axisLineX, axisTicksX);
-        });
+          // Render x-axis if bottom row OR free_x/free
+          if (isBottomRow || isFreeX) {
+            // Create per-panel x scale using this panel's domain
+            const xScaleDesc = Object.assign({}, ir.scales.x);
+            if (isFreeX && xScaleDesc.type === "continuous" && panelData.x_range) {
+              xScaleDesc.domain = panelData.x_range;
+            }
+            const panelXScale = window.gg2d3.scales.createScale(xScaleDesc, flip ? [panelH, 0] : [0, panelW]);
 
-        // Per-row y-axes at left column
-        const col1Panels = layout.panels.filter(function(p) {
-          const layoutEntry = ir.facets.layout.find(function(l) { return l.PANEL === p.PANEL; });
-          return layoutEntry && layoutEntry.COL === 1;
-        });
+            const ag = root.append("g").attr("transform", "translate(" + panelBox.x + "," + (panelBox.y + panelH) + ")");
+            const xAxisGen = d3.axisBottom(panelXScale);
 
-        col1Panels.forEach(function(cp) {
-          const ag = root.append("g").attr("transform", "translate(" + cp.x + "," + cp.y + ")");
-          const yAxisGen = d3.axisLeft(axisYScale);
-          if (yBreaks && typeof axisYScale.bandwidth !== "function") yAxisGen.tickValues(yBreaks);
-          if (yTransform && yTransform !== "identity" && typeof axisYScale.bandwidth !== "function") yAxisGen.tickFormat(cleanFormat);
-          const yAxis = ag.append("g").attr("class", "axis").call(yAxisGen);
-          window.gg2d3.theme.applyAxisStyle(yAxis, axisTextY, axisLineY, axisTicksY);
+            // Use panel-specific breaks for free scales
+            const panelXBreaks = (isFreeX && panelData.x_breaks) ? panelData.x_breaks :
+                                 (ir.scales.x && ir.scales.x.breaks);
+            if (panelXBreaks && typeof panelXScale.bandwidth !== "function") {
+              xAxisGen.tickValues(panelXBreaks);
+            }
+            if (xTransform && xTransform !== "identity" && typeof panelXScale.bandwidth !== "function") {
+              xAxisGen.tickFormat(cleanFormat);
+            }
+
+            const xAxis = ag.append("g").attr("class", "axis").call(xAxisGen);
+            window.gg2d3.theme.applyAxisStyle(xAxis, axisTextX, axisLineX, axisTicksX);
+          }
+
+          // Render y-axis if left column OR free_y/free
+          if (isLeftCol || isFreeY) {
+            const yScaleDesc = Object.assign({}, ir.scales.y);
+            if (isFreeY && yScaleDesc.type === "continuous" && panelData.y_range) {
+              yScaleDesc.domain = panelData.y_range;
+            }
+            const panelYScale = window.gg2d3.scales.createScale(yScaleDesc, flip ? [0, panelW] : [panelH, 0]);
+
+            const ag = root.append("g").attr("transform", "translate(" + panelBox.x + "," + panelBox.y + ")");
+            const yAxisGen = d3.axisLeft(panelYScale);
+
+            const panelYBreaks = (isFreeY && panelData.y_breaks) ? panelData.y_breaks :
+                                 (ir.scales.y && ir.scales.y.breaks);
+            if (panelYBreaks && typeof panelYScale.bandwidth !== "function") {
+              yAxisGen.tickValues(panelYBreaks);
+            }
+            if (yTransform && yTransform !== "identity" && typeof panelYScale.bandwidth !== "function") {
+              yAxisGen.tickFormat(cleanFormat);
+            }
+
+            const yAxis = ag.append("g").attr("class", "axis").call(yAxisGen);
+            window.gg2d3.theme.applyAxisStyle(yAxis, axisTextY, axisLineY, axisTicksY);
+          }
         });
       } else {
         // Single-panel axis rendering
