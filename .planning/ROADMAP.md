@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Statistical Geoms** - Boxplot, violin, density, smooth
 - [x] **Phase 6: Layout Engine** - Centralized spatial math for multi-panel layouts
 - [x] **Phase 7: Legend System** - Automatic legend generation for all aesthetics
-- [ ] **Phase 8: Basic Faceting** - facet_wrap with fixed scales
+- [x] **Phase 8: Basic Faceting** - facet_wrap with fixed scales
 - [ ] **Phase 9: Advanced Faceting** - facet_grid, free scales, complex layouts
 - [ ] **Phase 10: Interactivity Foundation** - Event system and tooltips
 - [ ] **Phase 11: Advanced Interactivity** - Brush, zoom, linked views
@@ -195,10 +195,10 @@ Plans:
 **Plans:** 4 plans in 3 waves
 
 Plans:
-- [ ] 08-01-PLAN.md -- R-side facet IR extraction + validation (Wave 1)
-- [ ] 08-02-PLAN.md -- Layout engine multi-panel grid calculation (Wave 1)
-- [ ] 08-03-PLAN.md -- Multi-panel rendering loop + strip labels (Wave 2)
-- [ ] 08-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 3)
+- [x] 08-01-PLAN.md -- R-side facet IR extraction + validation (Wave 1)
+- [x] 08-02-PLAN.md -- Layout engine multi-panel grid calculation (Wave 1)
+- [x] 08-03-PLAN.md -- Multi-panel rendering loop + strip labels (Wave 2)
+- [x] 08-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 3)
 
 ### Phase 9: Advanced Faceting
 **Goal**: facet_grid and free scales for complex multi-panel layouts
@@ -283,7 +283,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 5. Statistical Geoms | 4/4 | Complete | 2026-02-09 |
 | 6. Layout Engine | 3/3 | Complete | 2026-02-09 |
 | 7. Legend System | 4/4 | Complete | 2026-02-09 |
-| 8. Basic Faceting | 0/4 | Not started | - |
+| 8. Basic Faceting | 4/4 | Complete | 2026-02-13 |
 | 9. Advanced Faceting | 0/5 | Not started | - |
 | 10. Interactivity Foundation | 0/5 | Not started | - |
 | 11. Advanced Interactivity | 0/5 | Not started | - |
