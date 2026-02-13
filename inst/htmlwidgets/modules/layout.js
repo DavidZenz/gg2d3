@@ -660,6 +660,7 @@
       colStrips: colStripsArr, // [{COL, x, y, w, h, label, orientation}, ...] or null (facet_grid only)
       rowStrips: rowStripsArr, // [{ROW, x, y, w, h, label, orientation}, ...] or null (facet_grid only)
       stripHeight: stripHeight,  // Height of strip in pixels (0 for non-faceted)
+      scalesMode: facets ? (facets.scales || "fixed") : "fixed",  // "fixed", "free", "free_x", or "free_y"
       secondaryAxes: {
         top: topSpace > 0,
         right: rightSpace > 0
