@@ -765,11 +765,24 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
   tryCatch({
     is_facet_wrap <- inherits(b$layout$facet, "FacetWrap")
+    is_facet_grid <- inherits(b$layout$facet, "FacetGrid")
 
     if (is_facet_wrap) {
       # Extract facet_wrap metadata
       layout_df <- b$layout$layout
       facet_vars <- names(b$layout$facet$params$facets)
+
+      # Determine scales mode for facet_wrap
+      free_params <- b$layout$facet$params$free
+      if (free_params$x && free_params$y) {
+        scales_mode <- "free"
+      } else if (free_params$x) {
+        scales_mode <- "free_x"
+      } else if (free_params$y) {
+        scales_mode <- "free_y"
+      } else {
+        scales_mode <- "fixed"
+      }
 
       # Extract strip labels
       strips <- lapply(seq_len(nrow(layout_df)), function(i) {
@@ -819,6 +832,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
         vars = facet_vars,
         nrow = as.integer(max(layout_df$ROW)),
         ncol = as.integer(max(layout_df$COL)),
+        scales = scales_mode,
         spacing = panel_spacing,
         layout = lapply(seq_len(nrow(layout_df)), function(i) {
           row <- as.list(layout_df[i, , drop = FALSE])
@@ -830,6 +844,106 @@ as_d3_ir <- function(p, width = 640, height = 400,
           row
         }),
         strips = strips
+      )
+    } else if (is_facet_grid) {
+      # Extract facet_grid metadata
+      layout_df <- b$layout$layout
+      row_vars <- names(b$layout$facet$params$rows)
+      col_vars <- names(b$layout$facet$params$cols)
+
+      # Determine scales mode
+      free_params <- b$layout$facet$params$free
+      if (free_params$x && free_params$y) {
+        scales_mode <- "free"
+      } else if (free_params$x) {
+        scales_mode <- "free_x"
+      } else if (free_params$y) {
+        scales_mode <- "free_y"
+      } else {
+        scales_mode <- "fixed"
+      }
+
+      # Extract row strips (one per unique ROW)
+      row_strips <- NULL
+      if (length(row_vars) > 0) {
+        row_combos <- unique(layout_df[, c("ROW", row_vars), drop = FALSE])
+        row_strips <- lapply(seq_len(nrow(row_combos)), function(i) {
+          label_parts <- vapply(row_vars, function(v) {
+            as.character(row_combos[[v]][i])
+          }, character(1))
+          list(
+            ROW = as.integer(row_combos$ROW[i]),
+            label = paste(label_parts, collapse = ", ")
+          )
+        })
+      }
+
+      # Extract column strips (one per unique COL)
+      col_strips <- NULL
+      if (length(col_vars) > 0) {
+        col_combos <- unique(layout_df[, c("COL", col_vars), drop = FALSE])
+        col_strips <- lapply(seq_len(nrow(col_combos)), function(i) {
+          label_parts <- vapply(col_vars, function(v) {
+            as.character(col_combos[[v]][i])
+          }, character(1))
+          list(
+            COL = as.integer(col_combos$COL[i]),
+            label = paste(label_parts, collapse = ", ")
+          )
+        })
+      }
+
+      # Extract per-panel scale metadata
+      panels_ir <- lapply(seq_along(b$layout$panel_params), function(p) {
+        pp <- b$layout$panel_params[[p]]
+        if (is_flip_early) {
+          ppx <- pp$y  # un-swap for coord_flip
+          ppy <- pp$x
+        } else {
+          ppx <- pp$x
+          ppy <- pp$y
+        }
+        list(
+          PANEL = as.integer(p),
+          x_range = unname(ppx$continuous_range %||% ppx$range),
+          y_range = unname(ppy$continuous_range %||% ppy$range),
+          x_breaks = unname(ppx$breaks[!is.na(ppx$breaks)]),
+          y_breaks = unname(ppy$breaks[!is.na(ppy$breaks)])
+        )
+      })
+
+      # Extract panel.spacing
+      panel_spacing <- tryCatch({
+        complete_theme <- ggplot2::theme_get() + b$plot$theme
+        spacing <- ggplot2:::calc_element("panel.spacing", complete_theme)
+        if (!is.null(spacing)) {
+          inches <- grid::convertUnit(spacing, "inches", valueOnly = TRUE)
+          inches * 96  # pixels
+        } else {
+          7.3  # default 5.5pt in pixels
+        }
+      }, error = function(e) 7.3)
+
+      # Build facets IR object
+      facets_ir <- list(
+        type = "grid",
+        rows = row_vars,
+        cols = col_vars,
+        scales = scales_mode,
+        nrow = as.integer(max(layout_df$ROW)),
+        ncol = as.integer(max(layout_df$COL)),
+        spacing = panel_spacing,
+        layout = lapply(seq_len(nrow(layout_df)), function(i) {
+          row <- as.list(layout_df[i, , drop = FALSE])
+          row$PANEL <- as.integer(row$PANEL)
+          row$ROW <- as.integer(row$ROW)
+          row$COL <- as.integer(row$COL)
+          row$SCALE_X <- as.integer(row$SCALE_X)
+          row$SCALE_Y <- as.integer(row$SCALE_Y)
+          row
+        }),
+        row_strips = row_strips,
+        col_strips = col_strips
       )
     } else {
       # Non-faceted plot (default)
