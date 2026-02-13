@@ -20,7 +20,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: Layout Engine** - Centralized spatial math for multi-panel layouts
 - [x] **Phase 7: Legend System** - Automatic legend generation for all aesthetics
 - [x] **Phase 8: Basic Faceting** - facet_wrap with fixed scales
-- [ ] **Phase 9: Advanced Faceting** - facet_grid, free scales, complex layouts
+- [x] **Phase 9: Advanced Faceting** - facet_grid, free scales, complex layouts
 - [ ] **Phase 10: Interactivity Foundation** - Event system and tooltips
 - [ ] **Phase 11: Advanced Interactivity** - Brush, zoom, linked views
 
@@ -217,10 +217,10 @@ Plans:
 **Plans:** 4 plans in 4 waves
 
 Plans:
-- [ ] 09-01-PLAN.md -- R-side facet_grid IR extraction + validation (Wave 1)
-- [ ] 09-02-PLAN.md -- Layout engine + rendering for facet_grid with strips (Wave 2)
-- [ ] 09-03-PLAN.md -- Free scale support with per-panel axes (Wave 3)
-- [ ] 09-04-PLAN.md -- Testing + visual verification checkpoint (Wave 4)
+- [x] 09-01-PLAN.md -- R-side facet_grid IR extraction + validation (Wave 1)
+- [x] 09-02-PLAN.md -- Layout engine + rendering for facet_grid with strips (Wave 2)
+- [x] 09-03-PLAN.md -- Free scale support with per-panel axes (Wave 3)
+- [x] 09-04-PLAN.md -- Testing + visual verification checkpoint (Wave 4)
 
 ### Phase 10: Interactivity Foundation
 **Goal**: Event system and tooltip functionality via pipe-based R API
@@ -283,7 +283,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 6. Layout Engine | 3/3 | Complete | 2026-02-09 |
 | 7. Legend System | 4/4 | Complete | 2026-02-09 |
 | 8. Basic Faceting | 4/4 | Complete | 2026-02-13 |
-| 9. Advanced Faceting | 0/4 | Not started | - |
+| 9. Advanced Faceting | 4/4 | Complete | 2026-02-13 |
 | 10. Interactivity Foundation | 0/5 | Not started | - |
 | 11. Advanced Interactivity | 0/5 | Not started | - |
 
