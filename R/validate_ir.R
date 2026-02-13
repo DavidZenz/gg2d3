@@ -118,6 +118,23 @@ validate_ir <- function(ir) {
         warning("facet_wrap IR missing nrow/ncol", call. = FALSE)
       }
     }
+    if (ir$facets$type == "grid") {
+      if (is.null(ir$facets$layout) || length(ir$facets$layout) == 0) {
+        stop("facet_grid IR must have non-empty layout", call. = FALSE)
+      }
+      if (is.null(ir$facets$rows) && is.null(ir$facets$cols)) {
+        warning("facet_grid IR has neither rows nor cols", call. = FALSE)
+      }
+      if (is.null(ir$facets$row_strips) && is.null(ir$facets$col_strips)) {
+        warning("facet_grid IR has no strip labels", call. = FALSE)
+      }
+      if (is.null(ir$facets$nrow) || is.null(ir$facets$ncol)) {
+        warning("facet_grid IR missing nrow/ncol", call. = FALSE)
+      }
+      if (!is.null(ir$facets$scales) && !ir$facets$scales %in% c("fixed", "free", "free_x", "free_y")) {
+        warning(sprintf("Unrecognized facet scales mode '%s'", ir$facets$scales), call. = FALSE)
+      }
+    }
   }
 
   # Validate panels array
