@@ -20,6 +20,7 @@ dependencies:
       - legend.js
       - tooltip.js
       - events.js
+      - zoom.js
       - geom-registry.js
       - geoms/point.js
       - geoms/line.js
