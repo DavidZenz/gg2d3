@@ -595,6 +595,18 @@ HTMLWidgets.widget({
         }
         currentIR = ir;
         draw(ir, width, height);
+
+        // Initialize crosstalk if metadata present
+        if (typeof crosstalk !== 'undefined' && x.crosstalk_key && x.crosstalk_group) {
+          if (window.gg2d3.crosstalk) {
+            window.gg2d3.crosstalk.init(el, x.crosstalk_key, x.crosstalk_group);
+          }
+        }
+
+        // Initialize Shiny message handlers if in Shiny mode
+        if (window.gg2d3.crosstalk) {
+          window.gg2d3.crosstalk.initShinyHandlers(el);
+        }
       },
       resize: function (newWidth, newHeight) {
         width = newWidth;

@@ -22,6 +22,7 @@ dependencies:
       - events.js
       - zoom.js
       - brush.js
+      - crosstalk.js
       - geom-registry.js
       - geoms/point.js
       - geoms/line.js
