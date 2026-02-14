@@ -11,6 +11,8 @@ gg2d3 <- function(x, width = NULL, height = NULL, elementId = NULL) {
     if (requireNamespace("crosstalk", quietly = TRUE) && crosstalk::is.SharedData(x$data)) {
       crosstalk_key <- x$data$key()
       crosstalk_group <- x$data$groupName()
+      # Replace SharedData with its underlying data frame for ggplot_build()
+      x$data <- x$data$origData()
     }
     ir <- as_d3_ir(x)
   } else if (is.list(x) && !is.null(x$scales) && !is.null(x$layers)) {
