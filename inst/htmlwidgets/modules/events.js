@@ -21,8 +21,9 @@
    * Excludes non-interactive elements like panel backgrounds.
    */
   const INTERACTIVE_SELECTORS = [
-    'circle',                    // geom_point
-    'rect:not(.panel-bg)',       // geom_bar, geom_tile (exclude panel backgrounds)
+    'circle.geom-point',         // geom_point
+    'rect.geom-bar',             // geom_bar
+    'rect.geom-rect',            // geom_rect / geom_tile
     'path.geom-line',            // geom_line
     'path.geom-area',            // geom_area
     'path.geom-density',         // geom_density
@@ -30,7 +31,9 @@
     'path.geom-ribbon',          // geom_ribbon
     'path.geom-violin',          // geom_violin
     'text.geom-text',            // geom_text
-    'line.geom-segment'          // geom_segment
+    'line.geom-segment',         // geom_segment
+    'rect.geom-boxplot-box',     // geom_boxplot (IQR box)
+    'circle.geom-boxplot-outlier' // geom_boxplot (outliers)
   ];
 
   /**
@@ -55,13 +58,13 @@
       }
 
       selection
-        .on('mouseover', function(event, d) {
+        .on('mouseover.tooltip', function(event, d) {
           window.gg2d3.tooltip.show(event, d, config);
         })
-        .on('mousemove', function(event) {
+        .on('mousemove.tooltip', function(event) {
           window.gg2d3.tooltip.move(event);
         })
-        .on('mouseout', function() {
+        .on('mouseout.tooltip', function() {
           window.gg2d3.tooltip.hide();
         });
     });
@@ -99,7 +102,7 @@
       });
 
       selection
-        .on('mouseover', function(event, d) {
+        .on('mouseover.hover', function(event, d) {
           // Dim all interactive elements
           INTERACTIVE_SELECTORS.forEach(sel => {
             svg.selectAll(sel)
@@ -119,7 +122,7 @@
             }
           }
         })
-        .on('mouseout', function() {
+        .on('mouseout.hover', function() {
           // Restore original opacity for all elements
           INTERACTIVE_SELECTORS.forEach(sel => {
             svg.selectAll(sel).each(function() {
