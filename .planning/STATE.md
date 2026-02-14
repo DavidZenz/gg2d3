@@ -6,23 +6,23 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 
-**Current focus:** Phase 10 - Interactivity Foundation complete. Ready for Phase 11.
+**Current focus:** Phase 11 - Advanced Interactivity in progress.
 
 ## Current Position
 
-Phase: 10 of 11 (Interactivity Foundation) — COMPLETE
-Plan: 3 of 3 in Phase 10
-Status: Complete
-Last activity: 2026-02-14 — Completed 10-03 (Testing + Visual Verification with bugfixes).
+Phase: 11 of 11 (Advanced Interactivity) — IN PROGRESS
+Plan: 1 of 4 in Phase 11
+Status: In Progress
+Last activity: 2026-02-14 — Completed 11-01 (Zoom and Pan).
 
-Progress: [████████░░] 75% (38/51 plans complete)
+Progress: [████████░░] 76% (39/51 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 38
+- Total plans completed: 39
 - Average duration: ~11 min
-- Total execution time: ~6.95 hours
+- Total execution time: ~6.98 hours
 
 **By Phase:**
 
@@ -38,6 +38,7 @@ Progress: [████████░░] 75% (38/51 plans complete)
 | 08-basic-faceting | 4/4 | 10 min | 2.5 min |
 | 09-advanced-faceting | 4/4 | 159 min | 39.75 min |
 | 10-interactivity-foundation | 3/3 | 22 min | 7.3 min |
+| 11-advanced-interactivity | 1/4 | 2 min | 2 min |
 
 *Updated after each plan completion*
 
@@ -161,6 +162,14 @@ Recent decisions affecting current work:
 | d3-event-namespacing | Use D3 event namespacing (.tooltip, .hover) to prevent handler clobbering | Both tooltip and hover use mouseover/mouseleave events; without namespacing, second handler replaces first | Multiple interactivity features can coexist on same elements |
 | visual-verify-checkpoints | Visual verification checkpoints catch rendering bugs unit tests miss | Unit tests verify structure correctness but can't detect DOM event targeting issues or browser behavior | Human-verify checkpoints essential for browser-based features |
 
+**From Phase 11:**
+
+| Decision ID | Title | Rationale | Impact |
+|-------------|-------|-----------|--------|
+| scale-rescale-not-transform | Use scale rescaling instead of SVG transform for zoom | SVG transform would scale stroke widths and other properties; rescaling scales and repositioning elements preserves visual fidelity | More complex implementation but maintains pixel-perfect rendering |
+| synchronized-facet-zoom | Synchronized zoom across all facet panels | Users expect coherent exploration across facets; independent zoom would be confusing | All panels zoom together when any panel is zoomed |
+| geom-specific-repositioning | Geom-specific element repositioning logic for zoom | Different geom types store position data differently (cx/cy vs x/y vs d attribute) | Each geom type has dedicated repositioning code in zoom.js |
+
 ### Pending Todos
 
 None.
@@ -187,9 +196,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 10-03-PLAN.md (Testing + Visual Verification).
-Resume file: .planning/phases/10-interactivity-foundation/10-03-SUMMARY.md
-Next action: Phase 10 complete. Ready to begin Phase 11 (Advanced Interactivity).
+Stopped at: Completed 11-01-PLAN.md (Zoom and Pan).
+Resume file: .planning/phases/11-advanced-interactivity/11-01-SUMMARY.md
+Next action: Continue Phase 11 with Plan 11-02 (Brush Selection).
 
 ---
 *State initialized: 2026-02-07*
