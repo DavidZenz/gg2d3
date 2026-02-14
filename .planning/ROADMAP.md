@@ -257,13 +257,13 @@ Plans:
   4. Shiny integration allows server-side updates via message passing
   5. Zoom and brush reset to initial state when user double-clicks
 
-**Plans:** 4 plans in 2 waves
+**Plans:** 4 plans in 4 waves
 
 Plans:
 - [ ] 11-01-PLAN.md -- d3_zoom() R pipe function + zoom.js module with scale rescaling (Wave 1)
-- [ ] 11-02-PLAN.md -- d3_brush() R pipe function + brush.js module with selection highlighting (Wave 1)
-- [ ] 11-03-PLAN.md -- Crosstalk SharedData integration + Shiny message protocol (Wave 2)
-- [ ] 11-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 2)
+- [ ] 11-02-PLAN.md -- d3_brush() R pipe function + brush.js module with selection highlighting (Wave 2)
+- [ ] 11-03-PLAN.md -- Crosstalk SharedData integration + Shiny message protocol (Wave 3)
+- [ ] 11-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 4)
 
 ## Progress
 
