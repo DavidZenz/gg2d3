@@ -3,5 +3,6 @@
 export(as_d3_ir)
 export(d3_hover)
 export(d3_tooltip)
+export(d3_zoom)
 export(gg2d3)
 export(validate_ir)
