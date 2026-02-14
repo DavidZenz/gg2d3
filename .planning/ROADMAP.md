@@ -21,7 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 7: Legend System** - Automatic legend generation for all aesthetics
 - [x] **Phase 8: Basic Faceting** - facet_wrap with fixed scales
 - [x] **Phase 9: Advanced Faceting** - facet_grid, free scales, complex layouts
-- [ ] **Phase 10: Interactivity Foundation** - Event system and tooltips
+- [x] **Phase 10: Interactivity Foundation** - Event system and tooltips
 - [ ] **Phase 11: Advanced Interactivity** - Brush, zoom, linked views
 
 ## Phase Details
@@ -257,14 +257,13 @@ Plans:
   4. Shiny integration allows server-side updates via message passing
   5. Zoom and brush reset to initial state when user double-clicks
 
-**Plans**: TBD
+**Plans:** 4 plans in 2 waves
 
 Plans:
-- [ ] 11-01: Implement d3_zoom() with scale updates
-- [ ] 11-02: Implement d3_brush() with selection highlighting
-- [ ] 11-03: Crosstalk integration for linked views
-- [ ] 11-04: Shiny message protocol for interactive updates
-- [ ] 11-05: Touch event support for mobile brushing
+- [ ] 11-01-PLAN.md -- d3_zoom() R pipe function + zoom.js module with scale rescaling (Wave 1)
+- [ ] 11-02-PLAN.md -- d3_brush() R pipe function + brush.js module with selection highlighting (Wave 1)
+- [ ] 11-03-PLAN.md -- Crosstalk SharedData integration + Shiny message protocol (Wave 2)
+- [ ] 11-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 2)
 
 ## Progress
 
@@ -283,9 +282,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 8. Basic Faceting | 4/4 | Complete | 2026-02-13 |
 | 9. Advanced Faceting | 4/4 | Complete | 2026-02-13 |
 | 10. Interactivity Foundation | 3/3 | Complete | 2026-02-14 |
-| 11. Advanced Interactivity | 0/5 | Not started | - |
+| 11. Advanced Interactivity | 0/4 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-07*
 *Total phases: 11 (comprehensive depth)*
-*Total plans: 45 (estimated)*
+*Total plans: 42*
