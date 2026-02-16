@@ -45,8 +45,9 @@
    * @param {Object} config - Tooltip configuration
    * @param {Array<string>} config.fields - Field names to show (null = all)
    * @param {string} config.formatter - Optional JS function string
+   * @param {Object} [ir] - IR object for temporal field detection
    */
-  function attachTooltips(el, config) {
+  function attachTooltips(el, config, ir) {
     const svg = d3.select(el).select('svg');
 
     INTERACTIVE_SELECTORS.forEach(selector => {
@@ -59,7 +60,7 @@
 
       selection
         .on('mouseover.tooltip', function(event, d) {
-          window.gg2d3.tooltip.show(event, d, config);
+          window.gg2d3.tooltip.show(event, d, config, ir);
         })
         .on('mousemove.tooltip', function(event) {
           window.gg2d3.tooltip.move(event);
