@@ -24,6 +24,59 @@
    * convertColor('grey50') // '#7F7F7F'
    * convertColor('black')  // 'black'
    */
+  /**
+   * Translate R strftime format pattern for D3 time format.
+   * Strips %Z and %z (timezone directives incompatible with D3).
+   * R strftime and D3 timeFormat tokens are ~95% compatible.
+   *
+   * @param {string} rFormat - R strftime format string
+   * @returns {string|null} D3-compatible format string or null
+   */
+  function translateFormat(rFormat) {
+    if (!rFormat) return null;
+    return rFormat.replace(/%[Zz]/g, '').trim() || null;
+  }
+
+  /**
+   * Check if a scale transform indicates temporal data.
+   *
+   * @param {string} transform - Scale transform value
+   * @returns {boolean}
+   */
+  function isTemporalTransform(transform) {
+    return transform === 'date' || transform === 'time' || transform === 'datetime';
+  }
+
+  /**
+   * Apply temporal tick formatting to an axis generator.
+   * Handles format patterns, pre-formatted labels, and Date tickValues.
+   *
+   * @param {Object} axisGen - D3 axis generator
+   * @param {Array} breaks - Tick positions (may be ms timestamps)
+   * @param {Object} scaleDesc - IR scale descriptor
+   */
+  function applyTemporalAxisFormat(axisGen, breaks, scaleDesc) {
+    if (!scaleDesc) return;
+    var transform = scaleDesc.transform;
+    if (!isTemporalTransform(transform)) return;
+
+    // Convert break values to Date objects for D3 time scale tickValues
+    if (breaks && breaks.length) {
+      axisGen.tickValues(breaks.map(function(b) { return new Date(b); }));
+    }
+
+    // Apply tick format: explicit pattern > pre-formatted labels > D3 auto
+    var fmt = translateFormat(scaleDesc.format);
+    if (fmt) {
+      var useUtc = !scaleDesc.timezone || scaleDesc.timezone === 'UTC';
+      axisGen.tickFormat(useUtc ? d3.utcFormat(fmt) : d3.timeFormat(fmt));
+    } else if (scaleDesc.labels && scaleDesc.labels.length) {
+      var labels = scaleDesc.labels;
+      axisGen.tickFormat(function(d, i) { return i < labels.length ? labels[i] : ''; });
+    }
+    // else: let D3 auto-format with its default multi-scale formatter
+  }
+
   function convertColor(color) {
     if (!color || typeof color !== 'string') return color;
 
@@ -141,12 +194,29 @@
 
         case "time":
         case "date":
-        case "datetime":
-          return d3.scaleTime().domain(dateDomain).range(rng);
+        case "datetime": {
+          // Use scaleUtc for consistent rendering (avoids DST issues)
+          // unless timezone is explicitly non-UTC
+          var useUtc = !desc.timezone || desc.timezone === "UTC";
+          var scale = useUtc ? d3.scaleUtc().domain(dateDomain).range(rng)
+                             : d3.scaleTime().domain(dateDomain).range(rng);
+          // Attach metadata for axis formatting and zoom
+          scale.__gg2d3_format = translateFormat(desc.format) || null;
+          scale.__gg2d3_timezone = desc.timezone || null;
+          scale.__gg2d3_transform = transform || type;
+          scale.__gg2d3_labels = desc.labels || null;
+          return scale;
+        }
 
         case "utc":
-        case "time-utc":
-          return d3.scaleUtc().domain(dateDomain).range(rng);
+        case "time-utc": {
+          var scaleUtc = d3.scaleUtc().domain(dateDomain).range(rng);
+          scaleUtc.__gg2d3_format = translateFormat(desc.format) || null;
+          scaleUtc.__gg2d3_timezone = desc.timezone || null;
+          scaleUtc.__gg2d3_transform = transform || type;
+          scaleUtc.__gg2d3_labels = desc.labels || null;
+          return scaleUtc;
+        }
 
         case "band":
         case "categorical":
@@ -222,6 +292,9 @@
    */
   window.gg2d3.scales = {
     createScale: createScale,
-    convertColor: convertColor
+    convertColor: convertColor,
+    translateFormat: translateFormat,
+    isTemporalTransform: isTemporalTransform,
+    applyTemporalAxisFormat: applyTemporalAxisFormat
   };
 })();
