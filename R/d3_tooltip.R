@@ -55,7 +55,7 @@ d3_tooltip <- function(widget, fields = NULL, formatter = NULL) {
     function(el, x) {
       setTimeout(function() {
         if (x.interactivity && x.interactivity.tooltip) {
-          window.gg2d3.events.attachTooltips(el, x.interactivity.tooltip);
+          window.gg2d3.events.attachTooltips(el, x.interactivity.tooltip, x.ir);
         }
       }, 0);
     }

@@ -148,7 +148,7 @@
       // Update axes to reflect zoomed range
       updateAxes(svg, xScaleCurrent, yScaleCurrent, flip,
                  axisTextX, axisTextY, axisLineX, axisLineY, axisTicksX, axisTicksY,
-                 xTransform, yTransform, cleanFormat);
+                 xTransform, yTransform, cleanFormat, xScaleDesc, yScaleDesc);
     }
 
     // Double-click to reset
@@ -165,20 +165,27 @@
    */
   function updateAxes(svg, xScaleCurrent, yScaleCurrent, flip,
                       axisTextX, axisTextY, axisLineX, axisLineY, axisTicksX, axisTicksY,
-                      xTransform, yTransform, cleanFormat) {
+                      xTransform, yTransform, cleanFormat, xScaleDesc, yScaleDesc) {
     var axesGroup = svg.select('.axes-group');
     if (axesGroup.empty()) return;
 
     // Determine which scale maps to which physical axis
     var bottomScale = flip ? yScaleCurrent : xScaleCurrent;
     var leftScale = flip ? xScaleCurrent : yScaleCurrent;
+    var bottomScaleDesc = flip ? yScaleDesc : xScaleDesc;
+    var leftScaleDesc = flip ? xScaleDesc : yScaleDesc;
+
+    var isTemp = window.gg2d3.scales && window.gg2d3.scales.isTemporalTransform;
 
     // Bottom axis
     var axisBottom = axesGroup.select('.axis-bottom');
     if (!axisBottom.empty() && typeof bottomScale.invert === 'function') {
       var bottomGen = d3.axisBottom(bottomScale);
       var bottomTransform = flip ? yTransform : xTransform;
-      if (bottomTransform && bottomTransform !== 'identity') {
+      if (isTemp && isTemp(bottomTransform)) {
+        // Apply temporal tick formatting for zoomed axis
+        applyZoomTemporalFormat(bottomGen, bottomScaleDesc);
+      } else if (bottomTransform && bottomTransform !== 'identity') {
         bottomGen.tickFormat(cleanFormat);
       }
       axisBottom.call(bottomGen);
@@ -194,7 +201,9 @@
     if (!axisLeft.empty() && typeof leftScale.invert === 'function') {
       var leftGen = d3.axisLeft(leftScale);
       var leftTransform = flip ? xTransform : yTransform;
-      if (leftTransform && leftTransform !== 'identity') {
+      if (isTemp && isTemp(leftTransform)) {
+        applyZoomTemporalFormat(leftGen, leftScaleDesc);
+      } else if (leftTransform && leftTransform !== 'identity') {
         leftGen.tickFormat(cleanFormat);
       }
       axisLeft.call(leftGen);
@@ -204,6 +213,21 @@
       var leftTicksStyle = flip ? axisTicksX : axisTicksY;
       window.gg2d3.theme.applyAxisStyle(axisLeft, leftTextStyle, leftLineStyle, leftTicksStyle);
     }
+  }
+
+  /**
+   * Apply temporal tick formatting to a zoom-updated axis generator.
+   * Uses format pattern from scale descriptor or lets D3 auto-format.
+   */
+  function applyZoomTemporalFormat(axisGen, scaleDesc) {
+    if (!scaleDesc) return;
+    var translateFormat = window.gg2d3.scales && window.gg2d3.scales.translateFormat;
+    var fmt = translateFormat ? translateFormat(scaleDesc.format) : null;
+    if (fmt) {
+      var useUtc = !scaleDesc.timezone || scaleDesc.timezone === 'UTC';
+      axisGen.tickFormat(useUtc ? d3.utcFormat(fmt) : d3.timeFormat(fmt));
+    }
+    // If no explicit format, D3 time scales auto-format nicely during zoom
   }
 
   /**

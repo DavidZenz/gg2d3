@@ -47,6 +47,68 @@
   }
 
   /**
+   * Check if a data field maps to a temporal scale.
+   *
+   * @param {string} field - Data field name (e.g., 'x', 'y', 'xmin')
+   * @param {Object} ir - IR object with scales
+   * @returns {Object|false} Scale descriptor if temporal, false otherwise
+   */
+  function getTemporalScale(field, ir) {
+    if (!ir || !ir.scales) return false;
+    var isTemp = window.gg2d3.scales && window.gg2d3.scales.isTemporalTransform;
+    if (!isTemp) return false;
+
+    if ((field === 'x' || field === 'xmin' || field === 'xmax') &&
+        ir.scales.x && isTemp(ir.scales.x.transform)) {
+      return ir.scales.x;
+    }
+    if ((field === 'y' || field === 'ymin' || field === 'ymax') &&
+        ir.scales.y && isTemp(ir.scales.y.transform)) {
+      return ir.scales.y;
+    }
+    return false;
+  }
+
+  /**
+   * Format a temporal (millisecond timestamp) value for tooltip display.
+   *
+   * @param {number} value - Milliseconds since epoch
+   * @param {Object} scaleInfo - IR scale descriptor with format/timezone/transform
+   * @returns {string} Formatted date/time string
+   */
+  function formatTemporalValue(value, scaleInfo) {
+    var date = new Date(value);
+    if (isNaN(date.getTime())) return String(value);
+
+    // Use timezone-aware Intl formatting if timezone provided
+    if (scaleInfo.timezone && scaleInfo.timezone !== 'UTC') {
+      try {
+        var opts = {
+          timeZone: scaleInfo.timezone,
+          year: 'numeric', month: 'short', day: 'numeric'
+        };
+        if (scaleInfo.transform === 'time') {
+          opts.hour = '2-digit';
+          opts.minute = '2-digit';
+        }
+        return new Intl.DateTimeFormat('en-US', opts).format(date);
+      } catch (e) { /* fall through to D3 format */ }
+    }
+
+    // Use D3 UTC format with pattern from R, or default
+    var translateFormat = window.gg2d3.scales && window.gg2d3.scales.translateFormat;
+    var fmt = translateFormat ? translateFormat(scaleInfo.format) : null;
+    if (fmt) {
+      return d3.utcFormat(fmt)(date);
+    }
+
+    // Sensible default: date-only for "date", datetime for "time"
+    return scaleInfo.transform === 'time'
+      ? d3.utcFormat('%Y-%m-%d %H:%M')(date)
+      : d3.utcFormat('%Y-%m-%d')(date);
+  }
+
+  /**
    * Format tooltip content from data row.
    * Generates HTML string with field names and formatted values.
    *
@@ -54,9 +116,10 @@
    * @param {Object} config - Tooltip configuration
    * @param {Array<string>} config.fields - Field names to show (null = all except internals)
    * @param {string} config.formatter - Optional JS function string for custom formatting
+   * @param {Object} [ir] - IR object for temporal field detection
    * @returns {string} HTML string for tooltip content
    */
-  function format(d, config) {
+  function format(d, config, ir) {
     // Determine which fields to show
     let fields;
     if (config.fields) {
@@ -90,7 +153,11 @@
       } else {
         // Default formatting
         let displayValue = value;
-        if (typeof value === 'number') {
+        const temporalScale = getTemporalScale(field, ir);
+        if (temporalScale && typeof value === 'number') {
+          // Format temporal values as dates, not raw milliseconds
+          displayValue = formatTemporalValue(value, temporalScale);
+        } else if (typeof value === 'number') {
           // Format numbers with up to 4 significant digits
           displayValue = parseFloat(value.toPrecision(4));
         }
@@ -110,10 +177,10 @@
    * @param {Object} d - Data row to display
    * @param {Object} config - Tooltip configuration
    */
-  function show(event, d, config) {
+  function show(event, d, config, ir) {
     const tooltip = getOrCreate();
     tooltip.style('display', 'block');
-    tooltip.html(format(d, config));
+    tooltip.html(format(d, config, ir));
     position(event, tooltip);
   }
 
