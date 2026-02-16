@@ -23,6 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 9: Advanced Faceting** - facet_grid, free scales, complex layouts
 - [x] **Phase 10: Interactivity Foundation** - Event system and tooltips
 - [x] **Phase 11: Advanced Interactivity** - Brush, zoom, linked views
+- [ ] **Phase 12: Date/Time Scales** - POSIXct/Date scale support with time axis formatting
 
 ## Phase Details
 
@@ -265,10 +266,33 @@ Plans:
 - [x] 11-03-PLAN.md -- Crosstalk SharedData integration + Shiny message protocol (Wave 3)
 - [x] 11-04-PLAN.md -- Unit tests + visual verification checkpoint (Wave 4)
 
+### Phase 12: Date/Time Scales
+**Goal**: Add date/time scale support for POSIXct and Date data types with proper axis formatting
+
+**Depends on**: Phase 2 (Core Scale System)
+
+**Requirements**: REQ-5 (Full scale coverage — date/time scales)
+
+**Gap Closure**: Closes requirement gap from v1.0 audit
+
+**Success Criteria** (what must be TRUE):
+  1. POSIXct and Date columns produce correctly formatted time axes (labels show dates/times, not numeric values)
+  2. D3 scaleTime()/scaleUtc() used for temporal scales with appropriate tick formatting
+  3. Temporal data points position correctly on the time axis
+  4. All existing geoms (point, line, bar, etc.) work with date/time x-axes
+  5. Timezone handling preserves R's timezone information through the IR
+
+**Plans:** TBD
+
+Plans:
+- [ ] 12-01-PLAN.md -- TBD
+- [ ] 12-02-PLAN.md -- TBD
+- [ ] 12-03-PLAN.md -- TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 
 | Phase | Plans | Status | Completed |
 |-------|-------|--------|-----------|
@@ -283,8 +307,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 9. Advanced Faceting | 4/4 | Complete | 2026-02-13 |
 | 10. Interactivity Foundation | 3/3 | Complete | 2026-02-14 |
 | 11. Advanced Interactivity | 4/4 | Complete | 2026-02-16 |
+| 12. Date/Time Scales | 0/3 | Planned | — |
 
 ---
 *Roadmap created: 2026-02-07*
-*Total phases: 11 (comprehensive depth)*
-*Total plans: 42*
+*Total phases: 12*
+*Total plans: 48*
