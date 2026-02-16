@@ -282,12 +282,12 @@ Plans:
   4. All existing geoms (point, line, bar, etc.) work with date/time x-axes
   5. Timezone handling preserves R's timezone information through the IR
 
-**Plans:** TBD
+**Plans:** 3 plans in 3 waves
 
 Plans:
-- [ ] 12-01-PLAN.md -- TBD
-- [ ] 12-02-PLAN.md -- TBD
-- [ ] 12-03-PLAN.md -- TBD
+- [ ] 12-01-PLAN.md -- R-side temporal scale IR extraction (ms conversion, format, timezone) (Wave 1)
+- [ ] 12-02-PLAN.md -- D3 temporal scale creation, axis formatting, tooltip + zoom support (Wave 2)
+- [ ] 12-03-PLAN.md -- Unit tests + visual verification (Wave 3)
 
 ## Progress
 
