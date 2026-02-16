@@ -257,6 +257,26 @@ as_d3_ir <- function(p, width = 640, height = 400,
       yintercept = if ("yintercept" %in% cols) "yintercept" else NULL
     )
 
+    # Convert temporal data columns to milliseconds (ggplot_build strips
+
+    # Date/POSIXct class, leaving plain numeric days or seconds)
+    x_tn <- if (!is.null(xscale_obj$trans)) xscale_obj$trans$name else NULL
+    y_tn <- if (!is.null(yscale_obj$trans)) yscale_obj$trans$name else NULL
+
+    x_cols <- intersect(c("x", "xmin", "xmax", "xend", "xintercept"), names(df))
+    y_cols <- intersect(c("y", "ymin", "ymax", "yend", "yintercept"), names(df))
+
+    if (!is.null(x_tn) && x_tn == "date") {
+      for (cn in x_cols) if (is.numeric(df[[cn]])) df[[cn]] <- df[[cn]] * 86400000
+    } else if (!is.null(x_tn) && x_tn == "time") {
+      for (cn in x_cols) if (is.numeric(df[[cn]])) df[[cn]] <- df[[cn]] * 1000
+    }
+    if (!is.null(y_tn) && y_tn == "date") {
+      for (cn in y_cols) if (is.numeric(df[[cn]])) df[[cn]] <- df[[cn]] * 86400000
+    } else if (!is.null(y_tn) && y_tn == "time") {
+      for (cn in y_cols) if (is.numeric(df[[cn]])) df[[cn]] <- df[[cn]] * 1000
+    }
+
     list(
       geom   = gname,          # <-- now always a non-NULL string like "point"
       data   = to_rows(df),
