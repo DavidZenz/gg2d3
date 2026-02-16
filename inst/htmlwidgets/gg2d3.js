@@ -448,6 +448,8 @@ HTMLWidgets.widget({
             if (xTransform && xTransform !== "identity" && typeof panelXScale.bandwidth !== "function") {
               xAxisGen.tickFormat(cleanFormat);
             }
+            // Temporal axis formatting (overrides tickValues/tickFormat for date/time scales)
+            window.gg2d3.scales.applyTemporalAxisFormat(xAxisGen, panelXBreaks, xScaleDesc);
 
             const xAxis = ag.append("g").attr("class", "axis").call(xAxisGen);
             window.gg2d3.theme.applyAxisStyle(xAxis, axisTextX, axisLineX, axisTicksX);
@@ -472,6 +474,8 @@ HTMLWidgets.widget({
             if (yTransform && yTransform !== "identity" && typeof panelYScale.bandwidth !== "function") {
               yAxisGen.tickFormat(cleanFormat);
             }
+            // Temporal axis formatting (overrides tickValues/tickFormat for date/time scales)
+            window.gg2d3.scales.applyTemporalAxisFormat(yAxisGen, panelYBreaks, yScaleDesc);
 
             const yAxis = ag.append("g").attr("class", "axis").call(yAxisGen);
             window.gg2d3.theme.applyAxisStyle(yAxis, axisTextY, axisLineY, axisTicksY);
@@ -510,6 +514,9 @@ HTMLWidgets.widget({
           if (yTransform && yTransform !== "identity" && typeof axisYScale.bandwidth !== "function") {
             bottomAxisGen.tickFormat(cleanFormat);
           }
+          // Temporal axis formatting (overrides tickValues/tickFormat for date/time scales)
+          window.gg2d3.scales.applyTemporalAxisFormat(leftAxisGen, xBreaks, ir.scales && ir.scales.x);
+          window.gg2d3.scales.applyTemporalAxisFormat(bottomAxisGen, yBreaks, ir.scales && ir.scales.y);
 
           const leftAxis = axesGroup.append("g").attr("class", "axis axis-left").call(leftAxisGen);
           const bottomAxis = axesGroup.append("g").attr("class", "axis axis-bottom").attr("transform", "translate(0," + h + ")").call(bottomAxisGen);
@@ -532,6 +539,9 @@ HTMLWidgets.widget({
           if (yTransform && yTransform !== "identity" && typeof axisYScale.bandwidth !== "function") {
             yAxisGen.tickFormat(cleanFormat);
           }
+          // Temporal axis formatting (overrides tickValues/tickFormat for date/time scales)
+          window.gg2d3.scales.applyTemporalAxisFormat(xAxisGen, xBreaks, ir.scales && ir.scales.x);
+          window.gg2d3.scales.applyTemporalAxisFormat(yAxisGen, yBreaks, ir.scales && ir.scales.y);
 
           const xAxis = axesGroup.append("g").attr("class", "axis axis-bottom").attr("transform", "translate(0," + h + ")").call(xAxisGen);
           const yAxis = axesGroup.append("g").attr("class", "axis axis-left").call(yAxisGen);
