@@ -103,6 +103,13 @@
 
       selection
         .on('mouseover.hover', function(event, d) {
+          // When brush selection is active, skip hover dimming to avoid
+          // overriding the brush's opacity state
+          var panelNode = this.closest('.panel');
+          if (panelNode && panelNode.getAttribute('data-brush-active') === 'true') {
+            return;
+          }
+
           // Dim all interactive elements
           INTERACTIVE_SELECTORS.forEach(sel => {
             svg.selectAll(sel)
@@ -123,6 +130,12 @@
           }
         })
         .on('mouseout.hover', function() {
+          // When brush is active, skip hover restore
+          var panelNode = this.closest('.panel');
+          if (panelNode && panelNode.getAttribute('data-brush-active') === 'true') {
+            return;
+          }
+
           // Restore original opacity for all elements
           INTERACTIVE_SELECTORS.forEach(sel => {
             svg.selectAll(sel).each(function() {
