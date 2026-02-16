@@ -23,7 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 9: Advanced Faceting** - facet_grid, free scales, complex layouts
 - [x] **Phase 10: Interactivity Foundation** - Event system and tooltips
 - [x] **Phase 11: Advanced Interactivity** - Brush, zoom, linked views
-- [ ] **Phase 12: Date/Time Scales** - POSIXct/Date scale support with time axis formatting
+- [x] **Phase 12: Date/Time Scales** - POSIXct/Date scale support with time axis formatting
 
 ## Phase Details
 
@@ -285,9 +285,9 @@ Plans:
 **Plans:** 3 plans in 3 waves
 
 Plans:
-- [ ] 12-01-PLAN.md -- R-side temporal scale IR extraction (ms conversion, format, timezone) (Wave 1)
-- [ ] 12-02-PLAN.md -- D3 temporal scale creation, axis formatting, tooltip + zoom support (Wave 2)
-- [ ] 12-03-PLAN.md -- Unit tests + visual verification (Wave 3)
+- [x] 12-01-PLAN.md -- R-side temporal scale IR extraction (ms conversion, format, timezone) (Wave 1)
+- [x] 12-02-PLAN.md -- D3 temporal scale creation, axis formatting, tooltip + zoom support (Wave 2)
+- [x] 12-03-PLAN.md -- Unit tests + visual verification (Wave 3)
 
 ## Progress
 
@@ -307,7 +307,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 9. Advanced Faceting | 4/4 | Complete | 2026-02-13 |
 | 10. Interactivity Foundation | 3/3 | Complete | 2026-02-14 |
 | 11. Advanced Interactivity | 4/4 | Complete | 2026-02-16 |
-| 12. Date/Time Scales | 0/3 | Planned | — |
+| 12. Date/Time Scales | 3/3 | Complete | 2026-02-16 |
 
 ---
 *Roadmap created: 2026-02-07*
