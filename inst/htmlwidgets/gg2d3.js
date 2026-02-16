@@ -488,6 +488,7 @@ HTMLWidgets.widget({
 
         // Axes group positioned at panel location
         const axesGroup = root.append("g")
+          .attr("class", "axes-group")
           .attr("transform", "translate(" + layout.panel.x + "," + layout.panel.y + ")");
 
         if (flip) {
@@ -510,8 +511,8 @@ HTMLWidgets.widget({
             bottomAxisGen.tickFormat(cleanFormat);
           }
 
-          const leftAxis = axesGroup.append("g").attr("class", "axis").call(leftAxisGen);
-          const bottomAxis = axesGroup.append("g").attr("class", "axis").attr("transform", "translate(0," + h + ")").call(bottomAxisGen);
+          const leftAxis = axesGroup.append("g").attr("class", "axis axis-left").call(leftAxisGen);
+          const bottomAxis = axesGroup.append("g").attr("class", "axis axis-bottom").attr("transform", "translate(0," + h + ")").call(bottomAxisGen);
           window.gg2d3.theme.applyAxisStyle(leftAxis, axisTextX, axisLineX, axisTicksX);
           window.gg2d3.theme.applyAxisStyle(bottomAxis, axisTextY, axisLineY, axisTicksY);
         } else {
@@ -532,8 +533,8 @@ HTMLWidgets.widget({
             yAxisGen.tickFormat(cleanFormat);
           }
 
-          const xAxis = axesGroup.append("g").attr("class", "axis").attr("transform", "translate(0," + h + ")").call(xAxisGen);
-          const yAxis = axesGroup.append("g").attr("class", "axis").call(yAxisGen);
+          const xAxis = axesGroup.append("g").attr("class", "axis axis-bottom").attr("transform", "translate(0," + h + ")").call(xAxisGen);
+          const yAxis = axesGroup.append("g").attr("class", "axis axis-left").call(yAxisGen);
           window.gg2d3.theme.applyAxisStyle(xAxis, axisTextX, axisLineX, axisTicksX);
           window.gg2d3.theme.applyAxisStyle(yAxis, axisTextY, axisLineY, axisTicksY);
         }

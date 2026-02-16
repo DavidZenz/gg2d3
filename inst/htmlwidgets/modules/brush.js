@@ -4,6 +4,14 @@
  * Provides brush selection interaction for gg2d3 plots.
  * Uses d3.brush() behavior to enable rectangular selection with data highlighting.
  *
+ * Key design decisions:
+ * - Brush group inserted BEFORE clipped data group so data elements remain on top
+ *   and can still receive tooltip/hover events from events.js
+ * - Highlighting uses pixel-position checking (not data-domain comparison) so it
+ *   works for all scale types (continuous, categorical, band)
+ * - Selection format normalized: brushX returns [x0,x1], brushY returns [y0,y1],
+ *   brush returns [[x0,y0],[x1,y1]] — all converted to {px0,py0,px1,py1}
+ *
  * @module gg2d3.brush
  */
 
@@ -16,9 +24,9 @@
   }
 
   /**
-   * CSS selectors for interactive geom elements (reuse from events.js pattern).
+   * CSS selectors for interactive geom elements.
    */
-  const INTERACTIVE_SELECTORS = [
+  var INTERACTIVE_SELECTORS = [
     'circle.geom-point',
     'rect.geom-bar',
     'rect.geom-rect',
@@ -37,12 +45,6 @@
   /**
    * Attach brush behavior to a gg2d3 widget.
    *
-   * Implementation strategy:
-   * - Append brush overlay to panel
-   * - On brush end: invert selection to data domain, highlight selected elements
-   * - Use scale.invert() for continuous, band center filtering for categorical
-   * - Send brush coordinates to Shiny if in Shiny mode
-   *
    * @param {HTMLElement} el - Widget container element
    * @param {Object} config - Brush configuration
    * @param {string} config.direction - "xy", "x", or "y"
@@ -52,7 +54,7 @@
    * @param {Object} ir - Intermediate representation (for scale info)
    */
   function attach(el, config, ir) {
-    const svg = d3.select(el).select('svg');
+    var svg = d3.select(el).select('svg');
 
     if (svg.empty()) {
       console.warn('gg2d3.brush: SVG element not found');
@@ -60,17 +62,15 @@
     }
 
     // Determine if this is a faceted plot
-    const panels = svg.selectAll('.panel');
-    const isFaceted = panels.size() > 1;
+    var panels = svg.selectAll('.panel');
+    var isFaceted = panels.size() > 1;
 
     if (isFaceted) {
-      // Attach brush to each panel independently
       panels.each(function() {
         attachToPanel(d3.select(this), el, config, ir);
       });
     } else {
-      // Single panel
-      const panel = panels.node() ? panels : svg.select('.panel');
+      var panel = panels.size() >= 1 ? d3.select(panels.nodes()[0]) : svg.select('.panel');
       attachToPanel(panel, el, config, ir);
     }
   }
@@ -78,40 +78,38 @@
   /**
    * Attach brush to a single panel.
    */
-  function attachToPanel(panelSelection, containerEl, config, ir) {
-    if (panelSelection.empty()) {
+  function attachToPanel(panelGroup, containerEl, config, ir) {
+    if (panelGroup.empty()) {
       console.warn('gg2d3.brush: No panel found');
       return;
     }
 
-    const panelGroup = panelSelection;
-
     // Find panel dimensions from background rect
-    const bgRect = panelGroup.select('rect').node();
+    var bgRect = panelGroup.select('rect').node();
     if (!bgRect) {
       console.warn('gg2d3.brush: Panel background rect not found');
       return;
     }
 
-    const panelWidth = parseFloat(bgRect.getAttribute('width'));
-    const panelHeight = parseFloat(bgRect.getAttribute('height'));
+    var panelWidth = parseFloat(bgRect.getAttribute('width'));
+    var panelHeight = parseFloat(bgRect.getAttribute('height'));
 
-    // Create original scales from IR
-    const flip = !!(ir.coord && ir.coord.flip);
-    const xScaleDesc = ir.scales && ir.scales.x;
-    const yScaleDesc = ir.scales && ir.scales.y;
+    // Build scales for Shiny data-domain output only
+    var flip = !!(ir.coord && ir.coord.flip);
+    var xScaleDesc = ir.scales && ir.scales.x;
+    var yScaleDesc = ir.scales && ir.scales.y;
 
-    const xScale = window.gg2d3.scales.createScale(
+    var xScale = window.gg2d3.scales.createScale(
       xScaleDesc,
       flip ? [panelHeight, 0] : [0, panelWidth]
     );
-    const yScale = window.gg2d3.scales.createScale(
+    var yScale = window.gg2d3.scales.createScale(
       yScaleDesc,
       flip ? [0, panelWidth] : [panelHeight, 0]
     );
 
     // Determine brush type based on direction
-    let brushType;
+    var brushType;
     if (config.direction === 'x') {
       brushType = d3.brushX();
     } else if (config.direction === 'y') {
@@ -123,10 +121,21 @@
     // Configure brush extent to match panel dimensions
     brushType.extent([[0, 0], [panelWidth, panelHeight]]);
 
-    // Append brush group to panel (after data so overlay is on top)
-    const brushGroup = panelGroup.append('g')
-      .attr('class', 'brush-overlay')
-      .call(brushType);
+    // Insert brush group BEFORE the clipped data group so data elements
+    // remain on top and can still receive tooltip/hover events.
+    // Once a brush gesture starts (mousedown on overlay), D3 captures the
+    // pointer via window-level events, so dragging over data elements works.
+    var clippedGroup = panelGroup.select('g[clip-path]');
+    var brushGroup;
+    if (!clippedGroup.empty()) {
+      brushGroup = panelGroup.insert('g', function() { return clippedGroup.node(); })
+        .attr('class', 'brush-overlay')
+        .call(brushType);
+    } else {
+      brushGroup = panelGroup.append('g')
+        .attr('class', 'brush-overlay')
+        .call(brushType);
+    }
 
     // Style the brush overlay
     brushGroup.select('.overlay')
@@ -138,15 +147,15 @@
       .style('stroke', config.fill)
       .style('stroke-width', 1);
 
-    // Handle brush end event (fire only on completion, not during drag)
+    // Handle brush end event
     brushType.on('end.brush', function(event) {
-      const selection = event.selection;
+      var selection = event.selection;
 
       // If no selection (brush cleared), restore all elements
       if (!selection) {
         restoreAllElements(panelGroup);
+        panelGroup.attr('data-brush-active', null);
 
-        // Send null to Shiny if in Shiny mode
         if (typeof HTMLWidgets !== 'undefined' && HTMLWidgets.shinyMode) {
           Shiny.onInputChange(containerEl.id + '_brush', null);
         }
@@ -154,34 +163,46 @@
         return;
       }
 
-      // Invert selection to data domain
-      const bounds = invertSelection(selection, xScale, yScale, xScaleDesc, yScaleDesc, config.direction);
+      // Mark panel as having active brush (used by hover to skip dimming)
+      panelGroup.attr('data-brush-active', 'true');
 
-      // Highlight elements within selection
-      highlightSelection(panelGroup, bounds, flip, config.opacity);
+      // Normalize selection to pixel rect regardless of brush direction
+      // brushX returns [x0, x1], brushY returns [y0, y1], brush returns [[x0,y0],[x1,y1]]
+      var pixelRect = normalizeSelection(selection, config.direction, panelWidth, panelHeight);
 
-      // Send brush coordinates to Shiny if in Shiny mode
-      if (typeof HTMLWidgets !== 'undefined' && HTMLWidgets.shinyMode) {
-        Shiny.onInputChange(containerEl.id + '_brush', {
-          xmin: bounds.xmin,
-          xmax: bounds.xmax,
-          ymin: bounds.ymin,
-          ymax: bounds.ymax
-        });
-      }
+      // Highlight elements within selection using pixel positions
+      highlightSelection(panelGroup, pixelRect, config.opacity);
 
-      // Call user callback if provided
-      if (config.on_brush) {
-        try {
-          const callback = new Function('selectedData', config.on_brush);
-          // Collect selected data
-          const selectedData = collectSelectedData(panelGroup, bounds, flip);
-          callback(selectedData);
-        } catch (e) {
-          console.error('gg2d3.brush: Error in on_brush callback:', e);
+      // Invert to data domain for Shiny/callback output
+      if ((typeof HTMLWidgets !== 'undefined' && HTMLWidgets.shinyMode) || config.on_brush) {
+        var bounds = invertSelection(pixelRect, xScale, yScale, xScaleDesc, yScaleDesc, config.direction);
+
+        if (typeof HTMLWidgets !== 'undefined' && HTMLWidgets.shinyMode) {
+          Shiny.onInputChange(containerEl.id + '_brush', {
+            xmin: bounds.xmin,
+            xmax: bounds.xmax,
+            ymin: bounds.ymin,
+            ymax: bounds.ymax
+          });
+        }
+
+        if (config.on_brush) {
+          try {
+            var callback = new Function('selectedData', config.on_brush);
+            var selectedData = collectSelectedData(panelGroup, pixelRect);
+            callback(selectedData);
+          } catch (e) {
+            console.error('gg2d3.brush: Error in on_brush callback:', e);
+          }
         }
       }
     });
+
+    // Expose brush reference for external clearing (e.g., by zoom module)
+    panelGroup.node().__gg2d3_brush = {
+      behavior: brushType,
+      group: brushGroup
+    };
 
     // Double-click to clear brush
     brushGroup.on('dblclick.brush', function() {
@@ -190,55 +211,146 @@
   }
 
   /**
-   * Invert pixel selection to data domain.
-   * Handles both continuous (scale.invert) and categorical (band center) scales.
+   * Normalize brush selection to a pixel rect.
+   * d3.brush() returns [[x0,y0],[x1,y1]]
+   * d3.brushX() returns [x0, x1]
+   * d3.brushY() returns [y0, y1]
    */
-  function invertSelection(selection, xScale, yScale, xScaleDesc, yScaleDesc, direction) {
-    const bounds = {};
+  function normalizeSelection(selection, direction, panelWidth, panelHeight) {
+    if (direction === 'x') {
+      // brushX: selection = [x0, x1]
+      return { px0: selection[0], py0: 0, px1: selection[1], py1: panelHeight };
+    } else if (direction === 'y') {
+      // brushY: selection = [y0, y1]
+      return { px0: 0, py0: selection[0], px1: panelWidth, py1: selection[1] };
+    } else {
+      // brush: selection = [[x0,y0],[x1,y1]]
+      return { px0: selection[0][0], py0: selection[0][1], px1: selection[1][0], py1: selection[1][1] };
+    }
+  }
+
+  /**
+   * Highlight elements within selection using pixel-position checking.
+   * Works for all scale types (continuous, categorical, band).
+   */
+  function highlightSelection(panelGroup, pixelRect, dimOpacity) {
+    var clippedGroup = panelGroup.select('g[clip-path]');
+    if (clippedGroup.empty()) return;
+
+    INTERACTIVE_SELECTORS.forEach(function(selector) {
+      clippedGroup.selectAll(selector).each(function() {
+        var elem = d3.select(this);
+        var isSelected = isElementInPixelRect(this, pixelRect);
+        elem.style('opacity', isSelected ? 1.0 : dimOpacity);
+      });
+    });
+  }
+
+  /**
+   * Check if an SVG element's position falls within the pixel rectangle.
+   * Uses element attributes directly — no data-domain conversion needed.
+   */
+  function isElementInPixelRect(node, rect) {
+    var tagName = node.tagName.toLowerCase();
+
+    if (tagName === 'circle') {
+      // Point-in-rect check for circles (use center)
+      var cx = parseFloat(node.getAttribute('cx'));
+      var cy = parseFloat(node.getAttribute('cy'));
+      return cx >= rect.px0 && cx <= rect.px1 &&
+             cy >= rect.py0 && cy <= rect.py1;
+    }
+
+    if (tagName === 'rect') {
+      // Overlap check for rectangles (selected if any part overlaps)
+      var x = parseFloat(node.getAttribute('x'));
+      var y = parseFloat(node.getAttribute('y'));
+      var w = parseFloat(node.getAttribute('width'));
+      var h = parseFloat(node.getAttribute('height'));
+      return (x + w) > rect.px0 && x < rect.px1 &&
+             (y + h) > rect.py0 && y < rect.py1;
+    }
+
+    if (tagName === 'text') {
+      // Point-in-rect check for text (use anchor position)
+      var tx = parseFloat(node.getAttribute('x'));
+      var ty = parseFloat(node.getAttribute('y'));
+      return tx >= rect.px0 && tx <= rect.px1 &&
+             ty >= rect.py0 && ty <= rect.py1;
+    }
+
+    if (tagName === 'line') {
+      // Check if midpoint or either endpoint is in selection
+      var x1 = parseFloat(node.getAttribute('x1'));
+      var y1 = parseFloat(node.getAttribute('y1'));
+      var x2 = parseFloat(node.getAttribute('x2'));
+      var y2 = parseFloat(node.getAttribute('y2'));
+      var midX = (x1 + x2) / 2;
+      var midY = (y1 + y2) / 2;
+      var midIn = midX >= rect.px0 && midX <= rect.px1 &&
+                  midY >= rect.py0 && midY <= rect.py1;
+      var p1In = x1 >= rect.px0 && x1 <= rect.px1 &&
+                 y1 >= rect.py0 && y1 <= rect.py1;
+      var p2In = x2 >= rect.px0 && x2 <= rect.px1 &&
+                 y2 >= rect.py0 && y2 <= rect.py1;
+      return midIn || p1In || p2In;
+    }
+
+    if (tagName === 'path') {
+      // Use bounding box center for path elements
+      try {
+        var bbox = node.getBBox();
+        var centerX = bbox.x + bbox.width / 2;
+        var centerY = bbox.y + bbox.height / 2;
+        return centerX >= rect.px0 && centerX <= rect.px1 &&
+               centerY >= rect.py0 && centerY <= rect.py1;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Invert pixel rectangle to data domain (for Shiny output and callbacks).
+   */
+  function invertSelection(pixelRect, xScale, yScale, xScaleDesc, yScaleDesc, direction) {
+    var bounds = {};
 
     // Handle x dimension
     if (direction === 'xy' || direction === 'x') {
-      const x0 = selection[0][0];
-      const x1 = selection[1][0];
-
       if (xScaleDesc && xScaleDesc.type === 'band') {
-        // Categorical scale: filter domain values whose band center falls within selection
-        const domain = xScale.domain();
-        const bandwidth = xScale.bandwidth();
-        const selected = domain.filter(d => {
-          const center = xScale(d) + bandwidth / 2;
-          return center >= x0 && center <= x1;
+        var domainX = xScale.domain();
+        var bandwidthX = xScale.bandwidth();
+        var selectedX = domainX.filter(function(d) {
+          var center = xScale(d) + bandwidthX / 2;
+          return center >= pixelRect.px0 && center <= pixelRect.px1;
         });
-        bounds.xmin = selected[0];
-        bounds.xmax = selected[selected.length - 1];
-        bounds.xCategories = selected;
-      } else {
-        // Continuous scale: use invert
-        bounds.xmin = xScale.invert(x0);
-        bounds.xmax = xScale.invert(x1);
+        bounds.xmin = selectedX[0];
+        bounds.xmax = selectedX[selectedX.length - 1];
+        bounds.xCategories = selectedX;
+      } else if (xScale.invert) {
+        bounds.xmin = xScale.invert(pixelRect.px0);
+        bounds.xmax = xScale.invert(pixelRect.px1);
       }
     }
 
     // Handle y dimension
     if (direction === 'xy' || direction === 'y') {
-      const y0 = selection[0][1];
-      const y1 = selection[1][1];
-
       if (yScaleDesc && yScaleDesc.type === 'band') {
-        // Categorical scale
-        const domain = yScale.domain();
-        const bandwidth = yScale.bandwidth();
-        const selected = domain.filter(d => {
-          const center = yScale(d) + bandwidth / 2;
-          return center >= y0 && center <= y1;
+        var domainY = yScale.domain();
+        var bandwidthY = yScale.bandwidth();
+        var selectedY = domainY.filter(function(d) {
+          var center = yScale(d) + bandwidthY / 2;
+          return center >= pixelRect.py0 && center <= pixelRect.py1;
         });
-        bounds.ymin = selected[0];
-        bounds.ymax = selected[selected.length - 1];
-        bounds.yCategories = selected;
-      } else {
-        // Continuous scale: use invert
-        bounds.ymin = yScale.invert(y0);
-        bounds.ymax = yScale.invert(y1);
+        bounds.ymin = selectedY[0];
+        bounds.ymax = selectedY[selectedY.length - 1];
+        bounds.yCategories = selectedY;
+      } else if (yScale.invert) {
+        bounds.ymin = yScale.invert(pixelRect.py0);
+        bounds.ymax = yScale.invert(pixelRect.py1);
       }
     }
 
@@ -246,76 +358,20 @@
   }
 
   /**
-   * Highlight elements within selection, dim elements outside.
-   */
-  function highlightSelection(panelGroup, bounds, flip, dimOpacity) {
-    const clippedGroup = panelGroup.select('g[clip-path]');
-    if (clippedGroup.empty()) return;
-
-    // Get scale functions to use (flip swaps which scale goes to which axis)
-    const xField = flip ? 'y' : 'x';
-    const yField = flip ? 'x' : 'y';
-
-    // Process each geom type
-    INTERACTIVE_SELECTORS.forEach(selector => {
-      clippedGroup.selectAll(selector).each(function(d) {
-        if (!d) return;
-
-        const elem = d3.select(this);
-        const isSelected = isElementInSelection(d, bounds, xField, yField);
-
-        elem.style('opacity', isSelected ? 1.0 : dimOpacity);
-      });
-    });
-  }
-
-  /**
-   * Check if an element's data falls within the brush selection.
-   */
-  function isElementInSelection(d, bounds, xField, yField) {
-    let xInside = true;
-    let yInside = true;
-
-    // Check x dimension
-    if (bounds.xCategories !== undefined) {
-      // Categorical x scale
-      xInside = bounds.xCategories.includes(d[xField]);
-    } else if (bounds.xmin !== undefined && bounds.xmax !== undefined) {
-      // Continuous x scale
-      const xVal = d[xField];
-      xInside = xVal >= Math.min(bounds.xmin, bounds.xmax) &&
-                xVal <= Math.max(bounds.xmin, bounds.xmax);
-    }
-
-    // Check y dimension
-    if (bounds.yCategories !== undefined) {
-      // Categorical y scale
-      yInside = bounds.yCategories.includes(d[yField]);
-    } else if (bounds.ymin !== undefined && bounds.ymax !== undefined) {
-      // Continuous y scale
-      const yVal = d[yField];
-      yInside = yVal >= Math.min(bounds.ymin, bounds.ymax) &&
-                yVal <= Math.max(bounds.ymin, bounds.ymax);
-    }
-
-    return xInside && yInside;
-  }
-
-  /**
    * Restore all elements to original opacity.
    */
   function restoreAllElements(panelGroup) {
-    const clippedGroup = panelGroup.select('g[clip-path]');
+    var clippedGroup = panelGroup.select('g[clip-path]');
     if (clippedGroup.empty()) return;
 
-    INTERACTIVE_SELECTORS.forEach(selector => {
+    INTERACTIVE_SELECTORS.forEach(function(selector) {
       clippedGroup.selectAll(selector).each(function() {
-        const elem = d3.select(this);
-        const originalOpacity = elem.attr('data-original-opacity');
+        var elem = d3.select(this);
+        var originalOpacity = elem.attr('data-original-opacity');
         if (originalOpacity) {
           elem.style('opacity', originalOpacity);
         } else {
-          elem.style('opacity', null); // Remove inline style, fall back to CSS/attribute
+          elem.style('opacity', null);
         }
       });
     });
@@ -324,18 +380,16 @@
   /**
    * Collect data from selected elements (for on_brush callback).
    */
-  function collectSelectedData(panelGroup, bounds, flip) {
-    const clippedGroup = panelGroup.select('g[clip-path]');
+  function collectSelectedData(panelGroup, pixelRect) {
+    var clippedGroup = panelGroup.select('g[clip-path]');
     if (clippedGroup.empty()) return [];
 
-    const selectedData = [];
-    const xField = flip ? 'y' : 'x';
-    const yField = flip ? 'x' : 'y';
+    var selectedData = [];
 
-    INTERACTIVE_SELECTORS.forEach(selector => {
+    INTERACTIVE_SELECTORS.forEach(function(selector) {
       clippedGroup.selectAll(selector).each(function(d) {
         if (!d) return;
-        if (isElementInSelection(d, bounds, xField, yField)) {
+        if (isElementInPixelRect(this, pixelRect)) {
           selectedData.push(d);
         }
       });
