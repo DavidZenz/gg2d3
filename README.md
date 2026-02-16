@@ -50,6 +50,7 @@ gg2d3(p)
 
 - Continuous and categorical x/y scales
 - Log, sqrt, and reverse scale transforms
+- Date and datetime (POSIXct) scales
 - `coord_flip` and `coord_fixed` with aspect ratio support
 
 ### Layout & Guides
@@ -62,7 +63,8 @@ gg2d3(p)
 
 ### Faceting
 
-- `facet_wrap` with fixed scales
+- `facet_wrap` and `facet_grid`
+- Fixed and free scales (`scales = "free"`, `"free_x"`, `"free_y"`)
 - Strip labels with themed styling
 - Per-panel data filtering and rendering
 - Panel spacing from theme
@@ -73,11 +75,25 @@ gg2d3(p)
 - Axis titles, plot titles, subtitles, and captions
 - Secondary axes
 
-## Planned
+### Interactivity
 
-- `facet_grid` and free scales
-- Pipe-based interactivity: `gg2d3(p) |> d3_tooltip() |> d3_zoom()`
-- Brush selection and linked views
+Composable pipe-based API:
+
+``` r
+gg2d3(p) |>
+  d3_tooltip() |>
+  d3_hover() |>
+  d3_zoom() |>
+  d3_brush()
+```
+
+- **Tooltips** — hover to see data values (with date/time formatting)
+- **Hover highlighting** — dim non-hovered groups
+- **Zoom & pan** — scroll to zoom, drag to pan (resets on
+  double-click)
+- **Brush selection** — drag to select data regions
+- **Linked views** — Crosstalk integration for cross-widget
+  brushing
 
 ## Troubleshooting
 
