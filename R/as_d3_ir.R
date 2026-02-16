@@ -377,6 +377,68 @@ as_d3_ir <- function(p, width = 640, height = 400,
         result <- c(result, transform_info)
       }
 
+      # Temporal scale handling: convert domain to milliseconds and extract metadata
+      trans_name <- if (!is.null(scale_obj$trans)) scale_obj$trans$name else NULL
+      if (!is.null(trans_name) && trans_name %in% c("date", "time")) {
+        # Convert domain to milliseconds
+        if (trans_name == "date") {
+          # Date: values are days since epoch -> multiply by 86400000
+          result$domain <- result$domain * 86400000
+        } else if (trans_name == "time") {
+          # POSIXct/datetime: values are seconds since epoch -> multiply by 1000
+          result$domain <- result$domain * 1000
+        }
+
+        # Extract date format pattern from scale closure
+        # ggplot2 stores date_labels in the constructor closure:
+        # environment(environment(scale_obj$labels)$f)$date_labels
+        format_pattern <- NULL
+        if (!is.null(scale_obj$labels) && is.function(scale_obj$labels)) {
+          format_pattern <- tryCatch({
+            # Navigate ggproto method -> underlying function closure
+            outer_env <- environment(scale_obj$labels)
+            f <- outer_env$f
+            if (is.function(f)) {
+              inner_env <- environment(f)
+              dl <- inner_env$date_labels
+              # NULL or waiver means auto-format; only pass explicit patterns
+              if (!is.null(dl) && !inherits(dl, "waiver") && nzchar(dl)) dl else NULL
+            } else {
+              NULL
+            }
+          }, error = function(e) NULL)
+        }
+        result$format <- format_pattern
+
+        # Extract timezone from datetime scale
+        if (trans_name == "time") {
+          timezone <- tryCatch({
+            # First try: direct timezone field on scale object (scale_x_datetime stores it here)
+            tz_val <- scale_obj$timezone
+            if (!is.null(tz_val) && tz_val != "") {
+              tz_val
+            } else {
+              # Fallback: try labels closure (when labels function has been resolved)
+              if (is.function(scale_obj$labels)) {
+                env <- environment(scale_obj$labels)
+                tz_val2 <- env$tz
+                if (!is.null(tz_val2) && tz_val2 != "") tz_val2 else "UTC"
+              } else {
+                "UTC"
+              }
+            }
+          }, error = function(e) "UTC")
+          result$timezone <- timezone
+        }
+
+        # Include pre-formatted labels as fallback
+        formatted_labels <- tryCatch({
+          pp_labels <- panel_params_axis$get_labels()
+          if (length(pp_labels) > 0) as.character(pp_labels) else NULL
+        }, error = function(e) NULL)
+        result$labels <- formatted_labels
+      }
+
       result
     }
   }
@@ -413,6 +475,25 @@ as_d3_ir <- function(p, width = 640, height = 400,
   y_breaks <- y_breaks[!is.na(y_breaks)]
   x_minor_breaks <- if (!is.null(x_minor_breaks)) x_minor_breaks[!is.na(x_minor_breaks)] else NULL
   y_minor_breaks <- if (!is.null(y_minor_breaks)) y_minor_breaks[!is.na(y_minor_breaks)] else NULL
+
+  # Convert temporal breaks to milliseconds (matching domain conversion in get_scale_info)
+  x_trans_name <- if (!is.null(xscale_obj$trans)) xscale_obj$trans$name else NULL
+  if (!is.null(x_trans_name) && x_trans_name == "date") {
+    x_breaks <- x_breaks * 86400000
+    if (!is.null(x_minor_breaks)) x_minor_breaks <- x_minor_breaks * 86400000
+  } else if (!is.null(x_trans_name) && x_trans_name == "time") {
+    x_breaks <- x_breaks * 1000
+    if (!is.null(x_minor_breaks)) x_minor_breaks <- x_minor_breaks * 1000
+  }
+
+  y_trans_name <- if (!is.null(yscale_obj$trans)) yscale_obj$trans$name else NULL
+  if (!is.null(y_trans_name) && y_trans_name == "date") {
+    y_breaks <- y_breaks * 86400000
+    if (!is.null(y_minor_breaks)) y_minor_breaks <- y_minor_breaks * 86400000
+  } else if (!is.null(y_trans_name) && y_trans_name == "time") {
+    y_breaks <- y_breaks * 1000
+    if (!is.null(y_minor_breaks)) y_minor_breaks <- y_minor_breaks * 1000
+  }
 
   scales <- list(
     x = c(get_scale_info(xscale_obj, pp_x, "x"), list(
@@ -805,12 +886,33 @@ as_d3_ir <- function(p, width = 640, height = 400,
           ppx <- pp$x
           ppy <- pp$y
         }
+        panel_x_range <- unname(ppx$continuous_range %||% ppx$range)
+        panel_y_range <- unname(ppy$continuous_range %||% ppy$range)
+        panel_x_breaks <- unname(ppx$breaks[!is.na(ppx$breaks)])
+        panel_y_breaks <- unname(ppy$breaks[!is.na(ppy$breaks)])
+
+        # Convert temporal panel values to milliseconds
+        if (!is.null(x_trans_name) && x_trans_name == "date") {
+          panel_x_range <- panel_x_range * 86400000
+          panel_x_breaks <- panel_x_breaks * 86400000
+        } else if (!is.null(x_trans_name) && x_trans_name == "time") {
+          panel_x_range <- panel_x_range * 1000
+          panel_x_breaks <- panel_x_breaks * 1000
+        }
+        if (!is.null(y_trans_name) && y_trans_name == "date") {
+          panel_y_range <- panel_y_range * 86400000
+          panel_y_breaks <- panel_y_breaks * 86400000
+        } else if (!is.null(y_trans_name) && y_trans_name == "time") {
+          panel_y_range <- panel_y_range * 1000
+          panel_y_breaks <- panel_y_breaks * 1000
+        }
+
         list(
           PANEL = as.integer(p),
-          x_range = unname(ppx$continuous_range %||% ppx$range),
-          y_range = unname(ppy$continuous_range %||% ppy$range),
-          x_breaks = unname(ppx$breaks[!is.na(ppx$breaks)]),
-          y_breaks = unname(ppy$breaks[!is.na(ppy$breaks)])
+          x_range = panel_x_range,
+          y_range = panel_y_range,
+          x_breaks = panel_x_breaks,
+          y_breaks = panel_y_breaks
         )
       })
 
@@ -903,12 +1005,33 @@ as_d3_ir <- function(p, width = 640, height = 400,
           ppx <- pp$x
           ppy <- pp$y
         }
+        panel_x_range <- unname(ppx$continuous_range %||% ppx$range)
+        panel_y_range <- unname(ppy$continuous_range %||% ppy$range)
+        panel_x_breaks <- unname(ppx$breaks[!is.na(ppx$breaks)])
+        panel_y_breaks <- unname(ppy$breaks[!is.na(ppy$breaks)])
+
+        # Convert temporal panel values to milliseconds
+        if (!is.null(x_trans_name) && x_trans_name == "date") {
+          panel_x_range <- panel_x_range * 86400000
+          panel_x_breaks <- panel_x_breaks * 86400000
+        } else if (!is.null(x_trans_name) && x_trans_name == "time") {
+          panel_x_range <- panel_x_range * 1000
+          panel_x_breaks <- panel_x_breaks * 1000
+        }
+        if (!is.null(y_trans_name) && y_trans_name == "date") {
+          panel_y_range <- panel_y_range * 86400000
+          panel_y_breaks <- panel_y_breaks * 86400000
+        } else if (!is.null(y_trans_name) && y_trans_name == "time") {
+          panel_y_range <- panel_y_range * 1000
+          panel_y_breaks <- panel_y_breaks * 1000
+        }
+
         list(
           PANEL = as.integer(p),
-          x_range = unname(ppx$continuous_range %||% ppx$range),
-          y_range = unname(ppy$continuous_range %||% ppy$range),
-          x_breaks = unname(ppx$breaks[!is.na(ppx$breaks)]),
-          y_breaks = unname(ppy$breaks[!is.na(ppy$breaks)])
+          x_range = panel_x_range,
+          y_range = panel_y_range,
+          x_breaks = panel_x_breaks,
+          y_breaks = panel_y_breaks
         )
       })
 
