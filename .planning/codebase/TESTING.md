@@ -1,209 +1,304 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-02-07
+**Analysis Date:** 2026-03-11
 
 ## Test Framework
 
 **Runner:**
-- testthat (>= 3.0.0) - R testing framework
-- Config: `tests/testthat.R`
-- Roxygen edition: 3 (Config/testthat/edition: 3 in DESCRIPTION)
+- testthat [>= 3.0.0]
+- Edition 3: `Config/testthat/edition: 3` in DESCRIPTION
+- Config file: `tests/testthat.R` (standard setup, unchanged)
 
 **Assertion Library:**
-- testthat built-in expectations: `expect_true()`, `expect_equal()`, etc.
+- testthat's `expect_*()` functions (built-in to testthat)
 
 **Run Commands:**
 ```bash
-# Run all tests (from R console)
-devtools::test()
-
-# Run single test file
-testthat::test_file("tests/testthat/test-ir.R")
-
-# Run tests via command line
-R CMD check .
+devtools::test()              # Run all tests
+testthat::test_file("tests/testthat/test-ir.R")  # Run single test file
+devtools::test()              # Watch mode available via devtools
 ```
 
 ## Test File Organization
 
 **Location:**
-- Co-located in `tests/testthat/` directory (not beside source files)
-- Main test file: `tests/testthat/test-ir.R`
-- Setup file: `tests/testthat.R` (standard testthat boilerplate)
+- `tests/testthat/` directory (standard R package structure)
+- Test files committed to repository
 
 **Naming:**
-- Pattern: `test-*.R` for test files
-- Currently: `test-ir.R` for intermediate representation tests
+- Pattern: `test-<feature>.R`
+- Examples:
+  - `test-ir.R` - Intermediate representation structure and conversion
+  - `test-validate-ir.R` - IR validation function
+  - `test-interactivity.R` - Widget interactivity features
+  - `test-geoms-phase4.R` - Geom support (area, ribbon, segment, etc.)
+  - `test-geoms-phase5.R` - Additional geom support
+  - `test-date-scales.R` - Temporal data handling
+  - `test-facets.R`, `test-facet-grid.R` - Multi-panel layouts
+  - `test-legends.R` - Guide/legend rendering
+  - `test-zoom-brush.R`, `test-crosstalk.R` - Interactivity features
+  - `test-layout.R` - Coordinate systems and layout
 
-**Structure:**
-```
-tests/
-├── testthat.R          # Setup and configuration
-└── testthat/
-    └── test-ir.R       # Test suite for as_d3_ir()
-```
+**Files per feature:** 1 file per feature area (clean separation of concerns)
 
 ## Test Structure
 
 **Suite Organization:**
 ```r
-test_that("as_d3_ir builds layers with data", {
+test_that("descriptive test name", {
+  # Setup
   library(ggplot2)
   p <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
+
+  # Action
   ir <- as_d3_ir(p)
+
+  # Assertion
   expect_true(length(ir$layers) >= 1)
-  expect_true(length(ir$layers[[1]]$data) >= 1)
-  expect_equal(ir$scales$x$type, "continuous")
-  expect_equal(ir$scales$y$type, "continuous")
 })
 ```
 
 **Patterns:**
-- Single test suite with 4 assertions per test_that block
-- Setup within test block (creates plot object locally)
-- Direct assertions on IR structure fields
-- Library imported within test for scope isolation
+- Each test isolated and independent
+- `library(ggplot2)` called within test functions for clarity
+- Test names are descriptive and start with descriptive verb: "as_d3_ir builds layers", "continuous scale extracts domain"
+- Data setup typically uses built-in datasets: `mtcars`, `economics`, `LakeHuron`
 
 ## Mocking
 
-**Framework:** Not detected; no mocking library used (no mockery, unittest.mock, etc.)
+**Framework:** Not used - tests call actual functions
 
-**Patterns:**
-- No mocking detected in current tests
-- Tests work with real ggplot2 objects rather than mocks
-- Real data (mtcars) used for testing
+**Approach:**
+- Direct function calls (no mocking)
+- Built-in data (mtcars, economics, etc.) used as test data
+- ggplot2 functions called directly to build test plots
+- IR validation done against actual IR structures produced by `as_d3_ir()`
 
 **What to Mock:**
-- External system calls (not relevant to current codebase)
-- ggplot2::ggplot_build() could be mocked for unit testing, but current approach uses real builds
+- Not applicable - no mocking framework used
 
 **What NOT to Mock:**
-- ggplot2 objects and their structure (tests rely on real behavior)
-- Data frames and list structures (work with actual outputs)
+- ggplot2 functions (called directly)
+- Data structures (use real test data)
+- IR extraction (tested by calling actual `as_d3_ir()`)
 
 ## Fixtures and Factories
 
 **Test Data:**
-- Real R data: `mtcars` dataset used in test
-- No factory pattern detected
-- Plots created inline: `ggplot(mtcars, aes(wt, mpg)) + geom_point()`
+- Built-in R datasets: `mtcars`, `economics`, `LakeHuron`
+- Ad-hoc dataframes created inline:
+  ```r
+  df <- data.frame(
+    x = factor(c("A", "B"), levels = c("A", "B", "C", "D", "E")),
+    y = 1:2
+  )
+  ```
+- Custom transformations created as needed:
+  ```r
+  log2_trans <- scales::trans_new(
+    "log2",
+    transform = log2,
+    inverse = function(x) 2^x
+  )
+  ```
+
+**Common Test Data Patterns:**
+- Factor levels with `levels` parameter for testing drop behavior
+- NA values for null handling: `data.frame(x = c("A", "B", NA, "A"), y = 1:4)`
+- Custom data ranges for scale testing
+- Temporal data (Date, POSIXct) for time scale testing
 
 **Location:**
-- Test data created within `test-ir.R` test blocks
-- No separate fixtures directory
-- No reusable factory functions for test data
+- No separate fixture files - all test data created inline in test files
+- Simple and self-contained approach
 
-**Coverage:**
-- Current coverage: Only 1 test for IR conversion
-- Geom types: Tests point geometry only
-- Scale types: Tests continuous scales only
-- Theme elements: Not explicitly tested
-- Edge cases: Not tested (empty data, NULL values, etc.)
+## Coverage
+
+**Requirements:** No coverage targets enforced (none in DESCRIPTION or config)
+
+**View Coverage:**
+```bash
+covr::package_coverage()           # Generate coverage report
+covr::report()                     # Show in RStudio viewer
+```
 
 ## Test Types
 
 **Unit Tests:**
-- Scope: Individual function behavior (`as_d3_ir()`)
-- Approach: Direct IR structure validation
-- Example: `test_that("as_d3_ir builds layers with data", {`
-- Single responsibility: Verify IR layer and scale structure
+- Scope: Individual functions and small units
+- Approach: Test IR structure, validation rules, widget modifications
+- Dominant test type (90%+ of tests)
+- Examples:
+  - `test-ir.R`: Tests `as_d3_ir()` extraction for scales, layers, coordinates
+  - `test-validate-ir.R`: Tests `validate_ir()` error/warning behavior
+  - `test-interactivity.R`: Tests widget modifier functions (`d3_tooltip()`, `d3_hover()`)
 
 **Integration Tests:**
-- Scope: Not explicitly present
-- Widget integration with htmlwidgets could be tested but isn't
-- JavaScript rendering not tested at R level
+- Scope: Multiple components working together
+- Approach: Build full plots with multiple geoms/aesthetics, verify complete IR structure
+- Examples:
+  - Coordinate system + scale + geom combinations
+  - Faceted plots with scale handling
+  - Multiple layers with different geoms in single plot
 
 **E2E Tests:**
-- Framework: Not used
-- ggplot2 → IR → D3 rendering chain not tested end-to-end
-- Manual verification done via generated HTML files
+- Not applicable - this is a rendering library (visual testing requires browser)
+- Widget output tested for structure/data, not visual correctness
 
 ## Common Patterns
 
-**Async Testing:**
-- Not applicable; R is single-threaded in this context
-- No async/await patterns in testthat
-
-**Error Testing:**
+**Function Validation Testing:**
 ```r
-# Current approach: Not explicitly tested
-# Should test:
-expect_error(as_d3_ir(not_a_ggplot_object), "Provide a ggplot")
-expect_error(gg2d3(invalid_input), "Provide a ggplot")
+test_that("function validates input", {
+  expect_error(function_name("invalid_input"), "expected error message")
+})
 ```
 
-**Setup and Teardown:**
-- Not explicitly used
-- Setup within each test block
-- No shared fixtures or one-time setup
-
-## Coverage
-
-**Requirements:** Not enforced (no coverage targets in DESCRIPTION or CI config)
-
-**View Coverage:**
-```bash
-# Via devtools
-devtools::test_coverage()
-
-# Or via covr
-covr::package_coverage()
-```
-
-**Current Coverage:** Minimal
-- 1 test covering basic `as_d3_ir()` functionality
-- Major gaps:
-  - No tests for `gg2d3()` widget function
-  - No tests for discrete scales
-  - No tests for categorical data
-  - No tests for theme extraction
-  - No tests for error conditions
-  - No tests for edge cases (NULL, empty, NA values)
-  - No tests for different geom types beyond point
-
-**Test Execution:**
+Example from `test-interactivity.R`:
 ```r
-# From R console during development
-library(testthat)
-library(gg2d3)
-test_check("gg2d3")
+test_that("d3_hover() validates opacity range", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point()
 
-# Or via devtools
-devtools::test()
+  expect_error(gg2d3(p) |> d3_hover(opacity = -0.1), "between 0 and 1")
+  expect_error(gg2d3(p) |> d3_hover(opacity = 1.5), "between 0 and 1")
+})
 ```
 
-## Testing Gaps and Risks
+**Structure Verification:**
+```r
+test_that("object has expected structure", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
+  ir <- as_d3_ir(p)
 
-**Untested Functions:**
-- `gg2d3()`: Main widget entry point - not tested
-- Helper functions inside `as_d3_ir()`:
-  - `map_discrete()` - discrete scale mapping
-  - `extract_theme_element()` - theme extraction
-  - `get_scale_info()` - scale processing
-  - `to_rows()` - data transformation (defined twice)
+  expect_true(length(ir$layers) >= 1)
+  expect_true(length(ir$layers[[1]]$data) >= 1)
+  expect_equal(ir$scales$x$type, "continuous")
+})
+```
 
-**Untested Geom Types:**
-- Only point tested; bar, line, path, rect, text, area, segment, ribbon unsupported
+**Widget Chaining:**
+```r
+test_that("pipe chaining preserves configurations", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point()
+  w <- gg2d3(p) |>
+    d3_tooltip(fields = c("x", "y")) |>
+    d3_hover(opacity = 0.5)
 
-**Untested Scale Types:**
-- Only continuous tested
-- Categorical/discrete scales need coverage
-- Specialized scales (log, sqrt, etc.) untested
+  expect_equal(w$x$interactivity$tooltip$fields, c("x", "y"))
+  expect_equal(w$x$interactivity$hover$opacity, 0.5)
+})
+```
 
-**Untested Theme Features:**
-- Panel background/border
-- Grid major/minor
-- Axis text, ticks, titles
-- Plot margins
-- Text rotation/alignment
+**Assertion Types Used:**
 
-**Untested Error Paths:**
-- Invalid ggplot input to `gg2d3()`
-- NULL scale objects
-- Malformed theme elements
-- Empty data frames
-- Factor handling edge cases
+| Pattern | Usage | Example |
+|---------|-------|---------|
+| `expect_equal()` | Exact equality | `expect_equal(ir$scales$x$type, "continuous")` |
+| `expect_true()` / `expect_false()` | Boolean conditions | `expect_true(length(ir$layers) >= 1)` |
+| `expect_error()` | Error throwing | `expect_error(as_d3_ir(invalid), "error message")` |
+| `expect_warning()` | Warning throwing | `expect_warning(as_d3_ir(p), "coord_trans")` |
+| `expect_silent()` | No output | `expect_silent(validate_ir(valid_ir))` |
+| `expect_null()` | NULL values | `expect_null(ir$scales$x$transform)` |
+| `expect_s3_class()` | S3 class membership | `expect_s3_class(w, "gg2d3")` |
+| `expect_identical()` | Reference equality | `expect_identical(result, valid_ir)` |
+| `expect_type()` | R type checking | `expect_type(w$x$interactivity, "list")` |
+
+**Assumption Testing (Implicit):**
+```r
+test_that("domain values cover data range", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
+  ir <- as_d3_ir(p)
+
+  # Implicit assumption: domain should expand slightly beyond data range
+  expect_true(ir$scales$x$domain[1] <= min(mtcars$wt))
+  expect_true(ir$scales$x$domain[2] >= max(mtcars$wt))
+})
+```
+
+**Discrete/Categorical Scale Testing:**
+```r
+test_that("discrete scale with drop=FALSE shows all factor levels", {
+  library(ggplot2)
+  df <- data.frame(
+    x = factor(c("A", "B"), levels = c("A", "B", "C", "D", "E")),
+    y = 1:2
+  )
+  p <- ggplot(df, aes(x, y)) + geom_point() + scale_x_discrete(drop = FALSE)
+  ir <- as_d3_ir(p)
+
+  expect_equal(length(ir$scales$x$domain), 5)
+})
+```
+
+**Scale Transformation Testing:**
+```r
+test_that("log10 transformation extracted correctly", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() +
+    scale_x_log10()
+  ir <- as_d3_ir(p)
+
+  expect_equal(ir$scales$x$type, "continuous")
+  expect_equal(ir$scales$x$transform, "log10")
+  expect_equal(ir$scales$x$base, 10)
+  expect_true(all(ir$scales$x$domain > 0))
+})
+```
+
+**Error Message Validation:**
+```r
+test_that("log scale with zero data throws informative error", {
+  library(ggplot2)
+  p <- ggplot(data.frame(x = 0:10, y = 1:11), aes(x, y)) +
+    geom_point() +
+    scale_x_log10()
+
+  expect_error(
+    as_d3_ir(p),
+    "Log scale on x-axis has non-positive domain"
+  )
+
+  expect_error(
+    as_d3_ir(p),
+    "pseudo_log"
+  )
+})
+```
+
+**Backward Compatibility Testing:**
+```r
+test_that("static rendering unaffected (backward compat)", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point()
+  w <- gg2d3(p)
+
+  expect_null(w$x$interactivity)
+  expect_s3_class(w, "gg2d3")
+})
+```
+
+## Test Coverage Analysis
+
+**Well-Tested Areas:**
+- IR structure and extraction (`test-ir.R` - 263 lines)
+- IR validation (`test-validate-ir.R` - 231 lines)
+- Scale handling (continuous, discrete, transformations, temporal)
+- Coordinate systems (flip, fixed)
+- Widget interactivity (tooltip, hover, zoom, brush)
+- Geom support (point, line, area, ribbon, bar, text, etc.)
+- Faceting (wrap, grid)
+- Legends/guides
+
+**Test File Sizes:**
+- Range: 230-390 lines per file
+- Typical: 250-300 lines
+- Total test code: 2379 lines across 12 files
 
 ---
 
-*Testing analysis: 2026-02-07*
+*Testing analysis: 2026-03-11*

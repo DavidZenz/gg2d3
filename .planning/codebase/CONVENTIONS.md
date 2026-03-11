@@ -1,171 +1,156 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-02-07
+**Analysis Date:** 2026-03-11
 
 ## Naming Patterns
 
 **Files:**
-- `.R` extension for R source files
-- File names use snake_case: `as_d3_ir.R`, `gg2d3.R`
-- Test files in `tests/testthat/` follow pattern `test-*.R`
+- `snake_case.R` - R source files use snake_case for descriptive names
+- Examples: `as_d3_ir.R` (converter), `d3_zoom.R` (widget feature), `validate_ir.R` (validator)
+- Test files follow `test-<feature>.R` pattern in `tests/testthat/` directory
 
 **Functions:**
-- snake_case for all function definitions: `as_d3_ir()`, `map_discrete()`, `extract_theme_element()`
-- Local helper functions use snake_case within function scope
-- Special operators use backticks: `` `%||%` `` for null coalescing operator
-- Function names are descriptive: `to_rows()`, `get_scale_info()`, `isValidColor()` (JavaScript)
+- `snake_case` - All functions use snake_case
+- Exported functions documented with roxygen2 `#' @export`
+- Examples: `gg2d3()`, `as_d3_ir()`, `d3_zoom()`, `d3_tooltip()`, `validate_ir()`
+- Internal helper functions not exported, placed within larger functions when local
 
 **Variables:**
-- snake_case for all variable names: `xscale_obj`, `keep_aes`, `allx`, `ally`, `scale_range`
-- Abbreviations acceptable when clear: `ir` (intermediate representation), `df` (data frame), `col` (column)
-- Prefix convention for type hints: `*_obj` for objects, `*_px` for pixel measurements
-- One-letter loop indices acceptable: `i`, `ii` for loops, `x`, `y` for parameters
+- `snake_case` - Local variables and parameters use snake_case
+- Abbreviations acceptable for clarity: `ir` (intermediate representation), `p` (plot), `b` (built ggplot), `df` (dataframe)
+- Common shortcuts: `xscale_obj`, `yscale_obj`, `gname`, `col`, `cn`, `ii`, `v`
+- List names are lowercase: `scales`, `layers`, `params`, `aes`, `data`, `geom`
 
-**Types:**
-- Class checking via `inherits()`: `inherits(x, "ggplot")`, `inherits(calc, "element_rect")`
-- Type checking via `is.*()`: `is.null()`, `is.list()`, `is.factor()`, `is.numeric()`
-- Qualified function calls used with namespace prefix when from external packages: `ggplot2::ggplot_build()`, `htmlwidgets::createWidget()`, `grid::convertUnit()`
-
-**JavaScript (D3 rendering):**
-- camelCase for JavaScript functions: `val()`, `num()`, `isHexColor()`, `asRows()`, `makeScale()`, `convertColor()`
-- camelCase for JavaScript variables: `domainArr`, `numericDomain`, `dateDomain`
-- Constants in functions use camelCase: `testElem`, `greyMatch`
+**Types/Classes:**
+- Classes inherit from htmlwidgets: `gg2d3` (defined implicitly by htmlwidgets)
+- S3 inheritance checks use `inherits(x, "gg2d3")`
 
 ## Code Style
 
 **Formatting:**
-- Roxygen2 for R documentation generation
-- RoxygenNote: 7.3.1 in DESCRIPTION
-- 2-space indentation throughout (not tabs)
-- Functions typically have opening brace `{` on same line as declaration
-- Nested functions allowed and common for helper utilities
+- No explicit formatter configured (no .lintr or .styler files)
+- Indentation: 2 spaces (observed throughout codebase)
+- Line length: Typically 100 characters, some longer allowed
+- Comments: Space after `#` for readability
+
+**Roxygen2 Documentation:**
+- All exported functions documented with roxygen2
+- Standard template: `#'`, `@param`, `@return`, `@examples`, `@export`
+- Markdown enabled: `Roxygen: list(markdown = TRUE)` in DESCRIPTION
+- Code references: Use backticks for function names and file references
+- Example: `\code{gg2d3()}` or inline backticks `` `gg2d3()` ``
 
 **Linting:**
-- No explicit linting configuration detected (no .lintr or ESLint config)
-- Package uses roxygen2 for documentation
-- Encoding: UTF-8 specified in DESCRIPTION
+- No linting config detected (no .lintr file)
+- Manual code review approach
 
 ## Import Organization
 
-**Order (R):**
-1. Namespace qualification for external packages: `ggplot2::ggplot_build()`, `htmlwidgets::createWidget()`, `grid::convertUnit()`
-2. Base R functions used without prefix: `stopifnot()`, `inherits()`, `is.*()`, `lapply()`, `vector()`
-3. No explicit import statements in function body; packages accessed via `::` notation
+**Package Loading:**
+- Explicit `library()` calls within functions when needed
+- Example: `library(ggplot2)` called in `as_d3_ir()` for `ggplot_build()`
+- Example: `library(ggplot2)` in test files for test data and plot construction
+- Conditional imports: `requireNamespace("crosstalk", quietly = TRUE)` for optional features in `gg2d3.R`
 
 **Path Aliases:**
-- Not applicable; R does not use path aliases in the same way JavaScript/TypeScript does
-- ggplot2 object hierarchy accessed via `$` notation: `b$layout$panel_scales_x`, `b$plot$layers`, `b$plot$theme`
-
-**Dependencies:**
-- Roxygen2: Documentation generation
-- testthat (>= 3.0.0): Testing framework (in Suggests)
-- ggplot2: Plotting library (implicit, accessed via `::`)
-- htmlwidgets: Widget framework for web output
-- grid: For unit conversion (`grid::convertUnit`)
+- Not applicable - R package structure uses explicit namespacing
+- All dependencies in `DESCRIPTION` file
 
 ## Error Handling
 
-**Patterns:**
-- Input validation via `stopifnot()` at function entry:
-  ```r
-  stopifnot(inherits(p, "ggplot"))
-  ```
-- Conditional early returns for null/empty cases:
-  ```r
-  if (is.null(df) || !nrow(df)) return(list())
-  ```
-- `tryCatch()` for recovery from potentially failing operations:
-  ```r
-  scale_range <- tryCatch(
-    scale_obj$get_limits(),
-    error = function(e) range(data_values, finite = TRUE)
-  )
-  ```
-- Null coalescing via custom `%||%` operator for default values:
-  ```r
-  `%||%` <- function(x, y) if (is.null(x)) y else x
-  title = b$plot$labels$title %||% ""
-  ```
-- JavaScript null checks: `if (v == null || v === "")` for truthiness, `Number.isFinite()` for numeric validation
+**Stop Conditions:**
+- `stop()` for fatal errors with `call. = FALSE` to suppress stack trace
+- Informative messages that help users understand what went wrong
+- Example from `gg2d3.R`: `"Provide a ggplot object or a valid IR list."`
+- Example from `d3_zoom.R`: `"scale_extent minimum must be >= 1 (no zoom out beyond original view)"`
 
-**Error Messages:**
-- Stop messages are plain text, no special formatting: `"Provide a ggplot object or a valid IR list."`
+**Validation:**
+- `stopifnot()` for simple assertions at function start
+- Example: `stopifnot(inherits(p, "ggplot"))` in `as_d3_ir()`
+- Manual validation with detailed error messages for complex conditions
+- Input validation typically done first in public functions (see `d3_zoom.R` lines 41-54)
+
+**Warnings:**
+- `warning()` with `call. = FALSE` for non-fatal issues
+- Used for unsupported features that still render
+- Example: "coord_trans() is not yet supported" in `as_d3_ir.R`
+- Example: "Layer has no data" in `validate_ir.R`
 
 ## Logging
 
-**Framework:** None detected; no logger package used
+**Framework:** No logging framework (console.log equivalent in JavaScript)
 
 **Patterns:**
-- No explicit logging in source code
-- Comments used for explanation inline rather than logged output
-- Console output via browser/web context in JavaScript visualization
+- No explicit logging in R code
+- JavaScript errors/warnings handled via browser console (in D3 rendering layer)
+- Informational output via `warning()` and `message()` functions only
 
 ## Comments
 
 **When to Comment:**
-- Inline comments explain WHY not WHAT: `# colors may be hex already`, `# ms for JS time if ever needed`
-- Section comments use comment markers for clarity:
-  ```r
-  # --- robust geom name ---
-  # Extract scale objects early (needed for mapping discrete values)
-  # Helper to map discrete x/y values to labels
-  ```
-- Comments on important implementation decisions:
-  ```r
-  # IMPORTANT: do NOT jsonlite::toJSON() here. htmlwidgets will serialize it.
-  # Convert linewidth from mm to pixels (1mm = 96/25.4 px at 96 DPI)
-  ```
-- JavaScript uses explanatory comments for complex logic:
-  ```javascript
-  // Use paddingOuter for edge spacing (matches ggplot2's 0.6 units)
-  // Use paddingInner for spacing between bars
-  ```
+- Inline comments explain _why_ not _what_ (what is obvious from code)
+- Example in `as_d3_ir.R`: `# drop factor classes to base vectors early`
+- Example in `as_d3_ir.R`: `# make true scalars (no length-1 vectors)`
+- Phase annotations: `# Phase 3` indicates planned feature development
+- Internal implementation notes for complex transformations
 
-**Roxygen/JSDoc:**
-- Roxygen2 comments with `#'` for exported functions: `#' Render a ggplot as a D3 widget`
-- Parameters documented with `@param`: `#' @param x ggplot object or IR list from as_d3_ir()`
-- Functions marked with `@export` for inclusion in NAMESPACE
-- No JSDoc comments in JavaScript code; minimal inline documentation
+**Roxygen/Documentation:**
+- Roxygen2 `#'` comments required on all exported functions
+- Parameter descriptions start with capital letter in roxygen: `@param x ggplot object or IR list`
+- Return descriptions: `@return Modified gg2d3 widget with [feature] enabled`
+- Examples section: `@examples` with `\dontrun{}` for interactive examples
 
 ## Function Design
 
 **Size:**
-- Main conversion function `as_d3_ir()` is 353 lines (including nested helpers) - acceptable for complex data transformation
-- Helper functions kept small and focused: `map_discrete()`, `extract_theme_element()`, `get_scale_info()`
-- JavaScript rendering functions also moderately sized (716 lines total for gg2d3.js)
+- Typical range: 20-50 lines for public functions
+- Larger functions (200+ lines): `as_d3_ir()`, used for complex IR extraction logic
+- Private helper functions nested inside larger functions when logically grouped
 
 **Parameters:**
-- Function parameters with sensible defaults:
-  ```r
-  as_d3_ir <- function(p, width = 640, height = 400,
-                       padding = list(top = 20, right = 20, bottom = 40, left = 50))
-  ```
-- Parameters passed as named lists when multiple related values: `padding`, `aes`
-- No variadic arguments (...) used
+- Public functions take 1-3 main parameters
+- Optional parameters use defaults (e.g., `scale_extent = c(1, 8)` in `d3_zoom()`)
+- Widget functions pattern: First parameter is `widget`, subsequent params are feature-specific
+- Complex IR extraction uses optional width/height/padding parameters with sensible defaults
 
 **Return Values:**
-- Consistent list/structure returns matching JSON serialization needs:
-  ```r
-  list(
-    geom = gname,
-    data = to_rows(df),
-    aes = aes,
-    params = params
-  )
-  ```
-- NULL returns for missing/blank theme elements
-- Row-wise list conversion for data transformation
+- Widget functions return the modified widget object for pipe chaining (R 4.1+ `|>` operator)
+- Validation functions return input unchanged invisibly: `invisible(ir)` in `validate_ir()`
+- Converters return structured lists (IR format)
+- Constructors return widget objects suitable for htmlwidgets
+
+**Inheritance Checks:**
+- Public widget functions use `inherits(widget, "gg2d3")` for type validation
+- Class detection: `inherits(x, "ggplot")` for ggplot2 objects
+- Scale detection: `inherits(calc, "element_rect")`, `inherits(calc, "element_line")`, etc.
 
 ## Module Design
 
 **Exports:**
-- Two functions exported via roxygen `@export`: `gg2d3()` and `as_d3_ir()`
-- NAMESPACE auto-generated shows: `export(as_d3_ir)` and `export(gg2d3)`
-- No barrel files; functions exported individually
+- Core function: `gg2d3()` - main widget creator in `R/gg2d3.R`
+- Converters: `as_d3_ir()` in `R/as_d3_ir.R` - exported, used by `gg2d3()`
+- Validators: `validate_ir()` in `R/validate_ir.R` - exported for debugging/testing
+- Widget modifiers: `d3_zoom()`, `d3_tooltip()`, `d3_hover()`, `d3_brush()` - exported feature enhancers
+- Special integrations: `d3_crosstalk()` for interoperability
+
+**File Organization:**
+- One primary function per file (e.g., `d3_zoom.R` contains only `d3_zoom()`)
+- Helper functions defined locally within the file or within the primary function
+- Large complex functions like `as_d3_ir()` contain nested helpers: `to_rows()`, `map_discrete()`, `extract_theme_element()`, `validate_log_domain()`
 
 **Barrel Files:**
-- Not applicable; R uses NAMESPACE file for exports, not barrel/index files
+- Not used - R uses `NAMESPACE` for explicit export control
+
+**Environment Variables:**
+- Accessed via list assignment: `widget$x$interactivity` (htmlwidgets structure)
+- IR data structure uses nested lists accessed via `$` operator
+
+## Testing Patterns Reflected in Code
+
+- All public functions tested thoroughly in `tests/testthat/`
+- Test coverage: 1717 lines of R code, 2379 lines of test code (1.4x ratio)
+- Edge cases tested: empty data, categorical scales, transformations, coordinate systems
 
 ---
 
-*Convention analysis: 2026-02-07*
+*Convention analysis: 2026-03-11*

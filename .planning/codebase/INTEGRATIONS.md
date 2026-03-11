@@ -1,87 +1,126 @@
 # External Integrations
 
-**Analysis Date:** 2026-02-07
+**Analysis Date:** 2026-03-11
 
 ## APIs & External Services
 
-**Graphics/Visualization:**
-- D3.js v7 - JavaScript visualization library
-  - SDK/Client: Vendored in `inst/htmlwidgets/lib/d3/d3.v7.min.js`
-  - Auth: None (open source)
-  - Integration: Declaratively specified in `inst/htmlwidgets/gg2d3.yaml` dependencies
+**None detected** - gg2d3 does not integrate with external REST APIs or cloud services.
 
 ## Data Storage
 
 **Databases:**
-- None - Package is stateless; no persistent storage
+- None - gg2d3 is a pure visualization library; no database integration
 
 **File Storage:**
-- None - Widget renders in-browser
+- None - No persistent file storage or cloud storage integration
 
 **Caching:**
-- None detected
+- None - All rendering is stateless per widget instance
 
 ## Authentication & Identity
 
 **Auth Provider:**
-- None - Not applicable for visualization package
+- None - No authentication required. gg2d3 is a client-side visualization library.
 
 ## Monitoring & Observability
 
 **Error Tracking:**
-- None
+- None configured
 
 **Logs:**
-- Console logging available in D3 rendering layer (`inst/htmlwidgets/gg2d3.js`) via browser console
+- Browser console via `console.log()` (visible in browser dev tools)
+- R console warnings via `warning()` function (e.g., coord_trans not supported warning in `R/as_d3_ir.R`)
 
 ## CI/CD & Deployment
 
 **Hosting:**
-- Not applicable - R package distributed via GitHub/CRAN
+- Not applicable - gg2d3 is an R package for local/RStudio use
+- Visualizations are rendered in-browser via htmlwidgets
+- Package distributed via CRAN or GitHub
 
 **CI Pipeline:**
-- Not detected (commented-out badge in README suggests GitHub Actions workflow exists but not active)
-
-**Package Distribution:**
-- GitHub: `https://github.com/<you>/gg2d3` (placeholder in DESCRIPTION)
-- Installation: `devtools::install_github("DavidZenz/gg2d3")`
+- None configured - No GitHub Actions or CI workflow files present
+- Package testing runs locally via `devtools::test()` and testthat
 
 ## Environment Configuration
 
 **Required env vars:**
-- None
+- None - gg2d3 requires no environment variables
 
 **Secrets location:**
-- Not applicable
+- Not applicable - No secrets used
 
-## Webhooks & Callbacks
+## Widget Communication
 
-**Incoming:**
-- None
+**Incoming (from JavaScript to R/Shiny):**
+- Crosstalk selection messages (if SharedData detected)
+  - Module: `inst/htmlwidgets/modules/crosstalk.js`
+  - Sends selection via Crosstalk SelectionHandle to other widgets
+  - Shiny event handlers defined in `R/d3_brush.R`, `R/d3_hover.R`
 
-**Outgoing:**
-- None
+**Outgoing (from R to JavaScript):**
+- IR JSON object passed to htmlwidgets JavaScript factory
+  - Location: `R/gg2d3.R` creates widget with IR data
+  - Serialization: htmlwidgets automatically converts R list to JSON
+  - Payload includes: scales, layers, theme, coord, optional crosstalk metadata
 
-## R Ecosystem Integrations
+## Browser APIs Used
 
-**Tight coupling to:**
-- ggplot2 objects as input (parses via `ggplot2::ggplot_build()`)
-- htmlwidgets as rendering bridge (output via `htmlwidgets::createWidget()`)
+**D3.js v7:**
+- D3 scales (d3.scaleLinear, d3.scaleOrdinal, d3.scaleSequential, d3.scaleTime)
+- D3 selections and data binding
+- D3 zoom (d3.zoom)
+- D3 brush (d3.brush)
+- D3 color schemes (d3.schemeTableau10, d3.interpolateTurbo)
+- SVG manipulation via D3
 
-**Integration Flow:**
-1. User creates ggplot2 object in R
-2. Pass to `gg2d3()` function in `R/gg2d3.R`
-3. Internally calls `as_d3_ir()` in `R/as_d3_ir.R` to extract intermediate representation
-4. htmlwidgets serializes IR to JSON and passes to browser
-5. `inst/htmlwidgets/gg2d3.js` receives IR and renders with D3.js
+**Web Standards:**
+- SVG (Scalable Vector Graphics) for rendering
+- W3C CSS units and color parsing
+- JavaScript ES6 modules (IIFE pattern used)
+- HTML5 data attributes for interactive state
 
-## Browser Environment
+## Crosstalk Integration Details
 
-**Client-side:**
-- D3.js v7 provides DOM manipulation, scales, selections, axes
-- No external API calls from D3 rendering code (fully client-side)
-- SVG output only (no canvas, no WebGL)
+**Package:**
+- Optional dependency: `crosstalk` (Suggested in DESCRIPTION)
+
+**When Active:**
+- User creates ggplot with crosstalk::SharedData instead of data.frame
+- `R/gg2d3.R` detects SharedData via `crosstalk::is.SharedData()`
+- Extracts crosstalk_key and crosstalk_group
+- Passes metadata to JavaScript via widget data
+
+**JavaScript Side:**
+- `inst/htmlwidgets/modules/crosstalk.js` initializes SelectionHandle
+- Listens for selection changes from other Crosstalk widgets
+- Broadcasts selections from gg2d3 back to Crosstalk group
+- Interactive elements: circles, bars, paths, text elements
+
+**Compatible With:**
+- Shiny reactive input/output
+- DT (data table) widget brushing
+- plotly (via Crosstalk)
+- leaflet (map brushing)
+
+## Data Format
+
+**Input:**
+- R ggplot2 objects (from ggplot2::ggplot)
+- or IR list (output from `as_d3_ir()`)
+
+**Output:**
+- HTML widget (RStudio viewer / browser)
+- SVG visualization (exportable from browser)
+
+**Intermediate Representation (IR):**
+- JSON-serializable list with structure:
+  - `scales` - x, y, color scale descriptions
+  - `layers` - Array of geom layers with data and aesthetics
+  - `theme` - Extracted ggplot2 theme elements
+  - `coord` - Coordinate system info (e.g., flip status)
+  - `facet_info` (optional) - Faceting structure if present
 
 ---
 
-*Integration audit: 2026-02-07*
+*Integration audit: 2026-03-11*

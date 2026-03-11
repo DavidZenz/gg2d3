@@ -1,187 +1,157 @@
 # Architecture
 
-**Analysis Date:** 2026-02-07
+**Analysis Date:** 2026-03-11
 
 ## Pattern Overview
 
-**Overall:** Three-layer pipeline architecture for translating ggplot2 graphics to D3.js visualizations via HTMLWidgets.
+**Overall:** Three-layer pipeline with intermediate representation (IR) decoupling
 
 **Key Characteristics:**
-- Unidirectional data flow: R → Intermediate Representation → D3 rendering
-- JSON-serializable intermediate representation (IR) decouples R layer from JavaScript layer
-- Event-driven rendering: ggplot objects converted once to IR, then rendered by D3
-- No bidirectional communication or JavaScript-to-R callbacks currently implemented
+- R layer (`R/as_d3_ir.R`) builds a JSON-serializable IR from ggplot2 objects
+- IR layer passes structured data between R and JavaScript without execution
+- D3 layer (`inst/htmlwidgets/gg2d3.js`) renders IR as SVG using modular geom renderers
+- Module-based architecture in JavaScript with clear separation of concerns
+- htmlwidgets integration for browser rendering and interactivity
 
 ## Layers
 
-**R Layer (ggplot2 extraction):**
-- Purpose: Extract ggplot2 objects and convert to IR format
-- Location: `R/as_d3_ir.R` (~353 lines)
-- Contains: Scale extraction, layer data marshalling, theme element translation, unit conversion
-- Depends on: `ggplot2`, `grid` (for unit conversion)
-- Used by: `gg2d3()` widget entry point in `R/gg2d3.R`
+**R Layer (ggplot2 → IR):**
+- Purpose: Extract ggplot2 structure and convert to JSON-compatible intermediate representation
+- Location: `R/as_d3_ir.R` (main converter, ~900 lines)
+- Contains: Scale extraction, geom layer processing, theme translation, facet metadata
+- Depends on: ggplot2 (ggplot_build), grid (unit conversion)
+- Used by: `R/gg2d3.R` (main widget entry point)
 
-**IR Layer (intermediate representation):**
-- Purpose: JSON-serializable format passed from R to JavaScript
-- Location: Memory only—constructed as nested lists in `as_d3_ir()` and JSON-serialized by htmlwidgets
-- Contains:
-  - `scales`: x/y scale descriptions (type, domain, breaks, minor_breaks)
-  - `layers`: Array of geom layer objects with data, aesthetics, parameters
-  - `theme`: Extracted ggplot2 theme elements (panel, plot, grid, axis, text)
-  - `coord`: Coordinate system info (type, flip status)
-  - `axes`: Axis titles and orientations
-  - `title`: Plot title
-  - `width`, `height`, `padding`: Layout dimensions
+**IR Layer:**
+- Purpose: Platform-agnostic data structure carrying all rendering information
+- Location: In-memory JSON list, serialized by htmlwidgets
+- Contains: `scales`, `layers`, `theme`, `coord`, `guides`, `facets`, `panels` keys
+- Depends on: R list serialization via htmlwidgets
+- Used by: D3 rendering engine
 
-**D3 Layer (rendering engine):**
-- Purpose: Render IR as SVG visualization in the browser
-- Location: `inst/htmlwidgets/gg2d3.js` (~716 lines)
-- Contains: Scale construction, axis drawing, geom rendering, theme application
-- Depends on: D3 v7 (`inst/htmlwidgets/lib/d3/d3.v7.min.js`)
-- Entry point: `renderValue()` function receives IR object
+**D3 Layer (IR → SVG):**
+- Purpose: Render IR specification as interactive D3 SVG visualization
+- Location: `inst/htmlwidgets/gg2d3.js` (main widget factory, ~1200 lines) + `inst/htmlwidgets/modules/`
+- Contains: Scale creation, panel rendering, axis drawing, legend generation, interactivity
+- Depends on: D3 v7 (vendored in `inst/htmlwidgets/lib/d3/`), module system
+- Used by: Browser HTMLWidget framework
 
 ## Data Flow
 
-**Full rendering pipeline:**
+**Plot Rendering:**
 
-1. **User provides ggplot object** → calls `gg2d3(p)` in `R/gg2d3.R`
-2. **Input validation** → checks if input is ggplot or pre-built IR
-3. **ggplot build** → `ggplot2::ggplot_build(p)` creates internal build object with data, scales, layout
-4. **Extract scales** → `xscale_obj`, `yscale_obj` from build object for categorical mapping
-5. **Process layers** → For each layer in `b$data`:
-   - Map discrete x/y values to labels if categorical
-   - Extract geom name (point/line/bar/rect/text/etc.)
-   - Keep only relevant aesthetics (x, y, color, fill, size, alpha, etc.)
-   - Coerce to base types (factors → characters, dates → numeric, etc.)
-   - Convert to row-wise list format for JSON serialization
-6. **Extract scales** → Build scale descriptions with type, domain, breaks:
-   - Continuous: type + domain with 5% ggplot2 expansion
-   - Categorical: type + domain from scale limits
-   - Color: separate scale from color aesthetic values
-7. **Extract theme** → Call `extract_theme_element()` for each theme component:
-   - Panel (background, border)
-   - Plot (background, margin)
-   - Grid (major, minor)
-   - Axis (line, text, title, ticks)
-   - Text (title)
-8. **Build IR object** → Nested list with all extracted components
-9. **HTMLWidgets serialization** → `htmlwidgets::createWidget()` JSON-serializes IR
-10. **D3 initialization** → JavaScript factory receives widget HTML element and IR data
-11. **D3 rendering** → `draw(ir, elW, elH)`:
-    - Set theme defaults (merge with extracted theme)
-    - Calculate padding from theme margins
-    - Create SVG container
-    - Apply backgrounds (plot, panel)
-    - Construct D3 scales (linear, band, log, sqrt, pow, symlog, time, etc.)
-    - Draw grid lines (major then minor)
-    - Draw axes with labels and ticks
-    - Draw title
-    - Process each layer:
-      - Parse data from IR
-      - Apply color/fill scales
-      - Render geoms (point, line/path, bar/col, rect, text)
-    - Apply theme styling to axes
+1. User calls `gg2d3(ggplot_object)` in `R/gg2d3.R`
+2. Detect crosstalk SharedData (if present) and extract underlying data
+3. Call `as_d3_ir(ggplot_object)` to build intermediate representation
+4. `as_d3_ir()` calls `ggplot2::ggplot_build()` to extract build data
+5. Extract scales (x, y, color) from `b$layout$panel_scales_*` and `b$plot$scales`
+6. Process layers: for each layer in `b$data`, map geom class to geom name, coerce data to rows
+7. Extract theme elements from `b$plot$theme` (backgrounds, grids, axes, text)
+8. Extract facet metadata from `b$layout$facet` and `b$layout$layout`
+9. Return IR list with `scales`, `layers`, `theme`, `coord`, `guides`, `facets`, `panels`
+10. htmlwidgets serializes IR to JSON and passes to browser
+11. JavaScript factory in `gg2d3.js` receives IR and creates widget instance
+12. Widget calls `renderPanel()` for each panel (facet or single)
+13. For each panel: create scales, render grid/axes, filter layer data by PANEL, render geoms
+14. Geom renderers (`inst/htmlwidgets/modules/geoms/*.js`) draw marks (circles, lines, bars, etc.)
+15. Layout engine (`inst/htmlwidgets/modules/layout.js`) computes positions for title, axes, legend
+16. Legend renderer (`inst/htmlwidgets/modules/legend.js`) draws legend keys and labels
 
-**State during rendering:**
-- No persistent state in JavaScript layer (stateless rendering)
-- Scales and theme recomputed on each render
-- Widget width/height from htmlwidgets container
+**State Management:**
+- R-side: ggplot2 build object contains all geom and scale state
+- IR-side: Stateless JSON structure, IR serves as contract between languages
+- JS-side: D3 selections manage DOM state; module namespace (`window.gg2d3.*`) holds utilities
 
 ## Key Abstractions
 
 **Intermediate Representation (IR):**
-- Purpose: Platform-agnostic format for ggplot data and styling
-- Examples: `ir$scales$x`, `ir$layers`, `ir$theme$panel$background`
-- Pattern: Nested named lists, JSON-compatible (no functions, only primitives and arrays)
+- Purpose: Language-agnostic format capturing complete plot specification
+- Examples: `R/as_d3_ir.R` builds IR, `inst/htmlwidgets/gg2d3.js` consumes it
+- Pattern: Recursive lists/objects serializable to JSON with no functions or circular refs
+- Structure:
+  ```
+  {
+    scales: {x: {type, domain, breaks, ...}, y: {...}, color: {...}},
+    layers: [{geom, data: [...], aes: {...}, params: {...}}, ...],
+    theme: {panel, plot, grid, axis, text, legend, strip},
+    coord: {type, ratio?},
+    guides: [{aesthetic, type, title, keys, ...}, ...],
+    facets: {type, nrow, ncol, scales_mode},
+    panels: [{x_range, y_range, panel_num}, ...]
+  }
+  ```
 
-**Scale Objects:**
-- Purpose: Map data values to visual space
-- Examples: `ir$scales$x` (continuous with domain + breaks), `ir$scales$color` (categorical)
-- Pattern: Type-driven factory (`makeScale()` in D3) creates d3.scaleLinear, scaleBand, etc.
+**Geom Registry:**
+- Purpose: Central dispatch for rendering different geom types
+- Examples: `inst/htmlwidgets/modules/geom-registry.js` provides register/render/has APIs
+- Pattern: HashMap of geom name → renderer function
+- Renderers loaded in order in `gg2d3.yaml`: point, line, bar, rect, text, area, ribbon, segment, reference, boxplot, violin, density, smooth
 
-**Theme Element Extraction:**
-- Purpose: Convert ggplot2 theme objects to JSON-serializable format
-- Examples: `extract_theme_element("panel.background", theme)` → `{type:"rect", fill:"#EBEBEB", ...}`
-- Pattern: Switch on element class (element_blank, element_rect, element_line, element_text, margin)
+**Scale Factory:**
+- Purpose: Convert IR scale descriptors to D3 scale functions
+- Examples: `inst/htmlwidgets/modules/scales.js` implements `createScale(scaleDesc, range)`
+- Pattern: Examines `scaleDesc.type` (continuous/categorical), applies transform (log, sqrt, reverse), handles temporal scales
+- Handles unit conversion (R mm → SVG pixels using W3C constants)
 
-**Layer Processing Pipeline:**
-- Purpose: Standardize geom data into row-wise format with aesthetics mapping
-- Examples: Row-wise list `[{x:1, y:2, colour:"red"}, ...]` with `aes={x:"x", y:"y", color:"colour"}`
-- Pattern: Keep only relevant columns, coerce types, create scalar rows for JSON
+**Theme Factory:**
+- Purpose: Provide theme values with default fallback
+- Examples: `inst/htmlwidgets/modules/theme.js` implements `createTheme()` and deep merge
+- Pattern: Merges user-provided theme over `DEFAULT_THEME` at retrieval time
+- Matches ggplot2 theme_gray() defaults for consistency
 
-**Unit Conversion Helpers:**
-- Purpose: Convert ggplot2 units (mm, inches) to pixels for web display
-- Examples:
-  - Linewidth: `linewidth_mm * 3.7795275591` (96 DPI / 25.4 mm/inch)
-  - Size (points): `(size_mm * 3.78) / 2` for radius in pixels
-  - Margin: `grid::convertUnit(inches) * 96`
-- Pattern: Centralized in `extract_theme_element()` for theme, in D3 for geom aesthetics
+**Panel Renderer:**
+- Purpose: Render single plot panel (one facet, or whole plot if no facets)
+- Examples: `renderPanel()` in `gg2d3.js` (lines 11-100)
+- Pattern: Creates clipped group, renders grid/axes, filters layer data by PANEL, calls geom renderers
+
+**Layout Engine:**
+- Purpose: Compute pixel positions for all chart regions
+- Examples: `inst/htmlwidgets/modules/layout.js` implements `calculateLayout()`
+- Pattern: Pure function using box algebra (shrink, slice) to allocate space for margins, title, axes, legend
 
 ## Entry Points
 
-**R Entry Point (`R/gg2d3.R`):**
-- Location: `gg2d3()` function
-- Triggers: User calls `gg2d3(ggplot_object)` in console or Rmarkdown
-- Responsibilities:
-  - Accept ggplot or pre-built IR
-  - Call `as_d3_ir()` if ggplot
-  - Wrap IR in htmlwidgets object
-  - Return widget for display
+**R Entry Point:**
+- Location: `R/gg2d3.R`
+- Triggers: User calls `gg2d3(ggplot_object)` or `gg2d3(ir_list)`
+- Responsibilities: Accept ggplot or IR, detect crosstalk, build IR, create htmlwidget, add dependencies
 
-**IR Construction Entry Point (`R/as_d3_ir.R`):**
-- Location: `as_d3_ir(p, width=640, height=400, padding=...)`
-- Triggers: Called from `gg2d3()` or directly for testing
-- Responsibilities:
-  - Build ggplot
-  - Extract and marshal all components
-  - Return complete IR object
+**JavaScript Widget Factory:**
+- Location: `inst/htmlwidgets/gg2d3.js` lines 1-10
+- Triggers: htmlwidgets.js calls factory function with (el, width, height)
+- Responsibilities: Initialize SVG, store IR, define render function, handle resize
 
-**D3 Entry Point (`inst/htmlwidgets/gg2d3.js`):**
-- Location: HTMLWidgets factory function, `renderValue()` method
-- Triggers: Widget HTML element created in browser
-- Responsibilities:
-  - Receive IR as data
-  - Call `draw(ir, width, height)`
-  - Handle resize events (currently no-op)
+**Render Function:**
+- Location: `inst/htmlwidgets/gg2d3.js` in factory
+- Triggers: htmlwidgets calls render(x) with serialized IR
+- Responsibilities: Parse IR, call calculateLayout(), renderPanel() for each panel, set up interactivity
 
 ## Error Handling
 
-**Strategy:** Defensive extraction with graceful degradation
+**Strategy:** Early validation with informative messages
 
 **Patterns:**
-- **Input validation:** `stopifnot(inherits(p, "ggplot"))` in `as_d3_ir()`
-- **Null coalescing:** `%||%` operator for defaults (title, labels)
-- **Safe navigation:** Check for column existence before accessing (`if ("x" %in% names(df))`)
-- **Try-catch on scale limits:** `tryCatch(scale_obj$get_limits(), error = function(e) range(data_values))`
-- **Type checking in D3:** `num()` helper validates numeric conversion, `val()` extracts scalars
-- **Missing data filtering:** Filter out rows with null x/y before rendering
+- `validate_ir()` in `R/validate_ir.R` checks IR structure before passing to JS (top-level keys, layer geoms, scale types)
+- `as_d3_ir()` validates log scale domains (must be strictly positive) and warns on unsupported features (coord_trans)
+- Discrete scale handling: Safe integer index mapping with bounds checks
+- Temporal scale handling: Try-catch on date format extraction with UTC fallback
+- Facet detection: Try-catch on facet inheritance checks with null-safe defaults
 
 ## Cross-Cutting Concerns
 
-**Logging:** None currently implemented. Debugging via HTML export to browser for inspection.
+**Logging:** No logging layer; development debugging via console.log in JavaScript modules
 
 **Validation:**
-- R: Input ggplot validation, scale domain sanity checks (positive for log scales)
-- D3: Color validation (`isValidColor()`), numeric coercion checks
+- R-side: `validate_ir()` function checks required IR structure
+- JS-side: `createScale()` validates domain finiteness, color module checks hex/named color validity
 
-**Authentication:** Not applicable (client-side only)
+**Authentication:** None (client-side rendering only)
 
 **Unit Conversion:**
-- Centralized in `extract_theme_element()` and geom rendering functions
-- Consistent: 96 DPI web standard, 1mm = 3.7795 pixels
-- Applied to: linewidth, font size, point radius, margins
-
-**Color Handling:**
-- R: Extracts color values as strings (hex or R color names like "grey50")
-- D3: `convertColor()` translates R grey scale (grey0-grey100) to hex
-- D3: `isValidColor()` checks hex or CSS named colors
-- Fallback chain: Layer aesthetic → layer params → default
-
-**Discrete Value Mapping:**
-- R: `map_discrete()` converts integer indices to string labels using scale limits
-- Purpose: Categorical scales store integers in built data, labels in scale object
-- Safety: Only maps if all non-NA values are whole numbers
+- Constants: `inst/htmlwidgets/modules/constants.js` defines W3C standards (96 DPI)
+- Conversions: R mm → pixels (3.7795), points → pixels (1.333), dates → milliseconds (86400000 for days, 1000 for seconds)
+- Applied in: `as_d3_ir.R` for theme linewidth/text size, `scales.js` for point radius/stroke width
 
 ---
 
-*Architecture analysis: 2026-02-07*
+*Architecture analysis: 2026-03-11*
