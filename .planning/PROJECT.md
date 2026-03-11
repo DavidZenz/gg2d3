@@ -31,7 +31,16 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ### Active
 
-(None — next milestone requirements TBD via `/gsd:new-milestone`)
+- [ ] CRAN-ready package metadata (Imports, author, URLs, R CMD check clean)
+- [ ] ggplot2 color scale passthrough (viridis, brewer, manual palettes render identically in D3)
+- [ ] Secondary axis rendering (sec.axis ticks and labels in D3, not just layout space)
+- [ ] as_d3_ir() modularization (extract scale, theme, facet extraction into separate functions)
+- [ ] Non-finite value handling (NaN/Inf filtered with warnings and visual missing-data gaps)
+- [ ] Browser error handling (user-facing error messages instead of blank widgets)
+- [ ] Legend colorbar rendering (continuous color gradients instead of discrete key fallback)
+- [ ] Documentation refresh (CLAUDE.md, README, vignettes reflect current state)
+- [ ] Private API hardening (ggplot2:::calc_element() wrapped with fallback)
+- [ ] Edge case fixes (rect out-of-bounds, orphaned GeomPolygon, coord_flip+facet_grid)
 
 ### Out of Scope
 
@@ -40,15 +49,36 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 - ggplot2 extension packages (ggridges, ggrepel, etc.) — focus on core ggplot2 first
 - Mobile-specific optimizations — web-first
 
+## Current Milestone: v1.1 Release Hardening
+
+**Goal:** Make gg2d3 CRAN-submission ready with complete color fidelity, secondary axes, refactored internals, and robust edge case handling.
+
+**Target features:**
+- CRAN-ready packaging (Imports, metadata, R CMD check)
+- ggplot2 color scale passthrough (viridis, brewer, manual)
+- Secondary axis rendering
+- as_d3_ir() refactor into modular functions
+- Non-finite value handling with visual gaps
+- Browser error boundaries
+- Legend colorbar gradients
+- Documentation refresh
+- Private API hardening
+- Edge case fixes
+
 ## Context
 
 gg2d3 shipped v1.0 with 10,442 lines of R + JavaScript across 14 JS modules and 7 R source files. The three-layer pipeline (R → IR → D3) is mature: R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, which D3.js renders as SVG through a registry-based geom dispatch system. The package supports 15 geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, and a pipe-based interactivity API. Test coverage is 515+ tests across 12 test files.
 
-**Known tech debt:**
-- Monolithic `as_d3_ir()` function (~1000 lines) needs modularization
+**Known tech debt (from v1.0 audit, targeted for v1.1):**
+- Monolithic `as_d3_ir()` function (~1,150 lines) needs modularization
 - Private API dependency on `ggplot2:::calc_element()` creates fragility
 - Orphaned GeomPolygon reference (no renderer)
 - rect geom edge cases with out-of-bounds rendering
+- Hardcoded D3 color palettes instead of ggplot2 color passthrough
+- Missing DESCRIPTION Imports (ggplot2, htmlwidgets not declared)
+- Placeholder package metadata
+- Non-finite values break rendering silently
+- Secondary axes reserve space but don't render
 
 ## Constraints
 
@@ -71,6 +101,8 @@ gg2d3 shipped v1.0 with 10,442 lines of R + JavaScript across 14 JS modules and 
 | Pre-computed statistics in R | Statistical computations (boxplot, violin, density, smooth) in R, not JS | ✓ Good — leverages ggplot2's stat system |
 | D3 scaleUtc for temporal axes | Consistent cross-browser rendering with UTC-based time scales | ✓ Good — timezone-aware tooltips via Intl.DateTimeFormat |
 | Crosstalk for linked views | Client-side linked brushing without Shiny dependency | ✓ Good — works in static HTML |
+| v1.1 = hardening before features | Color fidelity, CRAN readiness, refactoring before adding new geoms | — Pending |
+| Refactor as_d3_ir() in v1.1 | Modularize before adding more complexity (sec axes, new geoms) | — Pending |
 
 ---
-*Last updated: 2026-02-16 after v1.0 milestone*
+*Last updated: 2026-03-11 after v1.1 milestone initialization*
