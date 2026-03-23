@@ -157,7 +157,14 @@
     const sel = new crosstalk.SelectionHandle(crosstalkGroup);
     selectionHandles[el.id] = sel;
 
-    // Listen for selection changes from other widgets
+    // Listen for selection changes from other widgets.
+    // Synchronization contract with legend interactions:
+    // 1) Crosstalk SelectionHandle change events are treated as linked persistent state
+    //    and routed through events.setCrosstalkSelection() so legend + mark visuals are
+    //    recomputed by one shared pipeline (events.applyLegendState).
+    // 2) Legend persistent changes (toggle/solo/reset) publish back through this same
+    //    SelectionHandle using existing sel.set()/sel.clear() transport.
+    // 3) Hover preview never propagates to crosstalk (transient-only by design).
     sel.on("change", function(e) {
       const selectedKeys = e.value;  // null or array of keys
 
@@ -177,6 +184,10 @@
     };
 
     bindCrosstalkKeys(svg, crosstalkKey);
+
+    if (window.gg2d3.events && window.gg2d3.events.applyLegendState) {
+      window.gg2d3.events.applyLegendState(el);
+    }
 
     if (window.gg2d3.events && window.gg2d3.events.onLegendChanged) {
       window.gg2d3.events.onLegendChanged(el, 'crosstalk-sync', function(payload) {
