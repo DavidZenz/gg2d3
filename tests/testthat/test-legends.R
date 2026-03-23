@@ -194,3 +194,68 @@ test_that("Alpha aesthetic legend", {
     expect_true(alpha_guide$type %in% c("legend", "colorbar"))
   }
 })
+
+test_that("interactive legend contract: discrete guides expose stable identity fields", {
+  library(ggplot2)
+
+  p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, colour = Species)) +
+    geom_point()
+  ir <- as_d3_ir(p)
+
+  expect_equal(length(ir$guides), 1)
+  guide <- ir$guides[[1]]
+
+  expect_equal(guide$type, "legend")
+  expect_true("colour" %in% unlist(guide$aesthetics))
+  expect_true(length(guide$keys) >= 3)
+
+  expect_true(all(sapply(guide$keys, function(k) "label" %in% names(k))))
+  expect_true(all(sapply(guide$keys, function(k) "value" %in% names(k))))
+  expect_true(all(sapply(guide$keys, function(k) !is.null(k$value) && !is.na(k$value))))
+})
+
+test_that("interactive legend contract: merged discrete guides preserve identity values", {
+  library(ggplot2)
+
+  p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, colour = Species, shape = Species)) +
+    geom_point()
+  ir <- as_d3_ir(p)
+
+  expect_equal(length(ir$guides), 1)
+  guide <- ir$guides[[1]]
+
+  expect_equal(guide$type, "legend")
+  expect_true(all(c("colour", "shape") %in% unlist(guide$aesthetics)))
+  expect_true(all(sapply(guide$keys, function(k) all(c("value", "label", "colour", "shape") %in% names(k)))))
+})
+
+test_that("interactive legend contract: colorbar guides stay non-discrete", {
+  library(ggplot2)
+
+  p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, colour = Petal.Length)) +
+    geom_point()
+  ir <- as_d3_ir(p)
+
+  expect_equal(length(ir$guides), 1)
+  guide <- ir$guides[[1]]
+
+  expect_equal(guide$type, "colorbar")
+  expect_true(is.null(guide$aesthetics) || !any(unlist(guide$aesthetics) %in% c("shape", "linetype")))
+  expect_true(length(guide$colors) >= 20)
+})
+
+test_that("interactive legend contract: discrete legends carry reset-capable title semantics", {
+  library(ggplot2)
+
+  p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, colour = Species)) +
+    geom_point()
+  ir <- as_d3_ir(p)
+
+  expect_equal(length(ir$guides), 1)
+  guide <- ir$guides[[1]]
+
+  expect_equal(guide$type, "legend")
+  expect_true("title" %in% names(guide))
+  expect_true(is.character(guide$title))
+  expect_true(nzchar(guide$title))
+})

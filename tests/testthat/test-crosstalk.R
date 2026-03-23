@@ -102,3 +102,42 @@ test_that("SharedData detection handles missing crosstalk package gracefully", {
     w <- gg2d3(p)
   })
 })
+
+test_that("legend-enabled widget keeps crosstalk metadata and dependency", {
+  library(ggplot2)
+  library(crosstalk)
+
+  sd <- SharedData$new(iris, key = ~row.names(iris), group = "legend_group")
+  p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, colour = Species)) +
+    geom_point()
+  p$data <- sd
+
+  w <- gg2d3(p)
+
+  expect_equal(w$x$crosstalk_group, "legend_group")
+  expect_equal(length(w$x$crosstalk_key), nrow(iris))
+  expect_true(length(w$x$ir$guides) >= 1)
+  expect_equal(w$x$ir$guides[[1]]$type, "legend")
+
+  dep_names <- sapply(w$dependencies, function(d) d$name)
+  expect_true("crosstalk" %in% dep_names)
+})
+
+test_that("continuous colorbar with SharedData remains crosstalk-compatible", {
+  library(ggplot2)
+  library(crosstalk)
+
+  sd <- SharedData$new(iris, key = ~row.names(iris), group = "colorbar_group")
+  p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, colour = Petal.Length)) +
+    geom_point()
+  p$data <- sd
+
+  w <- gg2d3(p)
+
+  expect_equal(w$x$crosstalk_group, "colorbar_group")
+  expect_equal(length(w$x$crosstalk_key), nrow(iris))
+  expect_equal(w$x$ir$guides[[1]]$type, "colorbar")
+
+  dep_names <- sapply(w$dependencies, function(d) d$name)
+  expect_true("crosstalk" %in% dep_names)
+})
