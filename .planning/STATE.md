@@ -11,12 +11,12 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Milestone: v1.1 Interactive Exploration — STARTED 2026-03-23
-Phase: 13 - Interactive Legend Controls (next)
-Plan: Not started
-Status: Roadmap created
-Last activity: 2026-03-23 - Created v1.1 roadmap phases 13-15 with full requirement mapping.
+Phase: 13 of 15 (Interactive Legend Controls)
+Plan: 01 of 3 (Phase 13)
+Status: In progress
+Last activity: 2026-03-23 - Completed 13-01-PLAN.md
 
-Progress: [█░░░░░░░░░] 10% (roadmap complete, planning next)
+Progress: [███░░░░░░░] 33% (1/3 plans complete in Phase 13)
 
 ## Performance Metrics
 
@@ -28,14 +28,20 @@ Progress: [█░░░░░░░░░] 10% (roadmap complete, planning next)
 ## Accumulated Context
 
 ### Key Decisions
-- Start numbering at Phase 13 to continue from v1.0 completion at Phase 12.
-- Derive v1.1 phases strictly from active v1 requirements only (LEG, DATE, COORD).
-- Keep requirement categories as independent phases due to comprehensive depth setting.
+
+| Phase | Decision | Rationale |
+|-------|----------|-----------|
+| 13-roadmap | Start numbering at Phase 13 to continue from v1.0 Phase 12 | Preserve milestone continuity |
+| 13-roadmap | Map v1.1 phases strictly from active LEG/DATE/COORD requirements | Keep scope traceable to validated requirements |
+| 13-roadmap | Keep requirement categories as independent phases | Comprehensive depth favors explicit delivery boundaries |
+| 13-01 | Split legend state into persistent (`hidden`, `solo`) and transient (`hover`) channels | Prevent hover previews from mutating persistent filter state |
+| 13-01 | Route discrete legend interactions via semantic `d3.dispatch` events | Deterministic toggle/solo/reset behavior and modular integration |
+| 13-01 | Keep colorbar guides non-interactive | Maintain discrete-only scope and guide semantics |
 
 ### Active TODOs
-- Begin `/gsd-plan-phase 13` for interactive legend controls.
-- Preserve one-to-one requirement mapping during phase-plan decomposition.
-- Validate observable success criteria during implementation/testing.
+- Execute 13-02 plan: wire legend state to mark visibility and linked-view synchronization.
+- Execute 13-03 plan: add regression coverage and end-to-end legend verification.
+- Validate LEG-01..LEG-04 criteria across composed interactions.
 
 ### Blockers
 - None.
@@ -43,11 +49,12 @@ Progress: [█░░░░░░░░░] 10% (roadmap complete, planning next)
 ## Session Continuity
 
 Last session: 2026-03-23
-Stopped at: v1.1 roadmap created with phases 13-15
-Next action: Plan and execute Phase 13
+Stopped at: Completed 13-01 plan execution
+Resume file: .planning/phases/13-interactive-legend-controls/13-02-PLAN.md
 
 ---
 *State initialized: 2026-02-07*
 *v1.0 shipped: 2026-02-16*
 *v1.1 started: 2026-03-23*
 *v1.1 roadmap created: 2026-03-23*
+*13-01 completed: 2026-03-23*
