@@ -40,6 +40,96 @@
    */
   const selectionHandles = {};
 
+  function isLegendKeyVisible(state, key) {
+    if (!key) return true;
+    if (state && state.persistent && state.persistent.solo !== null) {
+      return key === state.persistent.solo;
+    }
+    const hidden = (state && state.persistent && state.persistent.hidden) || [];
+    return hidden.indexOf(key) === -1;
+  }
+
+  function applyCrosstalkSelection(el, selectedKeys) {
+    if (window.gg2d3.events && window.gg2d3.events.setCrosstalkSelection) {
+      window.gg2d3.events.setCrosstalkSelection(el, selectedKeys || []);
+      return;
+    }
+
+    const svg = d3.select(el).select('svg');
+    if (svg.empty()) return;
+
+    if (!selectedKeys || selectedKeys.length === 0) {
+      restoreAllOpacity(svg);
+    } else {
+      highlightByKeys(svg, selectedKeys);
+    }
+  }
+
+  function syncLegendToCrosstalk(el, legendState) {
+    if (!el._gg2d3_crosstalk || !legendState) return;
+    const meta = el._gg2d3_crosstalk;
+    if (meta.syncLock) return;
+
+    const svg = d3.select(el).select('svg');
+    if (svg.empty()) return;
+
+    const visibleKeys = new Set();
+    const allKeys = new Set();
+
+    svg.selectAll('.panel').each(function() {
+      const panel = d3.select(this);
+      const clippedGroup = panel.select('g[clip-path]');
+      if (clippedGroup.empty()) return;
+
+      INTERACTIVE_SELECTORS.forEach(function(selector) {
+        clippedGroup.selectAll(selector).each(function() {
+          const elem = d3.select(this);
+          const crosstalkKey = elem.attr('data-crosstalk-key');
+          if (!crosstalkKey) return;
+
+          const legendKey = elem.attr('data-legend-key');
+          allKeys.add(crosstalkKey);
+          if (isLegendKeyVisible(legendState, legendKey)) {
+            visibleKeys.add(crosstalkKey);
+          }
+        });
+      });
+    });
+
+    // Sync contract:
+    // - legend persistent states (toggle/solo/reset) publish visible crosstalk keys
+    //   through SelectionHandle so linked widgets receive identical filtering.
+    // - if legend allows all keys, clear selection to avoid imposing redundant filters.
+    const visible = Array.from(visibleKeys);
+    const total = allKeys.size;
+
+    meta.syncLock = true;
+    try {
+      if (!visible.length || visible.length === total) {
+        meta.sel.clear();
+      } else {
+        meta.sel.set(visible);
+      }
+    } finally {
+      meta.syncLock = false;
+    }
+  }
+
+  function bindCrosstalkKeys(svg, keyArray) {
+    svg.selectAll('.panel').each(function() {
+      const panel = d3.select(this);
+      const clippedGroup = panel.select('g[clip-path]');
+      if (clippedGroup.empty()) return;
+
+      INTERACTIVE_SELECTORS.forEach(function(selector) {
+        clippedGroup.selectAll(selector).each(function(d, i) {
+          const key = keyArray && keyArray[i] !== undefined ? keyArray[i] : null;
+          d3.select(this).attr('data-crosstalk-key', key == null ? null : String(key));
+        });
+      });
+    });
+  }
+
   /**
    * Initialize Crosstalk for a gg2d3 widget.
    *
@@ -71,22 +161,32 @@
     sel.on("change", function(e) {
       const selectedKeys = e.value;  // null or array of keys
 
-      if (!selectedKeys || selectedKeys.length === 0) {
-        // Clear: restore all elements to full opacity
-        restoreAllOpacity(svg);
+      if (el._gg2d3_crosstalk && el._gg2d3_crosstalk.syncLock) {
         return;
       }
 
-      // Highlight: dim non-selected, brighten selected
-      highlightByKeys(svg, selectedKeys, crosstalkKey);
+      applyCrosstalkSelection(el, selectedKeys);
     });
 
     // Store references for later use
     el._gg2d3_crosstalk = {
       sel: sel,
       crosstalkKey: crosstalkKey,
-      crosstalkGroup: crosstalkGroup
+      crosstalkGroup: crosstalkGroup,
+      syncLock: false
     };
+
+    bindCrosstalkKeys(svg, crosstalkKey);
+
+    if (window.gg2d3.events && window.gg2d3.events.onLegendChanged) {
+      window.gg2d3.events.onLegendChanged(el, 'crosstalk-sync', function(payload) {
+        if (!payload || !payload.state) return;
+        if (payload.source === 'hoverin' || payload.source === 'hoverout' || payload.source === 'crosstalk') {
+          return;
+        }
+        syncLegendToCrosstalk(el, payload.state);
+      });
+    }
   }
 
   /**
@@ -96,7 +196,7 @@
    * @param {Array} selectedKeys - Array of crosstalk keys to highlight
    * @param {Array} keyArray - Array mapping data indices to crosstalk keys
    */
-  function highlightByKeys(svg, selectedKeys, keyArray) {
+  function highlightByKeys(svg, selectedKeys) {
     const keySet = new Set(selectedKeys);
 
     // Process each panel (handles both faceted and non-faceted plots)
@@ -107,12 +207,10 @@
 
       // Process each geom type
       INTERACTIVE_SELECTORS.forEach(selector => {
-        clippedGroup.selectAll(selector).each(function(d, i) {
+        clippedGroup.selectAll(selector).each(function() {
           const elem = d3.select(this);
 
-          // Check if this data point's key is in the selected set
-          // keyArray maps data row index to crosstalk key
-          const dataKey = keyArray[i];
+          const dataKey = elem.attr('data-crosstalk-key');
           const isSelected = keySet.has(dataKey);
 
           elem.style('opacity', isSelected ? 1.0 : 0.15);
