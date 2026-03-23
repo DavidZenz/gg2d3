@@ -618,12 +618,33 @@ HTMLWidgets.widget({
         if (window.gg2d3.crosstalk) {
           window.gg2d3.crosstalk.initShinyHandlers(el);
         }
+
+        // Initialize semantic legend interactions for discrete legends only
+        if (window.gg2d3.events && window.gg2d3.events.attachLegend) {
+          const hasDiscreteGuides = !!(ir.guides && ir.guides.some(function(g) {
+            return g && g.type === 'legend' && g.position !== 'none';
+          }));
+
+          if (hasDiscreteGuides) {
+            window.gg2d3.events.attachLegend(el, { ir: ir, root: d3.select(el).select('svg') });
+          }
+        }
       },
       resize: function (newWidth, newHeight) {
         width = newWidth;
         height = newHeight;
         if (currentIR) {
           draw(currentIR, newWidth, newHeight);
+
+          if (window.gg2d3.events && window.gg2d3.events.attachLegend) {
+            const hasDiscreteGuides = !!(currentIR.guides && currentIR.guides.some(function(g) {
+              return g && g.type === 'legend' && g.position !== 'none';
+            }));
+
+            if (hasDiscreteGuides) {
+              window.gg2d3.events.attachLegend(el, { ir: currentIR, root: d3.select(el).select('svg') });
+            }
+          }
         }
       }
     };
