@@ -125,6 +125,9 @@
         },
         transient: {
           hover: null
+        },
+        linked: {
+          crosstalkKeys: null
         }
       }
     };
@@ -145,12 +148,13 @@
         controller.state.persistent.solo = null;
       }
 
+      applyLegendState(el);
+
       dispatch.call('legend:changed', null, {
         source: 'toggle',
         key: key,
         state: getLegendState(el)
       });
-      applyLegendState(el);
     });
 
     dispatch.on('legend:solo.state', function(payload) {
@@ -163,12 +167,13 @@
         controller.state.persistent.solo = key;
       }
 
+      applyLegendState(el);
+
       dispatch.call('legend:changed', null, {
         source: 'solo',
         key: key,
         state: getLegendState(el)
       });
-      applyLegendState(el);
     });
 
     dispatch.on('legend:reset.state', function() {
@@ -176,23 +181,25 @@
       controller.state.persistent.solo = null;
       controller.state.transient.hover = null;
 
+      applyLegendState(el);
+
       dispatch.call('legend:changed', null, {
         source: 'reset',
         key: null,
         state: getLegendState(el)
       });
-      applyLegendState(el);
     });
 
     dispatch.on('legend:hoverin.state', function(payload) {
       controller.state.transient.hover = (payload && payload.key) ? payload.key : null;
+
+      applyLegendState(el);
 
       dispatch.call('legend:changed', null, {
         source: 'hoverin',
         key: controller.state.transient.hover,
         state: getLegendState(el)
       });
-      applyLegendState(el);
     });
 
     dispatch.on('legend:hoverout.state', function(payload) {
@@ -201,12 +208,13 @@
         controller.state.transient.hover = null;
       }
 
+      applyLegendState(el);
+
       dispatch.call('legend:changed', null, {
         source: 'hoverout',
         key: key || null,
         state: getLegendState(el)
       });
-      applyLegendState(el);
     });
 
     LEGEND_CONTROLLERS.set(el, controller);
@@ -251,11 +259,14 @@
           hidden: [],
           solo: null
         },
-        transient: {
-          hover: null
-        }
-      };
-    }
+      transient: {
+        hover: null
+      },
+      linked: {
+        crosstalk: null
+      }
+    };
+  }
 
     return {
       persistent: {
@@ -264,8 +275,35 @@
       },
       transient: {
         hover: controller.state.transient.hover
+      },
+      linked: {
+        crosstalk: controller.state.linked.crosstalkKeys
+          ? Array.from(controller.state.linked.crosstalkKeys)
+          : null
       }
     };
+  }
+
+  function setCrosstalkSelection(el, selectedKeys) {
+    const controller = getOrCreateLegendController(el);
+    const keys = Array.isArray(selectedKeys)
+      ? selectedKeys.filter(k => k !== null && k !== undefined).map(String)
+      : [];
+
+    controller.state.linked.crosstalkKeys = keys.length ? new Set(keys) : null;
+    applyLegendState(el);
+
+    controller.dispatch.call('legend:changed', null, {
+      source: 'crosstalk',
+      key: null,
+      state: getLegendState(el)
+    });
+  }
+
+  function onLegendChanged(el, namespace, handler) {
+    const controller = getOrCreateLegendController(el);
+    const ns = (namespace && String(namespace).trim()) ? String(namespace).trim() : 'listener';
+    controller.dispatch.on('legend:changed.' + ns, handler || null);
   }
 
   function dispatchLegend(el, type, payload) {
@@ -377,18 +415,27 @@
     if (svg.empty()) return;
 
     const state = controller.state;
+    const crosstalkKeys = state.linked && state.linked.crosstalkKeys
+      ? state.linked.crosstalkKeys
+      : null;
+    const hasCrosstalkSelection = !!(crosstalkKeys && crosstalkKeys.size);
+    const hoverKey = state.transient.hover;
+    const hoverActive = hoverKey !== null;
 
     svg.selectAll('.legend-item').each(function() {
       const item = d3.select(this);
       const key = item.attr('data-legend-key');
       const visible = isLegendKeyVisible(state, key);
-      const isHovered = state.transient.hover !== null && key === state.transient.hover;
-      const isDimmedByHover = state.transient.hover !== null && key !== state.transient.hover;
+      const isHovered = hoverActive && key === hoverKey;
+      const isDimmedByHover = hoverActive && key !== hoverKey;
+      const isActive = visible && (!state.persistent.solo || state.persistent.solo === key);
 
       item
+        .classed('legend-item-active', isActive)
         .classed('legend-item-hidden', !visible)
         .classed('legend-item-solo', state.persistent.solo === key)
         .classed('legend-item-hover', isHovered)
+        .classed('legend-item-hover-preview', isDimmedByHover)
         .style('opacity', !visible ? 0.35 : (isDimmedByHover ? 0.65 : 1));
     });
 
@@ -402,26 +449,48 @@
         }
 
         const baseOpacity = parseFloat(elem.attr('data-original-opacity') || '1');
-        const legendKey = resolveLegendKeyForDatum(controller, d);
+        const legendKey = elem.attr('data-legend-key') || resolveLegendKeyForDatum(controller, d);
+        const legendLevel = elem.attr('data-legend-level') || '';
+        const legendAesthetic = elem.attr('data-legend-aesthetic') || '';
+        const crosstalkKey = elem.attr('data-crosstalk-key');
         const visible = isLegendKeyVisible(state, legendKey);
-        const hoverActive = state.transient.hover !== null;
-        const hoverMatch = hoverActive && legendKey === state.transient.hover;
-        const hoverDim = hoverActive && legendKey !== null && !hoverMatch;
+        const hoverMatch = hoverActive && legendKey === hoverKey;
+        const hoverDim = hoverActive && !!legendKey && !hoverMatch;
+        const panelNode = this.closest('.panel');
+        const brushActive = !!(panelNode && panelNode.getAttribute('data-brush-active') === 'true');
+
+        let effectiveOpacity = Number.isFinite(baseOpacity) ? baseOpacity : 1;
 
         elem.attr('data-legend-key', legendKey || '');
+        if (legendLevel) {
+          elem.attr('data-legend-level', legendLevel);
+        }
+        if (legendAesthetic) {
+          elem.attr('data-legend-aesthetic', legendAesthetic);
+        }
 
         if (!visible) {
           elem.style('opacity', 0.05).style('pointer-events', 'none');
           return;
         }
 
-        elem.style('pointer-events', null);
+        if (brushActive) {
+          const brushOpacity = parseFloat(elem.style('opacity'));
+          if (Number.isFinite(brushOpacity)) {
+            effectiveOpacity = Math.min(effectiveOpacity, brushOpacity);
+          }
+        }
+
+        if (hasCrosstalkSelection) {
+          const inLinkedSelection = !!(crosstalkKey && crosstalkKeys.has(String(crosstalkKey)));
+          effectiveOpacity = Math.min(effectiveOpacity, inLinkedSelection ? effectiveOpacity : 0.15);
+        }
 
         if (hoverDim) {
-          elem.style('opacity', Math.min(baseOpacity, 0.25));
-        } else {
-          elem.style('opacity', baseOpacity);
+          effectiveOpacity = Math.min(effectiveOpacity, 0.25);
         }
+
+        elem.style('opacity', effectiveOpacity).style('pointer-events', null);
       });
     });
   }
@@ -556,6 +625,8 @@
     attachLegend: attachLegend,
     getLegendState: getLegendState,
     applyLegendState: applyLegendState,
+    setCrosstalkSelection: setCrosstalkSelection,
+    onLegendChanged: onLegendChanged,
     dispatchLegend: dispatchLegend,
     handleLegendClick: handleLegendClick,
     handleLegendDoubleClick: handleLegendDoubleClick
