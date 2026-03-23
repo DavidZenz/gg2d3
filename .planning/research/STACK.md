@@ -1,310 +1,156 @@
 # Stack Research
 
-**Domain:** ggplot2-to-D3.js translation layer with pixel-perfect fidelity and interactivity
-**Researched:** 2026-02-07
+**Domain:** gg2d3 v1.1 stack changes for interactive legends, transitions, and advanced coord/scale parity
+**Researched:** 2026-03-23
 **Confidence:** HIGH
 
 ## Recommended Stack
 
-### Core Technologies
+### Core Technologies (v1.1 changes only)
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| D3.js | 7.9.0 | Low-level SVG rendering engine | Latest stable version (March 2024). Provides modular architecture with granular control over scales, shapes, and DOM manipulation. Pure ES modules enable tree-shaking for smaller bundles. Industry standard for custom data visualizations requiring pixel-level control. |
-| htmlwidgets | 1.6.4+ | R-to-JavaScript bridge | CRAN-standard framework for R bindings to JavaScript libraries. Enables seamless embedding in R Markdown, Shiny apps, and standalone HTML. Well-established with comprehensive documentation and ecosystem support. |
-| R (ggplot2) | 3.5.0+ | Source plotting system | ggplot2 3.5.0 (Feb 2024) introduced improved legend system and guide positioning. Provides complete theme specification system and robust geometry layer API for extraction. |
+| ggplot2 compatibility target | **3.5.1+ and 4.0.x** | Stable extraction target for guides/coords/themes | v1.1 depends on modern guide + coord behavior (`position = "inside"`, `coord_cartesian(reverse, ratio)`, expanded theme tree). 4.0 introduces S7 internals, so version-aware extraction is required. |
+| D3.js (vendored) | **7.9.0** | Runtime for legend interactions + animation | Keep current vendor model; D3 v7 already contains `transition`, `ease`, `dispatch`, `time-format`, `scale` needed for v1.1. No runtime library swap needed. |
+| htmlwidgets | **1.6.4** | R↔JS bridge and lifecycle hooks | Current architecture already depends on it. v1.1 features map cleanly to `renderValue` + resize + widget state without introducing another bridge. |
+| scales (R pkg) | **1.4.0** | Canonical R-side breaks/labels/palette semantics | Advanced parity is easier by serializing ggplot/scales outputs than reproducing every labeling edge case in JS. This is the key stack addition for parity reliability. |
 
-### D3.js Modules (Granular Dependencies)
+### Supporting Libraries
 
-| Module | Version | Purpose | When to Use |
+| Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
-| d3-selection | 3.x | DOM manipulation and data binding | Core module for all rendering. Required for SVG element creation and updates. |
-| d3-scale | 4.x | Data-to-visual mappings | Required for all geoms. Supports continuous (linear, log, sqrt, pow, symlog), time, categorical (band, point, ordinal), and discrete (quantize, quantile, threshold) scales. Maps directly to ggplot2 scale types. |
-| d3-shape | 3.x | Path generators for complex geometries | Essential for area, line, curve, arc, pie, stack, and symbol rendering. Provides built-in curve interpolators (linear, basis, cardinal, catmull-rom, monotone). |
-| d3-axis | 3.x | Axis rendering and tick generation | Required for pixel-perfect axis reproduction. Handles tick positioning, formatting, and label placement. |
-| d3-color | 3.x | Color space manipulation | Needed for color interpolation and ggplot2 color name conversion (e.g., grey0-grey100 to hex). |
-| d3-interpolate | 3.x | Value interpolation | Required for smooth transitions and animations. Supports numbers, colors, transforms, and custom interpolators. |
-| d3-format | 3.x | Number and date formatting | Essential for axis labels and tooltip formatting matching ggplot2 output. |
-| d3-array | 3.x | Statistical operations | Needed for extent, min, max, quantile, and binning operations that match ggplot2 stat transformations. |
-| d3-transition | 3.x | Animated transitions | Optional for basic rendering, critical for interactive features. Enables smooth data updates. |
-| d3-ease | 3.x | Easing functions | Works with d3-transition for animation timing. Matches ggplot2 smooth aesthetic transitions. |
-| d3-brush | 3.x | Selection brushing | Required for crosstalk integration and linked brushing functionality. |
-| d3-zoom | 3.x | Pan and zoom behaviors | Optional advanced feature for interactive exploration. |
-
-### Supporting R Packages
-
-| Package | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| crosstalk | 1.2.1+ | Inter-widget communication | For linked brushing and filtering across multiple plots. Works without Shiny. Limitation: client-side only, not suitable for >10k points. |
-| grid | Built-in | Unit conversion utilities | Essential for converting ggplot2 theme units (mm, pt, inches) to pixels. Already using `grid::convertUnit()` in current implementation. |
-| jsonlite | 1.8.8+ | JSON serialization | For IR (intermediate representation) serialization. Fast C-based implementation handles complex nested structures. |
-| testthat | 3.2.0+ | Testing framework | For regression tests comparing ggplot2 PNG output to D3 SVG rendering metrics. |
-| vdiffr | 1.0.7+ | Visual regression testing | For automated visual comparison of plot outputs. Generates SVG snapshots for comparison. |
+| d3-transition (module within d3 v7) | bundled in 7.9.0 | Enter/update/exit animations; axis/legend tweening | Required for animated legend filtering, coord zoom transitions, and scale-domain changes. |
+| d3-ease (module within d3 v7) | bundled in 7.9.0 | Motion curves (`cubic`, `linear`, etc.) | Use for globally consistent transition timing tokens. |
+| d3-dispatch (module within d3 v7) | bundled in 7.9.0 | Local event bus for legend ↔ layer sync | Use instead of ad-hoc DOM event wiring between modules. |
+| d3-time-format (module within d3 v7) | bundled in 7.9.0 | Time scale tick/tooltip formatting in browser | Use when JS must format ticks dynamically (zoom/pan); otherwise prefer precomputed R labels. |
+| crosstalk | 1.2.2 | Keep linked selection compatibility | Keep as-is; ensure legend toggle state participates in existing crosstalk filtering semantics. |
+| chromote | 0.5.1 | Browser automation for interaction snapshots | Use for deterministic tests of legend clicks, transitions, and coord updates. |
+| webshot2 | 0.1.2 | Screenshot capture in CI | Use for visual regression states (pre/post transition endframes). |
+| shinytest2 | 0.5.1 | End-to-end interaction tests in Shiny context | Use for event-order correctness and race-condition detection in interactive flows. |
 
 ### Development Tools
 
 | Tool | Purpose | Notes |
 |------|---------|-------|
-| devtools | Package development workflow | Standard R package development (load_all, document, test) |
-| roxygen2 | Documentation generation | Inline documentation with @export tags |
-| ESLint | JavaScript linting | Enforce consistent code style in D3 renderer |
-| Prettier | JavaScript formatting | Auto-format gg2d3.js for consistency |
-| R CMD check | CRAN compliance | Ensure package meets CRAN standards |
+| testthat (existing) + browser-backed tests | Stateful interaction assertions | Add tests for legend state machine + transition completion callbacks. |
+| vdiffr (existing) | Static fidelity regression | Keep for non-animated output; pair with chromote/webshot2 for interactive states. |
+| R CMD check matrix | ggplot2 version compatibility checks | Run CI against ggplot2 3.5.x and 4.0.x to catch extractor breaks early. |
+
+## Integration Points (explicitly with current architecture)
+
+### R layer (`R/as_d3_ir.R` and split helpers)
+
+1. **Add version-aware extractor shim** for ggplot2 3.5 vs 4.0 internals.
+   - Keep private-API usage isolated.
+2. **Serialize guide interaction metadata** into IR:
+   - stable key per legend item
+   - target layer groups/aesthetics
+   - toggle policy (`single`, `multi`, `isolate`)
+3. **Serialize transition config** into IR:
+   - duration, easing token, interrupt policy
+   - animation scopes (`legend`, `scales`, `coords`, `geoms`)
+4. **Prefer R-side break/label computation** (via ggplot2/scales), with JS fallback only when interaction changes domains client-side.
+5. **Encode coord parity fields** explicitly (`reverse`, `ratio`, side-specific expand flags) for JS layout/scale modules.
+
+### JS layer (`inst/htmlwidgets/gg2d3.js` + `inst/htmlwidgets/modules/*`)
+
+1. Add a **transition orchestrator module** (new file, e.g. `modules/transitions.js`) that wraps all `selection.transition()` calls.
+2. Extend **legend module** to emit semantic events through `d3.dispatch` instead of directly mutating layers.
+3. Update **geom registry renderers** to support keyed joins (`.data(data, key)`), enabling smooth enter/update/exit on legend filters.
+4. Extend **scales/layout modules** so coord/scale updates can be animated without re-creating unrelated DOM nodes.
+5. Keep `gg2d3.yaml` dependency model (vendored `d3.v7.min.js` + local modules); no bundler migration required for v1.1.
 
 ## Installation
 
 ```r
-# Core R dependencies (add to DESCRIPTION)
+# DESCRIPTION changes (v1.1 focused)
 Imports:
-  ggplot2 (>= 3.5.0),
-  htmlwidgets (>= 1.6.0),
+  ggplot2 (>= 3.5.1),
+  htmlwidgets (>= 1.6.4),
   jsonlite,
-  grid
+  grid,
+  scales (>= 1.4.0)
 
 Suggests:
-  crosstalk (>= 1.2.0),
+  crosstalk (>= 1.2.2),
   testthat (>= 3.0.0),
-  vdiffr
+  vdiffr,
+  chromote (>= 0.5.1),
+  webshot2 (>= 0.1.2),
+  shinytest2 (>= 0.5.1)
+```
 
-# D3.js vendoring (manual download to inst/htmlwidgets/lib/)
+```r
+# D3 remains vendored (no change in delivery model)
 dir.create("inst/htmlwidgets/lib/d3", recursive = TRUE, showWarnings = FALSE)
 download.file("https://d3js.org/d3.v7.min.js",
               destfile = "inst/htmlwidgets/lib/d3/d3.v7.min.js", mode = "wb")
 ```
 
-```bash
-# JavaScript development dependencies (optional, for linting)
-npm install --save-dev eslint prettier
-```
-
 ## Alternatives Considered
 
-| Recommended | Alternative | When to Use Alternative | Why Not Primary |
-|-------------|-------------|-------------------------|-----------------|
-| D3.js v7 | D3.js v8 (future) | When v8 is released with new features | v8 not yet released; v7.9.0 is latest stable (March 2024) |
-| D3.js (SVG) | Canvas rendering | For >5000 points or high-frequency updates | SVG provides better accessibility, responsiveness, and exact ggplot2 fidelity. Canvas sacrifices DOM structure. |
-| Custom D3 renderer | plotly.js (via ggplotly) | When speed to market matters more than fidelity | plotly.js doesn't preserve all ggplot2 aesthetics (subtitles, complex themes). Black-box approach limits customization. |
-| Custom D3 renderer | ggiraph | When pixel-perfect fidelity not required | ggiraph closer to ggplot2 than plotly but still wrapper-based. Less control over rendering pipeline. |
-| crosstalk | Shiny reactivity | For server-side filtering or >10k points | crosstalk is client-side only but enables static HTML deployment. Shiny requires server. |
-| htmlwidgets | R Markdown native | For simple static plots | htmlwidgets enables reusable widget, Shiny integration, and crosstalk compatibility. |
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| D3 transitions + dispatch | GSAP / anime.js | Use only if gg2d3 shifts to non-D3 DOM rendering (not current architecture). |
+| R-side scales labels + selective JS formatting | Full JS label engine | Use only in fully client-side plotting systems; unnecessary duplication here. |
+| Keep htmlwidgets script pipeline | npm bundling migration now | Defer until a larger packaging milestone (not required for v1.1 capability). |
+| Browser-driven visual tests | Pure unit tests | Unit tests alone are insufficient for transition timing and rendering parity bugs. |
 
 ## What NOT to Use
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| D3.js v3-v5 | Outdated API, lacks ES modules, larger bundle size | D3.js v7.9.0 |
-| ggvis | Abandoned (last update 2016), never reached production stability | Custom D3 with htmlwidgets |
-| d3-tip (tooltip library) | Unmaintained, incompatible with D3 v7 | Tippy.js or custom SVG tooltips |
-| Direct HTML strings | Security risk (XSS), hard to maintain | D3 selection API for DOM manipulation |
-| Inline CSS in JavaScript | Poor separation of concerns, harder theming | CSS classes or inline styles via D3 `.style()` |
-| Global D3 functions without namespace | Name collisions in complex apps | Use modular imports or namespaced D3 object |
-| Fixed pixel values for all sizes | Breaks responsiveness | Relative units or dynamic calculation from container size |
+| **New animation framework (GSAP/anime.js)** | Duplicates D3 transition engine; increases payload + integration complexity | d3-transition + d3-ease already in vendored D3 v7 |
+| **Moment.js/Day.js for scale ticks** | Extra runtime dependency; ggplot/scales + d3-time-format already cover required semantics | scales (R) + d3-time-format fallback |
+| **State management framework (Redux/MobX)** | Overkill for widget-local state; harder htmlwidgets integration | Small module-local store + d3-dispatch |
+| **Canvas/WebGL rewrite in v1.1** | Not needed for requested capabilities; risks parity regressions | Keep SVG DOM + keyed transitions |
+| **Switching away from htmlwidgets** | Breaks downstream RMarkdown/Shiny embedding model | Continue current htmlwidgets architecture |
+| **Relying on `ggplot2:::` everywhere** | Fragile under ggplot2 4.x internals | isolate private calls in one compatibility layer |
 
 ## Stack Patterns by Variant
 
-### Pattern 1: Static HTML Output (Current)
-**Use when:** Generating standalone HTML reports or R Markdown documents
-```
-R (ggplot2) → as_d3_ir() → JSON → htmlwidget() → D3.js (SVG)
-```
-**Stack:** ggplot2 + htmlwidgets + D3.js v7 (core modules only)
-**Trade-off:** No server required, limited to client-side data
+**If interactive legend controls only visibility/highlight:**
+- Use `d3-dispatch` + keyed joins + short (`120–200ms`) opacity/size transitions.
+- Keep axis domains fixed.
 
-### Pattern 2: Interactive with Crosstalk
-**Use when:** Linked brushing across multiple plots in static HTML
-```
-R (SharedData) → multiple gg2d3() → crosstalk bridge → D3 brush events
-```
-**Stack:** ggplot2 + htmlwidgets + crosstalk + D3.js (add d3-brush, d3-transition)
-**Limitation:** Client-side only, <10k points per dataset
+**If legend interaction changes scale domains or coord limits:**
+- Use transition orchestrator for axis + geom updates (`200–350ms`).
+- Compute new breaks/labels from R metadata when available; fallback to d3-time-format/d3-format for client-side updates.
 
-### Pattern 3: Shiny Integration
-**Use when:** Server-side filtering, large data, or dynamic plot updates
-```
-Shiny server → renderUI(gg2d3(...)) → updateData() → D3 re-render
-```
-**Stack:** ggplot2 + htmlwidgets + Shiny + D3.js (add d3-transition for smooth updates)
-**Trade-off:** Requires running R server, but handles unlimited data size
-
-### Pattern 4: Hybrid SVG + Canvas
-**Use when:** >5000 points but need axes/labels/tooltips
-```
-Canvas layer (data marks) + SVG layer (axes, labels, interactions)
-```
-**Stack:** ggplot2 + htmlwidgets + D3.js + custom Canvas renderer
-**Complexity:** High - requires dual rendering pipeline
-
-## Rendering Approach: SVG vs Canvas
-
-**Recommendation:** SVG for primary implementation, Canvas as future optimization
-
-| Criterion | SVG (Recommended) | Canvas (Future Option) |
-|-----------|-------------------|------------------------|
-| Performance | Excellent <5k elements | Excellent >5k elements |
-| Accessibility | Full DOM structure for screen readers | Requires ARIA fallbacks |
-| Responsiveness | Scales perfectly to any resolution | Requires redraw on resize |
-| Interactivity | Easy event listeners per element | Requires manual hit detection |
-| ggplot2 Fidelity | Exact pixel-perfect match possible | Harder to match text/stroke rendering |
-| Browser Consistency | Slight anti-aliasing differences | More consistent rendering |
-
-**Decision:** Start with SVG (90% use cases fit <5k points). Add Canvas rendering for specific geoms (e.g., `geom_point` with >5k observations) in later phase.
-
-## Scale Type Coverage
-
-### Required D3 Scale Types for ggplot2 Parity
-
-| ggplot2 Transform | D3 Scale | Current Support | Priority |
-|-------------------|----------|-----------------|----------|
-| identity/continuous | scaleLinear | ✅ Full | Core |
-| log/log10/log2 | scaleLog | ✅ Full | Core |
-| sqrt | scaleSqrt | ✅ Full | Core |
-| reverse | scaleLinear + reversed domain | ⚠️ Partial | High |
-| discrete/factor | scaleBand | ✅ Full | Core |
-| discrete/factor | scalePoint | ⚠️ Missing | Medium |
-| date/datetime | scaleTime | ✅ Full | Core |
-| date/datetime (UTC) | scaleUtc | ⚠️ Missing | Low |
-| pow/power | scalePow | ✅ Full | Medium |
-| symlog | scaleSymlog | ✅ Full | Low |
-| quantize | scaleQuantize | ⚠️ Missing | Low |
-| quantile | scaleQuantile | ⚠️ Missing | Low |
-| threshold | scaleThreshold | ⚠️ Missing | Low |
-| ordinal (color) | scaleOrdinal | ✅ Full | Core |
-| sequential (color) | scaleSequential | ✅ Full | Medium |
-| diverging (color) | scaleDiverging | ⚠️ Missing | Medium |
-
-**Assessment:** Current implementation covers 70% of common use cases. Priority gaps: scalePoint (for geom_dotplot), reversed scales, diverging color scales.
-
-## Shape Generator Coverage
-
-### Required D3 Shape Modules for Full Geom Support
-
-| ggplot2 Geom | D3 Shape/Primitive | Current Support | Complexity |
-|--------------|-------------------|-----------------|------------|
-| geom_point | SVG `<circle>` | ✅ Full | Low |
-| geom_line | d3.line() | ✅ Full | Low |
-| geom_path | d3.line() (no sort) | ⚠️ Buggy (sorts x) | Low |
-| geom_area | d3.area() | ❌ Missing | Low |
-| geom_ribbon | d3.area() | ❌ Missing | Low |
-| geom_bar/col | SVG `<rect>` | ✅ Full | Low |
-| geom_rect/tile | SVG `<rect>` | ✅ Full | Low |
-| geom_polygon | d3.line() + closepath | ❌ Missing | Medium |
-| geom_segment | SVG `<line>` | ❌ Missing | Low |
-| geom_curve | d3.line() + curve interpolator | ❌ Missing | Medium |
-| geom_text/label | SVG `<text>` | ⚠️ Partial (no rotation) | Medium |
-| geom_abline/hline/vline | SVG `<line>` | ❌ Missing | Low |
-| geom_smooth | d3.line() + stat_smooth data | ❌ Missing | Medium |
-| geom_boxplot | Multiple SVG primitives | ❌ Missing | High |
-| geom_violin | d3.area() + density calc | ❌ Missing | High |
-| geom_density | d3.line() + density calc | ❌ Missing | Medium |
-| geom_histogram | SVG `<rect>` + binning | ❌ Missing | Medium |
-| geom_contour | d3.contours() | ❌ Missing | High |
-| geom_hex | SVG `<path>` hexagon | ❌ Missing | High |
-| geom_sf | d3.geoPath() | ❌ Missing | Very High |
-
-**Priority Order for Phase 2:**
-1. geom_area, geom_ribbon (d3.area() - simple)
-2. geom_segment, geom_abline/hline/vline (SVG lines - simple)
-3. geom_polygon (close path - simple)
-4. geom_text rotation/alignment (transform - medium)
-5. geom_smooth (line with stat - medium)
-6. geom_boxplot (composite shapes - complex)
+**If dynamic coord parity (`reverse`, `ratio`, side-specific expand`) is enabled:**
+- Treat coord changes as layout+scale transitions, not full redraw.
+- Animate container groups and axis positions in lockstep.
 
 ## Version Compatibility
 
-| Package | Compatible Versions | Notes |
-|---------|-------------------|-------|
-| ggplot2 | 3.4.0 - 3.5.x | IR extraction relies on ggplot_build() structure. v3.5.0+ recommended for improved legend system. |
-| htmlwidgets | 1.5.4 - 1.6.x | Stable API since v1.5. v1.6.4 (July 2025) is latest. |
-| D3.js | 7.0.0 - 7.9.0 | v7 is current stable branch. ES module format required. Avoid v3-v6 (breaking API changes). |
-| crosstalk | 1.1.1 - 1.2.x | v1.2.1 stable. API unchanged since v1.1. |
-| R | 4.1.0+ | grid::convertUnit() behavior consistent since R 4.1. |
-
-## Interactivity Stack
-
-### Tooltips
-
-| Library | Version | Purpose | Why Recommended |
-|---------|---------|---------|-----------------|
-| Tippy.js | 6.3.7 | Tooltip positioning and lifecycle | Production-ready, handles edge cases (viewport bounds, touch events). 20kb gzipped. Better than d3-tip (abandoned). |
-| Popper.js | 2.11.x | Tooltip positioning engine | Lower-level alternative to Tippy.js. Use if custom tooltip design critical. |
-| Custom SVG | N/A | Simple hover tooltips | For basic tooltips, use SVG `<title>` or positioned `<text>` elements. Zero dependencies. |
-
-**Recommendation:** Start with SVG `<title>` for MVP (accessibility win, zero JS). Add Tippy.js when rich tooltips needed (HTML content, formatting, images).
-
-### Linked Views
-
-| Library | Version | Purpose | Limitation |
-|---------|---------|---------|------------|
-| crosstalk | 1.2.1 | Client-side linked brushing | <10k points, no aggregations |
-| Shiny | 1.8.0+ | Server-side linked brushing | Requires running server |
-
-**Pattern:** Use crosstalk for static HTML reports, Shiny for dashboards with large data.
-
-## Pixel-Perfect Rendering Considerations
-
-### Known Browser Inconsistencies
-
-1. **Sub-pixel rendering:** SVG coordinates can be fractional, causing anti-aliasing differences
-   - **Mitigation:** Round coordinates to integer pixels for crisp lines
-   - **Trade-off:** Slight position inaccuracy vs. visual clarity
-
-2. **Text rendering:** Font metrics vary across browsers and OS
-   - **Mitigation:** Use web fonts (e.g., Google Fonts) for consistency
-   - **ggplot2 default:** Uses system fonts (Helvetica/Arial), varies by OS
-   - **Recommendation:** Match ggplot2's font family exactly or document differences
-
-3. **Stroke rendering:** 1px lines may render at 0.5px or 1.5px depending on position
-   - **Mitigation:** Use `shape-rendering: crispEdges` for rectangles/axes
-   - **Current implementation:** Already converts mm to px (1mm = 3.78px at 96 DPI)
-
-4. **Color space:** ggplot2 uses sRGB, browsers default to sRGB but HDR displays differ
-   - **Mitigation:** Explicit color profile specification (future CSS Color Level 4)
-   - **Current state:** Accept minor color variance on wide-gamut displays
-
-### Testing Strategy for Pixel-Perfect Fidelity
-
-1. **Visual regression:** vdiffr package for automated snapshot comparison
-2. **Metric comparison:** Extract computed styles from both ggplot2 PNG and D3 SVG
-3. **Cross-browser:** Test on Chrome, Firefox, Safari (different rendering engines)
-4. **Acceptance criteria:** <2px position difference, exact color match (hex values)
+| Package | Compatible With | Notes |
+|---------|-----------------|-------|
+| ggplot2 3.5.1+ | ggplot2 4.0.x | Must test both due to 4.0 internal changes. |
+| htmlwidgets 1.6.4 | D3 v7 vendor pattern | Existing package model remains valid. |
+| d3 7.9.0 | d3-transition/ease/dispatch/time-format | No extra JS runtime deps required. |
+| scales 1.4.0 | ggplot2 3.5+/4.0+ | Recommended for parity-grade breaks/labels. |
+| crosstalk 1.2.2 | htmlwidgets 1.6.4 | Keep existing linked interaction support. |
+| chromote/webshot2/shinytest2 | CI and local Chrome/Chromium | Test-only stack; not runtime widget dependency. |
 
 ## Sources
 
-**D3.js Version and Features:**
-- [D3.js Releases (GitHub)](https://github.com/d3/d3/releases) — Latest version 7.9.0 (March 2024) verified
-- [D3.js Official Documentation](https://d3js.org/) — Module structure and feature overview
-- [D3.js Getting Started](https://d3js.org/getting-started) — ES module usage
-- [d3-scale Documentation](https://d3js.org/d3-scale) — Complete scale type reference
-- [d3-shape Documentation](https://d3js.org/d3-shape) — Path generators and shape primitives
-- [D3 Scale Functions (D3 in Depth)](https://www.d3indepth.com/scales/) — Scale implementation details
-
-**htmlwidgets Ecosystem:**
-- [htmlwidgets for R](https://www.htmlwidgets.org/) — Framework overview
-- [htmlwidgets CRAN Documentation](https://cran.r-project.org/web/packages/htmlwidgets/htmlwidgets.pdf) — Package reference (July 2025)
-- [Introduction to HTML Widgets](https://cran.r-project.org/web/packages/htmlwidgets/vignettes/develop_intro.html) — Development guide
-- [How to write a useful htmlwidget (Dean Attali)](https://deanattali.com/blog/htmlwidgets-tips/) — Best practices
-
-**ggplot2 Ecosystem:**
-- [ggplot2 Package Index](https://ggplot2.tidyverse.org/reference/) — Complete geom list
-- [ggplot2 3.5.0: Legends](https://tidyverse.org/blog/2024/02/ggplot2-3-5-0-legends/) — Latest legend system updates
-- [ggplot2 Themes](https://ggplot2-book.org/themes.html) — Theme system specification
-- [ggplot2 Scale Transformations](https://ggplot2-book.org/scales-position.html) — Position scale details
-- [ggplot2 Faceting](https://ggplot2-book.org/facet.html) — Facet grid and wrap implementation
-
-**Alternatives and Comparisons:**
-- [Interactive Data Visualization with R](https://blog.tidy-intelligence.com/posts/interactive-data-visualization-with-r/) — Ecosystem overview
-- [ggplot2 vs Plotly Comparison](https://williazo.github.io/statistics/plotly-ggplot2/) — Trade-offs
-- [SVG vs Canvas Performance 2026](https://www.augustinfotech.com/blogs/svg-vs-canvas-animation-what-modern-frontends-should-use-in-2026/) — Rendering trade-offs
-
-**Interactivity:**
-- [crosstalk Package](https://rstudio.github.io/crosstalk/) — Linked brushing documentation
-- [D3.js Tooltips Guide](https://d3-graph-gallery.com/graph/interactivity_tooltip.html) — Tooltip patterns
-- [Advanced Tooltip Techniques in D3](https://reintech.io/blog/advanced-tooltip-techniques-d3-enhanced-user-experience) — Best practices
-
-**Rendering Quality:**
-- [SVG Rendering in Browsers](https://area17.medium.com/svg-rendering-in-browsers-69e0a867297c) — Cross-browser consistency
-- [Why Is My SVG Blurry?](https://www.svggenie.com/blog/svg-blurry-fixes) — Sub-pixel rendering issues
+- https://github.com/d3/d3/releases — verified latest D3 release (v7.9.0) **[HIGH]**
+- https://d3js.org/d3-transition — transition model and API **[HIGH]**
+- https://d3js.org/d3-ease — easing functions for transition policy **[HIGH]**
+- https://d3js.org/d3-time-format — time formatting/parsing for dynamic scale ticks **[HIGH]**
+- https://cran.r-project.org/web/packages/htmlwidgets/index.html — htmlwidgets current CRAN version (1.6.4) **[HIGH]**
+- https://ggplot2.tidyverse.org/news/index.html — ggplot2 4.0.x and 3.5.x changes **[HIGH]**
+- https://ggplot2.tidyverse.org/reference/coord_cartesian.html — reverse/ratio/expand behavior **[HIGH]**
+- https://ggplot2.tidyverse.org/reference/guide_legend.html — legend guide semantics **[HIGH]**
+- https://ggplot2.tidyverse.org/reference/guide_colourbar.html — continuous guide semantics **[HIGH]**
+- https://ggplot2.tidyverse.org/reference/expansion.html — expansion defaults for parity **[HIGH]**
+- https://ggplot2.tidyverse.org/reference/complete_theme.html — theme completion API for extraction **[HIGH]**
+- https://cran.r-project.org/web/packages/scales/index.html — scales 1.4.0 version and scope **[HIGH]**
+- https://cran.r-project.org/web/packages/crosstalk/index.html — crosstalk 1.2.2 version **[HIGH]**
+- https://cran.r-project.org/web/packages/chromote/index.html — chromote 0.5.1 **[HIGH]**
+- https://cran.r-project.org/web/packages/webshot2/index.html — webshot2 0.1.2 **[HIGH]**
+- https://cran.r-project.org/web/packages/shinytest2/index.html — shinytest2 0.5.1 **[HIGH]**
 
 ---
-*Stack research for: gg2d3 (ggplot2-to-D3.js translation with pixel-perfect fidelity)*
-*Researched: 2026-02-07*
+*Stack research for: gg2d3 v1.1 milestone (interactive legends, transitions, advanced coord/scale parity)*
+*Researched: 2026-03-23*
