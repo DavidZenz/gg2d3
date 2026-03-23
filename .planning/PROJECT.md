@@ -8,6 +8,15 @@ An R package that renders ggplot2 graphics as interactive D3.js SVG visualizatio
 
 Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 
+## Current Milestone: v1.1 Interactive Exploration
+
+**Goal:** Make exploration in gg2d3 feel meaningfully richer for R analysts through interactive legends, animation/transitions, and deeper coordinate/scale parity.
+
+**Target features:**
+- Interactive legends for filter/toggle/highlight workflows
+- Animation and transition support for staged and state-change storytelling
+- Advanced coordinate and scale behavior to close high-impact ggplot2 parity gaps
+
 ## Requirements
 
 ### Validated
@@ -31,7 +40,9 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ### Active
 
-(None — next milestone requirements TBD via `/gsd:new-milestone`)
+- [ ] Interactive legend controls support analyst exploration workflows (toggle/filter/highlight)
+- [ ] Animation and transitions support exploratory storytelling without breaking visual fidelity
+- [ ] Priority advanced coord/scale parity gaps are closed for common analyst use cases
 
 ### Out of Scope
 
@@ -73,4 +84,4 @@ gg2d3 shipped v1.0 with 10,442 lines of R + JavaScript across 14 JS modules and 
 | Crosstalk for linked views | Client-side linked brushing without Shiny dependency | ✓ Good — works in static HTML |
 
 ---
-*Last updated: 2026-02-16 after v1.0 milestone*
+*Last updated: 2026-03-23 after milestone v1.1 initialization*
