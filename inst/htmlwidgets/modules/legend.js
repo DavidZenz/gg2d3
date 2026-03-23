@@ -232,6 +232,9 @@
     const hasFill = guide.aesthetics && guide.aesthetics.includes("fill");
     const hasSize = guide.aesthetics && guide.aesthetics.includes("size");
     const hasShape = guide.aesthetics && guide.aesthetics.includes("shape");
+    const primaryAesthetic = guide.aesthetics && guide.aesthetics.length
+      ? guide.aesthetics[0]
+      : "legend";
 
     // Pre-compute uniform column width for horizontal layout
     let columnWidth = defaults.keySize;
@@ -243,6 +246,7 @@
 
     // Draw title
     let titleElement = null;
+    let resetElement = null;
     let currentX = defaults.margin;
     if (guide.title) {
       if (direction === "horizontal") {
@@ -269,6 +273,29 @@
           .style("font-weight", "normal")
           .style("font-family", "sans-serif")
           .text(guide.title);
+
+        // Reset control next to title (discrete legends only)
+        const titleW = estimateTextWidth(guide.title, defaults.titleSize);
+        resetElement = g.append("text")
+          .attr("class", "legend-reset-control")
+          .attr("x", defaults.margin + titleW + defaults.keySpacing)
+          .attr("y", currentY + defaults.titleSize * 0.8)
+          .attr("fill", defaults.textColour)
+          .style("font-size", `${defaults.textSize}px`)
+          .style("font-family", "sans-serif")
+          .style("cursor", "pointer")
+          .text("Reset")
+          .on("click.legend", function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (window.gg2d3 && window.gg2d3.events && window.gg2d3.events.dispatchLegend) {
+              const host = this.closest('.html-widget') || this.closest('.gg2d3');
+              if (host) {
+                window.gg2d3.events.dispatchLegend(host, 'legend:reset', {});
+              }
+            }
+          });
+
         currentY += defaults.titleSize + defaults.titleSpacing;
       }
     }
@@ -283,8 +310,64 @@
           keyY = currentY + idx * (defaults.keySize + defaults.keySpacing);
         }
 
+        const level = (key.value !== undefined && key.value !== null)
+          ? key.value
+          : (key.label !== undefined && key.label !== null ? key.label : idx);
+        const legendKey = `${primaryAesthetic}::${String(level)}`;
+
+        // Interactive legend item wrapper with deterministic identity attrs
+        const item = g.append("g")
+          .attr("class", "legend-item")
+          .attr("data-legend-key", legendKey)
+          .attr("data-aesthetic", primaryAesthetic)
+          .attr("data-level", String(level))
+          .style("cursor", "pointer")
+          .on("click.legend", function(event) {
+            event.preventDefault();
+            if (window.gg2d3 && window.gg2d3.events && window.gg2d3.events.handleLegendClick) {
+              const host = this.closest('.html-widget') || this.closest('.gg2d3');
+              if (host) {
+                window.gg2d3.events.handleLegendClick(host, {
+                  key: legendKey,
+                  aesthetic: primaryAesthetic,
+                  level: String(level)
+                });
+              }
+            }
+          })
+          .on("dblclick.legend", function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (window.gg2d3 && window.gg2d3.events && window.gg2d3.events.handleLegendDoubleClick) {
+              const host = this.closest('.html-widget') || this.closest('.gg2d3');
+              if (host) {
+                window.gg2d3.events.handleLegendDoubleClick(host, {
+                  key: legendKey,
+                  aesthetic: primaryAesthetic,
+                  level: String(level)
+                });
+              }
+            }
+          })
+          .on("mouseover.legend", function() {
+            if (window.gg2d3 && window.gg2d3.events && window.gg2d3.events.dispatchLegend) {
+              const host = this.closest('.html-widget') || this.closest('.gg2d3');
+              if (host) {
+                window.gg2d3.events.dispatchLegend(host, 'legend:hoverin', { key: legendKey });
+              }
+            }
+          })
+          .on("mouseout.legend", function() {
+            if (window.gg2d3 && window.gg2d3.events && window.gg2d3.events.dispatchLegend) {
+              const host = this.closest('.html-widget') || this.closest('.gg2d3');
+              if (host) {
+                window.gg2d3.events.dispatchLegend(host, 'legend:hoverout', { key: legendKey });
+              }
+            }
+          });
+
         // Draw key background (ggplot2 default: grey92 fill, no border)
-        g.append("rect")
+        item.append("rect")
           .attr("class", "legend-key-bg")
           .attr("x", keyX)
           .attr("y", keyY)
@@ -308,7 +391,7 @@
                            hasColour ? convertColor(key.colour || "black") : "black";
           const strokeColor = hasColour && !hasFill ? convertColor(key.colour || "black") : "none";
 
-          g.append("path")
+          item.append("path")
             .attr("class", "legend-key-shape")
             .attr("transform", `translate(${cX}, ${cY})`)
             .attr("d", symbolGenerator)
@@ -320,7 +403,7 @@
           const sizeValue = key.size !== undefined ? key.size : 1.5;
           const radius = mmToPxRadius(sizeValue);
 
-          g.append("circle")
+          item.append("circle")
             .attr("class", "legend-key-size")
             .attr("cx", cX)
             .attr("cy", cY)
@@ -332,7 +415,7 @@
           const fillValue = hasFill ? (key.fill || "#4D4D4D") :
                            hasColour ? (key.colour || "#4D4D4D") : "#4D4D4D";
 
-          g.append("rect")
+          item.append("rect")
             .attr("class", "legend-key-swatch")
             .attr("x", keyX)
             .attr("y", keyY)
@@ -346,7 +429,7 @@
         // Draw label
         if (direction === "horizontal") {
           // Label below key, centered on column
-          g.append("text")
+          item.append("text")
             .attr("class", "legend-key-label")
             .attr("x", currentX + columnWidth / 2)
             .attr("y", keyY + defaults.keySize + defaults.textSize * 0.9)
@@ -360,7 +443,7 @@
           currentX += columnWidth;
         } else {
           // Label to right of key for vertical layout
-          g.append("text")
+          item.append("text")
             .attr("class", "legend-key-label")
             .attr("x", keyX + defaults.keySize + defaults.keySpacing)
             .attr("y", cY)
@@ -389,7 +472,8 @@
     if (direction === "vertical") {
       const titleW = guide.title ?
         estimateTextWidth(guide.title, defaults.titleSize) + defaults.margin * 2 : 0;
-      contentWidth = Math.max(contentWidth, titleW);
+      const resetW = resetElement ? estimateTextWidth("Reset", defaults.textSize) + defaults.keySpacing : 0;
+      contentWidth = Math.max(contentWidth, titleW + resetW);
     }
 
     // Draw legend background behind all content (insert as first child)
