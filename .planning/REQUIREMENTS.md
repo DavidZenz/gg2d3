@@ -59,21 +59,21 @@ Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LEG-01 | TBD | Pending |
-| LEG-02 | TBD | Pending |
-| LEG-03 | TBD | Pending |
-| LEG-04 | TBD | Pending |
-| DATE-01 | TBD | Pending |
-| DATE-02 | TBD | Pending |
-| DATE-03 | TBD | Pending |
-| COORD-01 | TBD | Pending |
-| COORD-02 | TBD | Pending |
+| LEG-01 | Phase 13 | Pending |
+| LEG-02 | Phase 13 | Pending |
+| LEG-03 | Phase 13 | Pending |
+| LEG-04 | Phase 13 | Pending |
+| DATE-01 | Phase 14 | Pending |
+| DATE-02 | Phase 14 | Pending |
+| DATE-03 | Phase 14 | Pending |
+| COORD-01 | Phase 15 | Pending |
+| COORD-02 | Phase 15 | Pending |
 
 **Coverage:**
 - v1 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9 ⚠
+- Mapped to phases: 9
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-23*
-*Last updated: 2026-03-23 after milestone v1.1 requirement scoping*
+*Last updated: 2026-03-23 after v1.1 roadmap creation and phase traceability mapping*
