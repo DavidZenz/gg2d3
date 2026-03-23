@@ -12,11 +12,11 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 
 Milestone: v1.1 Interactive Exploration — STARTED 2026-03-23
 Phase: 13 of 15 (Interactive Legend Controls)
-Plan: 01 of 3 (Phase 13)
+Plan: 02 of 3 (Phase 13)
 Status: In progress
-Last activity: 2026-03-23 - Completed 13-01-PLAN.md
+Last activity: 2026-03-23 - Completed 13-02-PLAN.md
 
-Progress: [███░░░░░░░] 33% (1/3 plans complete in Phase 13)
+Progress: [███████░░░] 67% (2/3 plans complete in Phase 13)
 
 ## Performance Metrics
 
@@ -37,9 +37,11 @@ Progress: [███░░░░░░░] 33% (1/3 plans complete in Phase 13)
 | 13-01 | Split legend state into persistent (`hidden`, `solo`) and transient (`hover`) channels | Prevent hover previews from mutating persistent filter state |
 | 13-01 | Route discrete legend interactions via semantic `d3.dispatch` events | Deterministic toggle/solo/reset behavior and modular integration |
 | 13-01 | Keep colorbar guides non-interactive | Maintain discrete-only scope and guide semantics |
+| 13-02 | Derive mark legend identity from discrete mapped aesthetics and attach stable `data-legend-*` attributes | Ensure deterministic legend-to-mark matching across redraws/facets |
+| 13-02 | Apply hidden > solo > crosstalk/brush > hover precedence through a single state pass | Prevent contradictory visuals when interaction modes compose |
+| 13-02 | Synchronize legend persistent filters through existing Crosstalk `SelectionHandle` set/clear flow | Keep linked widgets deterministic without introducing a new transport |
 
 ### Active TODOs
-- Execute 13-02 plan: wire legend state to mark visibility and linked-view synchronization.
 - Execute 13-03 plan: add regression coverage and end-to-end legend verification.
 - Validate LEG-01..LEG-04 criteria across composed interactions.
 
@@ -49,8 +51,8 @@ Progress: [███░░░░░░░] 33% (1/3 plans complete in Phase 13)
 ## Session Continuity
 
 Last session: 2026-03-23
-Stopped at: Completed 13-01 plan execution
-Resume file: .planning/phases/13-interactive-legend-controls/13-02-PLAN.md
+Stopped at: Completed 13-02 plan execution
+Resume file: .planning/phases/13-interactive-legend-controls/13-03-PLAN.md
 
 ---
 *State initialized: 2026-02-07*
@@ -58,3 +60,4 @@ Resume file: .planning/phases/13-interactive-legend-controls/13-02-PLAN.md
 *v1.1 started: 2026-03-23*
 *v1.1 roadmap created: 2026-03-23*
 *13-01 completed: 2026-03-23*
+*13-02 completed: 2026-03-23*
