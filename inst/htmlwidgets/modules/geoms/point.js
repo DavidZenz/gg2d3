@@ -58,6 +58,35 @@
 
     const defaultSize = params.size || 1.5;
 
+    function getLegendIdentity(datum) {
+      const candidates = [
+        { aesthetic: 'fill', mapping: aes.fill },
+        { aesthetic: 'colour', mapping: aes.color },
+        { aesthetic: 'shape', mapping: aes.shape },
+        { aesthetic: 'size', mapping: aes.size }
+      ];
+
+      for (let i = 0; i < candidates.length; i++) {
+        const candidate = candidates[i];
+        if (!candidate.mapping) continue;
+
+        const raw = val(get(datum, candidate.mapping));
+        if (raw === null || raw === undefined) continue;
+        if (typeof raw === 'number' && Number.isFinite(raw)) continue;
+
+        const level = String(raw).trim();
+        if (!level) continue;
+
+        return {
+          key: candidate.aesthetic + '::' + level,
+          level: level,
+          aesthetic: candidate.aesthetic
+        };
+      }
+
+      return null;
+    }
+
     // Helper: get pixel position from scale + value, centering for band scales
     function scalePos(scale, v, isBand) {
       return isBand ? scale(v) + scale.bandwidth() / 2 : scale(v);
@@ -111,7 +140,19 @@
         const strokeVal = val(get(d, "stroke"));
         return strokeVal != null ? strokeVal : 0.5;
       })
-      .attr("opacity", d => opacity(d));
+      .attr("opacity", d => opacity(d))
+      .attr("data-legend-key", d => {
+        const identity = getLegendIdentity(d);
+        return identity ? identity.key : null;
+      })
+      .attr("data-legend-level", d => {
+        const identity = getLegendIdentity(d);
+        return identity ? identity.level : null;
+      })
+      .attr("data-legend-aesthetic", d => {
+        const identity = getLegendIdentity(d);
+        return identity ? identity.aesthetic : null;
+      });
 
     return pts.length;
   }

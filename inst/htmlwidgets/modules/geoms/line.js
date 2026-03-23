@@ -54,6 +54,35 @@
 
     let linesDrawn = 0;
 
+    function getLegendIdentity(datum) {
+      const candidates = [
+        { aesthetic: 'fill', mapping: aes.fill },
+        { aesthetic: 'colour', mapping: aes.color },
+        { aesthetic: 'shape', mapping: aes.shape },
+        { aesthetic: 'size', mapping: aes.size }
+      ];
+
+      for (let i = 0; i < candidates.length; i++) {
+        const candidate = candidates[i];
+        if (!candidate.mapping) continue;
+
+        const raw = val(get(datum, candidate.mapping));
+        if (raw === null || raw === undefined) continue;
+        if (typeof raw === 'number' && Number.isFinite(raw)) continue;
+
+        const level = String(raw).trim();
+        if (!level) continue;
+
+        return {
+          key: candidate.aesthetic + '::' + level,
+          level: level,
+          aesthetic: candidate.aesthetic
+        };
+      }
+
+      return null;
+    }
+
     grouped.forEach(arr => {
       let pts = arr
         .map(d => {
@@ -86,7 +115,19 @@
           .attr("fill", "none")
           .attr("stroke", strokeColor(firstPoint))
           .attr("stroke-width", strokeWidth)
-          .attr("opacity", opacity(firstPoint));
+          .attr("opacity", opacity(firstPoint))
+          .attr("data-legend-key", function() {
+            const identity = getLegendIdentity(firstPoint);
+            return identity ? identity.key : null;
+          })
+          .attr("data-legend-level", function() {
+            const identity = getLegendIdentity(firstPoint);
+            return identity ? identity.level : null;
+          })
+          .attr("data-legend-aesthetic", function() {
+            const identity = getLegendIdentity(firstPoint);
+            return identity ? identity.aesthetic : null;
+          });
 
         linesDrawn += 1;
       }
