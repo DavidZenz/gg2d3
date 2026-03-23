@@ -51,6 +51,35 @@
     const isYBand = typeof yScale.bandwidth === "function";
     const flip = !!options.flip;
 
+    function getLegendIdentity(datum) {
+      const candidates = [
+        { aesthetic: 'fill', mapping: aes.fill },
+        { aesthetic: 'colour', mapping: aes.color },
+        { aesthetic: 'shape', mapping: aes.shape },
+        { aesthetic: 'size', mapping: aes.size }
+      ];
+
+      for (let i = 0; i < candidates.length; i++) {
+        const candidate = candidates[i];
+        if (!candidate.mapping) continue;
+
+        const raw = val(get(datum, candidate.mapping));
+        if (raw === null || raw === undefined) continue;
+        if (typeof raw === 'number' && Number.isFinite(raw)) continue;
+
+        const level = String(raw).trim();
+        if (!level) continue;
+
+        return {
+          key: candidate.aesthetic + '::' + level,
+          level: level,
+          aesthetic: candidate.aesthetic
+        };
+      }
+
+      return null;
+    }
+
     // Render rectangles
     // When flip: xScale maps vertical, yScale maps horizontal
     // x-aesthetic bounds (xmin/xmax) use xScale for vertical positioning
@@ -82,7 +111,19 @@
           return Math.abs(x2 - x1);
         })
         .attr("fill", d => fillColor(d))
-        .attr("opacity", d => opacity(d));
+        .attr("opacity", d => opacity(d))
+        .attr("data-legend-key", d => {
+          const identity = getLegendIdentity(d);
+          return identity ? identity.key : null;
+        })
+        .attr("data-legend-level", d => {
+          const identity = getLegendIdentity(d);
+          return identity ? identity.level : null;
+        })
+        .attr("data-legend-aesthetic", d => {
+          const identity = getLegendIdentity(d);
+          return identity ? identity.aesthetic : null;
+        });
     } else {
       sel.enter().append("rect")
         .attr("class", "geom-rect")
@@ -107,7 +148,19 @@
           return Math.abs(y2 - y1);
         })
       .attr("fill", d => fillColor(d))
-      .attr("opacity", d => opacity(d));
+      .attr("opacity", d => opacity(d))
+      .attr("data-legend-key", d => {
+        const identity = getLegendIdentity(d);
+        return identity ? identity.key : null;
+      })
+      .attr("data-legend-level", d => {
+        const identity = getLegendIdentity(d);
+        return identity ? identity.level : null;
+      })
+      .attr("data-legend-aesthetic", d => {
+        const identity = getLegendIdentity(d);
+        return identity ? identity.aesthetic : null;
+      });
     }
 
     return rects.length;

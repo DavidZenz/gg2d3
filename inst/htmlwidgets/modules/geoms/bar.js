@@ -62,6 +62,35 @@
     // Check if data has ymin/ymax (for stacked bars)
     const hasStack = bars.length > 0 && get(bars[0], "ymin") != null && get(bars[0], "ymax") != null;
 
+    function getLegendIdentity(datum) {
+      const candidates = [
+        { aesthetic: 'fill', mapping: aes.fill },
+        { aesthetic: 'colour', mapping: aes.color },
+        { aesthetic: 'shape', mapping: aes.shape },
+        { aesthetic: 'size', mapping: aes.size }
+      ];
+
+      for (let i = 0; i < candidates.length; i++) {
+        const candidate = candidates[i];
+        if (!candidate.mapping) continue;
+
+        const raw = val(get(datum, candidate.mapping));
+        if (raw === null || raw === undefined) continue;
+        if (typeof raw === 'number' && Number.isFinite(raw)) continue;
+
+        const level = String(raw).trim();
+        if (!level) continue;
+
+        return {
+          key: candidate.aesthetic + '::' + level,
+          level: level,
+          aesthetic: candidate.aesthetic
+        };
+      }
+
+      return null;
+    }
+
     // Calculate baseline: use 0 if in domain, else use domain min
     // When flip: the value axis is yScale (horizontal), baseline is horizontal
     const valScale = flip ? yScale : yScale;
@@ -118,7 +147,19 @@
           const linewidthVal = val(get(d, "linewidth"));
           return linewidthVal != null ? mmToPxLinewidth(linewidthVal) : 1.89;
         })
-        .attr("opacity", d => opacity(d));
+        .attr("opacity", d => opacity(d))
+        .attr("data-legend-key", d => {
+          const identity = getLegendIdentity(d);
+          return identity ? identity.key : null;
+        })
+        .attr("data-legend-level", d => {
+          const identity = getLegendIdentity(d);
+          return identity ? identity.level : null;
+        })
+        .attr("data-legend-aesthetic", d => {
+          const identity = getLegendIdentity(d);
+          return identity ? identity.aesthetic : null;
+        });
     } else {
       // Normal vertical bars
       sel.enter().append("rect")
@@ -156,7 +197,19 @@
         // Convert mm to pixels: 0.5mm = 1.89px
         return linewidthVal != null ? mmToPxLinewidth(linewidthVal) : 1.89;
       })
-      .attr("opacity", d => opacity(d));
+      .attr("opacity", d => opacity(d))
+      .attr("data-legend-key", d => {
+        const identity = getLegendIdentity(d);
+        return identity ? identity.key : null;
+      })
+      .attr("data-legend-level", d => {
+        const identity = getLegendIdentity(d);
+        return identity ? identity.level : null;
+      })
+      .attr("data-legend-aesthetic", d => {
+        const identity = getLegendIdentity(d);
+        return identity ? identity.aesthetic : null;
+      });
     }
 
     return bars.length;
