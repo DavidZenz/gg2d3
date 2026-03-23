@@ -27,6 +27,13 @@ Depth setting is **comprehensive**, so requirement categories are kept as separa
 3. User sees legend-driven visibility state remain synchronized with linked-view interaction state.
 4. User can hover a legend item to preview emphasis/de-emphasis without changing persistent filter state.
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Build canonical legend interaction state and semantic event pipeline for discrete guides.
+- [ ] 13-02-PLAN.md — Wire legend state into mark rendering and crosstalk synchronization for linked-view consistency.
+- [ ] 13-03-PLAN.md — Add regression coverage and run end-to-end interactive legend verification.
+
 ### Phase 14 - Date/Datetime Parity Behavior
 
 **Goal:** Users see date and datetime axes behave like ggplot2 for breaks, labels, and timezone display semantics.
