@@ -29,7 +29,38 @@ test_that("d3_tooltip() rejects non-widget input", {
   expect_error(d3_tooltip(list(x = 1)), "gg2d3 widget")
 })
 
-test_that("d3_hover() returns valid widget", {
+test_that("d3_handlers() configures IR correctly", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
+  
+  w <- gg2d3(p) |> d3_handlers(click = "console.log(d)", shiny_id = "plot_click")
+  
+  expect_equal(w$x$interactivity$handlers$click, "console.log(d)")
+  expect_equal(w$x$interactivity$handlers$shiny_id, "plot_click")
+  expect_s3_class(w, "gg2d3")
+})
+
+test_that("d3_transitions() configures IR correctly", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
+
+  # Default
+  w1 <- gg2d3(p) |> d3_transitions()
+  expect_true(w1$x$interactivity$transitions$enabled)
+  expect_equal(w1$x$interactivity$transitions$duration, 500)
+
+  # Custom
+  w2 <- gg2d3(p) |> d3_transitions(duration = 1000, easing = "linear")
+  expect_equal(w2$x$interactivity$transitions$duration, 1000)
+  expect_equal(w2$x$interactivity$transitions$easing, "linear")
+
+  # Disabled
+  w3 <- gg2d3(p) |> d3_transitions(duration = 0)
+  expect_false(w3$x$interactivity$transitions$enabled)
+})
+
+test_that("d3_zoom() returns valid widget", {
+
   library(ggplot2)
   p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point()
   w <- gg2d3(p) |> d3_hover()

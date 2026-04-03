@@ -4,8 +4,9 @@ HTMLWidgets.widget({
 
   factory: function (el, width, height) {
 
-    // Store IR for resize support
+    // Store IR for resize and update diffing
     let currentIR = null;
+    let previousIR = null;
 
     // ---------- renderPanel helper ----------
     function renderPanel(root, parentGroup, panelBox, panelData, ir, theme, convertColor, flip, panelNum, isFaceted) {
@@ -98,7 +99,14 @@ HTMLWidgets.widget({
           gClipped,
           xScale,
           yScale,
-          { colorScale: colorScale, plotWidth: w, plotHeight: h, flip: flip }
+          { 
+            colorScale: colorScale, 
+            plotWidth: w, 
+            plotHeight: h, 
+            flip: flip, 
+            coord: ir.coord,
+            scales: ir.scales 
+          }
         );
         drawn += count;
       });
@@ -117,6 +125,75 @@ HTMLWidgets.widget({
       return drawn;
     }
 
+    /**
+     * Render polar (radial/angular) axes and grid.
+     */
+    function renderPolarAxes(root, ir, layout, theme) {
+      const ptToPx = window.gg2d3.constants.ptToPx;
+      const convertColor = window.gg2d3.scales.convertColor;
+      const panel = layout.panels[0]; // Assume single panel for polar for now
+      const center = { x: panel.x + panel.w / 2, y: panel.y + panel.h / 2 };
+      const maxRadius = Math.min(panel.w, panel.h) / 2;
+
+      const gridTheme = ir.theme.grid || {};
+      const axisText = theme.get("axis.text") || {};
+
+      const coord = ir.coord;
+      const thetaAes = coord.theta || "x";
+      const rAes = thetaAes === "x" ? "y" : "x";
+
+      const thetaScale = window.gg2d3.scales.createScale(ir.scales[thetaAes], [coord.start, coord.start + coord.direction * 2 * Math.PI]);
+      const rScale = window.gg2d3.scales.createScale(ir.scales[rAes], [0, maxRadius]);
+
+      const thetaBreaks = ir.scales[thetaAes].breaks || [];
+      const rBreaks = ir.scales[rAes].breaks || [];
+
+      const gridGroup = root.append("g").attr("class", "polar-grid");
+
+      // 1. Draw circular grid lines (radial breaks)
+      rBreaks.forEach(d => {
+        gridGroup.append("circle")
+          .attr("cx", center.x)
+          .attr("cy", center.y)
+          .attr("r", rScale(d))
+          .attr("fill", "none")
+          .attr("stroke", convertColor(gridTheme.major && gridTheme.major.colour) || "white")
+          .attr("stroke-width", gridTheme.major && gridTheme.major.linewidth || 1);
+      });
+
+      // 2. Draw radiating grid lines (angular breaks)
+      thetaBreaks.forEach(d => {
+        const angle = thetaScale(d);
+        const x2 = center.x + maxRadius * Math.sin(angle);
+        const y2 = center.y - maxRadius * Math.cos(angle);
+
+        gridGroup.append("line")
+          .attr("x1", center.x)
+          .attr("y1", center.y)
+          .attr("x2", x2)
+          .attr("y2", y2)
+          .attr("stroke", convertColor(gridTheme.major && gridTheme.major.colour) || "white")
+          .attr("stroke-width", gridTheme.major && gridTheme.major.linewidth || 1);
+
+        // 3. Circular labels
+        const labelRadius = maxRadius + 10;
+        const lx = center.x + labelRadius * Math.sin(angle);
+        const ly = center.y - labelRadius * Math.cos(angle);
+
+        const labels = ir.scales[thetaAes].labels || ir.scales[thetaAes].domain;
+        const labelText = labels ? (labels[thetaBreaks.indexOf(d)] || d) : d;
+
+        gridGroup.append("text")
+          .attr("x", lx)
+          .attr("y", ly)
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "central")
+          .style("font-size", axisText.size ? `${ptToPx(axisText.size)}px` : "8.8px")
+          .style("fill", convertColor(axisText.colour) || "#4D4D4D")
+          .text(labelText);
+      });
+    }
+
     // ---------- draw ----------
     function draw(ir, elW, elH) {
       d3.select(el).selectAll("*").remove();
@@ -130,6 +207,16 @@ HTMLWidgets.widget({
       // Create theme accessor with deep merge
       const theme = window.gg2d3.theme.createTheme(ir.theme);
       const flip = !!(ir.coord && ir.coord.flip);
+
+      // Handle motion preferences
+      if (!ir.interactivity) ir.interactivity = {};
+      if (!ir.interactivity.transitions) ir.interactivity.transitions = { enabled: true, duration: 500, easing: 'cubic-in-out' };
+      
+      const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) {
+        ir.interactivity.transitions.enabled = false;
+        ir.interactivity.transitions.duration = 0;
+      }
 
       // Estimate legend dimensions from IR guides
       const legendPosition = (ir.legend && ir.legend.position) || "none";
@@ -258,13 +345,13 @@ HTMLWidgets.widget({
       }
 
       // Render strip labels (faceted plots only)
-      // facet_wrap strips (one per panel, positioned above each panel)
+      // facet_wrap strips (one per panel per level, positioned above each panel)
       if (!isFacetGrid && isFaceted && layout.strips && layout.strips.length > 0) {
         const stripTheme = window.gg2d3.layout.getStripTheme(theme);
 
         layout.strips.forEach(function(strip) {
           const stripGroup = root.append("g")
-            .attr("class", "strip strip-" + strip.PANEL);
+            .attr("class", "strip strip-" + strip.PANEL + " level-" + strip.level);
 
           // Strip background rectangle
           stripGroup.append("rect")
@@ -294,7 +381,8 @@ HTMLWidgets.widget({
       if (isFacetGrid && layout.colStrips && layout.colStrips.length > 0) {
         const stripTheme = window.gg2d3.layout.getStripTheme(theme);
         layout.colStrips.forEach(function(strip) {
-          const stripGroup = root.append("g").attr("class", "strip strip-col-" + strip.COL);
+          const stripGroup = root.append("g")
+            .attr("class", "strip strip-col-" + strip.COL + " level-" + strip.level);
           // Background rect
           stripGroup.append("rect")
             .attr("x", strip.x).attr("y", strip.y)
@@ -320,7 +408,8 @@ HTMLWidgets.widget({
       if (isFacetGrid && layout.rowStrips && layout.rowStrips.length > 0) {
         const stripTheme = window.gg2d3.layout.getStripTheme(theme);
         layout.rowStrips.forEach(function(strip) {
-          const stripGroup = root.append("g").attr("class", "strip strip-row-" + strip.ROW);
+          const stripGroup = root.append("g")
+            .attr("class", "strip strip-row-" + strip.ROW + " level-" + strip.level);
           // Background rect
           stripGroup.append("rect")
             .attr("x", strip.x).attr("y", strip.y)
@@ -436,23 +525,40 @@ HTMLWidgets.widget({
             }
             const panelXScale = window.gg2d3.scales.createScale(xScaleDesc, flip ? [panelH, 0] : [0, panelW]);
 
-            const ag = root.append("g").attr("transform", "translate(" + panelBox.x + "," + (panelBox.y + panelH) + ")");
-            const xAxisGen = d3.axisBottom(panelXScale);
+            if (flip) {
+              // x-aesthetic is vertical -> LEFT axis
+              const ag = root.append("g").attr("transform", "translate(" + panelBox.x + "," + panelBox.y + ")");
+              const leftAxisGen = d3.axisLeft(panelXScale);
 
-            // Use panel-specific breaks for free scales
-            const panelXBreaks = (isFreeX && panelData.x_breaks) ? panelData.x_breaks :
-                                 (ir.scales.x && ir.scales.x.breaks);
-            if (panelXBreaks && typeof panelXScale.bandwidth !== "function") {
-              xAxisGen.tickValues(panelXBreaks);
-            }
-            if (xTransform && xTransform !== "identity" && typeof panelXScale.bandwidth !== "function") {
-              xAxisGen.tickFormat(cleanFormat);
-            }
-            // Temporal axis formatting (overrides tickValues/tickFormat for date/time scales)
-            window.gg2d3.scales.applyTemporalAxisFormat(xAxisGen, panelXBreaks, xScaleDesc);
+              const panelXBreaks = (isFreeX && panelData.x_breaks) ? panelData.x_breaks :
+                                   (ir.scales.x && ir.scales.x.breaks);
+              if (panelXBreaks && typeof panelXScale.bandwidth !== "function") {
+                leftAxisGen.tickValues(panelXBreaks);
+              }
+              if (xTransform && xTransform !== "identity" && typeof panelXScale.bandwidth !== "function") {
+                leftAxisGen.tickFormat(cleanFormat);
+              }
+              window.gg2d3.scales.applyTemporalAxisFormat(leftAxisGen, panelXBreaks, xScaleDesc);
 
-            const xAxis = ag.append("g").attr("class", "axis").call(xAxisGen);
-            window.gg2d3.theme.applyAxisStyle(xAxis, axisTextX, axisLineX, axisTicksX);
+              const xAxis = ag.append("g").attr("class", "axis axis-left").call(leftAxisGen);
+              window.gg2d3.theme.applyAxisStyle(xAxis, axisTextX, axisLineX, axisTicksX);
+            } else {
+              const ag = root.append("g").attr("transform", "translate(" + panelBox.x + "," + (panelBox.y + panelH) + ")");
+              const xAxisGen = d3.axisBottom(panelXScale);
+
+              const panelXBreaks = (isFreeX && panelData.x_breaks) ? panelData.x_breaks :
+                                   (ir.scales.x && ir.scales.x.breaks);
+              if (panelXBreaks && typeof panelXScale.bandwidth !== "function") {
+                xAxisGen.tickValues(panelXBreaks);
+              }
+              if (xTransform && xTransform !== "identity" && typeof panelXScale.bandwidth !== "function") {
+                xAxisGen.tickFormat(cleanFormat);
+              }
+              window.gg2d3.scales.applyTemporalAxisFormat(xAxisGen, panelXBreaks, xScaleDesc);
+
+              const xAxis = ag.append("g").attr("class", "axis axis-bottom").call(xAxisGen);
+              window.gg2d3.theme.applyAxisStyle(xAxis, axisTextX, axisLineX, axisTicksX);
+            }
           }
 
           // Render y-axis if left column OR free_y/free
@@ -463,22 +569,40 @@ HTMLWidgets.widget({
             }
             const panelYScale = window.gg2d3.scales.createScale(yScaleDesc, flip ? [0, panelW] : [panelH, 0]);
 
-            const ag = root.append("g").attr("transform", "translate(" + panelBox.x + "," + panelBox.y + ")");
-            const yAxisGen = d3.axisLeft(panelYScale);
+            if (flip) {
+              // y-aesthetic is horizontal -> BOTTOM axis
+              const ag = root.append("g").attr("transform", "translate(" + panelBox.x + "," + (panelBox.y + panelH) + ")");
+              const bottomAxisGen = d3.axisBottom(panelYScale);
 
-            const panelYBreaks = (isFreeY && panelData.y_breaks) ? panelData.y_breaks :
-                                 (ir.scales.y && ir.scales.y.breaks);
-            if (panelYBreaks && typeof panelYScale.bandwidth !== "function") {
-              yAxisGen.tickValues(panelYBreaks);
-            }
-            if (yTransform && yTransform !== "identity" && typeof panelYScale.bandwidth !== "function") {
-              yAxisGen.tickFormat(cleanFormat);
-            }
-            // Temporal axis formatting (overrides tickValues/tickFormat for date/time scales)
-            window.gg2d3.scales.applyTemporalAxisFormat(yAxisGen, panelYBreaks, yScaleDesc);
+              const panelYBreaks = (isFreeY && panelData.y_breaks) ? panelData.y_breaks :
+                                   (ir.scales.y && ir.scales.y.breaks);
+              if (panelYBreaks && typeof panelYScale.bandwidth !== "function") {
+                bottomAxisGen.tickValues(panelYBreaks);
+              }
+              if (yTransform && yTransform !== "identity" && typeof panelYScale.bandwidth !== "function") {
+                bottomAxisGen.tickFormat(cleanFormat);
+              }
+              window.gg2d3.scales.applyTemporalAxisFormat(bottomAxisGen, panelYBreaks, yScaleDesc);
 
-            const yAxis = ag.append("g").attr("class", "axis").call(yAxisGen);
-            window.gg2d3.theme.applyAxisStyle(yAxis, axisTextY, axisLineY, axisTicksY);
+              const yAxis = ag.append("g").attr("class", "axis axis-bottom").call(bottomAxisGen);
+              window.gg2d3.theme.applyAxisStyle(yAxis, axisTextY, axisLineY, axisTicksY);
+            } else {
+              const ag = root.append("g").attr("transform", "translate(" + panelBox.x + "," + panelBox.y + ")");
+              const yAxisGen = d3.axisLeft(panelYScale);
+
+              const panelYBreaks = (isFreeY && panelData.y_breaks) ? panelData.y_breaks :
+                                   (ir.scales.y && ir.scales.y.breaks);
+              if (panelYBreaks && typeof panelYScale.bandwidth !== "function") {
+                yAxisGen.tickValues(panelYBreaks);
+              }
+              if (yTransform && yTransform !== "identity" && typeof panelYScale.bandwidth !== "function") {
+                yAxisGen.tickFormat(cleanFormat);
+              }
+              window.gg2d3.scales.applyTemporalAxisFormat(yAxisGen, panelYBreaks, yScaleDesc);
+
+              const yAxis = ag.append("g").attr("class", "axis axis-left").call(yAxisGen);
+              window.gg2d3.theme.applyAxisStyle(yAxis, axisTextY, axisLineY, axisTicksY);
+            }
           }
         });
       } else {
@@ -553,29 +677,36 @@ HTMLWidgets.widget({
       // Axis titles
       // ir.axes.x.label and ir.axes.y.label are already swapped for coord_flip in R
       // x label always goes below the bottom axis, y label always goes left of the left axis
-      const xTitle = ir.axes && ir.axes.x && ir.axes.x.label;
-      if (xTitle && layout.axisLabels.x.visible) {
-        root.append("text")
-          .attr("x", layout.axisLabels.x.x)
-          .attr("y", layout.axisLabels.x.y)
-          .attr("text-anchor", "middle")
-          .style("font-size", axisTitleSpec && axisTitleSpec.size ? `${axisTitleSpec.size}px` : "11px")
-          .style("fill", convertColor(axisTitleSpec && axisTitleSpec.colour) || "black")
-          .style("font-family", axisTitleSpec && axisTitleSpec.family || "sans-serif")
-          .text(xTitle);
+      if (ir.coord && ir.coord.type !== "polar") {
+        const xTitle = ir.axes && ir.axes.x && ir.axes.x.label;
+        if (xTitle && layout.axisLabels.x.visible) {
+          root.append("text")
+            .attr("x", layout.axisLabels.x.x)
+            .attr("y", layout.axisLabels.x.y)
+            .attr("text-anchor", "middle")
+            .style("font-size", axisTitleSpec && axisTitleSpec.size ? `${axisTitleSpec.size}px` : "11px")
+            .style("fill", convertColor(axisTitleSpec && axisTitleSpec.colour) || "black")
+            .style("font-family", axisTitleSpec && axisTitleSpec.family || "sans-serif")
+            .text(xTitle);
+        }
+
+        const yTitle = ir.axes && ir.axes.y && ir.axes.y.label;
+        if (yTitle && layout.axisLabels.y.visible) {
+          root.append("text")
+            .attr("x", layout.axisLabels.y.x)
+            .attr("y", layout.axisLabels.y.y)
+            .attr("text-anchor", "middle")
+            .attr("transform", `rotate(${layout.axisLabels.y.rotation}, ${layout.axisLabels.y.x}, ${layout.axisLabels.y.y})`)
+            .style("font-size", axisTitleSpec && axisTitleSpec.size ? `${axisTitleSpec.size}px` : "11px")
+            .style("fill", convertColor(axisTitleSpec && axisTitleSpec.colour) || "black")
+            .style("font-family", axisTitleSpec && axisTitleSpec.family || "sans-serif")
+            .text(yTitle);
+        }
       }
 
-      const yTitle = ir.axes && ir.axes.y && ir.axes.y.label;
-      if (yTitle && layout.axisLabels.y.visible) {
-        root.append("text")
-          .attr("x", layout.axisLabels.y.x)
-          .attr("y", layout.axisLabels.y.y)
-          .attr("text-anchor", "middle")
-          .attr("transform", `rotate(${layout.axisLabels.y.rotation}, ${layout.axisLabels.y.x}, ${layout.axisLabels.y.y})`)
-          .style("font-size", axisTitleSpec && axisTitleSpec.size ? `${axisTitleSpec.size}px` : "11px")
-          .style("fill", convertColor(axisTitleSpec && axisTitleSpec.colour) || "black")
-          .style("font-family", axisTitleSpec && axisTitleSpec.family || "sans-serif")
-          .text(yTitle);
+      // Render polar axes if applicable
+      if (ir.coord && ir.coord.type === "polar") {
+        renderPolarAxes(root, ir, layout, theme);
       }
 
       // Render legends (after panel content, using layout-computed positions)
@@ -604,8 +735,28 @@ HTMLWidgets.widget({
             .append("rect").attr("x", 20).attr("y", 20).attr("width", 200).attr("height", 100).attr("fill", "tomato");
           return;
         }
+        // Check if we can perform a flicker-free update
+        const isUpdate = previousIR && 
+          previousIR.width === ir.width &&
+          previousIR.height === ir.height &&
+          JSON.stringify(previousIR.coord) === JSON.stringify(ir.coord) &&
+          JSON.stringify(previousIR.facets) === JSON.stringify(ir.facets) &&
+          JSON.stringify(previousIR.scales) === JSON.stringify(ir.scales) &&
+          JSON.stringify(previousIR.guides) === JSON.stringify(ir.guides);
+
         currentIR = ir;
-        draw(ir, width, height);
+
+        if (isUpdate) {
+          // Structural elements are same, just apply state updates
+          if (window.gg2d3.events && window.gg2d3.events.applyLegendState) {
+            window.gg2d3.events.applyLegendState(el);
+          }
+        } else {
+          // Full redraw required
+          draw(ir, width, height);
+        }
+
+        previousIR = ir;
 
         // Initialize crosstalk if metadata present
         if (typeof crosstalk !== 'undefined' && x.crosstalk_key && x.crosstalk_group) {
@@ -629,6 +780,22 @@ HTMLWidgets.widget({
             window.gg2d3.events.attachLegend(el, { ir: ir, root: d3.select(el).select('svg') });
           }
         }
+
+        // Re-attach interactivity handlers if update mode
+        if (isUpdate && window.gg2d3.events) {
+          const interact = ir.interactivity || {};
+          setTimeout(function() {
+            if (interact.tooltip && interact.tooltip.enabled && window.gg2d3.events.attachTooltips) {
+              window.gg2d3.events.attachTooltips(el, interact.tooltip, ir);
+            }
+            if (interact.hover && interact.hover.enabled && window.gg2d3.events.attachHover) {
+              window.gg2d3.events.attachHover(el, interact.hover);
+            }
+            if (interact.handlers && window.gg2d3.events.attachHandlers) {
+              window.gg2d3.events.attachHandlers(el, interact.handlers);
+            }
+          }, 0);
+        }
       },
       resize: function (newWidth, newHeight) {
         width = newWidth;
@@ -636,14 +803,29 @@ HTMLWidgets.widget({
         if (currentIR) {
           draw(currentIR, newWidth, newHeight);
 
-          if (window.gg2d3.events && window.gg2d3.events.attachLegend) {
+          if (window.gg2d3.events) {
+            const interact = currentIR.interactivity || {};
+            
+            // Re-attach legend
             const hasDiscreteGuides = !!(currentIR.guides && currentIR.guides.some(function(g) {
               return g && g.type === 'legend' && g.position !== 'none';
             }));
-
-            if (hasDiscreteGuides) {
+            if (hasDiscreteGuides && window.gg2d3.events.attachLegend) {
               window.gg2d3.events.attachLegend(el, { ir: currentIR, root: d3.select(el).select('svg') });
             }
+
+            // Re-attach other handlers
+            setTimeout(function() {
+              if (interact.tooltip && interact.tooltip.enabled && window.gg2d3.events.attachTooltips) {
+                window.gg2d3.events.attachTooltips(el, interact.tooltip, currentIR);
+              }
+              if (interact.hover && interact.hover.enabled && window.gg2d3.events.attachHover) {
+                window.gg2d3.events.attachHover(el, interact.hover);
+              }
+              if (interact.handlers && window.gg2d3.events.attachHandlers) {
+                window.gg2d3.events.attachHandlers(el, interact.handlers);
+              }
+            }, 0);
           }
         }
       }

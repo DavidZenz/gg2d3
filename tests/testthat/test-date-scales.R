@@ -159,6 +159,71 @@ test_that("numeric scales unchanged by temporal support", {
   expect_null(ir$scales$x$labels)
 })
 
+# --- Date scale parity (breaks and labels) ---
+test_that("date_breaks correctly influences IR breaks", {
+  df <- data.frame(
+    date = as.Date("2024-01-01") + 0:100,
+    y = 1:101
+  )
+  # Default breaks vs 1 month breaks
+  p1 <- ggplot(df, aes(date, y)) + geom_point() + scale_x_date(date_breaks = "1 month")
+  ir1 <- as_d3_ir(p1)
+
+  p2 <- ggplot(df, aes(date, y)) + geom_point() + scale_x_date(date_breaks = "2 weeks")
+  ir2 <- as_d3_ir(p2)
+
+  # Should have different number of breaks
+  expect_true(length(ir1$scales$x$breaks) != length(ir2$scales$x$breaks))
+  # All breaks should be in ms
+  expect_true(all(ir1$scales$x$breaks > 1e12))
+})
+
+test_that("date_labels extracted for both date and datetime scales", {
+  df <- data.frame(
+    date = as.Date("2024-01-01") + 0:5,
+    time = as.POSIXct("2024-01-01 12:00", tz = "UTC") + (0:5)*3600,
+    y = 1:6
+  )
+
+  # Date scale
+  p_date <- ggplot(df, aes(date, y)) + geom_point() + scale_x_date(date_labels = "%d/%m")
+  ir_date <- as_d3_ir(p_date)
+  expect_equal(ir_date$scales$x$format, "%d/%m")
+
+  # Datetime scale
+  p_time <- ggplot(df, aes(time, y)) + geom_point() + scale_x_datetime(date_labels = "%H:%M")
+  ir_time <- as_d3_ir(p_time)
+  expect_equal(ir_time$scales$x$format, "%H:%M")
+})
+
+test_that("timezone robustly extracted even without explicit scale_x_datetime", {
+  # POSIXct data has its own TZ which ggplot2 uses by default
+  df <- data.frame(
+    time = as.POSIXct("2024-01-01 12:00", tz = "America/New_York") + (0:1)*3600,
+    y = 1:2
+  )
+  p <- ggplot(df, aes(time, y)) + geom_point()
+  ir <- as_d3_ir(p)
+
+  # Even without scale_x_datetime(timezone=...), it should ideally pick up the data's TZ
+  # if ggplot2 propagates it to the scale.
+  expect_equal(ir$scales$x$timezone, "America/New_York")
+})
+
+test_that("tooltips on date axes initialize correctly", {
+  library(ggplot2)
+  df <- data.frame(
+    date = as.Date("2024-01-01") + 0:2,
+    y = 1:3
+  )
+  p <- ggplot(df, aes(date, y)) + geom_point()
+  w <- gg2d3(p) |> d3_tooltip()
+
+  expect_true(w$x$interactivity$tooltip$enabled)
+  # Check that date transform is preserved in IR within the widget
+  expect_equal(w$x$ir$scales$x$transform, "date")
+})
+
 # --- Visual test ---
 test_that("visual test: date/time scales render correctly", {
   skip_on_ci()

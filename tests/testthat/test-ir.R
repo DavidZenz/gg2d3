@@ -260,3 +260,22 @@ test_that("coord_fixed preserves scale domains", {
   expect_true(ir$scales$y$domain[1] <= min(mtcars$mpg))
   expect_true(ir$scales$y$domain[2] >= max(mtcars$mpg))
 })
+
+# --- Advanced Scale Parity Tests ---
+
+test_that("IR contains per-panel minor breaks for faceted plots", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() +
+    facet_wrap(~ am, scales = "free")
+  ir <- as_d3_ir(p)
+
+  expect_true(length(ir$panels) >= 2)
+  for (panel in ir$panels) {
+    # After implementation, these should not be NULL
+    expect_true("x_minor_breaks" %in% names(panel))
+    expect_true("y_minor_breaks" %in% names(panel))
+    expect_true(is.numeric(panel$x_minor_breaks))
+    expect_true(is.numeric(panel$y_minor_breaks))
+  }
+})

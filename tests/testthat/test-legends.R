@@ -259,3 +259,44 @@ test_that("interactive legend contract: discrete legends carry reset-capable tit
   expect_true(is.character(guide$title))
   expect_true(nzchar(guide$title))
 })
+
+test_that("interactive legend contract: handles NA values in discrete scales", {
+  library(ggplot2)
+  df <- data.frame(x = 1:4, y = 1:4, g = c("A", "B", "A", NA))
+  p <- ggplot(df, aes(x, y, colour = g)) + geom_point()
+  ir <- as_d3_ir(p)
+
+  expect_equal(length(ir$guides), 1)
+  guide <- ir$guides[[1]]
+
+  # ggplot2 usually includes (NA) in the legend if present in data
+  # The interaction contract should still provide a stable 'value' for it
+  labels <- sapply(guide$keys, function(k) k$label)
+  values <- sapply(guide$keys, function(k) k$value)
+
+  expect_true(any(is.na(labels)) || any(labels == "NA"))
+  # Even for NA labels, we want a usable value or at least no crash
+  expect_equal(length(values), length(labels))
+})
+
+test_that("interactive legend contract: multiple separate legends have distinct identities", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg, colour = factor(cyl), shape = factor(am))) +
+    geom_point()
+  ir <- as_d3_ir(p)
+
+  expect_equal(length(ir$guides), 2)
+
+  # Both should be interactive legends
+  expect_true(all(sapply(ir$guides, function(g) g$type == "legend")))
+
+  # Each should have its own aesthetics
+  aes_list <- lapply(ir$guides, function(g) unlist(g$aesthetics))
+  expect_true(any(sapply(aes_list, function(a) "colour" %in% a)))
+  expect_true(any(sapply(aes_list, function(a) "shape" %in% a)))
+
+  # Each should have its own set of keys and values
+  for (guide in ir$guides) {
+    expect_true(all(sapply(guide$keys, function(k) "value" %in% names(k))))
+  }
+})

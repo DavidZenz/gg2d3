@@ -190,11 +190,182 @@
     return { strokeColor, fillColor, opacity };
   }
 
+  /**
+   * Update (reposition) all geom elements using new scales.
+   * Centralizes element updates for zoom and transitions.
+   *
+   * @param {d3.Selection} container - Container holding the panels/groups
+   * @param {Function} xScale - D3 x scale
+   * @param {Function} yScale - D3 y scale
+   * @param {Object} options - Update options (flip, transition)
+   */
+  function updateGeoms(container, xScale, yScale, options) {
+    const flip = !!options.flip;
+    const t = options.transition || d3.transition().duration(0);
+
+    const xScaleFunc = flip ? yScale : xScale;
+    const yScaleFunc = flip ? xScale : yScale;
+
+    // geom_point
+    container.selectAll('circle.geom-point')
+      .transition(t)
+      .attr('cx', d => xScaleFunc(d.x))
+      .attr('cy', d => yScaleFunc(d.y));
+
+    // geom_bar
+    container.selectAll('rect.geom-bar')
+      .transition(t)
+      .each(function(d) {
+        const elem = d3.select(this);
+        if (flip) {
+          const y0 = yScaleFunc(d.y);
+          const y1 = yScaleFunc(d.yend);
+          const x0 = xScaleFunc(d.xmin);
+          const x1 = xScaleFunc(d.xmax);
+          elem
+            .attr('x', Math.min(y0, y1))
+            .attr('y', Math.min(x0, x1))
+            .attr('width', Math.abs(y1 - y0))
+            .attr('height', Math.abs(x1 - x0));
+        } else {
+          const bx0 = xScaleFunc(d.xmin);
+          const bx1 = xScaleFunc(d.xmax);
+          const by0 = yScaleFunc(d.y);
+          const by1 = yScaleFunc(d.yend);
+          elem
+            .attr('x', Math.min(bx0, bx1))
+            .attr('y', Math.min(by0, by1))
+            .attr('width', Math.abs(bx1 - bx0))
+            .attr('height', Math.abs(by1 - by0));
+        }
+      });
+
+    // geom_rect / geom_tile
+    container.selectAll('rect.geom-rect')
+      .transition(t)
+      .attr('x', d => Math.min(xScaleFunc(d.xmin), xScaleFunc(d.xmax)))
+      .attr('y', d => Math.min(yScaleFunc(d.ymin), yScaleFunc(d.ymax)))
+      .attr('width', d => Math.abs(xScaleFunc(d.xmax) - xScaleFunc(d.xmin)))
+      .attr('height', d => Math.abs(yScaleFunc(d.ymax) - yScaleFunc(d.ymin)));
+
+    // geom_text
+    container.selectAll('text.geom-text')
+      .transition(t)
+      .attr('x', d => xScaleFunc(d.x))
+      .attr('y', d => yScaleFunc(d.y));
+
+    // geom_segment
+    container.selectAll('line.geom-segment')
+      .transition(t)
+      .attr('x1', d => xScaleFunc(d.x))
+      .attr('y1', d => yScaleFunc(d.y))
+      .attr('x2', d => xScaleFunc(d.xend))
+      .attr('y2', d => yScaleFunc(d.yend));
+
+    // geom_ribbon, geom_violin, and geom_smooth_ribbon
+    const areaRibbon = d3.area()
+      .x(pt => xScaleFunc(pt.x))
+      .y0(pt => yScaleFunc(pt.ymin))
+      .y1(pt => yScaleFunc(pt.ymax));
+
+    container.selectAll('path.geom-ribbon, path.geom-violin, path.geom-smooth-ribbon')
+      .transition(t)
+      .attr('d', d => areaRibbon(d));
+
+    // Path geoms (line, path, smooth, density-outline)
+    const line = d3.line()
+      .x(pt => xScaleFunc(pt.x))
+      .y(pt => yScaleFunc(pt.y));
+
+    container.selectAll('path.geom-line, path.geom-path, path.geom-smooth, path.geom-density-outline')
+      .transition(t)
+      .attr('d', d => line(d));
+
+    // geom_area & geom_density
+    // ggplot2 density uses ymin for stacking, else it fills to baseline (usually 0)
+    // We'll use a helper that checks for ymin
+    container.selectAll('path.geom-area, path.geom-density')
+      .transition(t)
+      .attr('d', function(d) {
+        const hasYmin = d.some(p => p.ymin != null);
+        const y0Func = hasYmin ? (p => yScaleFunc(p.ymin)) : (p => yScaleFunc(p.y0 !== undefined ? p.y0 : 0));
+        const areaGen = d3.area()
+          .x(p => xScaleFunc(p.x))
+          .y0(y0Func)
+          .y1(p => yScaleFunc(p.y));
+        return areaGen(d);
+      });
+
+    // geom_boxplot
+    container.selectAll('rect.geom-boxplot-box')
+      .transition(t)
+      .attr('x', d => Math.min(xScaleFunc(d.xmin), xScaleFunc(d.xmax)))
+      .attr('y', d => Math.min(yScaleFunc(d.ymin), yScaleFunc(d.ymax)))
+      .attr('width', d => Math.abs(xScaleFunc(d.xmax) - xScaleFunc(d.xmin)))
+      .attr('height', d => Math.abs(yScaleFunc(d.ymax) - yScaleFunc(d.ymin)));
+
+    container.selectAll('line.geom-boxplot-whisker, line.geom-boxplot-median, line.geom-boxplot-staple')
+      .transition(t)
+      .attr('x1', d => xScaleFunc(d.x))
+      .attr('y1', d => yScaleFunc(d.y))
+      .attr('x2', d => xScaleFunc(d.xend))
+      .attr('y2', d => yScaleFunc(d.yend));
+
+    container.selectAll('circle.geom-boxplot-outlier')
+      .transition(t)
+      .attr('cx', d => xScaleFunc(d.x))
+      .attr('cy', d => yScaleFunc(d.y));
+
+    // geom_hline
+    container.selectAll('line.geom-hline')
+      .transition(t)
+      .attr('y1', d => yScaleFunc(d.yintercept))
+      .attr('y2', d => yScaleFunc(d.yintercept));
+
+    // geom_vline
+    container.selectAll('line.geom-vline')
+      .transition(t)
+      .attr('x1', d => xScaleFunc(d.xintercept))
+      .attr('x2', d => xScaleFunc(d.xintercept));
+
+    // geom_dotplot
+    container.selectAll('circle.geom-dotplot')
+      .transition(t)
+      .attr('cx', d => xScaleFunc(d.x))
+      .attr('cy', d => yScaleFunc(d.y));
+
+    // geom_rug
+    container.selectAll('line.geom-rug')
+      .transition(t)
+      .each(function(d) {
+        // Rugs are complex because of multiple sides, but we can update positions
+        // if we identify which side they belong to. For now, let's just update
+        // the coordinate that maps to data.
+        const line = d3.select(this);
+        const parent = d3.select(this.parentNode);
+        const side = parent.attr('class').split('-').pop();
+        if (side === 'b' || side === 't') {
+          line.attr('x1', xScaleFunc(d.x)).attr('x2', xScaleFunc(d.x));
+        } else {
+          line.attr('y1', yScaleFunc(d.y)).attr('y2', yScaleFunc(d.y));
+        }
+      });
+
+    // geom_interval
+    container.selectAll('g.interval-item')
+      .transition(t)
+      .each(function(d) {
+        const g = d3.select(this);
+        // This is a simplified update; full update would need access to aes/flip
+      });
+  }
+
   // Export to window.gg2d3.geomRegistry namespace
   window.gg2d3.geomRegistry.register = registerGeom;
   window.gg2d3.geomRegistry.render = renderGeom;
   window.gg2d3.geomRegistry.has = hasGeom;
   window.gg2d3.geomRegistry.list = listGeoms;
   window.gg2d3.geomRegistry.makeColorAccessors = makeColorAccessors;
+  window.gg2d3.geomRegistry.updateGeoms = updateGeoms;
 
 })();

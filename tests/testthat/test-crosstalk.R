@@ -141,3 +141,24 @@ test_that("continuous colorbar with SharedData remains crosstalk-compatible", {
   dep_names <- sapply(w$dependencies, function(d) d$name)
   expect_true("crosstalk" %in% dep_names)
 })
+
+test_that("crosstalk compatibility: merged legends with shared data", {
+  library(ggplot2)
+  library(crosstalk)
+
+  sd <- SharedData$new(iris, group = "merged_group")
+  p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, colour = Species, shape = Species)) +
+    geom_point()
+  p$data <- sd
+
+  w <- gg2d3(p)
+
+  expect_equal(w$x$crosstalk_group, "merged_group")
+  expect_equal(length(w$x$ir$guides), 1)
+  guide <- w$x$ir$guides[[1]]
+  expect_true("colour" %in% unlist(guide$aesthetics))
+  expect_true("shape" %in% unlist(guide$aesthetics))
+
+  # Verify keys have both aesthetic values and labels
+  expect_true(all(sapply(guide$keys, function(k) all(c("colour", "shape", "label", "value") %in% names(k)))))
+})

@@ -107,25 +107,25 @@
   // =========================================================================
 
   /**
-   * Estimate text height from font size
+   * Estimate text height from font size and margin
    * @param {number} fontSizePx - Font size in pixels
-   * @returns {number} Estimated height in pixels (includes line height)
+   * @param {Object} [margin] - Optional margin object {top, bottom}
+   * @returns {number} Estimated total height in pixels
    */
-  function estimateTextHeight(fontSizePx) {
-    // Text height is approximately 1.2x font size (accounting for line height)
-    return fontSizePx * 1.2;
+  function estimateTextHeight(fontSizePx, margin) {
+    const h = fontSizePx * 1.2;
+    const m = margin || { top: 0, bottom: 0 };
+    return h + (m.top || 0) + (m.bottom || 0);
   }
 
   /**
-   * Estimate text width from string and font size
-   * @param {string} text - Text to measure
-   * @param {number} fontSizePx - Font size in pixels
-   * @returns {number} Estimated width in pixels
+   * Estimate total text width including margins
    */
-  function estimateTextWidth(text, fontSizePx) {
+  function estimateTextWidth(text, fontSizePx, margin) {
     if (!text || typeof text !== 'string') return 0;
-    // Average character width is ~0.6x font size for sans-serif
-    return text.length * fontSizePx * 0.6;
+    const w = text.length * fontSizePx * 0.6;
+    const m = margin || { left: 0, right: 0 };
+    return w + (m.left || 0) + (m.right || 0);
   }
 
   /**
@@ -202,19 +202,47 @@
   }
 
   /**
-   * Get axis title font sizes from theme
-   * @param {Object} theme - Theme accessor
-   * @returns {Object} {x, y} sizes in pixels
+   * Get title specs including margins
    */
-  function getAxisTitleSize(theme) {
+  function getTitleSpecs(theme) {
     const ptToPx = window.gg2d3.constants.ptToPx;
-    const titleX = theme.get("axis.title.x") || theme.get("axis.title");
-    const titleY = theme.get("axis.title.y") || theme.get("axis.title");
+    const title = theme.get("plot.title") || {};
+    const subtitle = theme.get("plot.subtitle") || {};
+    const caption = theme.get("plot.caption") || {};
 
     return {
-      x: titleX && titleX.size ? ptToPx(titleX.size) : ptToPx(11),
-      y: titleY && titleY.size ? ptToPx(titleY.size) : ptToPx(11)
+      title: { size: title.size ? ptToPx(title.size) : ptToPx(13.2), margin: title.margin },
+      subtitle: { size: subtitle.size ? ptToPx(subtitle.size) : ptToPx(11), margin: subtitle.margin },
+      caption: { size: caption.size ? ptToPx(caption.size) : ptToPx(8.8), margin: caption.margin }
     };
+  }
+
+  /**
+   * Get axis title font sizes from theme
+   * @param {Object} theme - Theme accessor
+   * @returns {Object} {x, y} sizes and margins
+   */
+  function getAxisTitleSpecs(theme) {
+    const ptToPx = window.gg2d3.constants.ptToPx;
+    const titleX = theme.get("axis.title.x") || theme.get("axis.title") || {};
+    const titleY = theme.get("axis.title.y") || theme.get("axis.title") || {};
+
+    return {
+      x: { size: titleX.size ? ptToPx(titleX.size) : ptToPx(11), margin: titleX.margin },
+      y: { size: titleY.size ? ptToPx(titleY.size) : ptToPx(11), margin: titleY.margin }
+    };
+  }
+
+  /**
+   * Get legend margin and spacing from theme
+   */
+  function getLegendTheme(theme) {
+    const ptToPx = window.gg2d3.constants.ptToPx;
+    const margin = theme.get("legend.margin") || { top: 0, right: 0, bottom: 0, left: 0 };
+    const spacing = theme.get("legend.spacing") || ptToPx(11);
+    const bg = theme.get("legend.background") || {};
+
+    return { margin, spacing, background: bg };
   }
 
   /**
@@ -301,27 +329,37 @@
     // --- Get theme values ---
     const plotMargin = getPlotMargin(theme);
     const axisTextSize = getAxisTextSize(theme);
-    const axisTitleSize = getAxisTitleSize(theme);
+    const axisTitleSpecs = getAxisTitleSpecs(theme);
     const tickLength = getTickLength(theme);
-    const titleSize = getTitleSize(theme);
-    const legendSpacing = getLegendBoxSpacing(theme);
+    const titleSpecs = getTitleSpecs(theme);
+    const legendTheme = getLegendTheme(theme);
 
     // Strip dimensions (for faceted plots)
     let stripHeight = 0;
+    let numColVars = 1;
+    let numRowVars = 1;
+
     if (isFaceted) {
       const stripTextSize = getStripTextSize(theme);
       // Strip height = text height + top/bottom margin (4.4pt each = ~5.9px each)
       const stripMargin = window.gg2d3.constants.ptToPx(4.4);
       stripHeight = estimateTextHeight(stripTextSize) + stripMargin * 2;
+
+      if (!isFacetGrid && facets.strips) {
+        numColVars = facets.strips.length || 1;
+      } else if (isFacetGrid) {
+        numColVars = (facets.col_strips && facets.col_strips.length) || 0;
+        numRowVars = (facets.row_strips && facets.row_strips.length) || 0;
+      }
     }
 
     // --- Compute component sizes ---
     const titleHeight = titles.title ?
-      estimateTextHeight(titleSize.title) + 4 : 0;
+      estimateTextHeight(titleSpecs.title.size, titleSpecs.title.margin) : 0;
     const subtitleHeight = titles.subtitle ?
-      estimateTextHeight(titleSize.subtitle) + 2 : 0;
+      estimateTextHeight(titleSpecs.subtitle.size, titleSpecs.subtitle.margin) : 0;
     const captionHeight = titles.caption ?
-      estimateTextHeight(titleSize.caption) + 4 : 0;
+      estimateTextHeight(titleSpecs.caption.size, titleSpecs.caption.margin) : 0;
 
     // Axis tick labels: estimate from label strings
     const yTickMaxWidth = axes.y.tickLabels && axes.y.tickLabels.length > 0 ?
@@ -331,9 +369,9 @@
 
     // Axis titles (y-axis title is rotated, so use height as width)
     const xTitleHeight = axes.x.label ?
-      estimateTextHeight(axisTitleSize.x) + 4 : 0;
+      estimateTextHeight(axisTitleSpecs.x.size, axisTitleSpecs.x.margin) : 0;
     const yTitleWidth = axes.y.label ?
-      estimateTextHeight(axisTitleSize.y) + 4 : 0;
+      estimateTextHeight(axisTitleSpecs.y.size, axisTitleSpecs.y.margin) : 0;
 
     // Secondary axes (same size as primary)
     const yTickMaxWidthSecondary = (axes.y2 && axes.y2.enabled) ? yTickMaxWidth : 0;
@@ -361,16 +399,18 @@
     // 4. Legend area (based on position)
     let legendBox = { x: 0, y: 0, w: 0, h: 0 };
     if (legend && legend.position !== "none" && legend.position !== "inside") {
-      const legendWidth = legend.width || 0;
-      const legendHeight = legend.height || 0;
+      const legMargin = legendTheme.margin || {};
+      const legendW = (legend.width || 0) + (legMargin.left || 0) + (legMargin.right || 0);
+      const legendH = (legend.height || 0) + (legMargin.top || 0) + (legMargin.bottom || 0);
+      const legendSpacing = legendTheme.spacing || 0;
 
       // Only reserve space if legend has non-zero dimensions
-      if (legendWidth > 0 || legendHeight > 0) {
+      if (legendW > 0 || legendH > 0) {
         let legendAmount;
         if (legend.position === "right" || legend.position === "left") {
-          legendAmount = legendWidth + legendSpacing;
+          legendAmount = legendW + legendSpacing;
         } else {
-          legendAmount = legendHeight + legendSpacing;
+          legendAmount = legendH + legendSpacing;
         }
 
         const legendResult = sliceSide(box, legend.position, legendAmount, legendAmount);
@@ -452,46 +492,52 @@
       const totalSpacingX = (ncol - 1) * spacing;
       const totalSpacingY = (nrow - 1) * spacing;
 
-      // Total strip height (one strip row per panel row)
-      const totalStripHeight = nrow * stripHeight;
+      // Total strip height (hierarchical rows of headers)
+      const totalStripHeightPerRow = numColVars * stripHeight;
+      const totalStripHeightAcrossAllRows = nrow * totalStripHeightPerRow;
 
       // Panel dimensions after accounting for spacing and strips
       const panelW = (availW - totalSpacingX) / ncol;
-      const panelH = (availH - totalSpacingY - totalStripHeight) / nrow;
+      const panelH = (availH - totalSpacingY - totalStripHeightAcrossAllRows) / nrow;
 
       // Build panels array from layout data
       panelsArr = facets.layout.map(function(item) {
         const col = item.COL - 1;  // 0-indexed
         const row = item.ROW - 1;
 
-        // Each row occupies: stripHeight + panelH + spacing
-        const rowBlockH = stripHeight + panelH;
+        // Each row occupies: totalStripHeightPerRow + panelH + spacing
+        const rowBlockH = totalStripHeightPerRow + panelH;
 
         return {
           PANEL: item.PANEL,
           x: availX + col * (panelW + spacing),
-          y: availY + row * (rowBlockH + spacing) + stripHeight,
+          y: availY + row * (rowBlockH + spacing) + totalStripHeightPerRow,
           w: panelW,
           h: panelH,
           clipId: "panel-" + item.PANEL + "-clip-" + Math.random().toString(36).substr(2, 6)
         };
       });
 
-      // Build strips array
-      stripsArr = facets.strips.map(function(strip) {
-        // Find corresponding panel layout entry
-        var panelLayout = panelsArr.find(function(p) { return p.PANEL === strip.PANEL; });
-        if (!panelLayout) return null;
+      // Build strips array (flattened hierarchical levels)
+      stripsArr = [];
+      facets.strips.forEach(function(levelObj) {
+        const level = levelObj.level; // 1-indexed
+        levelObj.labels.forEach(function(strip) {
+          var panelLayout = panelsArr.find(function(p) { return p.PANEL === strip.PANEL; });
+          if (!panelLayout) return;
 
-        return {
-          PANEL: strip.PANEL,
-          x: panelLayout.x,
-          y: panelLayout.y - stripHeight,  // strip is above its panel
-          w: panelLayout.w,
-          h: stripHeight,
-          label: strip.label
-        };
-      }).filter(Boolean);
+          stripsArr.push({
+            PANEL: strip.PANEL,
+            level: level,
+            x: panelLayout.x,
+            // Position based on level: level 1 is highest (furthest from panel)
+            y: panelLayout.y - (numColVars - level + 1) * stripHeight,
+            w: panelLayout.w,
+            h: stripHeight,
+            label: strip.label
+          });
+        });
+      });
 
       // Update panel bounding box to span the full grid (for axis label centering)
       if (panelsArr.length > 0) {
@@ -518,14 +564,13 @@
       const availW = panel.w;
       const availH = panel.h;
 
-      // Strip dimensions for facet_grid:
-      // - stripHeight: column strip height (already computed above, text height + 2*margin)
-      // - stripWidth: row strip width (rotated text, so width = text height)
-      const stripWidth = stripHeight;  // rotated text width equals text height
+      // Hierarchical strip totals
+      const totalColStripHeight = numColVars * stripHeight;
+      const totalRowStripWidth = numRowVars * stripHeight; // Width of side strip = text height * levels
 
       // Reserve space for row strips (right side) and column strips (top)
-      const panelAreaW = availW - stripWidth;    // reserve right for row strips
-      const panelAreaH = availH - stripHeight;   // reserve top for column strips
+      const panelAreaW = availW - totalRowStripWidth;
+      const panelAreaH = availH - totalColStripHeight;
 
       // Total spacing between panels
       const totalSpacingX = (ncol - 1) * spacing;
@@ -543,7 +588,7 @@
         return {
           PANEL: item.PANEL,
           x: availX + col * (panelW + spacing),
-          y: availY + stripHeight + row * (panelH + spacing),
+          y: availY + totalColStripHeight + row * (panelH + spacing),
           w: panelW,
           h: panelH,
           clipId: "panel-" + item.PANEL + "-clip-" + Math.random().toString(36).substr(2, 6)
@@ -551,34 +596,44 @@
       });
 
       // Build column strips array (positioned at top of each column)
+      colStripsArr = [];
       if (facets.col_strips) {
-        colStripsArr = facets.col_strips.map(function(strip) {
-          const col = strip.COL - 1;
-          return {
-            COL: strip.COL,
-            x: availX + col * (panelW + spacing),
-            y: availY,
-            w: panelW,
-            h: stripHeight,
-            label: strip.label,
-            orientation: "top"
-          };
+        facets.col_strips.forEach(function(levelObj) {
+          const level = levelObj.level;
+          levelObj.labels.forEach(function(strip) {
+            const col = strip.COL - 1;
+            colStripsArr.push({
+              COL: strip.COL,
+              level: level,
+              x: availX + col * (panelW + spacing),
+              y: availY + (level - 1) * stripHeight,
+              w: panelW,
+              h: stripHeight,
+              label: strip.label,
+              orientation: "top"
+            });
+          });
         });
       }
 
       // Build row strips array (positioned to the right of each row)
+      rowStripsArr = [];
       if (facets.row_strips) {
-        rowStripsArr = facets.row_strips.map(function(strip) {
-          const rowIdx = strip.ROW - 1;
-          return {
-            ROW: strip.ROW,
-            x: availX + panelAreaW,
-            y: availY + stripHeight + rowIdx * (panelH + spacing),
-            w: stripWidth,
-            h: panelH,
-            label: strip.label,
-            orientation: "right"
-          };
+        facets.row_strips.forEach(function(levelObj) {
+          const level = levelObj.level;
+          levelObj.labels.forEach(function(strip) {
+            const rowIdx = strip.ROW - 1;
+            rowStripsArr.push({
+              ROW: strip.ROW,
+              level: level,
+              x: availX + panelAreaW + (level - 1) * stripHeight,
+              y: availY + totalColStripHeight + rowIdx * (panelH + spacing),
+              w: stripHeight,
+              h: panelH,
+              label: strip.label,
+              orientation: "right"
+            });
+          });
         });
       }
 

@@ -1,79 +1,71 @@
 # Requirements: gg2d3
 
-**Defined:** 2026-03-23
-**Milestone:** v1.1 Interactive Exploration
+**Defined:** 2026-03-31
+**Milestone:** v1.6 Advanced Geoms & API Polish
 **Core Value:** Any ggplot2 plot should render identically in D3 - same visual output, but now interactive and web-native.
 
 ## v1 Requirements
 
-Requirements committed for milestone v1.1.
+Requirements committed for milestone v1.6.
 
-### Interactive Legends
+### Additional Geoms
 
-- [ ] **LEG-01**: User can click a discrete legend item to toggle that series visibility on/off.
-- [ ] **LEG-02**: User can double-click a discrete legend item to solo that series and use reset to restore all series.
-- [ ] **LEG-03**: User sees legend-driven visibility state stay synchronized with linked-view interaction state.
-- [ ] **LEG-04**: User can hover a legend item to preview emphasis/de-emphasis without changing persistent filter state.
+- [ ] **GEOM-20**: User can render `geom_dotplot` with correct dot stacking and orientation.
+- [ ] **GEOM-21**: User can render `geom_rug` for axis-aligned data density markers.
+- [ ] **GEOM-22**: User can render `geom_errorbar`, `geom_linerange`, and `geom_pointrange`.
 
-### Date/Time Parity
+### API & Performance
 
-- [ ] **DATE-01**: User sees date axes honor configured `date_breaks` values.
-- [ ] **DATE-02**: User sees date/datetime labels honor configured `date_labels` formatting.
-- [ ] **DATE-03**: User sees datetime displays apply timezone behavior consistently with ggplot2 expectations.
+- [ ] **API-01**: Developer can use a simplified internal helper for adding new geoms.
+- [ ] **API-02**: User sees comprehensive documentation for all `d3_*` interactivity functions.
+- [ ] **PERF-01**: User sees improved rendering performance for plots with >5000 points.
 
-### coord_flip Hardening
+## Completed Requirements
 
-- [ ] **COORD-01**: User sees `coord_flip` place x/y axes on correct sides after flipping.
-- [ ] **COORD-02**: User sees `coord_flip` preserve correct orientation behavior in faceted plots.
+Successfully delivered in previous milestones.
 
-## v2 Requirements
+### Non-Cartesian & Advanced Stats (v1.5)
+- [x] **COORD-03..04**: Polar coordinates and radial axis labeling.
+- [x] **GEOM-18..19**: Density and smooth (loess/gam) geoms.
 
-Deferred from v1.1 scope.
+### Theme Parity & Reference Geoms (v1.4)
+- [x] **THEME-01..03**: Theme inheritance and detailed styling.
+- [x] **GEOM-16..17**: hline, vline, and abline support.
 
-### Transitions
+### Facet Polish & Custom Interactivity (v1.3)
+- [x] **FACE-01..02**: Nested facets and theme-aware labels.
+- [x] **INT-01..02**: Custom handlers and Shiny sync.
 
-- **TRAN-01**: User sees object-constant enter/update/exit transitions during interactive state changes.
-- **TRAN-02**: User sees marks and axes transition on a synchronized timeline when domains change.
-- **TRAN-03**: User can use gg2d3 with reduced-motion preference and receive low-motion updates.
-- **TRAN-04**: User can configure simple transition presets from R (`none`, `fast`, `smooth`).
+### Smooth Transitions & Scale Parity (v1.2)
+- [x] **TRAN-01..04**: Transitions and motion preferences.
+- [x] **SCALE-01..03**: Advanced scale configuration.
 
-### Scale Parity
+### Interactive Legends (v1.1)
+- [x] **LEG-01..04**: Discrete legend interactivity.
 
-- **SCALE-01**: User sees continuous/discrete scales honor configured `breaks` and `minor_breaks` semantics.
-- **SCALE-02**: User sees axis labels honor configured formatter semantics across supported scale types.
-- **SCALE-03**: User sees `expand`, `oob`, and limits behavior match ggplot2 semantics.
+### Date/Time Parity (v1.1)
+- [x] **DATE-01..03**: Date/datetime axis parity.
 
-## Out of Scope
-
-Explicit exclusions for v1.1.
-
-| Feature | Reason |
-|---------|--------|
-| Broad `coord_transform` parity expansion | High complexity and correctness risk relative to v1.1 goals |
-| Advanced legend query UX (search/hierarchy) | Scope expansion beyond analyst-core legend interactions |
-| Auto-play storytelling animations | Presentation-focused behavior, low value for analyst exploration baseline |
+### Coordinate Hardening (v1.1)
+- [x] **COORD-01..02**: coord_flip correctness.
 
 ## Traceability
 
-Updated during roadmap creation.
+Updated during v1.6 roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LEG-01 | Phase 13 | Pending |
-| LEG-02 | Phase 13 | Pending |
-| LEG-03 | Phase 13 | Pending |
-| LEG-04 | Phase 13 | Pending |
-| DATE-01 | Phase 14 | Pending |
-| DATE-02 | Phase 14 | Pending |
-| DATE-03 | Phase 14 | Pending |
-| COORD-01 | Phase 15 | Pending |
-| COORD-02 | Phase 15 | Pending |
+| GEOM-20 | Phase 24 | Pending |
+| GEOM-21 | Phase 24 | Pending |
+| GEOM-22 | Phase 24 | Pending |
+| API-01 | Phase 25 | Pending |
+| API-02 | Phase 25 | Pending |
+| PERF-01 | Phase 25 | Pending |
 
 **Coverage:**
-- v1 requirements: 9 total
-- Mapped to phases: 9
+- v1 requirements: 6 total
+- Mapped to phases: 6
 - Unmapped: 0 ✓
 
 ---
-*Requirements defined: 2026-03-23*
-*Last updated: 2026-03-23 after v1.1 roadmap creation and phase traceability mapping*
+*Requirements updated: 2026-03-31*

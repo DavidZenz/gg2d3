@@ -4,6 +4,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
                      padding = list(top = 20, right = 20, bottom = 40, left = 50)) {
   stopifnot(inherits(p, "ggplot"))
   b <- ggplot2::ggplot_build(p)
+  is_flip <- inherits(b$plot$coordinates, "CoordFlip")
 
   # Detect coord_trans (not yet supported - Phase 3)
   if (inherits(b$plot$coordinates, "CoordTrans")) {
@@ -51,7 +52,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
   # Helper to map discrete x/y values to labels
   map_discrete <- function(values, scale_obj) {
-    if (inherits(scale_obj, "ScaleDiscrete") && is.numeric(values)) {
+    if (scale_obj$is_discrete() && is.numeric(values)) {
       labels <- scale_obj$get_limits()
       # Only map if values are integer indices (not continuous)
       # Check if all non-NA values are whole numbers
@@ -72,7 +73,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
   # Extract a single theme element as a plain list for JSON serialization
   extract_theme_element <- function(element_name, theme) {
-    calc <- ggplot2:::calc_element(element_name, theme)
+    calc <- tryCatch(ggplot2:::calc_element(element_name, theme), error = function(e) NULL)
 
     if (is.null(calc)) {
       return(NULL)
@@ -88,8 +89,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
       return(list(
         type = "rect",
-        fill = if (is.na(calc$fill)) NULL else calc$fill,
-        colour = if (is.na(calc$colour)) NULL else calc$colour,
+        fill = if (length(calc$fill) > 0 && !is.na(calc$fill)) calc$fill else NULL,
+        colour = if (length(calc$colour) > 0 && !is.na(calc$colour)) calc$colour else NULL,
         linewidth = linewidth_px,
         linetype = calc$linetype
       ))
@@ -101,7 +102,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
       return(list(
         type = "line",
-        colour = if (is.na(calc$colour)) NULL else calc$colour,
+        colour = if (length(calc$colour) > 0 && !is.na(calc$colour)) calc$colour else NULL,
         linewidth = linewidth_px,
         linetype = calc$linetype,
         lineend = calc$lineend
@@ -109,19 +110,30 @@ as_d3_ir <- function(p, width = 640, height = 400,
     }
 
     if (inherits(calc, "element_text")) {
+      # Extract margin if present
+      margin_info <- if (!is.null(calc$margin)) {
+        inches <- grid::convertUnit(calc$margin, "inches", valueOnly = TRUE)
+        pixels <- inches * 96
+        list(top = pixels[1], right = pixels[2], bottom = pixels[3], left = pixels[4])
+      } else {
+        NULL
+      }
+
       return(list(
         type = "text",
-        colour = if (is.na(calc$colour)) NULL else calc$colour,
+        colour = if (length(calc$colour) > 0 && !is.na(calc$colour)) calc$colour else NULL,
         size = calc$size,
         face = calc$face,
         family = calc$family,
         hjust = calc$hjust,
         vjust = calc$vjust,
-        angle = calc$angle
+        angle = calc$angle,
+        lineheight = calc$lineheight,
+        margin = margin_info
       ))
     }
 
-    # Handle margin elements (plot.margin)
+    # Handle margin elements (plot.margin, legend.margin)
     if (inherits(calc, "margin")) {
       # Convert margin to pixels using grid::convertUnit
       # First convert to inches, then to pixels (96 DPI web standard)
@@ -135,6 +147,12 @@ as_d3_ir <- function(p, width = 640, height = 400,
         bottom = pixels[3],
         left = pixels[4]
       ))
+    }
+
+    # Handle unit elements (legend.spacing, etc.)
+    if (inherits(calc, "unit")) {
+      inches <- grid::convertUnit(calc, "inches", valueOnly = TRUE)
+      return(inches * 96)
     }
 
     return(NULL)
@@ -170,8 +188,9 @@ as_d3_ir <- function(p, width = 640, height = 400,
                     GeomPoint  = "point",
                     GeomLine   = "line",
                     GeomPath   = "path",
-                    GeomCol    = "col",
+                    GeomCol    = "bar",
                     GeomBar    = "bar",
+
                     GeomArea   = "area",
                     GeomText   = "text",
                     GeomLabel  = "text",
@@ -186,6 +205,11 @@ as_d3_ir <- function(p, width = 640, height = 400,
                     GeomHline  = "hline",
                     GeomVline  = "vline",
                     GeomAbline = "abline",
+                    GeomDotplot = "dotplot",
+                    GeomRug    = "rug",
+                    GeomErrorbar = "errorbar",
+                    GeomLinerange = "linerange",
+                    GeomPointrange = "pointrange",
                     GeomPolygon= "polygon",
                     # Fallbacks
                     {
@@ -208,7 +232,9 @@ as_d3_ir <- function(p, width = 640, height = 400,
       # Statistical geom computed columns
       "lower","middle","upper","outliers","notchupper","notchlower",
       "width","violinwidth","density","scaled","count","ncount","ndensity",
-      "weight"
+      "weight",
+      # Dotplot specific
+      "stackpos","binwidth","countidx"
     )
 
     # coerce + rowize (same as your latest version)
@@ -254,11 +280,14 @@ as_d3_ir <- function(p, width = 640, height = 400,
       slope = if ("slope" %in% cols) "slope" else NULL,
       intercept = if ("intercept" %in% cols) "intercept" else NULL,
       xintercept = if ("xintercept" %in% cols) "xintercept" else NULL,
-      yintercept = if ("yintercept" %in% cols) "yintercept" else NULL
+      yintercept = if ("yintercept" %in% cols) "yintercept" else NULL,
+      # Dotplot
+      stackpos = if ("stackpos" %in% cols) "stackpos" else NULL,
+      binwidth = if ("binwidth" %in% cols) "binwidth" else NULL,
+      countidx = if ("countidx" %in% cols) "countidx" else NULL
     )
 
     # Convert temporal data columns to milliseconds (ggplot_build strips
-
     # Date/POSIXct class, leaving plain numeric days or seconds)
     x_tn <- if (!is.null(xscale_obj$trans)) xscale_obj$trans$name else NULL
     y_tn <- if (!is.null(yscale_obj$trans)) yscale_obj$trans$name else NULL
@@ -277,11 +306,21 @@ as_d3_ir <- function(p, width = 640, height = 400,
       for (cn in y_cols) if (is.numeric(df[[cn]])) df[[cn]] <- df[[cn]] * 1000
     }
 
+    # Extract geom-specific parameters
+    g_params <- b$plot$layers[[i]]$aes_params
+    if (gcl == "GeomRug") {
+      g_params$sides <- b$plot$layers[[i]]$geom_params$sides
+    } else if (gcl == "GeomDotplot") {
+      g_params$method <- b$plot$layers[[i]]$geom_params$method
+      g_params$binaxis <- b$plot$layers[[i]]$geom_params$binaxis
+      g_params$stackdir <- b$plot$layers[[i]]$geom_params$stackdir
+    }
+
     list(
       geom   = gname,          # <-- now always a non-NULL string like "point"
       data   = to_rows(df),
       aes    = aes,
-      params = b$plot$layers[[i]]$aes_params
+      params = g_params
     )
   })
 
@@ -349,7 +388,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
   # Check if scale is discrete and get proper domain
   get_scale_info <- function(scale_obj, panel_params_axis, axis_name) {
-    if (inherits(scale_obj, "ScaleDiscrete")) {
+    if (scale_obj$is_discrete()) {
       # Discrete scale: get labels from scale object
       domain <- scale_obj$get_limits()
       list(type = "categorical", domain = unname(domain))
@@ -410,18 +449,14 @@ as_d3_ir <- function(p, width = 640, height = 400,
         }
 
         # Extract date format pattern from scale closure
-        # ggplot2 stores date_labels in the constructor closure:
-        # environment(environment(scale_obj$labels)$f)$date_labels
         format_pattern <- NULL
         if (!is.null(scale_obj$labels) && is.function(scale_obj$labels)) {
           format_pattern <- tryCatch({
-            # Navigate ggproto method -> underlying function closure
             outer_env <- environment(scale_obj$labels)
             f <- outer_env$f
             if (is.function(f)) {
               inner_env <- environment(f)
               dl <- inner_env$date_labels
-              # NULL or waiver means auto-format; only pass explicit patterns
               if (!is.null(dl) && !inherits(dl, "waiver") && nzchar(dl)) dl else NULL
             } else {
               NULL
@@ -433,22 +468,38 @@ as_d3_ir <- function(p, width = 640, height = 400,
         # Extract timezone from datetime scale
         if (trans_name == "time") {
           timezone <- tryCatch({
-            # First try: direct timezone field on scale object (scale_x_datetime stores it here)
             tz_val <- scale_obj$timezone
             if (!is.null(tz_val) && tz_val != "") {
               tz_val
             } else {
-              # Fallback: try labels closure (when labels function has been resolved)
               if (is.function(scale_obj$labels)) {
                 env <- environment(scale_obj$labels)
                 tz_val2 <- env$tz
-                if (!is.null(tz_val2) && tz_val2 != "") tz_val2 else "UTC"
+                if (!is.null(tz_val2) && tz_val2 != "") {
+                  tz_val2
+                } else {
+                  f <- env$f
+                  if (is.function(f)) {
+                    env_f <- environment(f)
+                    tz_val3 <- env_f$tz
+                    if (!is.null(tz_val3) && tz_val3 != "") tz_val3 else NULL
+                  } else {
+                    NULL
+                  }
+                }
               } else {
-                "UTC"
+                NULL
               }
             }
-          }, error = function(e) "UTC")
-          result$timezone <- timezone
+          }, error = function(e) NULL)
+
+          if (is.null(timezone) || timezone == "") {
+            timezone <- tryCatch({
+              attr(scale_obj$range$range, "tzone")[1]
+            }, error = function(e) NULL)
+          }
+
+          result$timezone <- if (!is.null(timezone) && timezone != "") timezone else "UTC"
         }
 
         # Include pre-formatted labels as fallback
@@ -471,15 +522,10 @@ as_d3_ir <- function(p, width = 640, height = 400,
     if (is.numeric(v)) range(v, finite = TRUE) else unique(v)
   }
 
-  # Detect coord_flip early (needed for panel_params alignment)
-  is_flip_early <- inherits(b$plot$coordinates, "CoordFlip")
-
   # Extract grid breaks from panel params
-  # NOTE: coord_flip swaps panel_params (x<->y) but NOT panel_scales or data.
-  # We un-swap panel_params here to realign with the original scale objects.
-  if (is_flip_early) {
-    pp_x <- b$layout$panel_params[[1]]$y  # un-swap: original x is in y after flip
-    pp_y <- b$layout$panel_params[[1]]$x  # un-swap: original y is in x after flip
+  if (is_flip) {
+    pp_x <- b$layout$panel_params[[1]]$y
+    pp_y <- b$layout$panel_params[[1]]$x
   } else {
     pp_x <- b$layout$panel_params[[1]]$x
     pp_y <- b$layout$panel_params[[1]]$y
@@ -490,13 +536,11 @@ as_d3_ir <- function(p, width = 640, height = 400,
   x_minor_breaks <- pp_x$minor_breaks
   y_minor_breaks <- pp_y$minor_breaks
 
-  # Remove NA values (ggplot2 adds NAs at the edges)
   x_breaks <- x_breaks[!is.na(x_breaks)]
   y_breaks <- y_breaks[!is.na(y_breaks)]
   x_minor_breaks <- if (!is.null(x_minor_breaks)) x_minor_breaks[!is.na(x_minor_breaks)] else NULL
   y_minor_breaks <- if (!is.null(y_minor_breaks)) y_minor_breaks[!is.na(y_minor_breaks)] else NULL
 
-  # Convert temporal breaks to milliseconds (matching domain conversion in get_scale_info)
   x_trans_name <- if (!is.null(xscale_obj$trans)) xscale_obj$trans$name else NULL
   if (!is.null(x_trans_name) && x_trans_name == "date") {
     x_breaks <- x_breaks * 86400000
@@ -534,51 +578,77 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
   # Extract theme information
   theme_ir <- NULL
-  if (!is.null(b$plot$theme)) {
+  th <- ggplot2:::plot_theme(b$plot)
+  if (!is.null(th)) {
     theme_ir <- list(
       panel = list(
-        background = extract_theme_element("panel.background", b$plot$theme),
-        border = extract_theme_element("panel.border", b$plot$theme)
+        background = extract_theme_element("panel.background", th),
+        border = extract_theme_element("panel.border", th)
       ),
       plot = list(
-        background = extract_theme_element("plot.background", b$plot$theme),
-        margin = extract_theme_element("plot.margin", b$plot$theme)
+        background = extract_theme_element("plot.background", th),
+        margin = extract_theme_element("plot.margin", th),
+        title = extract_theme_element("plot.title", th),
+        subtitle = extract_theme_element("plot.subtitle", th),
+        caption = extract_theme_element("plot.caption", th)
       ),
       grid = list(
-        major = extract_theme_element("panel.grid.major", b$plot$theme),
-        minor = extract_theme_element("panel.grid.minor", b$plot$theme)
+        major = extract_theme_element("panel.grid.major", th),
+        minor = extract_theme_element("panel.grid.minor", th)
       ),
       axis = list(
-        line = extract_theme_element("axis.line", b$plot$theme),
-        line.x = extract_theme_element("axis.line.x", b$plot$theme),
-        line.y = extract_theme_element("axis.line.y", b$plot$theme),
-        text = extract_theme_element("axis.text", b$plot$theme),
-        text.x = extract_theme_element("axis.text.x", b$plot$theme),
-        text.y = extract_theme_element("axis.text.y", b$plot$theme),
-        title = extract_theme_element("axis.title", b$plot$theme),
-        title.x = extract_theme_element("axis.title.x", b$plot$theme),
-        title.y = extract_theme_element("axis.title.y", b$plot$theme),
-        ticks = extract_theme_element("axis.ticks", b$plot$theme),
-        ticks.x = extract_theme_element("axis.ticks.x", b$plot$theme),
-        ticks.y = extract_theme_element("axis.ticks.y", b$plot$theme)
+        line = extract_theme_element("axis.line", th),
+        line.x = extract_theme_element("axis.line.x", th),
+        line.y = extract_theme_element("axis.line.y", th),
+        text = extract_theme_element("axis.text", th),
+        text.x = extract_theme_element("axis.text.x", th),
+        text.y = extract_theme_element("axis.text.y", th),
+        title = extract_theme_element("axis.title", th),
+        title.x = extract_theme_element("axis.title.x", th),
+        title.y = extract_theme_element("axis.title.y", th),
+        ticks = extract_theme_element("axis.ticks", th),
+        ticks.x = extract_theme_element("axis.ticks.x", th),
+        ticks.y = extract_theme_element("axis.ticks.y", th)
       ),
-      text = list(
-        title = extract_theme_element("plot.title", b$plot$theme),
-        subtitle = extract_theme_element("plot.subtitle", b$plot$theme),
-        caption = extract_theme_element("plot.caption", b$plot$theme)
+      global_text = extract_theme_element("text", th),
+      legend = list(
+        background = extract_theme_element("legend.background", th),
+        key = extract_theme_element("legend.key", th),
+        text = extract_theme_element("legend.text", th),
+        title = extract_theme_element("legend.title", th),
+        margin = extract_theme_element("legend.margin", th),
+        spacing = extract_theme_element("legend.spacing", th),
+        key.size = tryCatch({
+          size <- ggplot2:::calc_element("legend.key.size", th)
+          inches <- grid::convertUnit(size, "inches", valueOnly = TRUE)
+          inches * 96
+        }, error = function(e) 23)
+      ),
+      strip = list(
+        background = extract_theme_element("strip.background", th),
+        text = extract_theme_element("strip.text", th),
+        text.x = extract_theme_element("strip.text.x", th),
+        text.y = extract_theme_element("strip.text.y", th)
       )
     )
   }
 
-  # Coord detection: CoordFlip, CoordFixed, or default CoordCartesian
-
-  is_flip  <- inherits(b$plot$coordinates, "CoordFlip")
   is_fixed <- inherits(b$plot$coordinates, "CoordFixed")
+  is_polar <- inherits(b$plot$coordinates, "CoordPolar")
 
-  coord_type  <- if (is_flip) "flip" else if (is_fixed) "fixed" else "cartesian"
+  coord_type  <- if (is_flip) "flip" else if (is_fixed) "fixed" else if (is_polar) "polar" else "cartesian"
   coord_ratio <- if (is_fixed) (b$plot$coordinates$ratio %||% 1) else NULL
 
-  # Axis labels: swap for coord_flip so x-aesthetic title goes to left visual axis
+  # Polar metadata
+  polar_meta <- if (is_polar) {
+    list(
+      theta = b$plot$coordinates$theta %||% "x",
+      start = b$plot$coordinates$start %||% 0,
+      direction = b$plot$coordinates$direction %||% 1
+    )
+  } else {
+    NULL
+  }
 
   if (is_flip) {
     x_label <- b$plot$labels$y %||% ""
@@ -588,8 +658,6 @@ as_d3_ir <- function(p, width = 640, height = 400,
     y_label <- b$plot$labels$y %||% ""
   }
 
-  # Extract axis tick labels as strings for JS layout text measurement
-  # Use the un-swapped panel_params (pp_x, pp_y) already computed above
   x_tick_labels <- tryCatch({
     labs <- pp_x$get_labels()
     labs <- labs[!is.na(labs)]
@@ -602,7 +670,6 @@ as_d3_ir <- function(p, width = 640, height = 400,
     as.character(labs)
   }, error = function(e) character(0))
 
-  # Detect secondary axes (Phase 6 reserves space, future phases render)
   has_sec_x <- tryCatch({
     sec <- b$layout$panel_scales_x[[1]]$secondary.axis
     !is.null(sec) && !inherits(sec, "waiver")
@@ -613,539 +680,175 @@ as_d3_ir <- function(p, width = 640, height = 400,
     !is.null(sec) && !inherits(sec, "waiver")
   }, error = function(e) FALSE)
 
-  # Extract legend position from theme for layout engine
   legend_position <- tryCatch({
-    complete_theme <- ggplot2::theme_get() + b$plot$theme
-    pos <- ggplot2:::calc_element("legend.position", complete_theme)
+    pos <- ggplot2:::calc_element("legend.position", th)
     if (is.character(pos)) pos else "right"
   }, error = function(e) "right")
 
-  # Extract subtitle and caption from plot labels
   subtitle_text <- b$plot$labels$subtitle %||% ""
   caption_text <- b$plot$labels$caption %||% ""
 
-  # Extract guide specifications for legends
   guides_ir <- list()
-
   if (legend_position != "none") {
-    # Get all scales that can produce guides
     all_scales <- b$plot$scales$scales
-
-    # Identify aesthetics that should have legends
     legend_aesthetics <- c()
-
     for (scale in all_scales) {
-      # Check if this scale produces a legend
       aes_names <- scale$aesthetics
-
-      # Only include aesthetics that produce legends
       for (aes_name in aes_names) {
         if (aes_name %in% c("colour", "color", "fill", "size", "shape", "alpha")) {
-          # Check if guide is not disabled
           guide_obj <- scale$guide
-          if (!inherits(guide_obj, "GuideNone") &&
-              !identical(guide_obj, "none") &&
-              !identical(guide_obj, FALSE)) {
+          if (!inherits(guide_obj, "GuideNone") && !identical(guide_obj, "none") && !identical(guide_obj, FALSE)) {
             legend_aesthetics <- c(legend_aesthetics, aes_name)
           }
         }
       }
     }
-
-    # Remove duplicates and normalize color/colour
     legend_aesthetics <- unique(legend_aesthetics)
     if ("color" %in% legend_aesthetics) {
       legend_aesthetics <- setdiff(legend_aesthetics, "color")
-      if (!"colour" %in% legend_aesthetics) {
-        legend_aesthetics <- c(legend_aesthetics, "colour")
-      }
+      if (!"colour" %in% legend_aesthetics) legend_aesthetics <- c(legend_aesthetics, "colour")
     }
 
-    # Extract guide data for each aesthetic
     for (aes_name in legend_aesthetics) {
-      guide_data <- tryCatch(
-        ggplot2::get_guide_data(p, aesthetic = aes_name),
-        error = function(e) NULL
-      )
-
-      if (is.null(guide_data) || nrow(guide_data) == 0) {
-        next
-      }
-
-      # Get the scale object
+      guide_data <- tryCatch(ggplot2::get_guide_data(p, aesthetic = aes_name), error = function(e) NULL)
+      if (is.null(guide_data) || nrow(guide_data) == 0) next
       scale_obj <- b$plot$scales$get_scales(aes_name)
       if (is.null(scale_obj)) next
-
-      # Determine guide type: only colour/fill continuous scales get colorbar
       is_continuous <- inherits(scale_obj, "ScaleContinuous")
       is_color_aes <- aes_name %in% c("colour", "fill")
       guide_type <- if (is_continuous && is_color_aes) "colorbar" else "legend"
-
-      # Get title from scale name or plot labels
       title <- scale_obj$name
-      if (is.null(title) || identical(title, waiver())) {
-        title <- b$plot$labels[[aes_name]] %||% aes_name
-      }
-
-      # Convert guide_data to list of keys
+      if (is.null(title) || identical(title, waiver())) title <- b$plot$labels[[aes_name]] %||% aes_name
       keys_list <- list()
       for (i in seq_len(nrow(guide_data))) {
         key <- list()
-
-        # Add standard fields
-        if (".value" %in% names(guide_data)) {
-          key$value <- guide_data[[".value"]][i]
-        }
-        if (".label" %in% names(guide_data)) {
-          key$label <- as.character(guide_data[[".label"]][i])
-        }
-
-        # Add aesthetic-specific values
-        if (aes_name %in% names(guide_data)) {
-          key[[aes_name]] <- guide_data[[aes_name]][i]
-        }
-        # Also check for normalized names
-        if ("colour" %in% names(guide_data)) {
-          key$colour <- guide_data$colour[i]
-        }
-        if ("fill" %in% names(guide_data)) {
-          key$fill <- guide_data$fill[i]
-        }
-        if ("size" %in% names(guide_data)) {
-          key$size <- guide_data$size[i]
-        }
-        if ("shape" %in% names(guide_data)) {
-          key$shape <- guide_data$shape[i]
-        }
-        if ("alpha" %in% names(guide_data)) {
-          key$alpha <- guide_data$alpha[i]
-        }
-
+        if (".value" %in% names(guide_data)) key$value <- guide_data[[".value"]][i]
+        if (".label" %in% names(guide_data)) key$label <- as.character(guide_data[[".label"]][i])
+        if (aes_name %in% names(guide_data)) key[[aes_name]] <- guide_data[[aes_name]][i]
+        if ("colour" %in% names(guide_data)) key$colour <- guide_data$colour[i]
+        if ("fill" %in% names(guide_data)) key$fill <- guide_data$fill[i]
+        if ("size" %in% names(guide_data)) key$size <- guide_data$size[i]
+        if ("shape" %in% names(guide_data)) key$shape <- guide_data$shape[i]
+        if ("alpha" %in% names(guide_data)) key$alpha <- guide_data$alpha[i]
         keys_list[[i]] <- key
       }
-
-      # For colorbar, generate additional color stops for smooth gradient
       colors_array <- NULL
       if (guide_type == "colorbar") {
-        # Get domain from scale
-        scale_domain <- tryCatch(
-          scale_obj$get_limits(),
-          error = function(e) c(0, 1)
-        )
-
-        # Generate 30 evenly-spaced values for smooth gradient
+        scale_domain <- tryCatch(scale_obj$get_limits(), error = function(e) c(0, 1))
         color_values <- seq(scale_domain[1], scale_domain[2], length.out = 30)
-
-        # Map through scale to get colors
-        colors_array <- tryCatch(
-          scale_obj$map(color_values),
-          error = function(e) NULL
-        )
+        colors_array <- tryCatch(scale_obj$map(color_values), error = function(e) NULL)
       }
-
-      # Build guide specification
-      guide_spec <- list(
-        aesthetic = aes_name,
-        aesthetics = list(aes_name),  # Will be updated if merged
-        type = guide_type,
-        title = as.character(title),
-        keys = keys_list,
-        colors = colors_array
+      guides_ir[[length(guides_ir) + 1]] <- list(
+        aesthetic = aes_name, aesthetics = list(aes_name), type = guide_type,
+        title = as.character(title), keys = keys_list, colors = colors_array
       )
-
-      guides_ir[[length(guides_ir) + 1]] <- guide_spec
     }
-
-    # Detect and handle merged guides (same title)
     if (length(guides_ir) > 1) {
       guide_titles <- sapply(guides_ir, function(g) g$title)
       duplicates <- duplicated(guide_titles) | duplicated(guide_titles, fromLast = TRUE)
-
       if (any(duplicates)) {
-        merged_guides <- list()
-        processed_titles <- character(0)
-
+        merged_guides <- list(); processed_titles <- character(0)
         for (i in seq_along(guides_ir)) {
-          guide <- guides_ir[[i]]
-          title <- guide$title
-
-          if (title %in% processed_titles) {
-            next  # Already processed as part of a merge
-          }
-
-          # Find all guides with this title
+          guide <- guides_ir[[i]]; title <- guide$title
+          if (title %in% processed_titles) next
           matching_indices <- which(guide_titles == title)
-
           if (length(matching_indices) > 1) {
-            # Merge guides with same title
-            merged_guide <- guide
-            merged_aesthetics <- list()
-
+            merged_guide <- guide; merged_aesthetics <- list()
             for (idx in matching_indices) {
               merged_aesthetics[[length(merged_aesthetics) + 1]] <- guides_ir[[idx]]$aesthetic
-
-              # Merge key columns from all aesthetics
               if (idx > matching_indices[1]) {
                 other_guide <- guides_ir[[idx]]
                 for (j in seq_along(merged_guide$keys)) {
                   if (j <= length(other_guide$keys)) {
-                    # Add columns from other guide's keys
                     other_key <- other_guide$keys[[j]]
                     for (col_name in names(other_key)) {
-                      if (!(col_name %in% names(merged_guide$keys[[j]]))) {
-                        merged_guide$keys[[j]][[col_name]] <- other_key[[col_name]]
-                      }
+                      if (!(col_name %in% names(merged_guide$keys[[j]]))) merged_guide$keys[[j]][[col_name]] <- other_key[[col_name]]
                     }
                   }
                 }
               }
             }
-
             merged_guide$aesthetics <- merged_aesthetics
             merged_guides[[length(merged_guides) + 1]] <- merged_guide
             processed_titles <- c(processed_titles, title)
           } else {
-            # Single guide with unique title
             merged_guides[[length(merged_guides) + 1]] <- guide
             processed_titles <- c(processed_titles, title)
           }
         }
-
         guides_ir <- merged_guides
       }
     }
   }
 
-  # Extract additional legend theme elements
-  legend_theme <- NULL
-  if (!is.null(b$plot$theme)) {
-    # Extract legend.key.size (unit to pixels conversion)
-    key_size <- tryCatch({
-      complete_theme <- ggplot2::theme_get() + b$plot$theme
-      key_size_elem <- ggplot2:::calc_element("legend.key.size", complete_theme)
-      if (!is.null(key_size_elem)) {
-        # Convert unit to pixels
-        inches <- grid::convertUnit(key_size_elem, "inches", valueOnly = TRUE)
-        inches * 96  # Convert to pixels
-      } else {
-        NULL
-      }
-    }, error = function(e) NULL)
-
-    legend_theme <- list(
-      key.size = key_size,
-      text = extract_theme_element("legend.text", b$plot$theme),
-      title = extract_theme_element("legend.title", b$plot$theme),
-      background = extract_theme_element("legend.background", b$plot$theme),
-      key = extract_theme_element("legend.key", b$plot$theme)
-    )
-  }
-
-  # Add legend theme elements to theme_ir
-  if (!is.null(theme_ir) && !is.null(legend_theme)) {
-    theme_ir$legend <- legend_theme
-  }
-
-  # Extract strip theme elements for facets
-  strip_theme <- NULL
-  if (!is.null(b$plot$theme)) {
-    strip_theme <- list(
-      text = extract_theme_element("strip.text", b$plot$theme),
-      background = extract_theme_element("strip.background", b$plot$theme)
-    )
-  }
-
-  # Add strip to theme_ir
-  if (!is.null(theme_ir) && !is.null(strip_theme)) {
-    theme_ir$strip <- strip_theme
-  }
-
-  # Extract facet metadata
-  facets_ir <- NULL
-  panels_ir <- NULL
-
+  facets_ir <- NULL; panels_ir <- NULL
   tryCatch({
     is_facet_wrap <- inherits(b$layout$facet, "FacetWrap")
     is_facet_grid <- inherits(b$layout$facet, "FacetGrid")
-
     if (is_facet_wrap) {
-      # Extract facet_wrap metadata
-      layout_df <- b$layout$layout
-      facet_vars <- names(b$layout$facet$params$facets)
-
-      # Determine scales mode for facet_wrap
+      layout_df <- b$layout$layout; facet_vars <- names(b$layout$facet$params$facets)
       free_params <- b$layout$facet$params$free
-      if (free_params$x && free_params$y) {
-        scales_mode <- "free"
-      } else if (free_params$x) {
-        scales_mode <- "free_x"
-      } else if (free_params$y) {
-        scales_mode <- "free_y"
-      } else {
-        scales_mode <- "fixed"
-      }
-
-      # Extract strip labels
-      strips <- lapply(seq_len(nrow(layout_df)), function(i) {
-        label_parts <- vapply(facet_vars, function(v) {
-          as.character(layout_df[[v]][i])
-        }, character(1))
-        list(
-          PANEL = as.integer(layout_df$PANEL[i]),
-          label = paste(label_parts, collapse = ", ")
-        )
+      if (free_params$x && free_params$y) scales_mode <- "free" else if (free_params$x) scales_mode <- "free_x" else if (free_params$y) scales_mode <- "free_y" else scales_mode <- "fixed"
+      strips <- lapply(seq_along(facet_vars), function(l) {
+        var <- facet_vars[l]
+        level_labels <- lapply(seq_len(nrow(layout_df)), function(i) list(PANEL = as.integer(layout_df$PANEL[i]), label = as.character(layout_df[[var]][i])))
+        list(level = l, variable = var, labels = level_labels)
       })
-
-      # Extract per-panel scale metadata
       panels_ir <- lapply(seq_along(b$layout$panel_params), function(p) {
         pp <- b$layout$panel_params[[p]]
-        if (is_flip_early) {
-          ppx <- pp$y  # un-swap for coord_flip
-          ppy <- pp$x
-        } else {
-          ppx <- pp$x
-          ppy <- pp$y
-        }
-        panel_x_range <- unname(ppx$continuous_range %||% ppx$range)
-        panel_y_range <- unname(ppy$continuous_range %||% ppy$range)
+        if (is_flip) { ppx <- pp$y; ppy <- pp$x } else { ppx <- pp$x; ppy <- pp$y }
+        panel_x_range <- if (xscale_obj$is_discrete()) unname(xscale_obj$get_limits()) else unname(ppx$continuous_range %||% ppx$range)
+        panel_y_range <- if (yscale_obj$is_discrete()) unname(yscale_obj$get_limits()) else unname(ppy$continuous_range %||% ppy$range)
         panel_x_breaks <- unname(ppx$breaks[!is.na(ppx$breaks)])
         panel_y_breaks <- unname(ppy$breaks[!is.na(ppy$breaks)])
-
-        # Convert temporal panel values to milliseconds
-        if (!is.null(x_trans_name) && x_trans_name == "date") {
-          panel_x_range <- panel_x_range * 86400000
-          panel_x_breaks <- panel_x_breaks * 86400000
-        } else if (!is.null(x_trans_name) && x_trans_name == "time") {
-          panel_x_range <- panel_x_range * 1000
-          panel_x_breaks <- panel_x_breaks * 1000
-        }
-        if (!is.null(y_trans_name) && y_trans_name == "date") {
-          panel_y_range <- panel_y_range * 86400000
-          panel_y_breaks <- panel_y_breaks * 86400000
-        } else if (!is.null(y_trans_name) && y_trans_name == "time") {
-          panel_y_range <- panel_y_range * 1000
-          panel_y_breaks <- panel_y_breaks * 1000
-        }
-
-        list(
-          PANEL = as.integer(p),
-          x_range = panel_x_range,
-          y_range = panel_y_range,
-          x_breaks = panel_x_breaks,
-          y_breaks = panel_y_breaks
-        )
+        panel_x_minor_breaks <- if (!is.null(ppx$minor_breaks)) unname(ppx$minor_breaks[!is.na(ppx$minor_breaks)]) else NULL
+        panel_y_minor_breaks <- if (!is.null(ppy$minor_breaks)) unname(ppy$minor_breaks[!is.na(ppy$minor_breaks)]) else NULL
+        if (!is.null(x_trans_name) && x_trans_name == "date") { panel_x_range <- panel_x_range * 86400000; panel_x_breaks <- panel_x_breaks * 86400000; if (!is.null(panel_x_minor_breaks)) panel_x_minor_breaks <- panel_x_minor_breaks * 86400000
+        } else if (!is.null(x_trans_name) && x_trans_name == "time") { panel_x_range <- panel_x_range * 1000; panel_x_breaks <- panel_x_breaks * 1000; if (!is.null(panel_x_minor_breaks)) panel_x_minor_breaks <- panel_x_minor_breaks * 1000 }
+        if (!is.null(y_trans_name) && y_trans_name == "date") { panel_y_range <- panel_y_range * 86400000; panel_y_breaks <- panel_y_breaks * 86400000; if (!is.null(panel_y_minor_breaks)) panel_y_minor_breaks <- panel_y_minor_breaks * 86400000
+        } else if (!is.null(y_trans_name) && y_trans_name == "time") { panel_y_range <- panel_y_range * 1000; panel_y_breaks <- panel_y_breaks * 1000; if (!is.null(panel_y_minor_breaks)) panel_y_minor_breaks <- panel_y_minor_breaks * 1000 }
+        list(PANEL = as.integer(p), x_range = panel_x_range, y_range = panel_y_range, x_breaks = panel_x_breaks, y_breaks = panel_y_breaks, x_minor_breaks = panel_x_minor_breaks, y_minor_breaks = panel_y_minor_breaks)
       })
-
-      # Extract panel.spacing
-      panel_spacing <- tryCatch({
-        complete_theme <- ggplot2::theme_get() + b$plot$theme
-        spacing <- ggplot2:::calc_element("panel.spacing", complete_theme)
-        if (!is.null(spacing)) {
-          inches <- grid::convertUnit(spacing, "inches", valueOnly = TRUE)
-          inches * 96  # pixels
-        } else {
-          7.3  # default 5.5pt in pixels
-        }
-      }, error = function(e) 7.3)
-
-      # Build facets IR object
-      facets_ir <- list(
-        type = "wrap",
-        vars = facet_vars,
-        nrow = as.integer(max(layout_df$ROW)),
-        ncol = as.integer(max(layout_df$COL)),
-        scales = scales_mode,
-        spacing = panel_spacing,
-        layout = lapply(seq_len(nrow(layout_df)), function(i) {
-          row <- as.list(layout_df[i, , drop = FALSE])
-          row$PANEL <- as.integer(row$PANEL)
-          row$ROW <- as.integer(row$ROW)
-          row$COL <- as.integer(row$COL)
-          row$SCALE_X <- as.integer(row$SCALE_X)
-          row$SCALE_Y <- as.integer(row$SCALE_Y)
-          row
-        }),
-        strips = strips
-      )
+      panel_spacing <- tryCatch({ spacing <- ggplot2:::calc_element("panel.spacing", th); if (!is.null(spacing)) grid::convertUnit(spacing, "inches", valueOnly = TRUE) * 96 else 7.3 }, error = function(e) 7.3)
+      facets_ir <- list(type = "wrap", vars = facet_vars, nrow = as.integer(max(layout_df$ROW)), ncol = as.integer(max(layout_df$COL)), scales = scales_mode, spacing = panel_spacing, layout = lapply(seq_len(nrow(layout_df)), function(i) { row <- as.list(layout_df[i, , drop = FALSE]); row$PANEL <- as.integer(row$PANEL); row$ROW <- as.integer(row$ROW); row$COL <- as.integer(row$COL); row$SCALE_X <- as.integer(row$SCALE_X); row$SCALE_Y <- as.integer(row$SCALE_Y); row }), strips = strips)
     } else if (is_facet_grid) {
-      # Extract facet_grid metadata
-      layout_df <- b$layout$layout
-      row_vars <- names(b$layout$facet$params$rows)
-      col_vars <- names(b$layout$facet$params$cols)
-
-      # Determine scales mode
+      layout_df <- b$layout$layout; row_vars <- names(b$layout$facet$params$rows); col_vars <- names(b$layout$facet$params$cols)
       free_params <- b$layout$facet$params$free
-      if (free_params$x && free_params$y) {
-        scales_mode <- "free"
-      } else if (free_params$x) {
-        scales_mode <- "free_x"
-      } else if (free_params$y) {
-        scales_mode <- "free_y"
-      } else {
-        scales_mode <- "fixed"
-      }
-
-      # Extract row strips (one per unique ROW)
-      row_strips <- NULL
-      if (length(row_vars) > 0) {
-        row_combos <- unique(layout_df[, c("ROW", row_vars), drop = FALSE])
-        row_strips <- lapply(seq_len(nrow(row_combos)), function(i) {
-          label_parts <- vapply(row_vars, function(v) {
-            as.character(row_combos[[v]][i])
-          }, character(1))
-          list(
-            ROW = as.integer(row_combos$ROW[i]),
-            label = paste(label_parts, collapse = ", ")
-          )
-        })
-      }
-
-      # Extract column strips (one per unique COL)
-      col_strips <- NULL
-      if (length(col_vars) > 0) {
-        col_combos <- unique(layout_df[, c("COL", col_vars), drop = FALSE])
-        col_strips <- lapply(seq_len(nrow(col_combos)), function(i) {
-          label_parts <- vapply(col_vars, function(v) {
-            as.character(col_combos[[v]][i])
-          }, character(1))
-          list(
-            COL = as.integer(col_combos$COL[i]),
-            label = paste(label_parts, collapse = ", ")
-          )
-        })
-      }
-
-      # Extract per-panel scale metadata
+      if (free_params$x && free_params$y) scales_mode <- "free" else if (free_params$x) scales_mode <- "free_x" else if (free_params$y) scales_mode <- "free_y" else scales_mode <- "fixed"
+      row_strips <- NULL; if (length(row_vars) > 0) { row_combos <- unique(layout_df[, c("ROW", row_vars), drop = FALSE]); row_strips <- lapply(seq_along(row_vars), function(l) { var <- row_vars[l]; level_labels <- lapply(seq_len(nrow(row_combos)), function(i) list(ROW = as.integer(row_combos$ROW[i]), label = as.character(row_combos[[var]][i]))); list(level = l, variable = var, labels = level_labels) }) }
+      col_strips <- NULL; if (length(col_vars) > 0) { col_combos <- unique(layout_df[, c("COL", col_vars), drop = FALSE]); col_strips <- lapply(seq_along(col_vars), function(l) { var <- col_vars[l]; level_labels <- lapply(seq_len(nrow(col_combos)), function(i) list(COL = as.integer(col_combos$COL[i]), label = as.character(col_combos[[var]][i]))); list(level = l, variable = var, labels = level_labels) }) }
       panels_ir <- lapply(seq_along(b$layout$panel_params), function(p) {
         pp <- b$layout$panel_params[[p]]
-        if (is_flip_early) {
-          ppx <- pp$y  # un-swap for coord_flip
-          ppy <- pp$x
-        } else {
-          ppx <- pp$x
-          ppy <- pp$y
-        }
-        panel_x_range <- unname(ppx$continuous_range %||% ppx$range)
-        panel_y_range <- unname(ppy$continuous_range %||% ppy$range)
+        if (is_flip) { ppx <- pp$y; ppy <- pp$x } else { ppx <- pp$x; ppy <- pp$y }
+        panel_x_range <- if (xscale_obj$is_discrete()) unname(xscale_obj$get_limits()) else unname(ppx$continuous_range %||% ppx$range)
+        panel_y_range <- if (yscale_obj$is_discrete()) unname(yscale_obj$get_limits()) else unname(ppy$continuous_range %||% ppy$range)
         panel_x_breaks <- unname(ppx$breaks[!is.na(ppx$breaks)])
         panel_y_breaks <- unname(ppy$breaks[!is.na(ppy$breaks)])
-
-        # Convert temporal panel values to milliseconds
-        if (!is.null(x_trans_name) && x_trans_name == "date") {
-          panel_x_range <- panel_x_range * 86400000
-          panel_x_breaks <- panel_x_breaks * 86400000
-        } else if (!is.null(x_trans_name) && x_trans_name == "time") {
-          panel_x_range <- panel_x_range * 1000
-          panel_x_breaks <- panel_x_breaks * 1000
-        }
-        if (!is.null(y_trans_name) && y_trans_name == "date") {
-          panel_y_range <- panel_y_range * 86400000
-          panel_y_breaks <- panel_y_breaks * 86400000
-        } else if (!is.null(y_trans_name) && y_trans_name == "time") {
-          panel_y_range <- panel_y_range * 1000
-          panel_y_breaks <- panel_y_breaks * 1000
-        }
-
-        list(
-          PANEL = as.integer(p),
-          x_range = panel_x_range,
-          y_range = panel_y_range,
-          x_breaks = panel_x_breaks,
-          y_breaks = panel_y_breaks
-        )
+        panel_x_minor_breaks <- if (!is.null(ppx$minor_breaks)) unname(ppx$minor_breaks[!is.na(ppx$minor_breaks)]) else NULL
+        panel_y_minor_breaks <- if (!is.null(ppy$minor_breaks)) unname(ppy$minor_breaks[!is.na(ppy$minor_breaks)]) else NULL
+        if (!is.null(x_trans_name) && x_trans_name == "date") { panel_x_range <- panel_x_range * 86400000; panel_x_breaks <- panel_x_breaks * 86400000; if (!is.null(panel_x_minor_breaks)) panel_x_minor_breaks <- panel_x_minor_breaks * 86400000
+        } else if (!is.null(x_trans_name) && x_trans_name == "time") { panel_x_range <- panel_x_range * 1000; panel_x_breaks <- panel_x_breaks * 1000; if (!is.null(panel_x_minor_breaks)) panel_x_minor_breaks <- panel_x_minor_breaks * 1000 }
+        if (!is.null(y_trans_name) && y_trans_name == "date") { panel_y_range <- panel_y_range * 86400000; panel_y_breaks <- panel_y_breaks * 86400000; if (!is.null(panel_y_minor_breaks)) panel_y_minor_breaks <- panel_y_minor_breaks * 86400000
+        } else if (!is.null(y_trans_name) && y_trans_name == "time") { panel_y_range <- panel_y_range * 1000; panel_y_breaks <- panel_y_breaks * 1000; if (!is.null(panel_y_minor_breaks)) panel_y_minor_breaks <- panel_y_minor_breaks * 1000 }
+        list(PANEL = as.integer(p), x_range = panel_x_range, y_range = panel_y_range, x_breaks = panel_x_breaks, y_breaks = panel_y_breaks, x_minor_breaks = panel_x_minor_breaks, y_minor_breaks = panel_y_minor_breaks)
       })
-
-      # Extract panel.spacing
-      panel_spacing <- tryCatch({
-        complete_theme <- ggplot2::theme_get() + b$plot$theme
-        spacing <- ggplot2:::calc_element("panel.spacing", complete_theme)
-        if (!is.null(spacing)) {
-          inches <- grid::convertUnit(spacing, "inches", valueOnly = TRUE)
-          inches * 96  # pixels
-        } else {
-          7.3  # default 5.5pt in pixels
-        }
-      }, error = function(e) 7.3)
-
-      # Build facets IR object
-      facets_ir <- list(
-        type = "grid",
-        rows = row_vars,
-        cols = col_vars,
-        scales = scales_mode,
-        nrow = as.integer(max(layout_df$ROW)),
-        ncol = as.integer(max(layout_df$COL)),
-        spacing = panel_spacing,
-        layout = lapply(seq_len(nrow(layout_df)), function(i) {
-          row <- as.list(layout_df[i, , drop = FALSE])
-          row$PANEL <- as.integer(row$PANEL)
-          row$ROW <- as.integer(row$ROW)
-          row$COL <- as.integer(row$COL)
-          row$SCALE_X <- as.integer(row$SCALE_X)
-          row$SCALE_Y <- as.integer(row$SCALE_Y)
-          row
-        }),
-        row_strips = row_strips,
-        col_strips = col_strips
-      )
+      panel_spacing <- tryCatch({ spacing <- ggplot2:::calc_element("panel.spacing", th); if (!is.null(spacing)) grid::convertUnit(spacing, "inches", valueOnly = TRUE) * 96 else 7.3 }, error = function(e) 7.3)
+      facets_ir <- list(type = "grid", rows = row_vars, cols = col_vars, scales = scales_mode, nrow = as.integer(max(layout_df$ROW)), ncol = as.integer(max(layout_df$COL)), spacing = panel_spacing, layout = lapply(seq_len(nrow(layout_df)), function(i) { row <- as.list(layout_df[i, , drop = FALSE]); row$PANEL <- as.integer(row$PANEL); row$ROW <- as.integer(row$ROW); row$COL <- as.integer(row$COL); row$SCALE_X <- as.integer(row$SCALE_X); row$SCALE_Y <- as.integer(row$SCALE_Y); row }), row_strips = row_strips, col_strips = col_strips)
     } else {
-      # Non-faceted plot (default)
-      facets_ir <- list(
-        type = "null",
-        vars = list(),
-        nrow = 1L,
-        ncol = 1L,
-        layout = list(list(PANEL = 1L, ROW = 1L, COL = 1L, SCALE_X = 1L, SCALE_Y = 1L)),
-        strips = list()
-      )
-      panels_ir <- list(list(
-        PANEL = 1L,
-        x_range = unname(scales$x$domain),
-        y_range = unname(scales$y$domain),
-        x_breaks = unname(x_breaks),
-        y_breaks = unname(y_breaks)
-      ))
+      facets_ir <- list(type = "null", vars = list(), nrow = 1L, ncol = 1L, layout = list(list(PANEL = 1L, ROW = 1L, COL = 1L, SCALE_X = 1L, SCALE_Y = 1L)), strips = list())
+      panels_ir <- list(list(PANEL = 1L, x_range = unname(scales$x$domain), y_range = unname(scales$y$domain), x_breaks = unname(x_breaks), y_breaks = unname(y_breaks)))
     }
   }, error = function(e) {
-    # Fallback to non-faceted on any error
-    facets_ir <<- list(
-      type = "null",
-      vars = list(),
-      nrow = 1L,
-      ncol = 1L,
-      layout = list(list(PANEL = 1L, ROW = 1L, COL = 1L, SCALE_X = 1L, SCALE_Y = 1L)),
-      strips = list()
-    )
-    panels_ir <<- list(list(
-      PANEL = 1L,
-      x_range = unname(scales$x$domain),
-      y_range = unname(scales$y$domain),
-      x_breaks = unname(x_breaks),
-      y_breaks = unname(y_breaks)
-    ))
+    facets_ir <<- list(type = "null", vars = list(), nrow = 1L, ncol = 1L, layout = list(list(PANEL = 1L, ROW = 1L, COL = 1L, SCALE_X = 1L, SCALE_Y = 1L)), strips = list())
+    panels_ir <<- list(list(PANEL = 1L, x_range = unname(scales$x$domain), y_range = unname(scales$y$domain), x_breaks = unname(x_breaks), y_breaks = unname(y_breaks)))
   })
 
   ir <- list(
     width = width, height = height, padding = padding,
-    coord  = list(type = coord_type, flip = is_flip, ratio = coord_ratio),
-    title  = b$plot$labels$title %||% "",
-    subtitle = subtitle_text,
-    caption = caption_text,
-    axes   = list(
-      x = list(orientation = "bottom", label = x_label, tickLabels = x_tick_labels),
-      y = list(orientation = "left",  label = y_label, tickLabels = y_tick_labels),
-      x2 = if (has_sec_x) list(enabled = TRUE) else NULL,
-      y2 = if (has_sec_y) list(enabled = TRUE) else NULL
-    ),
-    facets = facets_ir,
-    panels = panels_ir,
-    scales = scales,
-    layers = layers,
-    guides = guides_ir,
-    legend = list(enabled = TRUE, position = legend_position),
-    theme = theme_ir
+    coord  = c(list(type = coord_type, flip = is_flip, ratio = coord_ratio), polar_meta),
+    title  = b$plot$labels$title %||% "", subtitle = subtitle_text, caption = caption_text,
+    axes   = list(x = list(orientation = "bottom", label = x_label, tickLabels = x_tick_labels), y = list(orientation = "left",  label = y_label, tickLabels = y_tick_labels), x2 = if (has_sec_x) list(enabled = TRUE) else NULL, y2 = if (has_sec_y) list(enabled = TRUE) else NULL),
+    facets = facets_ir, panels = panels_ir, scales = scales, layers = layers, guides = guides_ir, legend = list(enabled = TRUE, position = legend_position), theme = theme_ir
   )
-
-  # Validate IR structure before returning
   validate_ir(ir)
 }

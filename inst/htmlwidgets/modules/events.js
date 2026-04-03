@@ -617,11 +617,67 @@
   }
 
   /**
+   * Attach custom user event handlers to interactive elements.
+   *
+   * @param {HTMLElement} el - Widget container element
+   * @param {Object} config - Handlers configuration
+   * @param {string} [config.click] - JS function string for click
+   * @param {string} [config.mouseover] - JS function string for mouseover
+   * @param {string} [config.mouseout] - JS function string for mouseout
+   * @param {string} [config.shiny_id] - Optional Shiny input ID
+   */
+  function attachHandlers(el, config) {
+    if (!config) return;
+    const svg = d3.select(el).select('svg');
+
+    const clickHandler = config.click ? new Function('event', 'd', config.click) : null;
+    const mouseoverHandler = config.mouseover ? new Function('event', 'd', config.mouseover) : null;
+    const mouseoutHandler = config.mouseout ? new Function('event', 'd', config.mouseout) : null;
+    const shinyId = config.shiny_id;
+
+    INTERACTIVE_SELECTORS.forEach(selector => {
+      const selection = svg.selectAll(selector);
+      if (selection.empty()) return;
+
+      if (clickHandler || shinyId) {
+        selection.on('click.custom', function(event, d) {
+          if (clickHandler) clickHandler.call(this, event, d);
+          if (shinyId && window.Shiny) {
+            window.Shiny.setInputValue(shinyId, d);
+          }
+        });
+      }
+
+      if (mouseoverHandler) {
+        selection.on('mouseover.custom', function(event, d) {
+          mouseoverHandler.call(this, event, d);
+        });
+      }
+
+      if (mouseoutHandler) {
+        selection.on('mouseout.custom', function(event, d) {
+          mouseoutHandler.call(this, event, d);
+        });
+      }
+    });
+
+    // Also sync legend changes to Shiny if shiny_id is present
+    if (shinyId) {
+      onLegendChanged(el, 'shiny', function(payload) {
+        if (window.Shiny) {
+          window.Shiny.setInputValue(shinyId + '_legend', payload);
+        }
+      });
+    }
+  }
+
+  /**
    * Export events module API
    */
   window.gg2d3.events = {
     attachTooltips: attachTooltips,
     attachHover: attachHover,
+    attachHandlers: attachHandlers,
     attachLegend: attachLegend,
     getLegendState: getLegendState,
     applyLegendState: applyLegendState,
