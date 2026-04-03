@@ -12,7 +12,7 @@ This roadmap defines milestone **v1.6 Advanced Geoms & API Polish**. The phase s
 - ✅ **v1.3 Advanced Facets & Custom Interactivity** — Phases 18-19 (shipped 2026-03-31)
 - ✅ **v1.4 Comprehensive Theme Parity & Reference Geoms** — Phases 20-21 (shipped 2026-03-31)
 - ✅ **v1.5 Non-Cartesian Systems & Advanced Stats** — Phases 22-23 (shipped 2026-03-31)
-- 🟡 **v1.6 Advanced Geoms & API Polish** — Phases 24-25 (planned)
+- 🟡 **v1.6 Advanced Geoms & API Polish** — Phases 24-26 (in progress)
 
 ## Phases
 
@@ -37,12 +37,27 @@ This roadmap defines milestone **v1.6 Advanced Geoms & API Polish**. The phase s
 1. Developer documentation is clear and accurate.
 2. Plots with >5000 points remain responsive.
 
+### Phase 26 - New Geom Interactivity Wiring
+
+**Goal:** Wire Phase 24 geoms into the interactivity system so dotplot, rug, and interval geoms participate in brush, hover, tooltip, and zoom interactions. Regenerate shipped documentation.
+
+**Requirements:** GEOM-20, GEOM-21, GEOM-22, API-02
+
+**Gap Closure:** Closes all gaps from v1.6 milestone audit.
+
+**Success Criteria (observable):**
+1. `geom_dotplot` marks respond to brush selection, hover highlighting, and tooltips.
+2. `geom_rug` marks respond to brush selection, hover highlighting, and tooltips.
+3. `geom_errorbar`, `geom_linerange`, and `geom_pointrange` reposition correctly on zoom/reset and respond to interactivity modules.
+4. `README.md` reflects all v1.6 features (regenerated from `README.Rmd`).
+
 ## Progress
 
 | Phase | Milestone | Goal | Requirements | Status |
 |-------|-----------|------|--------------|--------|
-| 24. Specialized Geoms | v1.6 | Implementation of dotplot, rug, and errorbars | GEOM-20..22 | Planned |
-| 25. API Polish & Performance | v1.6 | Documentation, helpers, and performance tuning | API-01..02, PERF-01 | Planned |
+| 24. Specialized Geoms | v1.6 | Implementation of dotplot, rug, and errorbars | GEOM-20..22 | Complete |
+| 25. API Polish & Performance | v1.6 | Documentation, helpers, and performance tuning | API-01..02, PERF-01 | Complete |
+| 26. New Geom Interactivity Wiring | v1.6 | Wire new geoms into interactivity modules | GEOM-20..22, API-02 | Planned |
 
 ---
-*Roadmap updated: 2026-03-31*
+*Roadmap updated: 2026-04-03*
