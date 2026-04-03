@@ -45,6 +45,12 @@ This roadmap defines milestone **v1.6 Advanced Geoms & API Polish**. The phase s
 
 **Gap Closure:** Closes all gaps from v1.6 milestone audit.
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 26-01-PLAN.md — Wire dotplot, rug, and interval geoms into interactivity selectors and implement interval zoom handler
+- [ ] 26-02-PLAN.md — Regenerate README.md from README.Rmd
+
 **Success Criteria (observable):**
 1. `geom_dotplot` marks respond to brush selection, hover highlighting, and tooltips.
 2. `geom_rug` marks respond to brush selection, hover highlighting, and tooltips.
