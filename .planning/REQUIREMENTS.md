@@ -55,12 +55,12 @@ Updated during v1.6 roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GEOM-20 | Phase 24 | Pending |
-| GEOM-21 | Phase 24 | Pending |
-| GEOM-22 | Phase 24 | Pending |
-| API-01 | Phase 25 | Pending |
-| API-02 | Phase 25 | Pending |
-| PERF-01 | Phase 25 | Pending |
+| GEOM-20 | Phase 24 (render) + Phase 26 (interactivity) | Pending |
+| GEOM-21 | Phase 24 (render) + Phase 26 (interactivity) | Pending |
+| GEOM-22 | Phase 24 (render) + Phase 26 (interactivity + zoom) | Pending |
+| API-01 | Phase 25 | Complete |
+| API-02 | Phase 25 (source) + Phase 26 (regenerate) | Pending |
+| PERF-01 | Phase 25 | Complete |
 
 **Coverage:**
 - v1 requirements: 6 total
@@ -68,4 +68,4 @@ Updated during v1.6 roadmap creation.
 - Unmapped: 0 ✓
 
 ---
-*Requirements updated: 2026-03-31*
+*Requirements updated: 2026-04-03*
