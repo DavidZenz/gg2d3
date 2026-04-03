@@ -165,3 +165,23 @@ test_that("Full composition works", {
   expect_true(w$x$interactivity$tooltip$enabled)
   expect_true(w$x$interactivity$hover$enabled)
 })
+
+test_with_squish <- function() {
+  library(ggplot2)
+  df <- data.frame(x = 1:10, y = 1:10)
+  # Values outside [3, 7] should be squished
+  p <- ggplot(df, aes(x, y)) + 
+    geom_point() + 
+    scale_y_continuous(limits = c(3, 7), oob = scales::squish)
+  ir <- as_d3_ir(p)
+  
+  # Check IR data
+  y_vals <- sapply(ir$layers[[1]]$data, function(d) d$y)
+  expect_true(all(y_vals >= 3 & y_vals <= 7))
+  expect_equal(sum(y_vals == 3), 3) # 1, 2, 3 all become 3
+  expect_equal(sum(y_vals == 7), 4) # 7, 8, 9, 10 all become 7
+}
+
+test_that("OOB squishing is preserved in IR", {
+  test_with_squish()
+})

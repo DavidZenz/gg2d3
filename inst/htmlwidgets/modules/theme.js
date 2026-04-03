@@ -37,26 +37,73 @@
 
   /**
    * Create a theme with deep merge of user-provided values over defaults.
+   * Supports ggplot2-style hierarchical inheritance.
    * @param {Object} userTheme - User-provided theme object (partial or complete)
    * @returns {Object} Theme accessor with get() method
    */
   function createTheme(userTheme) {
     const theme = userTheme || {};
 
+    // Standard ggplot2 inheritance tree for D3-side lookups
+    const INHERITANCE = {
+      "axis.line.x": ["axis.line"],
+      "axis.line.y": ["axis.line"],
+      "axis.text.x": ["axis.text", "text"],
+      "axis.text.y": ["axis.text", "text"],
+      "axis.title.x": ["axis.title", "text"],
+      "axis.title.y": ["axis.title", "text"],
+      "axis.ticks.x": ["axis.ticks", "axis.line"],
+      "axis.ticks.y": ["axis.ticks", "axis.line"],
+      "plot.title": ["text"],
+      "plot.subtitle": ["text"],
+      "plot.caption": ["text"],
+      "legend.text": ["text"],
+      "legend.title": ["text"],
+      "strip.text.x": ["strip.text", "text"],
+      "strip.text.y": ["strip.text", "text"]
+    };
+
     /**
-     * Get theme value by dot-notation path with deep merge fallback.
-     * @param {string} path - Dot-notation path (e.g., "axis.text", "grid.major")
-     * @returns {*} Merged value or null if not found
+     * Internal helper to traverse object path
      */
-    function get(path) {
+    function _resolve(obj, path) {
+      if (!obj) return null;
       const parts = path.split(".");
-      let val = theme;
-      let def = DEFAULT_THEME;
+      let val = obj;
       for (const p of parts) {
         val = val && val[p];
-        def = def && def[p];
+        if (val === undefined) return null;
       }
-      return val || def || null;
+      return val;
+    }
+
+    /**
+     * Get theme value by dot-notation path with deep merge and hierarchical inheritance.
+     * @param {string} path - Dot-notation path (e.g., "axis.text.x")
+     * @returns {*} Resolved value or null if not found
+     */
+    function get(path) {
+      // 1. Try exact path in user theme
+      let val = _resolve(theme, path);
+      if (val !== null) return val;
+
+      // 2. Try inheritance tree in user theme
+      const parents = INHERITANCE[path] || [];
+      for (const parent of parents) {
+        val = _resolve(theme, parent);
+        if (val !== null) return val;
+      }
+
+      // 3. Fallback to DEFAULT_THEME
+      val = _resolve(DEFAULT_THEME, path);
+      if (val !== null) return val;
+
+      for (const parent of parents) {
+        val = _resolve(DEFAULT_THEME, parent);
+        if (val !== null) return val;
+      }
+
+      return null;
     }
 
     return { get };
@@ -77,8 +124,11 @@
       : (c) => c;  // Fallback identity function
 
     // Style axis text (tick labels)
-    if (textSpec && textSpec.type === "text") {
+    if (textSpec && textSpec.type === "blank") {
+      axisGroup.selectAll("text").style("display", "none");
+    } else if (textSpec && textSpec.type === "text") {
       axisGroup.selectAll("text")
+        .style("display", null)
         .style("fill", convertColor(textSpec.colour) || "#4D4D4D")
         .style("font-size", textSpec.size ? `${textSpec.size}px` : "8.8px")
         .style("font-family", textSpec.family || "sans-serif")
@@ -86,7 +136,7 @@
         .style("font-style", textSpec.face === "italic" ? "italic" : "normal");
     }
 
-    // Hide axis line if element_blank (theme_gray default)
+    // Style axis line (domain)
     if (lineSpec && lineSpec.type === "blank") {
       axisGroup.select(".domain").attr("stroke", "none");
     } else if (lineSpec && lineSpec.type === "line") {
@@ -96,8 +146,11 @@
     }
 
     // Style tick marks
-    if (tickSpec && tickSpec.type === "line") {
+    if (tickSpec && tickSpec.type === "blank") {
+      axisGroup.selectAll(".tick line").style("display", "none");
+    } else if (tickSpec && tickSpec.type === "line") {
       axisGroup.selectAll(".tick line")
+        .style("display", null)
         .attr("stroke", convertColor(tickSpec.colour) || "#333333")
         .attr("stroke-width", tickSpec.linewidth || 1.89);
     }

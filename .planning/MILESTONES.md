@@ -8,7 +8,7 @@
 **Tests:** 515+
 **Commits:** 192
 
-**Delivered:** Production-ready R package rendering any ggplot2 visualization as interactive D3.js SVG with pixel-perfect fidelity.
+Delivered: Production-ready R package rendering any ggplot2 visualization as interactive D3.js SVG with pixel-perfect fidelity.
 
 **Key accomplishments:**
 - Modular three-layer architecture (R → IR → D3) with 14 JS modules and registry-based geom dispatch
@@ -19,4 +19,85 @@
 - Pipe-based interactivity API: d3_tooltip(), d3_hover(), d3_zoom(), d3_brush(), crosstalk linked views
 
 ---
+
+## v1.1 Interactive Exploration (Shipped: 2026-03-31)
+
+**Phases completed:** 3 phases (13-15)
+**Timeline:** 8 days (2026-03-23 → 2026-03-31)
+
+**Delivered:** Enhanced interactive workflows for data exploration, date/time parity, and coordination system hardening.
+
+**Key accomplishments:**
+- **Interactive Legends:** Implementation of toggle, solo/reset, and hover preview synchronization for discrete guides.
+- **Date/Time Parity:** Full parity with ggplot2 for date breaks, labels, and robust timezone extraction across all browser locales.
+- **coord_flip Hardening:** Corrected axis placement and orientation for flipped coordinates in both single-panel and faceted contexts.
+
+---
+
+## v1.2 Smooth Transitions & Scale Parity (Shipped: 2026-03-31)
+
+**Phases completed:** 2 phases (16-17)
+**Timeline:** 1 day (2026-03-31)
+
+**Delivered:** Smooth animation system and deep scale parity.
+
+**Key accomplishments:**
+- **Fluid Animations:** Smooth enter/update/exit transitions for marks and axes.
+- **Scale Depth:** Parity for per-panel minor breaks and OOB squishing logic.
+- **Accessibility:** Support for `prefers-reduced-motion`.
+
+---
+
+## v1.3 Advanced Facets & Custom Interactivity (Shipped: 2026-03-31)
+
+**Phases completed:** 2 phases (18-19)
+**Timeline:** 1 day (2026-03-31)
+
+**Delivered:** Hierarchical faceting and user-extensible interactivity.
+
+**Key accomplishments:**
+- **Nested Facets:** Support for multiple variables in facet_grid/facet_wrap with hierarchical headers.
+- **Custom Handlers:** R API (`d3_handlers`) for injecting custom JS logic into plot events.
+- **Shiny Sync:** Automated synchronization of plot clicks and legend changes with Shiny.
+
+---
+
+## v1.4 Comprehensive Theme Parity & Reference Geoms (Shipped: 2026-03-31)
+
+**Phases completed:** 2 phases (20-21)
+**Timeline:** 1 day (2026-03-31)
+
+**Delivered:** High-fidelity theme system and common annotation geoms.
+
+**Key accomplishments:**
+- **Theme Inheritance:** Full `theme()` inheritance logic and support for detailed element styling (margins, text alignment).
+- **Reference Geoms:** Implementation of `geom_hline`, `geom_vline`, and `geom_abline` with robust clipping.
+- **Visual Fidelity:** Support for `element_blank()` and comprehensive legend box styling.
+
+---
+
+## v1.5 Non-Cartesian Systems & Advanced Stats (Shipped: 2026-03-31)
+
+**Phases completed:** 2 phases (22-23)
+**Timeline:** 1 day (2026-03-31)
+
+**Delivered:** Support for radial coordinate systems and complex statistical geoms.
+
+**Key accomplishments:**
+- **Polar Coordinates:** Full support for `coord_polar`, including specialized radial/circular axis rendering and pie/coxcomb charts.
+- **Advanced Stats:** High-fidelity rendering for `geom_density` and `geom_smooth` (loess, gam) using pre-computed R paths.
+- **Statistical Transitions:** Extended the animation system to support complex SVG paths for ribbons and density outlines.
+
+---
+
+## v1.6 Advanced Geoms & API Polish (Planned)
+
+**Status:** Planning
+**Focus:** Completing the geom catalog and refining the developer experience.
+
+**Planned Features:**
+- **Additional Geoms:** Implementation of `geom_dotplot`, `geom_rug`, and `geom_errorbar`.
+- **API Refinement:** Polishing documentation and internal helpers for easier extension.
+- **Performance Audit:** Optimizing rendering for large datasets.
+
 

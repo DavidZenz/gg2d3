@@ -91,6 +91,72 @@
       return null;
     }
 
+    // --- Render polar coordinates (Pie/Coxcomb) ---
+    if (options.coord && options.coord.type === 'polar') {
+      const coord = options.coord;
+      const thetaAes = coord.theta || 'x';
+      const rAes = thetaAes === 'x' ? 'y' : 'x';
+
+      const center = { x: options.plotWidth / 2, y: options.plotHeight / 2 };
+      const maxR = Math.min(options.plotWidth, options.plotHeight) / 2;
+
+      // Create internal scales for arc mapping
+      // thetaScale maps aesthetic to [start, start + 2pi]
+      // rScale maps aesthetic to [0, maxR]
+      const thetaScale = window.gg2d3.scales.createScale(
+        options.scales[thetaAes], 
+        [coord.start, coord.start + coord.direction * 2 * Math.PI]
+      );
+      const rScale = window.gg2d3.scales.createScale(
+        options.scales[rAes], 
+        [0, maxR]
+      );
+
+      const arc = d3.arc()
+        .innerRadius(d => {
+          const rVal = hasStack ? num(get(d, "ymin")) : 0;
+          return rScale(rVal);
+        })
+        .outerRadius(d => {
+          const rVal = hasStack ? num(get(d, "ymax")) : num(get(d, rAes === 'x' ? aes.x : aes.y));
+          return rScale(rVal);
+        })
+        .startAngle(d => {
+          const tVal = thetaScale(num(get(d, thetaAes === 'x' ? aes.x : aes.y)));
+          // ggplot2 bars have width - they are segments of the circle
+          return tVal - (isBand ? 0 : bw / 2 * (2 * Math.PI / options.plotWidth)); // simple approximation
+        })
+        .endAngle(d => {
+          const tVal = thetaScale(num(get(d, thetaAes === 'x' ? aes.x : aes.y)));
+          return tVal + (isBand ? 0 : bw / 2 * (2 * Math.PI / options.plotWidth));
+        });
+
+      const selPolar = g.append("g").attr("transform", `translate(${center.x}, ${center.y})`)
+        .selectAll("path").data(bars);
+
+      selPolar.enter().append("path")
+        .attr("class", "geom-bar geom-polar")
+        .attr("d", arc)
+        .attr("fill", d => fillColor(d))
+        .attr("stroke", d => {
+          const colourVal = val(get(d, "colour"));
+          if (colourVal == null || colourVal === "NA") return "none";
+          return strokeColor(d);
+        })
+        .attr("stroke-width", d => {
+          const linewidthVal = val(get(d, "linewidth"));
+          return linewidthVal != null ? mmToPxLinewidth(linewidthVal) : 1.89;
+        })
+        .attr("opacity", d => opacity(d))
+        .attr("data-legend-key", d => {
+          const identity = getLegendIdentity(d);
+          return identity ? identity.key : null;
+        });
+
+      return bars.length;
+    }
+
+    // --- Render Cartesian coordinates (existing logic) ---
     // Calculate baseline: use 0 if in domain, else use domain min
     // When flip: the value axis is yScale (horizontal), baseline is horizontal
     const valScale = flip ? yScale : yScale;

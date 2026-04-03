@@ -143,7 +143,8 @@
       }
 
       // Reposition data elements (clipped by clip-path)
-      repositionElements(panelGroup, xScaleCurrent, yScaleCurrent, flip);
+      const updateOptions = { flip: flip };
+      window.gg2d3.geomRegistry.updateGeoms(panelGroup, xScaleCurrent, yScaleCurrent, updateOptions);
 
       // Update axes to reflect zoomed range
       updateAxes(svg, xScaleCurrent, yScaleCurrent, flip,
@@ -153,9 +154,31 @@
 
     // Double-click to reset
     panelGroup.on('dblclick', function() {
-      panelGroup.transition()
-        .duration(750)
+      const transitions = (ir.interactivity && ir.interactivity.transitions) || {};
+      const duration = transitions.enabled ? transitions.duration : 750;
+      const easing = transitions.easing || 'cubic-in-out';
+
+      // Convert R easing string to D3 easing function
+      const d3Ease = d3['ease' + easing.split('-').map(s => s[0].toUpperCase() + s.slice(1)).join('')] || d3.easeCubicInOut;
+
+      const t = d3.transition().duration(duration).ease(d3Ease);
+
+      // 1. Transition the zoom transform (this will trigger many 'zoom' events)
+      //    We want to intercept these and ensure they don't fight with our manual transition.
+      //    Actually, d3.zoom's transition is built-in.
+      panelGroup.transition(t)
         .call(zoom.transform, d3.zoomIdentity);
+
+      // 2. Synchronously transition marks and axes to the identity state
+      window.gg2d3.geomRegistry.updateGeoms(panelGroup, xScaleOriginal, yScaleOriginal, {
+        flip: flip,
+        transition: t
+      });
+
+      updateAxes(svg, xScaleOriginal, yScaleOriginal, flip,
+                 axisTextX, axisTextY, axisLineX, axisLineY, axisTicksX, axisTicksY,
+                 xTransform, yTransform, cleanFormat, xScaleDesc, yScaleDesc,
+                 t);
     });
   }
 
@@ -165,9 +188,12 @@
    */
   function updateAxes(svg, xScaleCurrent, yScaleCurrent, flip,
                       axisTextX, axisTextY, axisLineX, axisLineY, axisTicksX, axisTicksY,
-                      xTransform, yTransform, cleanFormat, xScaleDesc, yScaleDesc) {
+                      xTransform, yTransform, cleanFormat, xScaleDesc, yScaleDesc,
+                      transition) {
     var axesGroup = svg.select('.axes-group');
     if (axesGroup.empty()) return;
+
+    const t = transition || d3.transition().duration(0);
 
     // Determine which scale maps to which physical axis
     var bottomScale = flip ? yScaleCurrent : xScaleCurrent;
@@ -188,7 +214,7 @@
       } else if (bottomTransform && bottomTransform !== 'identity') {
         bottomGen.tickFormat(cleanFormat);
       }
-      axisBottom.call(bottomGen);
+      axisBottom.transition(t).call(bottomGen);
       // Reapply theme styling
       var bottomTextStyle = flip ? axisTextY : axisTextX;
       var bottomLineStyle = flip ? axisLineY : axisLineX;
@@ -206,7 +232,7 @@
       } else if (leftTransform && leftTransform !== 'identity') {
         leftGen.tickFormat(cleanFormat);
       }
-      axisLeft.call(leftGen);
+      axisLeft.transition(t).call(leftGen);
       // Reapply theme styling
       var leftTextStyle = flip ? axisTextX : axisTextY;
       var leftLineStyle = flip ? axisLineX : axisLineY;
@@ -299,7 +325,7 @@
           // Clear brush and update all panels
           panelData.forEach(function(p) {
             clearBrush(p.group);
-            repositionElements(p.group, xScaleCurrent, yScaleCurrent, flip);
+            window.gg2d3.geomRegistry.updateGeoms(p.group, xScaleCurrent, yScaleCurrent, { flip: flip });
           });
         });
 

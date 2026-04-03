@@ -14,7 +14,8 @@ validate_ir <- function(ir) {
     "point", "line", "path", "bar", "col", "area",
     "text", "rect", "segment", "ribbon", "violin", "boxplot",
     "density", "smooth",
-    "hline", "vline", "abline", "polygon"
+    "hline", "vline", "abline", "dotplot", "rug",
+    "errorbar", "linerange", "pointrange", "polygon"
   )
 
   # Check that IR is a list
@@ -144,11 +145,15 @@ validate_ir <- function(ir) {
       if (is.null(panel$PANEL)) {
         warning(sprintf("Panel %d missing PANEL identifier", i), call. = FALSE)
       }
-      if (is.null(panel$x_range) || length(panel$x_range) != 2) {
-        warning(sprintf("Panel %d has invalid x_range", i), call. = FALSE)
+      if (is.null(panel$x_range)) {
+        warning(sprintf("Panel %d missing x_range", i), call. = FALSE)
+      } else if (!is.character(panel$x_range) && length(panel$x_range) != 2) {
+        warning(sprintf("Panel %d has invalid x_range (not categorical and length != 2)", i), call. = FALSE)
       }
-      if (is.null(panel$y_range) || length(panel$y_range) != 2) {
-        warning(sprintf("Panel %d has invalid y_range", i), call. = FALSE)
+      if (is.null(panel$y_range)) {
+        warning(sprintf("Panel %d missing y_range", i), call. = FALSE)
+      } else if (!is.character(panel$y_range) && length(panel$y_range) != 2) {
+        warning(sprintf("Panel %d has invalid y_range (not categorical and length != 2)", i), call. = FALSE)
       }
     }
   }

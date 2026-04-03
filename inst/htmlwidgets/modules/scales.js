@@ -65,16 +65,21 @@
       axisGen.tickValues(breaks.map(function(b) { return new Date(b); }));
     }
 
-    // Apply tick format: explicit pattern > pre-formatted labels > D3 auto
-    var fmt = translateFormat(scaleDesc.format);
-    if (fmt) {
-      var useUtc = !scaleDesc.timezone || scaleDesc.timezone === 'UTC';
-      axisGen.tickFormat(useUtc ? d3.utcFormat(fmt) : d3.timeFormat(fmt));
-    } else if (scaleDesc.labels && scaleDesc.labels.length) {
+    // Apply tick format: pre-formatted labels > explicit pattern > D3 auto
+    // Preference: ggplot2 pre-formatted labels (most accurate parity)
+    if (scaleDesc.labels && scaleDesc.labels.length) {
       var labels = scaleDesc.labels;
-      axisGen.tickFormat(function(d, i) { return i < labels.length ? labels[i] : ''; });
+      axisGen.tickFormat(function(d, i) { 
+        return i < labels.length ? labels[i] : (typeof d.getMonth === 'function' ? d.toLocaleDateString() : String(d)); 
+      });
+    } else {
+      var fmt = translateFormat(scaleDesc.format);
+      if (fmt) {
+        var useUtc = !scaleDesc.timezone || scaleDesc.timezone === 'UTC';
+        axisGen.tickFormat(useUtc ? d3.utcFormat(fmt) : d3.timeFormat(fmt));
+      }
+      // else: let D3 auto-format with its default multi-scale formatter
     }
-    // else: let D3 auto-format with its default multi-scale formatter
   }
 
   function convertColor(color) {
@@ -288,6 +293,21 @@
   }
 
   /**
+   * Convert polar coordinates (radius, angle) to Cartesian (x, y)
+   *
+   * @param {number} r - Radius value
+   * @param {number} theta - Angle value in radians
+   * @param {Object} center - {x, y} center point of the panel
+   * @returns {Object} {x, y} Cartesian coordinates
+   */
+  function getPolarCoords(r, theta, center) {
+    return {
+      x: center.x + r * Math.sin(theta),
+      y: center.y - r * Math.cos(theta)
+    };
+  }
+
+  /**
    * Exported scale factory
    */
   window.gg2d3.scales = {
@@ -295,6 +315,7 @@
     convertColor: convertColor,
     translateFormat: translateFormat,
     isTemporalTransform: isTemporalTransform,
-    applyTemporalAxisFormat: applyTemporalAxisFormat
+    applyTemporalAxisFormat: applyTemporalAxisFormat,
+    getPolarCoords: getPolarCoords
   };
 })();

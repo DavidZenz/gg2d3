@@ -31,6 +31,7 @@
     const textTheme = theme.get("legend.text") || {};
     const titleTheme = theme.get("legend.title") || {};
     const bgTheme = theme.get("legend.background") || {};
+    const legSpacing = theme.get("legend.spacing") || ptToPx(11);
 
     return {
       // Key size: ggplot2 default is 1.2 lines = 1.2 * 11pt = 13.2pt
@@ -44,9 +45,10 @@
       titleColour: convertColor(titleTheme.colour || "black"),
       textColour: convertColor(textTheme.colour || "black"),
 
-      // Spacing: ggplot2 default legend.key.spacing = 5.5pt
+      // Spacing
       keySpacing: ptToPx(5.5),
-      titleSpacing: ptToPx(5.5),
+      titleSpacing: (titleTheme.margin && titleTheme.margin.bottom) || ptToPx(5.5),
+      spacing: legSpacing,
 
       // Backgrounds
       keyBackground: convertColor(keyTheme.fill || "white"),
@@ -54,8 +56,8 @@
       legendBackground: bgTheme.type !== "blank" ? convertColor(bgTheme.fill || "white") : "transparent",
       legendStroke: bgTheme.colour && bgTheme.colour !== "NA" ? convertColor(bgTheme.colour) : "none",
 
-      // Margin: ggplot2 default legend.margin = 5.5pt all sides
-      margin: ptToPx(5.5)
+      // Margin now handled by renderLegends container pass
+      margin: 0
     };
   }
 
@@ -635,24 +637,43 @@
     const legendBox = layout.legend;
     if (legendBox.position === "none") return;
 
-    // Get theme defaults for spacing
-    const guideSpacing = window.gg2d3.constants.ptToPx(11);
+    // Get theme properties
+    const legTheme = window.gg2d3.layout.getLegendTheme(theme);
+    const legMargin = legTheme.margin || {};
+    const convertColor = window.gg2d3.scales.convertColor;
+
+    // Render legend background if not blank
+    const bgSpec = legTheme.background || {};
+    if (bgSpec && bgSpec.type !== "blank") {
+      svg.append("rect")
+        .attr("class", "legend-background")
+        .attr("x", legendBox.x)
+        .attr("y", legendBox.y)
+        .attr("width", legendBox.w)
+        .attr("height", legendBox.h)
+        .attr("fill", convertColor(bgSpec.fill) || "none")
+        .attr("stroke", convertColor(bgSpec.colour) || "none")
+        .attr("stroke-width", bgSpec.linewidth || 0);
+    }
+
+    // Get theme defaults for spacing between multiple guides
+    const guideSpacing = legTheme.spacing || window.gg2d3.constants.ptToPx(11);
 
     const isVertical = legendBox.position === "right" || legendBox.position === "left";
 
     // Compute total legend content size for centering (ggplot2 justification = "center")
     const totalDims = estimateLegendDimensions(guides, theme, legendBox.position);
 
-    // Center legend within allocated box
+    // Center legend within allocated box (respecting margins)
     let currentX, currentY;
     if (isVertical) {
       // Vertically center for right/left positions
-      currentX = legendBox.x;
-      currentY = legendBox.y + Math.max(0, (legendBox.h - totalDims.height) / 2);
+      currentX = legendBox.x + (legMargin.left || 0);
+      currentY = legendBox.y + (legMargin.top || 0) + Math.max(0, (legendBox.h - totalDims.height - (legMargin.top || 0) - (legMargin.bottom || 0)) / 2);
     } else {
       // Horizontally center for top/bottom positions
-      currentX = legendBox.x + Math.max(0, (legendBox.w - totalDims.width) / 2);
-      currentY = legendBox.y;
+      currentX = legendBox.x + (legMargin.left || 0) + Math.max(0, (legendBox.w - totalDims.width - (legMargin.left || 0) - (legMargin.right || 0)) / 2);
+      currentY = legendBox.y + (legMargin.top || 0);
     }
 
     // Key direction: vertical for right/left, horizontal for top/bottom

@@ -306,6 +306,25 @@ test_that("geom_density with custom bandwidth", {
   expect_true("y" %in% names(first_row))
 })
 
+test_that("geom_smooth with gam method", {
+  library(ggplot2)
+  # Ensure mgcv is available or skip
+  skip_if_not_installed("mgcv")
+
+  p <- ggplot(mtcars, aes(wt, mpg)) +
+    geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"))
+
+  ir <- suppressMessages(as_d3_ir(p))
+
+  # Check geom name is "smooth"
+  expect_equal(ir$layers[[1]]$geom, "smooth")
+
+  # Check that data has confidence bands
+  first_row <- ir$layers[[1]]$data[[1]]
+  expect_true("ymin" %in% names(first_row))
+  expect_true("ymax" %in% names(first_row))
+})
+
 test_that("geom_boxplot with notch", {
   library(ggplot2)
 

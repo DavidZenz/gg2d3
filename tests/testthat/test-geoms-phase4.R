@@ -292,3 +292,56 @@ test_that("geom_ribbon preserves data order", {
   first_row <- ir$layers[[1]]$data[[1]]
   expect_true(all(c("x", "ymin", "ymax") %in% names(first_row)))
 })
+
+test_that("reference geoms with mapped aesthetics work", {
+  library(ggplot2)
+  df <- data.frame(val = c(10, 20), type = c("A", "B"))
+  p <- ggplot(mtcars, aes(wt, mpg)) +
+    geom_point() +
+    geom_hline(data = df, aes(yintercept = val, colour = type))
+  ir <- as_d3_ir(p)
+
+  geom_names <- sapply(ir$layers, function(l) l$geom)
+  idx <- which(geom_names == "hline")
+  hline_layer <- ir$layers[[idx]]
+  
+  expect_equal(length(hline_layer$data), 2)
+  expect_equal(hline_layer$data[[1]]$yintercept, 10)
+  expect_equal(hline_layer$data[[2]]$yintercept, 20)
+  
+  # After implementation, this should be non-NULL
+  expect_equal(hline_layer$aes$yintercept, "yintercept")
+})
+
+test_that("geom_dotplot produces correct IR", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(mpg)) + geom_dotplot()
+  ir <- suppressMessages(as_d3_ir(p))
+  expect_equal(ir$layers[[1]]$geom, "dotplot")
+  expect_true("stackpos" %in% names(ir$layers[[1]]$data[[1]]))
+})
+
+test_that("geom_rug produces correct IR", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg)) + geom_rug(sides = "tr")
+  ir <- as_d3_ir(p)
+  expect_equal(ir$layers[[1]]$geom, "rug")
+  expect_equal(ir$layers[[1]]$params$sides, "tr")
+})
+
+test_that("interval geoms produce correct IR", {
+  library(ggplot2)
+  df <- data.frame(x=1, y=5, ymin=4, ymax=6)
+  
+  p1 <- ggplot(df, aes(x, y, ymin=ymin, ymax=ymax)) + geom_errorbar()
+  ir1 <- as_d3_ir(p1)
+  expect_equal(ir1$layers[[1]]$geom, "errorbar")
+  
+  p2 <- ggplot(df, aes(x, y, ymin=ymin, ymax=ymax)) + geom_linerange()
+  ir2 <- as_d3_ir(p2)
+  expect_equal(ir2$layers[[1]]$geom, "linerange")
+  
+  p3 <- ggplot(df, aes(x, y, ymin=ymin, ymax=ymax)) + geom_pointrange()
+  ir3 <- as_d3_ir(p3)
+  expect_equal(ir3$layers[[1]]$geom, "pointrange")
+})

@@ -12,15 +12,21 @@ test_that("facet_grid produces correct IR structure", {
   expect_equal(length(ir$panels), 6)
 })
 
-test_that("facet_grid row_strips and col_strips are correct", {
+test_that("facet_grid row_strips and col_strips are hierarchical", {
   library(ggplot2)
   p <- ggplot(mtcars, aes(wt, mpg)) + geom_point() + facet_grid(cyl ~ am)
   ir <- as_d3_ir(p)
-  expect_equal(length(ir$facets$row_strips), 3)  # 3 cyl values
-  expect_equal(length(ir$facets$col_strips), 2)  # 2 am values
+  
+  # Now a list of levels
+  expect_equal(length(ir$facets$row_strips), 1)  # 1 level (cyl)
+  expect_equal(length(ir$facets$col_strips), 1)  # 1 level (am)
+  
+  expect_equal(length(ir$facets$row_strips[[1]]$labels), 3) # 3 cyl values
+  expect_equal(length(ir$facets$col_strips[[1]]$labels), 2) # 2 am values
+  
   # Check ROW/COL indices
-  row_indices <- sapply(ir$facets$row_strips, function(s) s$ROW)
-  col_indices <- sapply(ir$facets$col_strips, function(s) s$COL)
+  row_indices <- sapply(ir$facets$row_strips[[1]]$labels, function(s) s$ROW)
+  col_indices <- sapply(ir$facets$col_strips[[1]]$labels, function(s) s$COL)
   expect_equal(sort(row_indices), 1:3)
   expect_equal(sort(col_indices), 1:2)
 })
@@ -68,16 +74,18 @@ test_that("free scales produce per-panel specific ranges", {
   expect_false(all(sapply(x_ranges, function(r) identical(r, x_ranges[[1]]))))
 })
 
-test_that("multi-variable facet_grid produces correct strips", {
+test_that("multi-variable facet_grid produces correct hierarchical strips", {
   library(ggplot2)
   p <- ggplot(mtcars, aes(wt, mpg)) + geom_point() + facet_grid(cyl ~ am + vs)
   ir <- as_d3_ir(p)
   expect_equal(ir$facets$type, "grid")
   expect_equal(length(ir$facets$cols), 2)  # am and vs
   expect_equal(length(ir$facets$rows), 1)  # cyl only
-  # Column strips should have concatenated labels
-  col_labels <- sapply(ir$facets$col_strips, function(s) s$label)
-  expect_true(all(grepl(",", col_labels)))  # Labels contain comma separator
+  
+  # Column strips should have 2 levels
+  expect_equal(length(ir$facets$col_strips), 2)
+  expect_equal(ir$facets$col_strips[[1]]$variable, "am")
+  expect_equal(ir$facets$col_strips[[2]]$variable, "vs")
 })
 
 test_that("facet_grid handles missing combinations", {
@@ -97,7 +105,7 @@ test_that("facet_grid handles missing combinations", {
   expect_equal(ir$facets$ncol, 2L)
 })
 
-test_that("facet_wrap IR unchanged by Phase 9", {
+test_that("facet_wrap IR structure is correct", {
   library(ggplot2)
   p <- ggplot(mtcars, aes(wt, mpg)) + geom_point() + facet_wrap(~ cyl)
   ir <- as_d3_ir(p)
@@ -107,7 +115,7 @@ test_that("facet_wrap IR unchanged by Phase 9", {
   expect_true(is.null(ir$facets$col_strips))
 })
 
-test_that("non-faceted IR unchanged by Phase 9", {
+test_that("non-faceted IR structure is correct", {
   library(ggplot2)
   p <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
   ir <- as_d3_ir(p)
