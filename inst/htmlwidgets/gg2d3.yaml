@@ -40,3 +40,4 @@ dependencies:
       - geoms/violin.js
       - geoms/density.js
       - geoms/smooth.js
+      - geoms/sf.js
