@@ -318,6 +318,15 @@ as_d3_ir <- function(p, width = 640, height = 400,
     }
 
     if (gname == "sf") {
+      # Normalize geometry column to WGS84 first so CRS and geometries are consistent
+      gcol_name <- attr(df, "sf_column")
+      if (is.null(gcol_name)) {
+        candidates <- names(df)[vapply(df, inherits, logical(1L), "sfc")]
+        gcol_name <- if (length(candidates) > 0L) candidates[[1L]] else NA_character_
+      }
+      if (!is.na(gcol_name)) {
+        df[[gcol_name]] <- normalize_to_wgs84(df[[gcol_name]])
+      }
       sf_geom_strings <- extract_sf_geometries(df)
       sf_layer_crs    <- get_layer_crs(df)
       sf_layer_gtype  <- detect_dominant_geom_type(df)
@@ -752,7 +761,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
       is_color_aes <- aes_name %in% c("colour", "fill")
       guide_type <- if (is_continuous && is_color_aes) "colorbar" else "legend"
       title <- scale_obj$name
-      if (is.null(title) || identical(title, waiver())) title <- b$plot$labels[[aes_name]] %||% aes_name
+      if (is.null(title) || identical(title, ggplot2::waiver())) title <- b$plot$labels[[aes_name]] %||% aes_name
       keys_list <- list()
       for (i in seq_len(nrow(guide_data))) {
         key <- list()
