@@ -10,9 +10,9 @@ Requirements committed for milestone v1.6.
 
 ### Additional Geoms
 
-- [ ] **GEOM-20**: User can render `geom_dotplot` with correct dot stacking and orientation.
-- [ ] **GEOM-21**: User can render `geom_rug` for axis-aligned data density markers.
-- [ ] **GEOM-22**: User can render `geom_errorbar`, `geom_linerange`, and `geom_pointrange`.
+- [x] **GEOM-20**: User can render `geom_dotplot` with correct dot stacking and orientation.
+- [x] **GEOM-21**: User can render `geom_rug` for axis-aligned data density markers.
+- [x] **GEOM-22**: User can render `geom_errorbar`, `geom_linerange`, and `geom_pointrange`.
 
 ### API & Performance
 
@@ -55,9 +55,9 @@ Updated during v1.6 roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GEOM-20 | Phase 24 (render) + Phase 26 (interactivity) | Pending |
-| GEOM-21 | Phase 24 (render) + Phase 26 (interactivity) | Pending |
-| GEOM-22 | Phase 24 (render) + Phase 26 (interactivity + zoom) | Pending |
+| GEOM-20 | Phase 24 (render) + Phase 26 (interactivity) | Complete |
+| GEOM-21 | Phase 24 (render) + Phase 26 (interactivity) | Complete |
+| GEOM-22 | Phase 24 (render) + Phase 26 (interactivity + zoom) | Complete |
 | API-01 | Phase 25 | Complete |
 | API-02 | Phase 25 (source) + Phase 26 (regenerate) | Complete |
 | PERF-01 | Phase 25 | Complete |
