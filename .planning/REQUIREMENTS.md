@@ -9,9 +9,9 @@ Requirements for choropleth map research milestone. Each maps to roadmap phases.
 
 ### Feasibility
 
-- [ ] **FEAS-01**: Empirically verify that `ggplot_build()` preserves the `sfc` geometry list-column for `geom_sf` layers
-- [ ] **FEAS-02**: Prototype R-side extraction of sf geometries to GeoJSON strings via `geojsonsf::sfc_geojson()`
-- [ ] **FEAS-03**: Verify CRS normalization path (`st_transform` to WGS84) works for common projected CRS inputs
+- [x] **FEAS-01**: Empirically verify that `ggplot_build()` preserves the `sfc` geometry list-column for `geom_sf` layers
+- [x] **FEAS-02**: Prototype R-side extraction of sf geometries to GeoJSON strings via `geojsonsf::sfc_geojson()`
+- [x] **FEAS-03**: Verify CRS normalization path (`st_transform` to WGS84) works for common projected CRS inputs
 - [ ] **FEAS-04**: Design IR schema extension for sf layers (geometries array, coord type, bbox)
 
 ### Rendering
@@ -59,9 +59,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FEAS-01 | Phase 27 | Pending |
-| FEAS-02 | Phase 27 | Pending |
-| FEAS-03 | Phase 27 | Pending |
+| FEAS-01 | Phase 27 | Complete |
+| FEAS-02 | Phase 27 | Complete |
+| FEAS-03 | Phase 27 | Complete |
 | FEAS-04 | Phase 27 | Pending |
 | REND-01 | Phase 28 | Pending |
 | REND-02 | Phase 28 | Pending |

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Choropleth Map Research
-status: planning
-stopped_at: Phase 27 context gathered
-last_updated: "2026-04-04T14:20:38.357Z"
-last_activity: 2026-04-04 — v1.7 roadmap created; research milestone initialized (Phases 27-30)
+status: executing
+stopped_at: Completed 27-01-PLAN.md
+last_updated: "2026-04-04T16:20:21.672Z"
+last_activity: 2026-04-04
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** Phase 27 — R IR Extraction Feasibility
+**Current focus:** Phase 27 — r-ir-extraction-feasibility
 
 ## Current Position
 
-Phase: 27 of 30 (R IR Extraction Feasibility)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-04-04 — v1.7 roadmap created; research milestone initialized (Phases 27-30)
+Phase: 27 (r-ir-extraction-feasibility) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-04
 
 Progress: [░░░░░░░░░░] 0% (v1.7 milestone)
 
@@ -47,6 +47,7 @@ Progress: [░░░░░░░░░░] 0% (v1.7 milestone)
 | - | - | - | - |
 
 *Updated after each plan completion*
+| Phase 27-r-ir-extraction-feasibility P01 | 10 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -58,6 +59,7 @@ Recent decisions affecting current work:
 - Research (2026-04-04): Use `geojsonsf::sfc_geojson()` for GeoJSON serialization (not `jsonlite::toJSON`); add sf + geojsonsf to Suggests only to avoid forcing GDAL/GEOS/PROJ on all users
 - Research (2026-04-04): Use `d3.geoIdentity().reflectY(true).fitExtent()` — no JS reprojection; R normalizes CRS to WGS84 via `sf::st_transform` before serialization
 - Research (2026-04-04): Centroid-based brush selection preferred over polygon hit-testing; store centroids as `data-cx`/`data-cy` on path elements in Phase 28
+- [Phase 27-r-ir-extraction-feasibility]: geojsonsf installed cleanly for D-10 production path; sf_column attr is NULL post-ggplot_build so class-based sfc fallback is primary detection path
 
 ### Pending Todos
 
@@ -70,9 +72,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T14:20:38.353Z
-Stopped at: Phase 27 context gathered
-Resume file: .planning/phases/27-r-ir-extraction-feasibility/27-CONTEXT.md
+Last session: 2026-04-04T16:20:21.669Z
+Stopped at: Completed 27-01-PLAN.md
+Resume file: None
 
 ---
 *State initialized: 2026-02-07*

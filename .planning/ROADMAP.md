@@ -82,9 +82,9 @@ See .planning/milestones/v1.6-ROADMAP.md for full details.
   2. A prototype R function produces a character vector of valid GeoJSON strings from an `sfc` column via `geojsonsf::sfc_geojson()`, verified against at least one real shapefile (e.g., the NC dataset bundled with sf)
   3. A researcher can confirm that `sf::st_transform(geom_col, 4326)` successfully normalizes at least two common projected CRS inputs (e.g., EPSG:3857, EPSG:32618) to WGS84 without error
   4. A written IR schema document specifies the new fields for sf layers (`geometries[]`, `crs`, `geom_type`, `coord.type`, `coord.bbox`) with example JSON showing their structure
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
-- [ ] 27-01-PLAN.md — sf geometry utility functions (sf_utils.R) with tests and DESCRIPTION update
+- [x] 27-01-PLAN.md — sf geometry utility functions (sf_utils.R) with tests and DESCRIPTION update
 - [ ] 27-02-PLAN.md — GeomSf/CoordSf integration into as_d3_ir pipeline, validator update, IR schema document
 
 ### Phase 28: D3 Renderer Prototyping
@@ -124,7 +124,7 @@ Phases execute in numeric order: 27 → 28 → 29 → 30
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 27. R IR Extraction Feasibility | v1.7 | 0/2 | Not started | - |
+| 27. R IR Extraction Feasibility | v1.7 | 1/2 | In Progress|  |
 | 28. D3 Renderer Prototyping | v1.7 | 0/? | Not started | - |
 | 29. Interactivity Design | v1.7 | 0/? | Not started | - |
 | 30. Edge Cases and Blueprint | v1.7 | 0/? | Not started | - |
