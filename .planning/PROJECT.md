@@ -8,14 +8,14 @@ An R package that renders ggplot2 graphics as interactive D3.js SVG visualizatio
 
 Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 
-## Current Milestone: v1.1 Interactive Exploration
+## Current Milestone: v1.6 Advanced Geoms & API Polish (Complete)
 
-**Goal:** Make exploration in gg2d3 feel meaningfully richer for R analysts through interactive legends, animation/transitions, and deeper coordinate/scale parity.
+**Goal:** Complete the geom catalog with specialized geoms and refine the developer experience.
 
-**Target features:**
-- Interactive legends for filter/toggle/highlight workflows
-- Animation and transition support for staged and state-change storytelling
-- Advanced coordinate and scale behavior to close high-impact ggplot2 parity gaps
+**Delivered:**
+- Specialized geoms (dotplot, rug, errorbar, linerange, pointrange)
+- API polish and performance optimization for >5000 points
+- Full interactivity wiring for all new geoms (Phase 26 gap closure)
 
 ## Requirements
 
@@ -37,12 +37,17 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 - ✓ Full scale coverage (date/time, color palettes, sqrt, reverse) — v1.0
 - ✓ Pipe-based interactivity API (tooltips, linked views) — v1.0
 - ✓ Comprehensive test suite — v1.0
+- ✓ Interactive legend controls (toggle/filter/highlight) — v1.1
+- ✓ Animation and transition support — v1.2
+- ✓ Advanced facets and custom interactivity — v1.3
+- ✓ Comprehensive theme parity and reference geoms — v1.4
+- ✓ Non-Cartesian systems and advanced stats — v1.5
+- ✓ Specialized geoms (dotplot, rug, errorbar, linerange, pointrange) — v1.6
+- ✓ Full interactivity wiring for all 25 geoms — v1.6
 
 ### Active
 
-- [ ] Interactive legend controls support analyst exploration workflows (toggle/filter/highlight)
-- [ ] Animation and transitions support exploratory storytelling without breaking visual fidelity
-- [ ] Priority advanced coord/scale parity gaps are closed for common analyst use cases
+(No active milestone — v1.6 complete)
 
 ### Out of Scope
 
@@ -84,4 +89,4 @@ gg2d3 shipped v1.0 with 10,442 lines of R + JavaScript across 14 JS modules and 
 | Crosstalk for linked views | Client-side linked brushing without Shiny dependency | ✓ Good — works in static HTML |
 
 ---
-*Last updated: 2026-03-23 after milestone v1.1 initialization*
+*Last updated: 2026-04-04 after Phase 26 completion (v1.6 milestone complete)*
