@@ -33,7 +33,13 @@
     'text.geom-text',            // geom_text
     'line.geom-segment',         // geom_segment
     'rect.geom-boxplot-box',     // geom_boxplot (IQR box)
-    'circle.geom-boxplot-outlier' // geom_boxplot (outliers)
+    'circle.geom-boxplot-outlier', // geom_boxplot (outliers)
+    'circle.geom-dotplot',         // geom_dotplot (GEOM-20)
+    'line.geom-rug',               // geom_rug (GEOM-21)
+    'line.interval-line',          // interval central line (GEOM-22)
+    'line.errorbar-cap-top',       // errorbar top cap (GEOM-22)
+    'line.errorbar-cap-bottom',    // errorbar bottom cap (GEOM-22)
+    'circle.pointrange-point'      // pointrange center dot (GEOM-22)
   ];
 
   // Per-widget legend interaction controllers.

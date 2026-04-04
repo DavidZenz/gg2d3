@@ -39,7 +39,13 @@
     'text.geom-text',
     'line.geom-segment',
     'rect.geom-boxplot-box',
-    'circle.geom-boxplot-outlier'
+    'circle.geom-boxplot-outlier',
+    'circle.geom-dotplot',         // geom_dotplot (GEOM-20)
+    'line.geom-rug',               // geom_rug (GEOM-21)
+    'line.interval-line',          // interval central line (GEOM-22)
+    'line.errorbar-cap-top',       // errorbar top cap (GEOM-22)
+    'line.errorbar-cap-bottom',    // errorbar bottom cap (GEOM-22)
+    'circle.pointrange-point'      // pointrange center dot (GEOM-22)
   ];
 
   /**
