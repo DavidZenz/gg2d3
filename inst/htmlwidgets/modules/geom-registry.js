@@ -351,12 +351,50 @@
         }
       });
 
-    // geom_interval
-    container.selectAll('g.interval-item')
-      .transition(t)
+    // geom_interval: errorbar
+    container.selectAll('g.geom-interval-errorbar g.interval-item')
       .each(function(d) {
-        const g = d3.select(this);
-        // This is a simplified update; full update would need access to aes/flip
+        var g = d3.select(this);
+        g.select('line.interval-line').transition(t)
+          .attr('x1', flip ? yScaleFunc(d.ymin) : xScaleFunc(d.x))
+          .attr('x2', flip ? yScaleFunc(d.ymax) : xScaleFunc(d.x))
+          .attr('y1', flip ? xScaleFunc(d.x) : yScaleFunc(d.ymin))
+          .attr('y2', flip ? xScaleFunc(d.x) : yScaleFunc(d.ymax));
+        g.select('line.errorbar-cap-top').transition(t)
+          .attr('x1', flip ? yScaleFunc(d.ymax) : xScaleFunc(d.xmin))
+          .attr('x2', flip ? yScaleFunc(d.ymax) : xScaleFunc(d.xmax))
+          .attr('y1', flip ? xScaleFunc(d.xmin) : yScaleFunc(d.ymax))
+          .attr('y2', flip ? xScaleFunc(d.xmax) : yScaleFunc(d.ymax));
+        g.select('line.errorbar-cap-bottom').transition(t)
+          .attr('x1', flip ? yScaleFunc(d.ymin) : xScaleFunc(d.xmin))
+          .attr('x2', flip ? yScaleFunc(d.ymin) : xScaleFunc(d.xmax))
+          .attr('y1', flip ? xScaleFunc(d.xmin) : yScaleFunc(d.ymin))
+          .attr('y2', flip ? xScaleFunc(d.xmax) : yScaleFunc(d.ymin));
+      });
+
+    // geom_interval: linerange
+    container.selectAll('g.geom-interval-linerange g.interval-item')
+      .each(function(d) {
+        var g = d3.select(this);
+        g.select('line.interval-line').transition(t)
+          .attr('x1', flip ? yScaleFunc(d.ymin) : xScaleFunc(d.x))
+          .attr('x2', flip ? yScaleFunc(d.ymax) : xScaleFunc(d.x))
+          .attr('y1', flip ? xScaleFunc(d.x) : yScaleFunc(d.ymin))
+          .attr('y2', flip ? xScaleFunc(d.x) : yScaleFunc(d.ymax));
+      });
+
+    // geom_interval: pointrange
+    container.selectAll('g.geom-interval-pointrange g.interval-item')
+      .each(function(d) {
+        var g = d3.select(this);
+        g.select('line.interval-line').transition(t)
+          .attr('x1', flip ? yScaleFunc(d.ymin) : xScaleFunc(d.x))
+          .attr('x2', flip ? yScaleFunc(d.ymax) : xScaleFunc(d.x))
+          .attr('y1', flip ? xScaleFunc(d.x) : yScaleFunc(d.ymin))
+          .attr('y2', flip ? xScaleFunc(d.x) : yScaleFunc(d.ymax));
+        g.select('circle.pointrange-point').transition(t)
+          .attr('cx', flip ? yScaleFunc(d.y) : xScaleFunc(d.x))
+          .attr('cy', flip ? xScaleFunc(d.x) : yScaleFunc(d.y));
       });
   }
 
