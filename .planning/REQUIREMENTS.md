@@ -59,25 +59,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FEAS-01 | — | Pending |
-| FEAS-02 | — | Pending |
-| FEAS-03 | — | Pending |
-| FEAS-04 | — | Pending |
-| REND-01 | — | Pending |
-| REND-02 | — | Pending |
-| REND-03 | — | Pending |
-| INTR-01 | — | Pending |
-| INTR-02 | — | Pending |
-| INTR-03 | — | Pending |
-| BLPR-01 | — | Pending |
-| BLPR-02 | — | Pending |
-| BLPR-03 | — | Pending |
+| FEAS-01 | Phase 27 | Pending |
+| FEAS-02 | Phase 27 | Pending |
+| FEAS-03 | Phase 27 | Pending |
+| FEAS-04 | Phase 27 | Pending |
+| REND-01 | Phase 28 | Pending |
+| REND-02 | Phase 28 | Pending |
+| REND-03 | Phase 28 | Pending |
+| INTR-01 | Phase 29 | Pending |
+| INTR-02 | Phase 29 | Pending |
+| INTR-03 | Phase 29 | Pending |
+| BLPR-01 | Phase 30 | Pending |
+| BLPR-02 | Phase 30 | Pending |
+| BLPR-03 | Phase 30 | Pending |
 
 **Coverage:**
 - v1.7 requirements: 13 total
-- Mapped to phases: 0
-- Unmapped: 13 ⚠️
+- Mapped to phases: 13
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-04*
-*Last updated: 2026-04-04 after initial definition*
+*Last updated: 2026-04-04 — traceability populated after roadmap creation*
