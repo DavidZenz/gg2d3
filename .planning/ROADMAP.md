@@ -45,10 +45,10 @@ This roadmap defines milestone **v1.6 Advanced Geoms & API Polish**. The phase s
 
 **Gap Closure:** Closes all gaps from v1.6 milestone audit.
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 26-01-PLAN.md — Wire dotplot, rug, and interval geoms into interactivity selectors and implement interval zoom handler
+- [x] 26-01-PLAN.md — Wire dotplot, rug, and interval geoms into interactivity selectors and implement interval zoom handler
 - [x] 26-02-PLAN.md — Regenerate README.md from README.Rmd
 
 **Success Criteria (observable):**
@@ -63,7 +63,7 @@ Plans:
 |-------|-----------|------|--------------|--------|
 | 24. Specialized Geoms | v1.6 | Implementation of dotplot, rug, and errorbars | GEOM-20..22 | Complete |
 | 25. API Polish & Performance | v1.6 | Documentation, helpers, and performance tuning | API-01..02, PERF-01 | Complete |
-| 26. New Geom Interactivity Wiring | v1.6 | 1/2 | In Progress|  |
+| 26. New Geom Interactivity Wiring | v1.6 | 2/2 | Complete   | 2026-04-04 |
 
 ---
 *Roadmap updated: 2026-04-03*
