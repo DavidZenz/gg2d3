@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Choropleth Map Research
-status: executing
-stopped_at: Completed 27-01-PLAN.md
-last_updated: "2026-04-04T16:20:21.672Z"
+status: verifying
+stopped_at: Completed 27-02-PLAN.md
+last_updated: "2026-04-04T16:28:10.453Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 
 Phase: 27 (r-ir-extraction-feasibility) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-04
 
 Progress: [░░░░░░░░░░] 0% (v1.7 milestone)
@@ -48,6 +48,7 @@ Progress: [░░░░░░░░░░] 0% (v1.7 milestone)
 
 *Updated after each plan completion*
 | Phase 27-r-ir-extraction-feasibility P01 | 10 | 3 tasks | 3 files |
+| Phase 27-r-ir-extraction-feasibility P02 | 525626 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -60,6 +61,8 @@ Recent decisions affecting current work:
 - Research (2026-04-04): Use `d3.geoIdentity().reflectY(true).fitExtent()` — no JS reprojection; R normalizes CRS to WGS84 via `sf::st_transform` before serialization
 - Research (2026-04-04): Centroid-based brush selection preferred over polygon hit-testing; store centroids as `data-cx`/`data-cy` on path elements in Phase 28
 - [Phase 27-r-ir-extraction-feasibility]: geojsonsf installed cleanly for D-10 production path; sf_column attr is NULL post-ggplot_build so class-based sfc fallback is primary detection path
+- [Phase 27-r-ir-extraction-feasibility]: Normalize geometry column before get_layer_crs() in sf branch so crs.epsg is always 4326 in IR
+- [Phase 27-r-ir-extraction-feasibility]: sf panels use NULL x_range/y_range; D3 renderer uses coord.bbox with d3.geoIdentity().reflectY(true).fitExtent()
 
 ### Pending Todos
 
@@ -72,8 +75,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T16:20:21.669Z
-Stopped at: Completed 27-01-PLAN.md
+Last session: 2026-04-04T16:28:10.450Z
+Stopped at: Completed 27-02-PLAN.md
 Resume file: None
 
 ---

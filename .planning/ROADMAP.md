@@ -66,7 +66,7 @@ See .planning/milestones/v1.6-ROADMAP.md for full details.
 
 **Milestone Goal:** Investigate how gg2d3 can support choropleth map rendering via `geom_sf()` and produce a clear implementation blueprint for a future build milestone. This is a research milestone — deliverables are investigation documents, prototype scripts, and design findings, not production code.
 
-- [ ] **Phase 27: R IR Extraction Feasibility** - Verify and prototype the R-side geometry extraction pipeline for geom_sf layers
+- [x] **Phase 27: R IR Extraction Feasibility** - Verify and prototype the R-side geometry extraction pipeline for geom_sf layers (completed 2026-04-04)
 - [ ] **Phase 28: D3 Renderer Prototyping** - Prototype basic polygon rendering via d3.geoPath and validate the visual output
 - [ ] **Phase 29: Interactivity Design** - Document and evaluate the interactivity extension strategy for map regions
 - [ ] **Phase 30: Edge Cases and Blueprint** - Investigate complex scenarios and produce the implementation blueprint
@@ -82,10 +82,10 @@ See .planning/milestones/v1.6-ROADMAP.md for full details.
   2. A prototype R function produces a character vector of valid GeoJSON strings from an `sfc` column via `geojsonsf::sfc_geojson()`, verified against at least one real shapefile (e.g., the NC dataset bundled with sf)
   3. A researcher can confirm that `sf::st_transform(geom_col, 4326)` successfully normalizes at least two common projected CRS inputs (e.g., EPSG:3857, EPSG:32618) to WGS84 without error
   4. A written IR schema document specifies the new fields for sf layers (`geometries[]`, `crs`, `geom_type`, `coord.type`, `coord.bbox`) with example JSON showing their structure
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 27-01-PLAN.md — sf geometry utility functions (sf_utils.R) with tests and DESCRIPTION update
-- [ ] 27-02-PLAN.md — GeomSf/CoordSf integration into as_d3_ir pipeline, validator update, IR schema document
+- [x] 27-02-PLAN.md — GeomSf/CoordSf integration into as_d3_ir pipeline, validator update, IR schema document
 
 ### Phase 28: D3 Renderer Prototyping
 **Goal**: A working prototype JavaScript snippet (or standalone HTML file) renders GeoJSON polygon data from the Phase 27 IR using `d3.geoIdentity().reflectY(true).fitExtent()`, correctly filling regions by aesthetic value and handling multipolygons with holes
@@ -124,7 +124,7 @@ Phases execute in numeric order: 27 → 28 → 29 → 30
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 27. R IR Extraction Feasibility | v1.7 | 1/2 | In Progress|  |
+| 27. R IR Extraction Feasibility | v1.7 | 2/2 | Complete   | 2026-04-04 |
 | 28. D3 Renderer Prototyping | v1.7 | 0/? | Not started | - |
 | 29. Interactivity Design | v1.7 | 0/? | Not started | - |
 | 30. Edge Cases and Blueprint | v1.7 | 0/? | Not started | - |
