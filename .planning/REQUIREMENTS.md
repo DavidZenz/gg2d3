@@ -17,7 +17,7 @@ Requirements committed for milestone v1.6.
 ### API & Performance
 
 - [ ] **API-01**: Developer can use a simplified internal helper for adding new geoms.
-- [ ] **API-02**: User sees comprehensive documentation for all `d3_*` interactivity functions.
+- [x] **API-02**: User sees comprehensive documentation for all `d3_*` interactivity functions.
 - [ ] **PERF-01**: User sees improved rendering performance for plots with >5000 points.
 
 ## Completed Requirements
@@ -59,7 +59,7 @@ Updated during v1.6 roadmap creation.
 | GEOM-21 | Phase 24 (render) + Phase 26 (interactivity) | Pending |
 | GEOM-22 | Phase 24 (render) + Phase 26 (interactivity + zoom) | Pending |
 | API-01 | Phase 25 | Complete |
-| API-02 | Phase 25 (source) + Phase 26 (regenerate) | Pending |
+| API-02 | Phase 25 (source) + Phase 26 (regenerate) | Complete |
 | PERF-01 | Phase 25 | Complete |
 
 **Coverage:**
