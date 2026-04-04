@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Choropleth Map Research
-status: executing
-stopped_at: Completed 28-01-PLAN.md
-last_updated: "2026-04-04T18:08:12.672Z"
+status: verifying
+stopped_at: Completed 28-02-PLAN.md
+last_updated: "2026-04-04T18:23:44.641Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 
 Phase: 28 (d3-renderer-prototyping) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-04
 
 Progress: [░░░░░░░░░░] 0% (v1.7 milestone)
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0% (v1.7 milestone)
 | Phase 27-r-ir-extraction-feasibility P01 | 10 | 3 tasks | 3 files |
 | Phase 27-r-ir-extraction-feasibility P02 | 525626 | 2 tasks | 4 files |
 | Phase 28-d3-renderer-prototyping P01 | 8 | 2 tasks | 4 files |
+| Phase 28-d3-renderer-prototyping P02 | 10 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,8 @@ Recent decisions affecting current work:
 - [Phase 27-r-ir-extraction-feasibility]: Normalize geometry column before get_layer_crs() in sf branch so crs.epsg is always 4326 in IR
 - [Phase 27-r-ir-extraction-feasibility]: sf panels use NULL x_range/y_range; D3 renderer uses coord.bbox with d3.geoIdentity().reflectY(true).fitExtent()
 - [Phase 28-d3-renderer-prototyping]: sf.js uses geoIdentity+reflectY+fitExtent; xScale/yScale received but ignored; centroids pre-computed in single pass
+- [Phase 28-d3-renderer-prototyping]: Visual tests use skip_if_not_installed() guards for all optional spatial packages so CI passes without GDAL/GEOS/PROJ
+- [Phase 28-d3-renderer-prototyping]: REND-01/02/03 all human-verified passing via browser inspection of NC choropleth and world borders HTML files
 
 ### Pending Todos
 
@@ -77,8 +80,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T18:08:12.669Z
-Stopped at: Completed 28-01-PLAN.md
+Last session: 2026-04-04T18:23:44.638Z
+Stopped at: Completed 28-02-PLAN.md
 Resume file: None
 
 ---
