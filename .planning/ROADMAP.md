@@ -62,7 +62,7 @@ See .planning/milestones/v1.6-ROADMAP.md for full details.
 
 </details>
 
-### 🚧 v1.7 Choropleth Map Research (In Progress)
+### v1.7 Choropleth Map Research (In Progress)
 
 **Milestone Goal:** Investigate how gg2d3 can support choropleth map rendering via `geom_sf()` and produce a clear implementation blueprint for a future build milestone. This is a research milestone — deliverables are investigation documents, prototype scripts, and design findings, not production code.
 
@@ -95,7 +95,10 @@ Plans:
   1. A standalone HTML prototype renders the NC counties shapefile as a filled choropleth using `d3.geoPath()` and `geoIdentity().reflectY(true).fitExtent()`, with region shapes visually matching ggplot2's `geom_sf` output
   2. A researcher can visually confirm that MULTIPOLYGON features with interior rings (holes) render with transparent holes rather than filled interiors, confirming `fill-rule="evenodd"` resolves the winding order issue
   3. Fill color and stroke color values passed through the IR (as resolved hex strings) appear correctly on each `<path>` element in the rendered output, matching the per-row aesthetic data
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 28-01-PLAN.md — sf.js geom renderer module, R-side row_id addition, gg2d3.yaml wiring
+- [ ] 28-02-PLAN.md — Visual test HTML generation and human verification of rendering
 
 ### Phase 29: Interactivity Design
 **Goal**: The interactivity extension strategy for geom_sf map regions is fully documented with enough specificity that a future build phase can implement each capability without additional design decisions
@@ -125,7 +128,7 @@ Phases execute in numeric order: 27 → 28 → 29 → 30
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 27. R IR Extraction Feasibility | v1.7 | 2/2 | Complete    | 2026-04-04 |
-| 28. D3 Renderer Prototyping | v1.7 | 0/? | Not started | - |
+| 28. D3 Renderer Prototyping | v1.7 | 0/2 | Not started | - |
 | 29. Interactivity Design | v1.7 | 0/? | Not started | - |
 | 30. Edge Cases and Blueprint | v1.7 | 0/? | Not started | - |
 
