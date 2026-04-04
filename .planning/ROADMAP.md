@@ -63,7 +63,7 @@ Plans:
 |-------|-----------|------|--------------|--------|
 | 24. Specialized Geoms | v1.6 | Implementation of dotplot, rug, and errorbars | GEOM-20..22 | Complete |
 | 25. API Polish & Performance | v1.6 | Documentation, helpers, and performance tuning | API-01..02, PERF-01 | Complete |
-| 26. New Geom Interactivity Wiring | v1.6 | 2/2 | Complete   | 2026-04-04 |
+| 26. New Geom Interactivity Wiring | v1.6 | 2/2 | Complete    | 2026-04-04 |
 
 ---
 *Roadmap updated: 2026-04-03*
