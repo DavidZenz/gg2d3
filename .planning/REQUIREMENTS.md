@@ -16,9 +16,9 @@ Requirements for choropleth map research milestone. Each maps to roadmap phases.
 
 ### Rendering
 
-- [ ] **REND-01**: Prototype D3 `geoPath` + `geoIdentity().reflectY(true).fitExtent()` rendering of GeoJSON polygons
-- [ ] **REND-02**: Verify winding order fix (`fill-rule="evenodd"`) handles multipolygons with holes
-- [ ] **REND-03**: Validate fill/stroke aesthetic passthrough from IR to SVG path elements
+- [x] **REND-01**: Prototype D3 `geoPath` + `geoIdentity().reflectY(true).fitExtent()` rendering of GeoJSON polygons
+- [x] **REND-02**: Verify winding order fix (`fill-rule="evenodd"`) handles multipolygons with holes
+- [x] **REND-03**: Validate fill/stroke aesthetic passthrough from IR to SVG path elements
 
 ### Interactivity
 
@@ -63,9 +63,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FEAS-02 | Phase 27 | Complete |
 | FEAS-03 | Phase 27 | Complete |
 | FEAS-04 | Phase 27 | Complete |
-| REND-01 | Phase 28 | Pending |
-| REND-02 | Phase 28 | Pending |
-| REND-03 | Phase 28 | Pending |
+| REND-01 | Phase 28 | Complete |
+| REND-02 | Phase 28 | Complete |
+| REND-03 | Phase 28 | Complete |
 | INTR-01 | Phase 29 | Pending |
 | INTR-02 | Phase 29 | Pending |
 | INTR-03 | Phase 29 | Pending |

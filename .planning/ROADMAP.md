@@ -95,9 +95,9 @@ Plans:
   1. A standalone HTML prototype renders the NC counties shapefile as a filled choropleth using `d3.geoPath()` and `geoIdentity().reflectY(true).fitExtent()`, with region shapes visually matching ggplot2's `geom_sf` output
   2. A researcher can visually confirm that MULTIPOLYGON features with interior rings (holes) render with transparent holes rather than filled interiors, confirming `fill-rule="evenodd"` resolves the winding order issue
   3. Fill color and stroke color values passed through the IR (as resolved hex strings) appear correctly on each `<path>` element in the rendered output, matching the per-row aesthetic data
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
-- [ ] 28-01-PLAN.md — sf.js geom renderer module, R-side row_id addition, gg2d3.yaml wiring
+- [x] 28-01-PLAN.md — sf.js geom renderer module, R-side row_id addition, gg2d3.yaml wiring
 - [ ] 28-02-PLAN.md — Visual test HTML generation and human verification of rendering
 
 ### Phase 29: Interactivity Design
@@ -128,7 +128,7 @@ Phases execute in numeric order: 27 → 28 → 29 → 30
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 27. R IR Extraction Feasibility | v1.7 | 2/2 | Complete    | 2026-04-04 |
-| 28. D3 Renderer Prototyping | v1.7 | 0/2 | Not started | - |
+| 28. D3 Renderer Prototyping | v1.7 | 1/2 | In Progress|  |
 | 29. Interactivity Design | v1.7 | 0/? | Not started | - |
 | 30. Edge Cases and Blueprint | v1.7 | 0/? | Not started | - |
 

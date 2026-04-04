@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Choropleth Map Research
-status: verifying
-stopped_at: Phase 28 UI-SPEC approved
-last_updated: "2026-04-04T17:21:10.057Z"
+status: executing
+stopped_at: Completed 28-01-PLAN.md
+last_updated: "2026-04-04T18:08:12.672Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
   percent: 0
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** Phase 27 — r-ir-extraction-feasibility
+**Current focus:** Phase 28 — d3-renderer-prototyping
 
 ## Current Position
 
-Phase: 28
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 28 (d3-renderer-prototyping) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
 Last activity: 2026-04-04
 
 Progress: [░░░░░░░░░░] 0% (v1.7 milestone)
@@ -49,6 +49,7 @@ Progress: [░░░░░░░░░░] 0% (v1.7 milestone)
 *Updated after each plan completion*
 | Phase 27-r-ir-extraction-feasibility P01 | 10 | 3 tasks | 3 files |
 | Phase 27-r-ir-extraction-feasibility P02 | 525626 | 2 tasks | 4 files |
+| Phase 28-d3-renderer-prototyping P01 | 8 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,7 @@ Recent decisions affecting current work:
 - [Phase 27-r-ir-extraction-feasibility]: geojsonsf installed cleanly for D-10 production path; sf_column attr is NULL post-ggplot_build so class-based sfc fallback is primary detection path
 - [Phase 27-r-ir-extraction-feasibility]: Normalize geometry column before get_layer_crs() in sf branch so crs.epsg is always 4326 in IR
 - [Phase 27-r-ir-extraction-feasibility]: sf panels use NULL x_range/y_range; D3 renderer uses coord.bbox with d3.geoIdentity().reflectY(true).fitExtent()
+- [Phase 28-d3-renderer-prototyping]: sf.js uses geoIdentity+reflectY+fitExtent; xScale/yScale received but ignored; centroids pre-computed in single pass
 
 ### Pending Todos
 
@@ -75,9 +77,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T17:21:10.053Z
-Stopped at: Phase 28 UI-SPEC approved
-Resume file: .planning/phases/28-d3-renderer-prototyping/28-UI-SPEC.md
+Last session: 2026-04-04T18:08:12.669Z
+Stopped at: Completed 28-01-PLAN.md
+Resume file: None
 
 ---
 *State initialized: 2026-02-07*
