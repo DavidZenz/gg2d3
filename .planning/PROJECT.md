@@ -8,14 +8,18 @@ An R package that renders ggplot2 graphics as interactive D3.js SVG visualizatio
 
 Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 
-## Current Milestone: v1.6 Advanced Geoms & API Polish (Complete)
+## Current State
 
-**Goal:** Complete the geom catalog with specialized geoms and refine the developer experience.
+v1.6 shipped 2026-04-04. No active milestone.
 
-**Delivered:**
-- Specialized geoms (dotplot, rug, errorbar, linerange, pointrange)
-- API polish and performance optimization for >5000 points
-- Full interactivity wiring for all new geoms (Phase 26 gap closure)
+**Shipped through v1.6:**
+- 25 geom types with full interactivity (hover, tooltip, brush, zoom)
+- Composable pipe-based interactivity API (`d3_tooltip`, `d3_zoom`, `d3_brush`, `d3_hover`, `d3_transitions`, `d3_handlers`)
+- Interactive legends with toggle/solo/reset/hover
+- Facets (wrap + grid) with linked interactivity
+- Non-Cartesian coordinates (polar) and advanced stats (density, smooth)
+- Comprehensive theme parity and reference geoms
+- Performance optimized for >5000 points
 
 ## Requirements
 
@@ -58,7 +62,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Context
 
-gg2d3 shipped v1.0 with 10,442 lines of R + JavaScript across 14 JS modules and 7 R source files. The three-layer pipeline (R → IR → D3) is mature: R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, which D3.js renders as SVG through a registry-based geom dispatch system. The package supports 15 geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, and a pipe-based interactivity API. Test coverage is 515+ tests across 12 test files.
+gg2d3 shipped v1.6 with ~7,300 lines of R + JavaScript source code. The three-layer pipeline (R → IR → D3) is mature: R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, which D3.js renders as SVG through a registry-based geom dispatch system. The package supports 25 geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, non-Cartesian coordinates, and a composable pipe-based interactivity API. Test coverage spans 16 test files across 638+ tests.
 
 **Known tech debt:**
 - Monolithic `as_d3_ir()` function (~1000 lines) needs modularization
@@ -78,15 +82,17 @@ gg2d3 shipped v1.0 with 10,442 lines of R + JavaScript across 14 JS modules and 
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Geom coverage before visual polish | User priority — broader coverage unlocks more use cases | ✓ Good — 15 geoms shipped |
+| Geom coverage before visual polish | User priority — broader coverage unlocks more use cases | ✓ Good — 25 geoms shipped |
 | Legends early, facets later | Legends needed to verify geom rendering; facets are more complex | ✓ Good — legends ready for facet integration |
 | Pipe-based interactivity API | Composable like ggplot layers: `gg2d3(p) \|> d3_tooltip() \|> d3_zoom()` | ✓ Good — clean API, non-breaking |
 | Pixel-perfect fidelity target | R community expects professional output matching ggplot2 | ✓ Good — ggplot2 .pt conversion factor, visual verification |
-| Registry-based geom dispatch | Adding new geoms without modifying core rendering code | ✓ Good — 15 geoms self-register |
+| Registry-based geom dispatch | Adding new geoms without modifying core rendering code | ✓ Good — 25 geoms self-register |
 | Pure-function layout engine | Single source of truth for all positioning, no DOM dependency | ✓ Good — eliminated magic numbers |
 | Pre-computed statistics in R | Statistical computations (boxplot, violin, density, smooth) in R, not JS | ✓ Good — leverages ggplot2's stat system |
 | D3 scaleUtc for temporal axes | Consistent cross-browser rendering with UTC-based time scales | ✓ Good — timezone-aware tooltips via Intl.DateTimeFormat |
 | Crosstalk for linked views | Client-side linked brushing without Shiny dependency | ✓ Good — works in static HTML |
+| Scoped INTERACTIVE_SELECTORS | Each interactivity module maintains its own selector array for geom classes | ✓ Good — extensible, caught as gap in v1.6 audit |
+| Standardized onRender pattern | All d3_* functions use consistent onRender + setTimeout for reliable event attachment | ✓ Good — eliminated race conditions |
 
 ---
-*Last updated: 2026-04-04 after Phase 26 completion (v1.6 milestone complete)*
+*Last updated: 2026-04-04 after v1.6 milestone*

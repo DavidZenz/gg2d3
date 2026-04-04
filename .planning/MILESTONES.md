@@ -1,5 +1,18 @@
 # Milestones
 
+## v1.6 Advanced Geoms & API Polish (Shipped: 2026-04-04)
+
+**Phases completed:** 14 phases, 17 plans, 9 tasks
+
+**Key accomplishments:**
+
+- Canonical discrete legend controller now drives toggle/solo/reset/hover semantics through d3.dispatch with deterministic legend-item identity and automatic render-time wiring.
+- Legend controls now drive deterministic mark visibility and transient hover preview while staying synchronized with Crosstalk-linked selection across widgets.
+- dotplot, rug, and interval geoms wired into hover/tooltip/brush/zoom via 6 new INTERACTIVE_SELECTORS entries and a functional scoped interval updateGeoms handler
+- README.md regenerated from README.Rmd via devtools::build_readme(), now documenting all 25 geoms including geom_dotplot, geom_rug, geom_errorbar, and the full composable interactivity pipe API
+
+---
+
 ## v1.0 MVP (Shipped: 2026-02-16)
 
 **Phases completed:** 12 phases, 48 plans
@@ -11,6 +24,7 @@
 Delivered: Production-ready R package rendering any ggplot2 visualization as interactive D3.js SVG with pixel-perfect fidelity.
 
 **Key accomplishments:**
+
 - Modular three-layer architecture (R → IR → D3) with 14 JS modules and registry-based geom dispatch
 - 15 geom types: point, line, path, bar, col, rect, tile, text, area, ribbon, segment, reference, boxplot, violin, density, smooth
 - Full scale system with continuous, discrete, log, sqrt, reverse, and date/time transforms
@@ -28,6 +42,7 @@ Delivered: Production-ready R package rendering any ggplot2 visualization as int
 **Delivered:** Enhanced interactive workflows for data exploration, date/time parity, and coordination system hardening.
 
 **Key accomplishments:**
+
 - **Interactive Legends:** Implementation of toggle, solo/reset, and hover preview synchronization for discrete guides.
 - **Date/Time Parity:** Full parity with ggplot2 for date breaks, labels, and robust timezone extraction across all browser locales.
 - **coord_flip Hardening:** Corrected axis placement and orientation for flipped coordinates in both single-panel and faceted contexts.
@@ -42,6 +57,7 @@ Delivered: Production-ready R package rendering any ggplot2 visualization as int
 **Delivered:** Smooth animation system and deep scale parity.
 
 **Key accomplishments:**
+
 - **Fluid Animations:** Smooth enter/update/exit transitions for marks and axes.
 - **Scale Depth:** Parity for per-panel minor breaks and OOB squishing logic.
 - **Accessibility:** Support for `prefers-reduced-motion`.
@@ -56,6 +72,7 @@ Delivered: Production-ready R package rendering any ggplot2 visualization as int
 **Delivered:** Hierarchical faceting and user-extensible interactivity.
 
 **Key accomplishments:**
+
 - **Nested Facets:** Support for multiple variables in facet_grid/facet_wrap with hierarchical headers.
 - **Custom Handlers:** R API (`d3_handlers`) for injecting custom JS logic into plot events.
 - **Shiny Sync:** Automated synchronization of plot clicks and legend changes with Shiny.
@@ -70,6 +87,7 @@ Delivered: Production-ready R package rendering any ggplot2 visualization as int
 **Delivered:** High-fidelity theme system and common annotation geoms.
 
 **Key accomplishments:**
+
 - **Theme Inheritance:** Full `theme()` inheritance logic and support for detailed element styling (margins, text alignment).
 - **Reference Geoms:** Implementation of `geom_hline`, `geom_vline`, and `geom_abline` with robust clipping.
 - **Visual Fidelity:** Support for `element_blank()` and comprehensive legend box styling.
@@ -84,6 +102,7 @@ Delivered: Production-ready R package rendering any ggplot2 visualization as int
 **Delivered:** Support for radial coordinate systems and complex statistical geoms.
 
 **Key accomplishments:**
+
 - **Polar Coordinates:** Full support for `coord_polar`, including specialized radial/circular axis rendering and pie/coxcomb charts.
 - **Advanced Stats:** High-fidelity rendering for `geom_density` and `geom_smooth` (loess, gam) using pre-computed R paths.
 - **Statistical Transitions:** Extended the animation system to support complex SVG paths for ribbons and density outlines.
@@ -96,8 +115,7 @@ Delivered: Production-ready R package rendering any ggplot2 visualization as int
 **Focus:** Completing the geom catalog and refining the developer experience.
 
 **Planned Features:**
+
 - **Additional Geoms:** Implementation of `geom_dotplot`, `geom_rug`, and `geom_errorbar`.
 - **API Refinement:** Polishing documentation and internal helpers for easier extension.
 - **Performance Audit:** Optimizing rendering for large datasets.
-
-
