@@ -235,7 +235,9 @@ as_d3_ir <- function(p, width = 640, height = 400,
       "width","violinwidth","density","scaled","count","ncount","ndensity",
       "weight",
       # Dotplot specific
-      "stackpos","binwidth","countidx"
+      "stackpos","binwidth","countidx",
+      # sf-specific: row index for geometry-aesthetic join (D-06)
+      "row_id"
     )
 
     # coerce + rowize (same as your latest version)
@@ -330,6 +332,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
       sf_geom_strings <- extract_sf_geometries(df)
       sf_layer_crs    <- get_layer_crs(df)
       sf_layer_gtype  <- detect_dominant_geom_type(df)
+      # D-06: add row_id for safe geometry-aesthetic join
+      df[["row_id"]] <- seq_along(sf_geom_strings)
       list(
         geom       = "sf",
         geom_type  = sf_layer_gtype,
