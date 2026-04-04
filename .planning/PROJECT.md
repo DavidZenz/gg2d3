@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.6 shipped 2026-04-04. v1.7 research milestone active.
+v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 27 complete (R IR extraction feasibility proven).
 
 ## Current Milestone: v1.7 Choropleth Map Research
 
@@ -63,10 +63,10 @@ v1.6 shipped 2026-04-04. v1.7 research milestone active.
 
 ### Active
 
-- [ ] Investigate `geom_sf()` geometry extraction via `ggplot_build()` — v1.7
-- [ ] Map polygon/multipolygon geometries to IR layer — v1.7
+- [x] Investigate `geom_sf()` geometry extraction via `ggplot_build()` — Validated in Phase 27
+- [x] Map polygon/multipolygon geometries to IR layer — Validated in Phase 27
 - [ ] Evaluate D3 `d3.geoPath()` rendering for geographic shapes — v1.7
-- [ ] Assess CRS → D3 projection handling — v1.7
+- [x] Assess CRS → D3 projection handling — Validated in Phase 27 (unconditional WGS84 normalization)
 - [ ] Document interactivity integration for map regions — v1.7
 - [ ] Produce feasibility assessment and implementation blueprint — v1.7
 
@@ -112,4 +112,4 @@ gg2d3 shipped v1.6 with ~7,300 lines of R + JavaScript source code. The three-la
 | Standardized onRender pattern | All d3_* functions use consistent onRender + setTimeout for reliable event attachment | ✓ Good — eliminated race conditions |
 
 ---
-*Last updated: 2026-04-04 after v1.7 milestone start*
+*Last updated: 2026-04-04 after Phase 27 completion*
