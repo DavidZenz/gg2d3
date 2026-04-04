@@ -211,6 +211,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
                     GeomLinerange = "linerange",
                     GeomPointrange = "pointrange",
                     GeomPolygon= "polygon",
+                    GeomSf     = "sf",
                     # Fallbacks
                     {
                       if (!is.null(gobj$objname)) {
@@ -316,12 +317,27 @@ as_d3_ir <- function(p, width = 640, height = 400,
       g_params$stackdir <- b$plot$layers[[i]]$geom_params$stackdir
     }
 
-    list(
-      geom   = gname,          # <-- now always a non-NULL string like "point"
-      data   = to_rows(df),
-      aes    = aes,
-      params = g_params
-    )
+    if (gname == "sf") {
+      sf_geom_strings <- extract_sf_geometries(df)
+      sf_layer_crs    <- get_layer_crs(df)
+      sf_layer_gtype  <- detect_dominant_geom_type(df)
+      list(
+        geom       = "sf",
+        geom_type  = sf_layer_gtype,
+        geometries = sf_geom_strings,
+        data       = to_rows(df),
+        aes        = aes,
+        params     = g_params,
+        crs        = sf_layer_crs
+      )
+    } else {
+      list(
+        geom   = gname,          # <-- now always a non-NULL string like "point"
+        data   = to_rows(df),
+        aes    = aes,
+        params = g_params
+      )
+    }
   })
 
   # Validate log scale domains (must be strictly positive)
@@ -633,10 +649,15 @@ as_d3_ir <- function(p, width = 640, height = 400,
     )
   }
 
-  is_fixed <- inherits(b$plot$coordinates, "CoordFixed")
-  is_polar <- inherits(b$plot$coordinates, "CoordPolar")
+  is_fixed    <- inherits(b$plot$coordinates, "CoordFixed")
+  is_polar    <- inherits(b$plot$coordinates, "CoordPolar")
+  is_sf_coord <- inherits(b$plot$coordinates, "CoordSf")
 
-  coord_type  <- if (is_flip) "flip" else if (is_fixed) "fixed" else if (is_polar) "polar" else "cartesian"
+  coord_type  <- if (is_flip) "flip"
+                 else if (is_fixed) "fixed"
+                 else if (is_polar) "polar"
+                 else if (is_sf_coord) "sf"
+                 else "cartesian"
   coord_ratio <- if (is_fixed) (b$plot$coordinates$ratio %||% 1) else NULL
 
   # Polar metadata
@@ -646,6 +667,19 @@ as_d3_ir <- function(p, width = 640, height = 400,
       start = b$plot$coordinates$start %||% 0,
       direction = b$plot$coordinates$direction %||% 1
     )
+  } else {
+    NULL
+  }
+
+  # sf coord metadata: compute WGS84 bounding box from all sf layers
+  sf_coord_meta <- if (is_sf_coord) {
+    all_sf_geoms <- do.call(c, Filter(Negate(is.null), lapply(seq_along(b$data), function(i) {
+      df_i <- b$data[[i]]
+      gcol <- names(df_i)[vapply(df_i, inherits, logical(1L), "sfc")][1L]
+      if (!is.na(gcol)) normalize_to_wgs84(df_i[[gcol]]) else NULL
+    })))
+    bbox_vals <- if (!is.null(all_sf_geoms)) unname(as.numeric(sf::st_bbox(all_sf_geoms))) else NULL
+    list(bbox = bbox_vals)
   } else {
     NULL
   }
@@ -836,7 +870,12 @@ as_d3_ir <- function(p, width = 640, height = 400,
       facets_ir <- list(type = "grid", rows = row_vars, cols = col_vars, scales = scales_mode, nrow = as.integer(max(layout_df$ROW)), ncol = as.integer(max(layout_df$COL)), spacing = panel_spacing, layout = lapply(seq_len(nrow(layout_df)), function(i) { row <- as.list(layout_df[i, , drop = FALSE]); row$PANEL <- as.integer(row$PANEL); row$ROW <- as.integer(row$ROW); row$COL <- as.integer(row$COL); row$SCALE_X <- as.integer(row$SCALE_X); row$SCALE_Y <- as.integer(row$SCALE_Y); row }), row_strips = row_strips, col_strips = col_strips)
     } else {
       facets_ir <- list(type = "null", vars = list(), nrow = 1L, ncol = 1L, layout = list(list(PANEL = 1L, ROW = 1L, COL = 1L, SCALE_X = 1L, SCALE_Y = 1L)), strips = list())
-      panels_ir <- list(list(PANEL = 1L, x_range = unname(scales$x$domain), y_range = unname(scales$y$domain), x_breaks = unname(x_breaks), y_breaks = unname(y_breaks)))
+      if (is_sf_coord) {
+        # sf panels: no meaningful Cartesian x/y scale domains; bbox is on coord object
+        panels_ir <- list(list(PANEL = 1L, x_range = NULL, y_range = NULL, x_breaks = NULL, y_breaks = NULL))
+      } else {
+        panels_ir <- list(list(PANEL = 1L, x_range = unname(scales$x$domain), y_range = unname(scales$y$domain), x_breaks = unname(x_breaks), y_breaks = unname(y_breaks)))
+      }
     }
   }, error = function(e) {
     facets_ir <<- list(type = "null", vars = list(), nrow = 1L, ncol = 1L, layout = list(list(PANEL = 1L, ROW = 1L, COL = 1L, SCALE_X = 1L, SCALE_Y = 1L)), strips = list())
@@ -845,7 +884,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
   ir <- list(
     width = width, height = height, padding = padding,
-    coord  = c(list(type = coord_type, flip = is_flip, ratio = coord_ratio), polar_meta),
+    coord  = c(list(type = coord_type, flip = is_flip, ratio = coord_ratio), polar_meta, sf_coord_meta),
     title  = b$plot$labels$title %||% "", subtitle = subtitle_text, caption = caption_text,
     axes   = list(x = list(orientation = "bottom", label = x_label, tickLabels = x_tick_labels), y = list(orientation = "left",  label = y_label, tickLabels = y_tick_labels), x2 = if (has_sec_x) list(enabled = TRUE) else NULL, y2 = if (has_sec_y) list(enabled = TRUE) else NULL),
     facets = facets_ir, panels = panels_ir, scales = scales, layers = layers, guides = guides_ir, legend = list(enabled = TRUE, position = legend_position), theme = theme_ir
