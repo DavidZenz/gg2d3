@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.6
-milestone_name: milestone
-status: verifying
-stopped_at: Completed 26-01-PLAN.md
-last_updated: "2026-04-04T06:16:45.620Z"
+milestone: v1.7
+milestone_name: Choropleth Map Research
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-04-04T06:26:00.000Z"
 last_activity: 2026-04-04
 progress:
-  total_phases: 14
-  completed_phases: 14
-  total_plans: 17
-  completed_plans: 17
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -22,17 +22,14 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 
-**Current focus:** Phase 26 — new-geom-interactivity-wiring
+**Current focus:** Milestone v1.7 — Choropleth Map Research
 
 ## Current Position
 
-Milestone: v1.6 Advanced Geoms & API Polish — COMPLETED 2026-03-31
-Phase: 26
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-04
-
-Progress: [██████████] 100% (All planned milestones v1.0-v1.6 complete)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-04 — Milestone v1.7 started
 
 ## Performance Metrics
 

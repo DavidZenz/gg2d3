@@ -10,7 +10,19 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.6 shipped 2026-04-04. No active milestone.
+v1.6 shipped 2026-04-04. v1.7 research milestone active.
+
+## Current Milestone: v1.7 Choropleth Map Research
+
+**Goal:** Investigate how gg2d3 can support choropleth map rendering via `geom_sf()` and document a clear implementation plan for future build.
+
+**Target features:**
+- Investigate `geom_sf()` / sf geometry extraction through `ggplot_build()`
+- Determine how polygon/multipolygon geometries map to the IR layer
+- Evaluate D3 `d3.geoPath()` rendering approach for geographic shapes
+- Assess projection handling (CRS → D3 projection)
+- Document integration points with existing interactivity (hover, tooltip, brush on regions)
+- Produce a feasibility assessment and implementation blueprint
 
 **Shipped through v1.6:**
 - 25 geom types with full interactivity (hover, tooltip, brush, zoom)
@@ -51,7 +63,12 @@ v1.6 shipped 2026-04-04. No active milestone.
 
 ### Active
 
-(No active milestone — v1.6 complete)
+- [ ] Investigate `geom_sf()` geometry extraction via `ggplot_build()` — v1.7
+- [ ] Map polygon/multipolygon geometries to IR layer — v1.7
+- [ ] Evaluate D3 `d3.geoPath()` rendering for geographic shapes — v1.7
+- [ ] Assess CRS → D3 projection handling — v1.7
+- [ ] Document interactivity integration for map regions — v1.7
+- [ ] Produce feasibility assessment and implementation blueprint — v1.7
 
 ### Out of Scope
 
@@ -95,4 +112,4 @@ gg2d3 shipped v1.6 with ~7,300 lines of R + JavaScript source code. The three-la
 | Standardized onRender pattern | All d3_* functions use consistent onRender + setTimeout for reliable event attachment | ✓ Good — eliminated race conditions |
 
 ---
-*Last updated: 2026-04-04 after v1.6 milestone*
+*Last updated: 2026-04-04 after v1.7 milestone start*
