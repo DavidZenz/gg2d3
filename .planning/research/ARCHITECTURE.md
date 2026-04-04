@@ -1,331 +1,479 @@
 # Architecture Research
 
-**Domain:** gg2d3 v1.1 integration architecture (interactive legends, transitions, advanced coord/scale parity)
-**Researched:** 2026-03-23
-**Confidence:** HIGH
+**Domain:** gg2d3 v1.7 — geom_sf / choropleth integration into three-layer pipeline
+**Researched:** 2026-04-04
+**Confidence:** HIGH (pipeline mechanics verified against source), MEDIUM (ggplot_build sf output — inferred from ggplot2 source + documentation)
 
-## Standard Architecture
+---
 
-### System Overview
+## System Overview
+
+The existing three-layer pipeline and where geom_sf integration touches it:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                    R Extraction + IR Assembly Layer                         │
+│                         R Layer  (as_d3_ir.R)                                │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│  as_d3_ir() orchestration                                                   │
-│   ├─ scale/coord extract + panel metadata                                   │
-│   ├─ layer rows + stable row keys                                           │
-│   ├─ guide extraction via get_guide_data()                                  │
-│   ├─ transition spec + interaction config pass-through                       │
-│   └─ validate_ir() contract checks                                           │
+│  as_d3_ir()                                                                  │
+│   ├─ ggplot_build(p) → b                                                     │
+│   ├─ geom name dispatch (switch on class(gobj)[1])   ← ADD: GeomSf = "sf"   │
+│   ├─ keep_aes column filter                          ← ADD: "geometry" col   │
+│   ├─ to_rows() serialization                         ← CHANGE: skip geometry │
+│   ├─ [NEW] extract_sf_geometries() per layer         ← NEW function          │
+│   └─ [NEW] coord detection: CoordSf → map_coord IR  ← NEW branch            │
+│                                                                              │
+│  Output: IR JSON  ← geometry goes as GeoJSON strings, not row data          │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│                          IR Contract Layer                                   │
+│                           IR Contract Layer                                  │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│ ir = {                                                                       │
-│   scales, panels, facets, coord, layers, guides, theme,                     │
-│   interactivity, transitions, key_index                                      │
-│ }                                                                            │
+│  ir = {                                                                      │
+│    scales, panels, facets, coord, layers, guides, theme,                     │
+│    interactivity, transitions, key_index                                     │
+│  }                                                                           │
+│                                                                              │
+│  For sf layers, each layer object gains:                                     │
+│    layer.geom = "sf"                                                         │
+│    layer.geom_type = "polygon" | "multipolygon" | "point" | "linestring"    │
+│    layer.geometries = [ GeoJSON geometry string, ... ]  ← per row           │
+│    layer.crs = { epsg: 4326, proj4: "..." }                                 │
+│    layer.data = [ { fill, colour, alpha, ... }, ... ]  ← aesthetics only    │
+│                                                                              │
+│  ir.coord gains:                                                             │
+│    ir.coord.type = "sf"                                                      │
+│    ir.coord.crs = { epsg: N, proj4: "..." }                                 │
+│    ir.coord.bbox = [xmin, ymin, xmax, ymax]   ← in CRS units               │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│                   D3 Rendering + Interaction Layer                           │
+│                    D3 Rendering + Interaction Layer                          │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│  gg2d3.js orchestration                                                      │
-│   ├─ layout.calculateLayout()                                                │
-│   ├─ scales.createScale()                                                    │
-│   ├─ geomRegistry.render(...) by panel                                       │
-│   ├─ legend.renderLegends(...)                                               │
-│   ├─ transitions.reconcileAndAnimate(...)    [NEW]                           │
-│   └─ events/tooltip/zoom/brush/crosstalk attach                              │
+│  gg2d3.js main render                                                        │
+│   ├─ coord type check: if coord.type === "sf" → renderSfPanel()             │
+│   └─ else → renderPanel() (existing, unchanged)                             │
+│                                                                              │
+│  modules/geoms/sf.js  (NEW)                                                  │
+│   ├─ register("sf", renderSf)                                                │
+│   ├─ d3.geoIdentity().reflectY(true).fitExtent([panel bounds], allFeatures) │
+│   ├─ pathGen = d3.geoPath().projection(proj)                                 │
+│   └─ SVG <path class="geom-sf"> per row                                     │
+│                                                                              │
+│  Interactivity modules (events.js, brush.js) ← ADD "path.geom-sf" selector │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Component Responsibilities
+---
 
-| Component | Responsibility | Typical Implementation |
-|-----------|----------------|------------------------|
-| `R/as_d3_ir.R` | Canonical IR producer; owns R→IR mapping and defaults | Extend existing orchestration, avoid splitting again before v1.1 ships |
-| `R/validate_ir.R` | Hard contract checks for new IR fields | Add validation for `layers[].key`, `transitions`, guide merge metadata |
-| `inst/htmlwidgets/gg2d3.js` | Render orchestration and module sequencing | Keep as coordinator; delegate animation diffing to new transitions module |
-| `modules/legend.js` | Legend sizing and drawing from guide IR | Extend to expose legend item identity + state classes for interaction |
-| `modules/layout.js` | Spatial allocation for panel/legend/axes/strips | Reuse; add no new layout system for v1.1 |
-| `modules/scales.js` | Scale construction + temporal formatting helpers | Extend transform parity and axis formatting consistency |
-| `modules/transitions.js` **(NEW)** | Data join + enter/update/exit animation policy | Use `selection.data(data, key).join(...)` + d3-transition |
-| `modules/coords.js` **(NEW optional shim)** | Coordinate transform helpers shared by geoms | Start as small helper for coord_transform-compatible mapping |
+## Component Responsibilities
 
-## Recommended Project Structure
+| Component | Responsibility | New vs Modified |
+|-----------|----------------|-----------------|
+| `as_d3_ir.R` — geom dispatch | Detect `GeomSf`, emit `"sf"` geom name | Modified (add case to switch) |
+| `as_d3_ir.R` — geometry extraction | Call `geojsonsf::sfc_geojson()` on `b$data[[i]]$geometry` | New function `extract_sf_geometries()` |
+| `as_d3_ir.R` — to_rows | Skip `geometry` column in aesthetic row serialization | Modified (exclude `geometry` from `keep_aes`) |
+| `as_d3_ir.R` — coord extraction | Detect `CoordSf`, extract CRS + bbox for IR | Modified (add `CoordSf` branch) |
+| `as_d3_ir.R` — CRS normalization | Reproject all sf layers to a common CRS before conversion | New helper (optional: use `sf::st_transform`) |
+| IR contract | Add `geometries[]`, `crs`, `geom_type`, `bbox` fields on sf layers | New IR fields (additive, non-breaking) |
+| `gg2d3.js` | Route `coord.type === "sf"` panels to sf render path | Modified (coord check in main render) |
+| `modules/geoms/sf.js` | Parse GeoJSON strings, build D3 geoPath, render SVG paths | New file |
+| `modules/events.js` | Add `path.geom-sf` to INTERACTIVE_SELECTORS | Modified |
+| `modules/brush.js` | Add `path.geom-sf` to INTERACTIVE_SELECTORS | Modified |
+| `modules/geom-registry.js` — `updateGeoms()` | Add sf path update for zoom (geoPath recompute) | Modified |
+
+---
+
+## Recommended Project Structure Changes
 
 ```
 R/
-├── as_d3_ir.R                 # MODIFY: add transition+key metadata, advanced coord IR
-├── validate_ir.R              # MODIFY: enforce new IR contract
-├── d3_tooltip.R               # existing
-├── d3_hover.R                 # existing
-├── d3_zoom.R                  # existing
-├── d3_brush.R                 # existing
-└── d3_crosstalk.R             # MODIFY: key mapping compatibility for legend/selection sync
+├── as_d3_ir.R           # modified: GeomSf dispatch, geometry extraction, CoordSf coord
+└── sf_utils.R           # new: extract_sf_geometries(), normalize_crs_for_ir()
 
 inst/htmlwidgets/
-├── gg2d3.js                   # MODIFY: route through transition reconciler
-├── gg2d3.yaml                 # MODIFY: register transitions.js (+coords.js if added)
-└── modules/
-    ├── scales.js              # MODIFY: advanced transform parity behavior
-    ├── layout.js              # MINOR MODIFY: animation-safe layout outputs
-    ├── legend.js              # MODIFY: interactive legend semantics
-    ├── events.js              # MODIFY: legend-item events + namespaced handlers
-    ├── zoom.js                # MINOR MODIFY: transition interrupt coordination
-    ├── brush.js               # MINOR MODIFY: transition interrupt coordination
-    ├── crosstalk.js           # MODIFY: stable key-indexed highlight path
-    ├── transitions.js         # NEW: central enter/update/exit animation engine
-    ├── coords.js              # NEW (recommended): coord transform helpers
-    ├── geom-registry.js       # MODIFY: enforce geom render contract for keyed joins
-    └── geoms/*.js             # MODIFY subset: return/update selections with stable keys
+├── gg2d3.js             # modified: sf coord routing
+├── modules/
+│   ├── geoms/
+│   │   └── sf.js        # new: geom_sf renderer using d3.geoPath + geoIdentity
+│   ├── events.js        # modified: add path.geom-sf to INTERACTIVE_SELECTORS
+│   ├── brush.js         # modified: add path.geom-sf to INTERACTIVE_SELECTORS
+│   └── geom-registry.js # modified: updateGeoms() sf path branch
+└── gg2d3.yaml           # no changes needed (d3-geo is part of d3 v7 bundle)
 ```
 
 ### Structure Rationale
 
-- **Keep one orchestrator on each side** (`as_d3_ir.R`, `gg2d3.js`) and add focused modules; this minimizes regression risk in a mature-but-fragile pipeline.
-- **Add transitions as a dedicated module** rather than sprinkling `.transition()` calls across geom files. This keeps timing policy, interrupt behavior, and keying in one place.
-- **Treat advanced coord/scale parity as contract work first** (IR + scale helpers), then renderer work. Parity bugs come from inconsistent semantics, not missing drawing primitives.
+- **`sf_utils.R`**: Isolating sf-specific R code keeps `as_d3_ir.R` from growing further. sf is an optional dependency (Suggests, not Imports) — centralizing the `requireNamespace("sf")` and `requireNamespace("geojsonsf")` guards is cleaner.
+- **`modules/geoms/sf.js`**: Follows the existing per-geom module pattern. Self-registers with `window.gg2d3.geomRegistry.register('sf', renderSf)`. Keeps geographic rendering logic isolated from Cartesian geoms.
+- **No new JS dependencies**: `d3.geoPath`, `d3.geoIdentity` are in the vendored `d3.v7.min.js` already. No additional library required.
+
+---
 
 ## Architectural Patterns
 
-### Pattern 1: Keyed Mark Identity as First-Class Contract
+### Pattern 1: Geometry-Aesthetic Split
 
-**What:** Every renderable row gets a stable key (`layers[].data[].key`) generated in R and preserved in JS.
-**When to use:** Always for animated updates, interactive legend filtering, brush/zoom persistence, crosstalk syncing.
-**Trade-offs:**
-- Pro: Enables correct D3 join semantics and object constancy.
-- Con: Slightly larger IR payload and stricter validation burden.
+**What:** In the IR, geographic geometry (GeoJSON strings) and aesthetic data (fill, colour, alpha) are separated into parallel arrays rather than merged into a single row object.
 
-**Example:**
-```javascript
-// transitions.js (core idea)
-const marks = g.selectAll("circle.geom-point")
-  .data(rows, d => d.key);   // stable key from R
+**When to use:** Always for sf layers. The `geometry` column is an sfc list-column — it cannot be serialized by standard `jsonlite::toJSON()` and must be converted separately via `geojsonsf::sfc_geojson()`.
 
-marks.join(
-  enter => enter.append("circle").attr("opacity", 0),
-  update => update,
-  exit => exit.transition(t).attr("opacity", 0).remove()
-);
+**Trade-offs:** Adds a parallel `geometries[]` array alongside `data[]`. JavaScript must zip them together by index. This is acceptable — sf layers are always positional (row i geometry matches row i aesthetics).
+
+```r
+# R extraction (in as_d3_ir.R)
+extract_sf_geometries <- function(df) {
+  geom_col <- df[["geometry"]]
+  if (is.null(geom_col)) return(NULL)
+  # Returns character vector: one GeoJSON string per row
+  geojsonsf::sfc_geojson(geom_col)
+}
+
+# Layer output structure
+list(
+  geom      = "sf",
+  geom_type = detect_dominant_geom_type(df),
+  geometries = extract_sf_geometries(df),  # character vector, JSON-safe
+  data      = to_rows(df),                 # aesthetics only, no geometry col
+  aes       = aes,
+  params    = g_params,
+  crs       = list(epsg = get_epsg(df), proj4 = get_proj4(df))
+)
 ```
 
-### Pattern 2: Transition Reconciler Between Layout and Geom Render
-
-**What:** A single reconciler computes `prevIR -> nextIR` intent and invokes geom-specific enter/update/exit animation paths.
-**When to use:** Any update beyond initial draw (resizes, data changes, legend toggles, axis/scale changes).
-**Trade-offs:**
-- Pro: Consistent timing/easing/interrupt policy across all geoms.
-- Con: Requires geom API standardization (some geoms currently imperative-only).
-
-**Example:**
 ```javascript
-// gg2d3.js
-if (previousState && ir.transitions?.enabled) {
-  window.gg2d3.transitions.reconcileAndAnimate({
-    root, previousState, nextIR: ir, layout, registry: window.gg2d3.geomRegistry
-  });
-} else {
-  drawStatic(ir, layout);
+// JS consumption (in sf.js)
+const geoms = layer.geometries;  // array of GeoJSON strings
+const rows  = layer.data;        // array of aesthetic objects
+
+geoms.forEach((geojsonStr, i) => {
+  const geomObj = JSON.parse(geojsonStr);
+  const aesthetics = rows[i];
+  // render path using geomObj, style with aesthetics
+});
+```
+
+### Pattern 2: geoIdentity Projection with fitExtent
+
+**What:** Use `d3.geoIdentity().reflectY(true).fitExtent([[0,0],[w,h]], featureCollection)` to scale geographic coordinates to panel pixel dimensions, bypassing spherical projection math.
+
+**When to use:** This is the correct approach when ggplot2's `coord_sf()` has already handled CRS projection by transforming all geometries to a common CRS. The coordinates in `b$data[[i]]$geometry` are already in the user's chosen CRS (typically EPSG:4326 lon/lat or a projected CRS). gg2d3 does not need to re-project — it just needs to fit those coordinates to the SVG panel dimensions.
+
+**Trade-offs:**
+- Simple, no spherical distortion calculation in JS
+- Works for any CRS since it's purely a scale+translate fit
+- Does NOT apply geographic projection effects (e.g., Mercator curvature) — acceptable because ggplot2's coord_sf already applied projection when the user specified one
+- reflectY(true) is required: geographic coordinates have y increasing upward (north), SVG has y increasing downward
+
+```javascript
+// In sf.js renderSf()
+function renderSf(layer, g, xScale, yScale, options) {
+  const { w, h } = options.panelSize;  // panel pixel dimensions
+  const geoms = layer.geometries.map(s => JSON.parse(s));
+
+  // Build FeatureCollection for fitExtent bounds computation
+  const fc = {
+    type: "FeatureCollection",
+    features: geoms.map(geom => ({ type: "Feature", geometry: geom, properties: {} }))
+  };
+
+  const proj = d3.geoIdentity()
+    .reflectY(true)
+    .fitExtent([[0, 0], [w, h]], fc);
+
+  const pathGen = d3.geoPath().projection(proj);
+
+  const { fillColor, strokeColor, opacity } =
+    window.gg2d3.geomRegistry.makeColorAccessors(layer, options);
+
+  g.selectAll("path.geom-sf")
+    .data(layer.data.map((d, i) => ({ ...d, _geom: geoms[i] })))
+    .enter().append("path")
+      .attr("class", "geom-sf")
+      .attr("d", d => pathGen({ type: "Feature", geometry: d._geom, properties: {} }))
+      .attr("fill", d => fillColor(d))
+      .attr("stroke", d => strokeColor(d))
+      .attr("opacity", d => opacity(d));
+
+  return layer.data.length;
 }
 ```
 
-### Pattern 3: Guides as Interaction Controllers (Not Decoration)
+### Pattern 3: CRS Normalization in R Before IR Emission
 
-**What:** Legend entries emit semantic events (`legend:toggle`, `legend:hover`) keyed by aesthetic/value and drive mark state updates.
-**When to use:** Interactive legends in v1.1.
+**What:** Before calling `sfc_geojson()`, normalize all sf layer geometries to a single CRS — EPSG:4326 (WGS84 lon/lat) — using `sf::st_transform()`. Store the original CRS in the IR for reference.
+
+**When to use:** Always, as a safety measure. coord_sf already reprojects layers to a common CRS internally, but the CRS stored in `b$data[[i]]$geometry` may differ per layer if coord_sf hasn't normalized them. Normalizing to EPSG:4326 also makes the IR CRS-agnostic: the JS side always receives lon/lat coordinates and `geoIdentity` fits them to the panel.
+
 **Trade-offs:**
-- Pro: Unified interaction semantics across point/bar/line/etc.
-- Con: Requires legend items and marks to share identity space (aesthetic + key/value mapping).
+- Adds `sf::st_transform()` call in R — requires sf package (already a Suggests dependency for geom_sf to work at all)
+- Slightly increases R-side computation for projected data
+- Avoids CRS mismatch bugs where JS receives mixed-CRS geometries
+- EPSG:4326 is the GeoJSON spec's expected CRS (RFC 7946), so this is semantically correct
 
-### Pattern 4: Coord/Scale Parity via Canonical Mapping Functions
+```r
+# In sf_utils.R
+normalize_to_wgs84 <- function(geom_col) {
+  if (!inherits(geom_col, "sfc")) return(geom_col)
+  current_crs <- sf::st_crs(geom_col)
+  if (!is.na(current_crs) && current_crs != sf::st_crs(4326)) {
+    geom_col <- sf::st_transform(geom_col, 4326)
+  }
+  geom_col
+}
+```
 
-**What:** Central helpers map data-space → panel-space for transformed coords and scales; geoms call helpers rather than ad hoc math.
-**When to use:** coord_transform parity and any non-identity transform.
-**Trade-offs:**
-- Pro: Prevents per-geom divergence and flip/transform edge-case drift.
-- Con: Requires careful testing for each coord/scale combination.
+---
 
 ## Data Flow
 
-### Request Flow
+### geom_sf Render Flow
 
 ```
-ggplot object
-   ↓
-as_d3_ir()
-   ├─ ggplot_build()
-   ├─ extract scales/panels/guides/coord
-   ├─ assign stable row keys
-   ├─ assemble transitions + interactivity config
-   └─ validate_ir()
-   ↓
-htmlwidgets JSON payload
-   ↓
-gg2d3.js renderValue(x)
-   ├─ layout.calculateLayout(...)
-   ├─ scales.createScale(...)
-   ├─ if first render → static draw path
-   └─ else → transitions.reconcileAndAnimate(prev,next)
-         ├─ keyed join per geom
-         ├─ axis/grid/legend transition pass
-         └─ interaction rebind/refresh
+User: gg2d3(p)  where p has geom_sf() layer
+    ↓
+as_d3_ir(p)
+    ↓
+ggplot_build(p) → b
+    ↓
+b$data[[i]]  — sf data.frame with:
+    ├─ geometry column (sfc, preserved by ggplot_build)
+    ├─ fill, colour, alpha, size, linewidth, linetype columns
+    └─ PANEL column
+    ↓
+extract_sf_geometries()
+    ├─ normalize_to_wgs84(df$geometry)
+    └─ geojsonsf::sfc_geojson(geom_col)  → character vector of GeoJSON strings
+    ↓
+to_rows(df)  — aesthetics only (geometry excluded from keep_aes)
+    ↓
+IR layer = { geom:"sf", geometries:[...], data:[{fill,...},...], crs:{...} }
+    ↓
+htmlwidgets serialization (jsonlite::toJSON)
+    — geometries[] is plain character vector → JSON array of strings
+    — data[] is plain list of named lists → JSON array of objects
+    ↓
+JS: sf.js renderSf()
+    ├─ Parse each GeoJSON string
+    ├─ Build FeatureCollection for fitExtent
+    ├─ d3.geoIdentity().reflectY(true).fitExtent([panel dims], fc)
+    ├─ d3.geoPath().projection(proj)
+    └─ SVG <path class="geom-sf"> per row, styled from data[]
+    ↓
+SVG output in browser
 ```
 
-### State Management
+### ggplot_build Output for sf Layers
+
+Verified from ggplot2 source (`geom-sf.R`):
+
+- `b$data[[i]]` for a `geom_sf` layer is a data frame where:
+  - The `geometry` column is class `sfc` (simple feature collection) — **preserved through ggplot_build**
+  - Aesthetic columns present: `fill`, `colour`, `size`, `linewidth`, `linetype`, `alpha`, `stroke`, `shape`
+  - `PANEL` column present (for facet filtering)
+  - `use_defaults()` splits rows by geometry type (point/line/polygon) to apply type-specific defaults, then recombines in original row order
+- The class of the layer object in `b$plot$layers[[i]]$geom` is `GeomSf`
+- `coord_sf` reprojects all layers to a common CRS and stores it; the CRS of `b$data[[i]]$geometry` is in the plot's target CRS
+
+### Coord Detection for sf Maps
 
 ```
-Widget instance state
-  ├─ previousIR                (for diff/animation)
-  ├─ rendered mark index       (key → node refs, optional)
-  ├─ active interaction state  (legend filters, brush ranges, zoom transform)
-  └─ transition locks/interrupt flags
+b$plot$coordinates class:
+├─ CoordSf   → ir.coord.type = "sf"
+│              ir.coord.crs  = sf::st_crs(coord$crs)
+│              ir.coord.bbox = coord limits
+├─ CoordFlip → existing handling (unchanged)
+└─ CoordCartesian → existing handling (unchanged)
 ```
 
-### Key Data Flows
+### Interactivity Flow for Map Regions
 
-1. **Legend → Mark state flow:** `guides[key/value]` → legend event → mark filter/highlight → optional transition.
-2. **Scale/coord update flow:** IR transform/domain change → recompute scales → transition reconciler updates marks + axes.
-3. **Interaction persistence flow:** brush/zoom/hover state carried across redraw via key-index and interrupted/replayed transitions.
+```
+User hover/click on SVG path.geom-sf
+    ↓
+events.js INTERACTIVE_SELECTORS matches "path.geom-sf"
+    ↓
+Tooltip: data-tooltip from row data (d.fill value, region name if label aes)
+    ↓
+Hover: dim all path.geom-sf except hovered (existing dim pattern)
+    ↓
+Brush: pixel-position check against path bounding box
+    (d3.select(el).node().getBBox() for path elements)
+```
+
+---
 
 ## Integration Points
 
-### External Services
+### Modified: as_d3_ir.R
 
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| ggplot2 `get_guide_data()` | R-side guide extraction contract | Official API supports merged guides and panel-specific extraction (HIGH confidence) |
-| ggplot2 `coord_transform()` semantics | R-side coord metadata + JS mapping consistency | Must preserve “coord transform occurs after stat” behavior (HIGH confidence) |
-| D3 selection join | Keyed `selection.data(..., key).join(...)` in transitions module | Canonical pattern for object constancy and animated enter/update/exit (HIGH confidence) |
-| D3 transition | Centralized transition orchestration (`d3-transition`) | Must not use transition for element creation/data binding steps (HIGH confidence) |
+| Touch Point | Change |
+|-------------|--------|
+| `gname` switch statement | Add `GeomSf = "sf"` case |
+| `keep_aes` vector | Do NOT add `"geometry"` — it must be excluded from to_rows |
+| Layer list construction | Add `geometries` and `crs` fields when `gname == "sf"` |
+| Coord detection block | Add `CoordSf` branch: extract CRS, bbox, emit `coord.type = "sf"` |
 
-### Internal Boundaries
+### New: R/sf_utils.R
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| `as_d3_ir.R` ↔ `validate_ir.R` | Full IR object | Validation becomes release gate for new fields |
-| `gg2d3.js` ↔ `transitions.js` | `previousState`, `nextIR`, `layout`, registry hooks | Keep orchestration thin in gg2d3.js |
-| `legend.js` ↔ `events.js` | DOM classes + custom events | Legend interaction should not directly mutate geoms |
-| `scales.js`/`coords.js` ↔ geoms | Pure mapping functions | Geoms stop embedding transform-specific math |
-| `brush.js`/`zoom.js` ↔ `transitions.js` | interrupt + state handoff hooks | Avoid fighting transitions during active gestures |
+| Function | Purpose |
+|----------|---------|
+| `extract_sf_geometries(df)` | Normalizes CRS to WGS84, calls `sfc_geojson()`, returns character vector |
+| `normalize_to_wgs84(geom_col)` | Transforms sfc to EPSG:4326 if not already |
+| `detect_dominant_geom_type(df)` | Returns `"polygon"`, `"multipolygon"`, `"point"`, etc. from `sf::st_geometry_type()` |
+| `get_layer_crs(df)` | Extracts CRS as list `{epsg, proj4}` from geometry column |
 
-## New vs Modified Components (Explicit)
+### New: inst/htmlwidgets/modules/geoms/sf.js
 
-### New Components
+| Responsibility | Implementation |
+|----------------|----------------|
+| Parse GeoJSON strings | `JSON.parse(layer.geometries[i])` per row |
+| Build projection | `d3.geoIdentity().reflectY(true).fitExtent(...)` |
+| Build path generator | `d3.geoPath().projection(proj)` |
+| Render SVG paths | `g.selectAll("path.geom-sf").data(...).enter().append("path").attr("d", pathGen)` |
+| Apply aesthetics | `makeColorAccessors(layer, options)` (existing utility) |
+| Self-register | `window.gg2d3.geomRegistry.register('sf', renderSf)` |
 
-1. **`inst/htmlwidgets/modules/transitions.js`**
-   - Owns diff classification (enter/update/exit, scale-only change, layout-only change).
-   - Owns timing/easing defaults and interrupt policy.
-   - Owns keyed join wrappers used by geom modules.
+### Modified: inst/htmlwidgets/gg2d3.js
 
-2. **`inst/htmlwidgets/modules/coords.js`** *(recommended, can start minimal)*
-   - Encapsulates coord mapping helpers for transformed coordinates.
-   - Shared by geoms to reduce duplication and parity drift.
+The main render entry point needs a routing branch for sf coordinate panels. Current `renderPanel()` creates Cartesian x/y scales — these are not meaningful for geographic data. sf panels need a bypass that skips Cartesian scale creation and calls the sf renderer directly.
 
-### Modified Components
+```javascript
+// In gg2d3.js factory, at renderPanel dispatch:
+if (ir.coord && ir.coord.type === 'sf') {
+  // sf panels: skip Cartesian scales, pass panel dims to sf renderer
+  renderSfPanel(root, parentGroup, panelBox, panelData, ir, theme, convertColor, panelNum, isFaceted);
+} else {
+  renderPanel(...);  // existing
+}
+```
 
-1. **`R/as_d3_ir.R` (major)**
-   - Add stable mark keys and transition config block.
-   - Emit richer coord metadata for parity (transform names/options).
-   - Preserve guide merge metadata explicitly.
+`renderSfPanel()` creates a panel group, draws background and clip path (same as `renderPanel`), then calls `geomRegistry.render()` with `options.panelSize = { w, h }` instead of D3 Cartesian scales.
 
-2. **`R/validate_ir.R` (major)**
-   - Enforce key uniqueness per layer/panel.
-   - Validate transitions schema and supported coord transform descriptors.
+### Modified: INTERACTIVE_SELECTORS (events.js, brush.js)
 
-3. **`inst/htmlwidgets/gg2d3.js` (major)**
-   - Maintain previous render state.
-   - Route updates through transition reconciler.
+Add to both arrays:
+```javascript
+'path.geom-sf',  // geom_sf polygon/multipolygon/linestring
+```
 
-4. **`modules/legend.js` + `modules/events.js` (major)**
-   - Add interactive legend event emission and handling.
-   - Standardize legend item classes/data attrs (`data-aesthetic`, `data-level`).
+### Modified: geom-registry.js updateGeoms()
 
-5. **`modules/scales.js` (major)**
-   - Ensure advanced transform parity and unified formatting for static + zoomed axes.
+sf paths must be redrawn (not just repositioned) when zoom changes, because the path `d` attribute is computed from the geoPath generator which bakes in the projection transform. Add:
 
-6. **`modules/zoom.js`, `modules/brush.js`, `modules/crosstalk.js` (medium)**
-   - Integrate with transition interrupt/state handoff.
-   - Use stable key-index for reliable selection/highlight persistence.
+```javascript
+// In updateGeoms(), after other geom updates:
+// geom_sf paths: cannot be repositioned with scale — must be regenerated
+// The sf.js module must expose a re-render function that updateGeoms() can call.
+// Simplest approach: tag sf paths with data-panel attribute and trigger
+// a panel-level re-render rather than per-element repositioning.
+```
 
-7. **`modules/geoms/*.js` + `geom-registry.js` (medium-major)**
-   - Conform to keyed join/update contract (at least for geoms targeted in v1.1).
+**Note on zoom:** Standard D3 zoom for sf maps uses `d3.zoom()` applied at the SVG level, storing a transform. sf paths are typically zoomed via an SVG `<g transform="...">` group rather than recomputing geoPath. This is different from the existing Cartesian zoom which redraws axes and repositions elements. The sf renderer can store the geoPath generator and re-apply to the selection on zoom events.
 
-## Build Order (Dependency + Risk Driven)
-
-1. **IR Contract Upgrade (R first)**
-   - Add stable keys, transition block, coord metadata, and validator rules.
-   - Why first: every downstream feature depends on identity and contract correctness.
-
-2. **Transition Infrastructure (JS core)**
-   - Add `transitions.js`, wire `gg2d3.js` stateful render path, no feature toggles yet.
-   - Why second: provides safe primitive used by legends and coord/scale updates.
-
-3. **Geom Contract Migration (targeted set)**
-   - Upgrade high-usage geoms (point, line, bar, rect, text) to keyed join paths.
-   - Why third: proves end-to-end animation architecture before broad rollout.
-
-4. **Interactive Legends Integration**
-   - Extend `legend.js` + `events.js`; link legend state to keyed mark updates.
-   - Why fourth: now identity + transition primitives exist, avoiding ad hoc toggles.
-
-5. **Advanced Scale/Coord Parity Integration**
-   - Centralize mapping in `scales.js`/`coords.js`; apply across migrated geoms.
-   - Why fifth: parity changes are easier/safer once render/update mechanics are stable.
-
-6. **Interactivity Reconciliation Pass (zoom/brush/crosstalk)**
-   - Add interrupt/persistence hooks so gestures and transitions coexist.
-   - Why last: polishing integration risk after core behavior is deterministic.
-
-### Ordering Rationale
-
-- **Identity before animation**, **animation before interaction controls**, **controls before parity edge-cases**.
-- This sequence minimizes rewrite churn: each phase builds on stable primitives from the prior phase.
+---
 
 ## Scaling Considerations
 
 | Scale | Architecture Adjustments |
 |-------|--------------------------|
-| 0–1k marks | Full SVG transitions acceptable; keep defaults simple |
-| 1k–20k marks | Disable/shorten transitions by default for heavy geoms; animate axes/legend only |
-| 20k+ marks | Keep keyed joins but switch to selective/no mark transitions, preserve interaction correctness |
+| Small maps (<100 features) | One SVG path per feature — current approach, no issue |
+| Medium maps (100-1000 features) | Path simplification in R via `sf::st_simplify()` before IR emission; still one path per feature |
+| Large maps (>1000 features) | Consider Canvas rendering via `d3.geoPath().context(canvasCtx)` instead of SVG; gg2d3 is SVG-only by design, so simplification is the lever |
+| GeoJSON payload size | Choropleth data is typically 50-500 features with complex polygon boundaries; consider `rmapshaper::ms_simplify()` or tolerance parameter in `sfc_geojson()` |
 
-### Scaling Priorities
-
-1. **First bottleneck:** transition cost on large mark counts; mitigate with per-geom animation policies.
-2. **Second bottleneck:** interaction-vs-transition conflicts; mitigate with explicit interrupt/state handoff API.
+---
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Per-Geom Ad Hoc Animation Logic
+### Anti-Pattern 1: Putting Geometry in the Row Data
 
-**What people do:** Add `.transition()` directly in each geom renderer without shared policy.
-**Why it's wrong:** Inconsistent timing, hard-to-reason interrupts, brittle behavior under zoom/brush.
-**Do this instead:** Central transition reconciler + small geom hooks.
+**What people do:** Add `"geometry"` to `keep_aes` and let `to_rows()` serialize it alongside other columns.
 
-### Anti-Pattern 2: Legend State by CSS-Only Filtering
+**Why it's wrong:** sfc columns are R list-columns containing S3 objects. `jsonlite::toJSON()` will either error, emit `{}`, or produce unusable output. The existing `to_rows()` function handles list-columns with `I(col)` passthrough (for boxplot outliers), but sfc columns are not JSON-serializable even with that workaround.
 
-**What people do:** Toggle `.hidden` classes on DOM nodes without key/index model.
-**Why it's wrong:** Breaks on redraw/resize/facets and cannot sync with crosstalk/brush.
-**Do this instead:** Keyed state model in widget instance; render from state each update.
+**Do this instead:** Extract geometries separately via `geojsonsf::sfc_geojson()` before `to_rows()`, exclude `"geometry"` from `keep_aes`, and pass geometries as a parallel `layer.geometries` array.
 
-### Anti-Pattern 3: Declaring Coord Parity Without Contract Tests
+### Anti-Pattern 2: Using a Geographic Projection in JS
 
-**What people do:** Add partial transform math in JS and call feature “supported”.
-**Why it's wrong:** Silent mismatch vs ggplot semantics, especially stat/coord ordering.
-**Do this instead:** Encode coord semantics in IR + validator + golden tests per coord/geom pair.
+**What people do:** Apply `d3.geoMercator()` or another spherical projection in JavaScript to the GeoJSON coordinates received from R.
+
+**Why it's wrong:** ggplot2's `coord_sf()` already handled projection in R. The coordinates in `b$data[[i]]$geometry` are in the user's target CRS. Applying a second projection in JS double-projects and distorts the geometry. Additionally, the visual output would no longer match ggplot2's rendered output.
+
+**Do this instead:** Use `d3.geoIdentity().reflectY(true).fitExtent(...)` to perform a pure scale+translate fit to the panel dimensions. This respects the projection ggplot2 already applied.
+
+### Anti-Pattern 3: Reusing Cartesian xScale/yScale for sf Rendering
+
+**What people do:** Pass the existing Cartesian `xScale` and `yScale` (built from `ir.scales.x` and `ir.scales.y`) to the sf renderer instead of routing through `renderSfPanel()`.
+
+**Why it's wrong:** sf plots don't have Cartesian x/y scales in the ggplot2 sense. The `ir.scales.x` / `ir.scales.y` fields are not populated by `coord_sf()` — the coordinate bounds are stored in `ir.coord.bbox`. Attempting to use non-existent Cartesian scales will cause crashes or render nothing.
+
+**Do this instead:** The sf render path must bypass Cartesian scale creation entirely. Pass `panelSize = { w, h }` in the options object instead of `xScale`/`yScale`, and build the `geoIdentity` projection inside the sf renderer.
+
+### Anti-Pattern 4: Forgetting reflectY
+
+**What people do:** Use `d3.geoIdentity().fitExtent(...)` without `.reflectY(true)`.
+
+**Why it's wrong:** Geographic coordinate systems (including EPSG:4326) have y increasing northward (up). SVG has y increasing downward. Without `reflectY(true)`, the map renders upside-down.
+
+**Do this instead:** Always chain `.reflectY(true)` before `.fitExtent()` when using `geoIdentity` for geographic data.
+
+### Anti-Pattern 5: Treating sf Zoom Like Cartesian Zoom
+
+**What people do:** Add `path.geom-sf` to the existing `updateGeoms()` zoom repositioning using scale functions.
+
+**Why it's wrong:** sf path shapes (the SVG `d` attribute) are computed from a projection object, not from x/y scale functions. Repositioning by updating `cx`/`cy` or `x`/`y` attributes does not apply to path elements whose shape is defined by `d`. The existing zoom approach translates data domain → pixel position; sf paths bake both position and shape into a single `d` string.
+
+**Do this instead:** For sf zoom, store the rendered geoPath generator and the D3 zoom transform. On zoom, apply a CSS/SVG `transform` to the sf layer group (translate+scale), or re-render the paths with an adjusted `fitExtent` that accounts for the zoom level.
+
+---
+
+## Suggested Build Order
+
+Based on component dependencies and risk:
+
+### Phase 1: R Extraction (no JS dependency)
+1. Add `GeomSf = "sf"` to geom dispatch switch in `as_d3_ir.R`
+2. Create `R/sf_utils.R` with `extract_sf_geometries()`, `normalize_to_wgs84()`, `detect_dominant_geom_type()`
+3. Integrate geometry extraction into layer construction: emit `geometries[]` and `crs` fields
+4. Add `CoordSf` detection to coord extraction block
+5. Exclude `"geometry"` from `keep_aes` in the sf layer branch
+6. Write R tests: verify IR structure, verify geometry is GeoJSON strings, verify aesthetics in data[]
+7. Add `sf` and `geojsonsf` to DESCRIPTION `Suggests`
+
+### Phase 2: Basic D3 Rendering (no interactivity)
+1. Create `modules/geoms/sf.js` with basic `renderSf()` using `geoIdentity` + `geoPath`
+2. Add `renderSfPanel()` to `gg2d3.js` main render
+3. Add coord routing: `if (ir.coord.type === 'sf') renderSfPanel(...)`
+4. Update `gg2d3.yaml` to include `sf.js` in module loading order (after geom-registry.js)
+5. Visual test: render a simple world map choropleth, verify orientation and fill colors
+
+### Phase 3: Interactivity Wiring
+1. Add `'path.geom-sf'` to INTERACTIVE_SELECTORS in `events.js`
+2. Add `'path.geom-sf'` to INTERACTIVE_SELECTORS in `brush.js`
+3. Verify tooltip shows fill value and any label aesthetic on hover
+4. Verify brush dim/highlight works on polygon regions
+
+### Phase 4: Zoom Integration
+1. Decide approach: SVG group transform vs geoPath re-render (SVG group transform is simpler)
+2. Implement sf-specific zoom behavior: apply zoom transform to sf panel group element
+3. Coordinate with existing zoom.js to not apply Cartesian axis repositioning for sf panels
+
+### Phase 5: Edge Cases and Polish
+1. MultiPolygon handling (already in GeoJSON spec; `d3.geoPath` handles it natively)
+2. GeometryCollection layers (mixed polygon + point within one sf layer)
+3. Non-polygon geometry types: LineString (use same geoPath, just no fill) and Point (render as circles using geoPath's `.pointRadius()`)
+4. Faceted sf maps (each panel has same features but different data values — filter by PANEL column)
+
+---
 
 ## Sources
 
-- D3 transition API (v7.9.0 docs): https://d3js.org/d3-transition
-- D3 data join / `selection.join` (official docs): https://d3js.org/d3-selection/joining
-- ggplot2 `get_guide_data()` reference (v4.0.2): https://ggplot2.tidyverse.org/reference/get_guide_data.html
-- ggplot2 `coord_transform()` reference (v4.0.2): https://ggplot2.tidyverse.org/reference/coord_transform.html
-- Codebase evidence (current architecture):
-  - `R/as_d3_ir.R`
-  - `R/validate_ir.R`
-  - `inst/htmlwidgets/gg2d3.js`
-  - `inst/htmlwidgets/modules/{layout.js,legend.js,scales.js,events.js,zoom.js,brush.js,crosstalk.js}`
+- [ggplot2 geom-sf.R source](https://github.com/tidyverse/ggplot2/blob/main/R/geom-sf.R) — geometry column preserved through ggplot_build, aesthetics applied per geometry type
+- [ggplot2 ggsf reference](https://ggplot2.tidyverse.org/reference/ggsf.html) — geometry aesthetic is sfc class, coord_sf controls CRS
+- [d3-geo path documentation](https://d3js.org/d3-geo/path) — d3.geoPath API, SVG path string output, geoPath.bounds for bounding box
+- [d3-geo projection documentation](https://github.com/d3/d3/blob/main/docs/d3-geo/projection.md) — geoIdentity.reflectY(true), fitExtent/fitSize API
+- [geojsonsf package](https://github.com/SymbolixAU/geojsonsf) — sfc_geojson() converts sfc column to character vector of GeoJSON strings
+- [geojsonsf vignette](https://cran.r-project.org/web/packages/geojsonsf/vignettes/geojson-sf-conversions.html) — atomise=TRUE for per-row GeoJSON
+- [d3-geo geoIdentity reflectY issue](https://github.com/d3/d3-geo/issues/68) — canonical reference for why reflectY is needed
+- [ggplot2-book maps chapter](https://ggplot2-book.org/maps.html) — coord_sf CRS behavior, default_crs parameter
 
 ---
-*Architecture research for: gg2d3 v1.1 integration architecture*
-*Researched: 2026-03-23*
+
+*Architecture research for: gg2d3 v1.7 geom_sf choropleth integration*
+*Researched: 2026-04-04*
