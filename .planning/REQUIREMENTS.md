@@ -70,30 +70,28 @@ Explicit exclusions for v1.1 — documented to prevent scope creep.
 
 ## Traceability
 
-Empty — populated when ROADMAP.md is generated.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PKG-01 | TBD | Pending |
-| PKG-02 | TBD | Pending |
-| PKG-03 | TBD | Pending |
-| COLOR-01 | TBD | Pending |
-| COLOR-02 | TBD | Pending |
-| AXIS-01 | TBD | Pending |
-| REFACTOR-01 | TBD | Pending |
-| REFACTOR-02 | TBD | Pending |
-| ROBUST-01 | TBD | Pending |
-| ROBUST-02 | TBD | Pending |
-| ROBUST-03 | TBD | Pending |
-| ROBUST-04 | TBD | Pending |
-| ROBUST-05 | TBD | Pending |
-| DOCS-01 | TBD | Pending |
+| PKG-01 | Phase 17 | Pending |
+| PKG-02 | Phase 17 | Pending |
+| PKG-03 | Phase 17 | Pending |
+| COLOR-01 | Phase 14 | Pending |
+| COLOR-02 | Phase 14 | Pending |
+| AXIS-01 | Phase 15 | Pending |
+| REFACTOR-01 | Phase 13 | Pending |
+| REFACTOR-02 | Phase 13 | Pending |
+| ROBUST-01 | Phase 16 | Pending |
+| ROBUST-02 | Phase 16 | Pending |
+| ROBUST-03 | Phase 16 | Pending |
+| ROBUST-04 | Phase 16 | Pending |
+| ROBUST-05 | Phase 16 | Pending |
+| DOCS-01 | Phase 18 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 14 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 14 ⚠️ (will be resolved by /gsd-roadmapper)
+- Mapped to phases: 14 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-02*
-*Last updated: 2026-05-02 after initial v1.1 definition*
+*Last updated: 2026-05-02 — traceability populated by /gsd-roadmapper (Phases 13-18)*
