@@ -70,75 +70,9 @@ as_d3_ir <- function(p, width = 640, height = 400,
     }
   }
 
-  # Extract a single theme element as a plain list for JSON serialization
-  extract_theme_element <- function(element_name, theme) {
-    calc <- ggplot2:::calc_element(element_name, theme)
-
-    if (is.null(calc)) {
-      return(NULL)
-    }
-
-    if (inherits(calc, "element_blank")) {
-      return(list(type = "blank"))
-    }
-
-    if (inherits(calc, "element_rect")) {
-      # Convert linewidth from mm to pixels (1mm = 96/25.4 px at 96 DPI)
-      linewidth_px <- if (!is.null(calc$linewidth)) calc$linewidth * 3.7795275591 else NULL
-
-      return(list(
-        type = "rect",
-        fill = if (is.na(calc$fill)) NULL else calc$fill,
-        colour = if (is.na(calc$colour)) NULL else calc$colour,
-        linewidth = linewidth_px,
-        linetype = calc$linetype
-      ))
-    }
-
-    if (inherits(calc, "element_line")) {
-      # Convert linewidth from mm to pixels (1mm = 96/25.4 px at 96 DPI)
-      linewidth_px <- if (!is.null(calc$linewidth)) calc$linewidth * 3.7795275591 else NULL
-
-      return(list(
-        type = "line",
-        colour = if (is.na(calc$colour)) NULL else calc$colour,
-        linewidth = linewidth_px,
-        linetype = calc$linetype,
-        lineend = calc$lineend
-      ))
-    }
-
-    if (inherits(calc, "element_text")) {
-      return(list(
-        type = "text",
-        colour = if (is.na(calc$colour)) NULL else calc$colour,
-        size = calc$size,
-        face = calc$face,
-        family = calc$family,
-        hjust = calc$hjust,
-        vjust = calc$vjust,
-        angle = calc$angle
-      ))
-    }
-
-    # Handle margin elements (plot.margin)
-    if (inherits(calc, "margin")) {
-      # Convert margin to pixels using grid::convertUnit
-      # First convert to inches, then to pixels (96 DPI web standard)
-      inches <- grid::convertUnit(calc, "inches", valueOnly = TRUE)
-      pixels <- inches * 96
-
-      return(list(
-        type = "margin",
-        top = pixels[1],
-        right = pixels[2],
-        bottom = pixels[3],
-        left = pixels[4]
-      ))
-    }
-
-    return(NULL)
-  }
+  # extract_theme_element / extract_theme_ir / calc_element_safe live in
+  # R/ir_theme.R (Phase 13 internals refactor). The orchestrator now delegates
+  # the entire theme slice via extract_theme_ir(b) below.
 
   layers <- lapply(seq_along(b$data), function(i) {
     df <- b$data[[i]]
@@ -532,43 +466,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
     )
   }
 
-  # Extract theme information
-  theme_ir <- NULL
-  if (!is.null(b$plot$theme)) {
-    theme_ir <- list(
-      panel = list(
-        background = extract_theme_element("panel.background", b$plot$theme),
-        border = extract_theme_element("panel.border", b$plot$theme)
-      ),
-      plot = list(
-        background = extract_theme_element("plot.background", b$plot$theme),
-        margin = extract_theme_element("plot.margin", b$plot$theme)
-      ),
-      grid = list(
-        major = extract_theme_element("panel.grid.major", b$plot$theme),
-        minor = extract_theme_element("panel.grid.minor", b$plot$theme)
-      ),
-      axis = list(
-        line = extract_theme_element("axis.line", b$plot$theme),
-        line.x = extract_theme_element("axis.line.x", b$plot$theme),
-        line.y = extract_theme_element("axis.line.y", b$plot$theme),
-        text = extract_theme_element("axis.text", b$plot$theme),
-        text.x = extract_theme_element("axis.text.x", b$plot$theme),
-        text.y = extract_theme_element("axis.text.y", b$plot$theme),
-        title = extract_theme_element("axis.title", b$plot$theme),
-        title.x = extract_theme_element("axis.title.x", b$plot$theme),
-        title.y = extract_theme_element("axis.title.y", b$plot$theme),
-        ticks = extract_theme_element("axis.ticks", b$plot$theme),
-        ticks.x = extract_theme_element("axis.ticks.x", b$plot$theme),
-        ticks.y = extract_theme_element("axis.ticks.y", b$plot$theme)
-      ),
-      text = list(
-        title = extract_theme_element("plot.title", b$plot$theme),
-        subtitle = extract_theme_element("plot.subtitle", b$plot$theme),
-        caption = extract_theme_element("plot.caption", b$plot$theme)
-      )
-    )
-  }
+  # Extract theme information (delegated to R/ir_theme.R::extract_theme_ir)
+  theme_ir <- extract_theme_ir(b)
 
   # Coord detection: CoordFlip, CoordFixed, or default CoordCartesian
 
@@ -615,8 +514,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
   # Extract legend position from theme for layout engine
   legend_position <- tryCatch({
-    complete_theme <- ggplot2::theme_get() + b$plot$theme
-    pos <- ggplot2:::calc_element("legend.position", complete_theme)
+    pos <- calc_element_safe("legend.position", b$plot$theme)
     if (is.character(pos)) pos else "right"
   }, error = function(e) "right")
 
@@ -816,49 +714,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
     }
   }
 
-  # Extract additional legend theme elements
-  legend_theme <- NULL
-  if (!is.null(b$plot$theme)) {
-    # Extract legend.key.size (unit to pixels conversion)
-    key_size <- tryCatch({
-      complete_theme <- ggplot2::theme_get() + b$plot$theme
-      key_size_elem <- ggplot2:::calc_element("legend.key.size", complete_theme)
-      if (!is.null(key_size_elem)) {
-        # Convert unit to pixels
-        inches <- grid::convertUnit(key_size_elem, "inches", valueOnly = TRUE)
-        inches * 96  # Convert to pixels
-      } else {
-        NULL
-      }
-    }, error = function(e) NULL)
-
-    legend_theme <- list(
-      key.size = key_size,
-      text = extract_theme_element("legend.text", b$plot$theme),
-      title = extract_theme_element("legend.title", b$plot$theme),
-      background = extract_theme_element("legend.background", b$plot$theme),
-      key = extract_theme_element("legend.key", b$plot$theme)
-    )
-  }
-
-  # Add legend theme elements to theme_ir
-  if (!is.null(theme_ir) && !is.null(legend_theme)) {
-    theme_ir$legend <- legend_theme
-  }
-
-  # Extract strip theme elements for facets
-  strip_theme <- NULL
-  if (!is.null(b$plot$theme)) {
-    strip_theme <- list(
-      text = extract_theme_element("strip.text", b$plot$theme),
-      background = extract_theme_element("strip.background", b$plot$theme)
-    )
-  }
-
-  # Add strip to theme_ir
-  if (!is.null(theme_ir) && !is.null(strip_theme)) {
-    theme_ir$strip <- strip_theme
-  }
+  # Legend + strip theme elements are now part of extract_theme_ir(b) above.
 
   # Extract facet metadata
   facets_ir <- NULL
@@ -938,8 +794,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
       # Extract panel.spacing
       panel_spacing <- tryCatch({
-        complete_theme <- ggplot2::theme_get() + b$plot$theme
-        spacing <- ggplot2:::calc_element("panel.spacing", complete_theme)
+        spacing <- calc_element_safe("panel.spacing", b$plot$theme)
         if (!is.null(spacing)) {
           inches <- grid::convertUnit(spacing, "inches", valueOnly = TRUE)
           inches * 96  # pixels
@@ -1057,8 +912,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
       # Extract panel.spacing
       panel_spacing <- tryCatch({
-        complete_theme <- ggplot2::theme_get() + b$plot$theme
-        spacing <- ggplot2:::calc_element("panel.spacing", complete_theme)
+        spacing <- calc_element_safe("panel.spacing", b$plot$theme)
         if (!is.null(spacing)) {
           inches <- grid::convertUnit(spacing, "inches", valueOnly = TRUE)
           inches * 96  # pixels
