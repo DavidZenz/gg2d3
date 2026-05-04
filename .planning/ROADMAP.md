@@ -47,7 +47,14 @@ Full details: .planning/milestones/v1.0-ROADMAP.md
   2. Each extraction helper has its own dedicated test file in `tests/testthat/` and can be exercised without running the full pipeline.
   3. All `ggplot2:::calc_element()` call sites route through a single `calc_element_safe()` helper that falls back to a public-API path on error.
   4. Existing v1.0 visual regression and unit tests continue to pass against the refactored code (no behavior change observable to consumers).
-**Plans**: TBD
+**Plans**: 7 plans
+- [ ] 13-01-foundation-PLAN.md — Wave 0 test stubs, R/zzz.R pkgenv, R/ir_utils.R utilities
+- [ ] 13-02-theme-PLAN.md — R/ir_theme.R + calc_element_safe (REFACTOR-02 chokepoint)
+- [ ] 13-03-scales-PLAN.md — R/ir_scales.R lift (map_discrete, get_scale_info, validate_log_domain, get_scale_transform)
+- [ ] 13-04-layers-PLAN.md — R/ir_layers.R lift (extract_layers_ir, to_rows dedup, keep_aes lift)
+- [ ] 13-05-legends-PLAN.md — R/ir_legends.R lift (extract_legends_ir using public get_guide_data)
+- [ ] 13-06-facets-PLAN.md — R/ir_facets.R lift (extract_facets_ir, removes <<- per Pitfall 2)
+- [ ] 13-07-orchestrator-shrink-PLAN.md — Final shrink to ≤~200 lines + visual diff checkpoint
 
 ### Phase 14: Color Fidelity
 **Goal**: ggplot2 color and fill scales (viridis, brewer, manual) render in D3 with the exact colors ggplot2 produces, and continuous color legends render as a true colorbar gradient.
@@ -123,7 +130,7 @@ Full details: .planning/milestones/v1.0-ROADMAP.md
 | 10. Interactivity Foundation | v1.0 | 3/3 | Complete | 2026-02-14 |
 | 11. Advanced Interactivity | v1.0 | 4/4 | Complete | 2026-02-16 |
 | 12. Date/Time Scales | v1.0 | 3/3 | Complete | 2026-02-16 |
-| 13. Internals Refactor | v1.1 | 0/0 | Ready to plan | - |
+| 13. Internals Refactor | v1.1 | 0/7 | Ready to execute | - |
 | 14. Color Fidelity | v1.1 | 0/0 | Not started | - |
 | 15. Secondary Axes | v1.1 | 0/0 | Not started | - |
 | 16. Robustness & Edge Cases | v1.1 | 0/0 | Not started | - |

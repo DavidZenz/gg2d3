@@ -542,22 +542,22 @@ This sketch is ~50 lines, well under the ~200 cap. `.axis_ticklabels` and `.has_
 | A4 | The outer `to_rows` (line 27) is dead code shadowed by the inner one (line 215) | Pitfall 3 | Low — `to_rows` is only called once at line 282, lexically inside the `layers <- lapply(...)` block where the inner definition shadows the outer [VERIFIED via grep in session]. |
 | A5 | `extract_theme_element`'s closure capture of `keep_aes` is the only lexical-scope hazard | Pitfall 1 | Medium — read the file but did not exhaustively trace every closure. Plan should include a "lift each helper, run tests after each lift" step to surface any others early. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Is there an automated visual-regression harness in v1.0?**
    - What we know: `test_output/` exists and is gitignored; CONTEXT D-11 calls visual diff "the safety net."
    - What's unclear: Whether there's a script that renders the corpus and a way to programmatically diff against a baseline, or whether the diff is fully manual.
-   - Recommendation: Plan should include a "Wave 0" task that documents (or builds, if missing) the corpus-rendering script. If no harness exists, the visual check is manual-eyeball — surface this risk in the plan's verification section.
+   - **RESOLVED:** Plan 07 Task 2 implements a manual visual-diff procedure on the `test_output/` corpus as the gate. Plan should include a "Wave 0" task that documents (or builds, if missing) the corpus-rendering script. If no harness exists, the visual check is manual-eyeball — surface this risk in the plan's verification section.
 
 2. **What is the minimum ggplot2 version gg2d3 needs to support?**
    - What we know: DESCRIPTION has no `Imports:` block — gg2d3 currently doesn't declare a version constraint. ggplot2 4.0.3 verified in dev environment.
    - What's unclear: Whether `ggplot2::calc_element` was exported at gg2d3 v1.0 ship time or in older ggplot2 releases users might still have.
-   - Recommendation: This phase doesn't need to answer it — the fallback chain handles old ggplot2 (private path works) and new ggplot2 (public path works). Phase 17 (CRAN packaging) can pin a minimum.
+   - **RESOLVED:** Deferred to Phase 17 (CRAN packaging). This phase doesn't need to answer it — the fallback chain handles old ggplot2 (private path works) and new ggplot2 (public path works). Phase 17 (CRAN packaging) can pin a minimum.
 
 3. **Should `calc_element_safe` warn-once state survive `devtools::load_all()` cycles?**
    - What we know: `.gg2d3_pkgenv` lives in package namespace; load_all rebuilds it.
    - What's unclear: Test interaction — if test 1 triggers fallback and warns, test 2 might silently fall back without warning.
-   - Recommendation: Provide a test-only reset hook: `.gg2d3_pkgenv$calc_element_warned <- FALSE` callable from test setup. Keep it `@keywords internal @noRd`.
+   - **RESOLVED:** Test-only reset hook `.gg2d3_reset_calc_element_warned()` implemented in `R/zzz.R` per plan 01. Provide a test-only reset hook: `.gg2d3_pkgenv$calc_element_warned <- FALSE` callable from test setup. Keep it `@keywords internal @noRd`.
 
 ## Sources
 
