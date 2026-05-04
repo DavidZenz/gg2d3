@@ -25,8 +25,10 @@ Each requirement maps to exactly one phase. v1.0 requirements live in `MILESTONE
 
 ### Internals
 
-- [ ] **REFACTOR-01**: `as_d3_ir()` is split into per-concern modules (scales, theme, facets, layers) with the top-level function under ~200 lines and each helper independently testable
-- [ ] **REFACTOR-02**: `ggplot2:::calc_element()` usage is wrapped in a helper with a public-API fallback path so a private-API change in ggplot2 does not break gg2d3
+- [x] **REFACTOR-01
+**: `as_d3_ir()` is split into per-concern modules (scales, theme, facets, layers) with the top-level function under ~200 lines and each helper independently testable
+- [x] **REFACTOR-02
+**: `ggplot2:::calc_element()` usage is wrapped in a helper with a public-API fallback path so a private-API change in ggplot2 does not break gg2d3
 
 ### Robustness
 
