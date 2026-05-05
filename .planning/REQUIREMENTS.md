@@ -80,8 +80,8 @@ Explicit exclusions for v1.1 — documented to prevent scope creep.
 | COLOR-01 | Phase 14 | Pending |
 | COLOR-02 | Phase 14 | Pending |
 | AXIS-01 | Phase 15 | Pending |
-| REFACTOR-01 | Phase 13 | Pending |
-| REFACTOR-02 | Phase 13 | Pending |
+| REFACTOR-01 | Phase 13 | Complete (2026-05-04) |
+| REFACTOR-02 | Phase 13 | Complete (2026-05-04) |
 | ROBUST-01 | Phase 16 | Pending |
 | ROBUST-02 | Phase 16 | Pending |
 | ROBUST-03 | Phase 16 | Pending |

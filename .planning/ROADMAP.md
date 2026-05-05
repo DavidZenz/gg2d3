@@ -29,7 +29,7 @@ Full details: .planning/milestones/v1.0-ROADMAP.md
 
 ### v1.1 Release Hardening (Phases 13-18)
 
-- [ ] **Phase 13: Internals Refactor** — Modularize `as_d3_ir()` and harden private-API usage so subsequent v1.1 work has clean seams.
+- [x] **Phase 13: Internals Refactor** — Modularize `as_d3_ir()` and harden private-API usage so subsequent v1.1 work has clean seams. (completed 2026-05-04)
 - [ ] **Phase 14: Color Fidelity** — ggplot2 color/fill scales (viridis, brewer, manual) render with identical hex codes; continuous color renders as a colorbar legend.
 - [ ] **Phase 15: Secondary Axes** — `sec.axis` produces a real rendered secondary axis (ticks, labels, title) on the D3 side.
 - [ ] **Phase 16: Robustness & Edge Cases** — Non-finite handling, browser/R error surfacing, rect clipping, GeomPolygon dispatch fix, coord_flip + facet_grid regression.
@@ -54,7 +54,7 @@ Full details: .planning/milestones/v1.0-ROADMAP.md
 - [ ] 13-04-layers-PLAN.md — R/ir_layers.R lift (extract_layers_ir, to_rows dedup, keep_aes lift)
 - [ ] 13-05-legends-PLAN.md — R/ir_legends.R lift (extract_legends_ir using public get_guide_data)
 - [ ] 13-06-facets-PLAN.md — R/ir_facets.R lift (extract_facets_ir, removes <<- per Pitfall 2)
-- [ ] 13-07-orchestrator-shrink-PLAN.md — Final shrink to ≤~200 lines + visual diff checkpoint
+- [x] 13-07-orchestrator-shrink-PLAN.md — Final shrink to ≤~200 lines + visual diff checkpoint
 
 ### Phase 14: Color Fidelity
 **Goal**: ggplot2 color and fill scales (viridis, brewer, manual) render in D3 with the exact colors ggplot2 produces, and continuous color legends render as a true colorbar gradient.
@@ -130,7 +130,7 @@ Full details: .planning/milestones/v1.0-ROADMAP.md
 | 10. Interactivity Foundation | v1.0 | 3/3 | Complete | 2026-02-14 |
 | 11. Advanced Interactivity | v1.0 | 4/4 | Complete | 2026-02-16 |
 | 12. Date/Time Scales | v1.0 | 3/3 | Complete | 2026-02-16 |
-| 13. Internals Refactor | v1.1 | 0/7 | Ready to execute | - |
+| 13. Internals Refactor | v1.1 | 7/7 | Complete | 2026-05-04 |
 | 14. Color Fidelity | v1.1 | 0/0 | Not started | - |
 | 15. Secondary Axes | v1.1 | 0/0 | Not started | - |
 | 16. Robustness & Edge Cases | v1.1 | 0/0 | Not started | - |
