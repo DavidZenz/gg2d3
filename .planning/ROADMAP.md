@@ -65,7 +65,14 @@ Full details: .planning/milestones/v1.0-ROADMAP.md
   2. `scale_color_brewer()` and `scale_fill_manual()` likewise round-trip to identical hex codes in the D3 output.
   3. A plot with a continuous color aesthetic renders a colorbar legend (gradient rectangle with axis ticks and labels), not a stack of discrete keys.
   4. Discrete color legends from v1.0 still render correctly (no regression).
-**Plans**: TBD
+**Plans**: 7 plans
+  - [ ] 14-01-test-scaffold-PLAN.md — Wave 0 test harness (helper-color.R + skip-pending corpus)
+  - [ ] 14-02-rgba-hex-PLAN.md — Widen isHexColor regex to accept 4/8-digit RGBA (Pitfall 1)
+  - [ ] 14-03-binned-detection-PLAN.md — Route ScaleBinned to colorbar; emit is_steps flag (Pitfall 2)
+  - [ ] 14-04-colorscale-cleanup-PLAN.md — Delete dead ir.scales.color + colorScale path (Pitfalls 3+7)
+  - [ ] 14-05-colorbar-ir-PLAN.md — Enrich colorbar IR with breaks/labels/na.value/domain/bin_colors (Pitfall 4)
+  - [ ] 14-06-colorbar-render-PLAN.md — Rewrite renderColorbar for breaks-driven ticks + banded variant (Pitfalls 5+8)
+  - [ ] 14-07-snapshots-PLAN.md — 7 base + 4 edge-case snapshots (D-11..D-14)
 
 ### Phase 15: Secondary Axes
 **Goal**: `sec.axis` on x or y produces a fully rendered secondary axis in D3 — ticks, tick labels, and axis title — using the user-supplied transformation, not just reserved layout space.
