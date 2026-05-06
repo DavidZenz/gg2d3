@@ -183,10 +183,11 @@
   /**
    * Check if string is a valid hex color.
    * @param {string} s - String to check
-   * @returns {boolean} True if valid hex color (#RGB or #RRGGBB)
+   * @returns {boolean} True if valid hex color (#RGB, #RGBA, #RRGGBB, or #RRGGBBAA)
    */
   function isHexColor(s) {
-    return typeof s === "string" && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(s);
+    // Accept #RGB, #RGBA (CSS Color 4 short), #RRGGBB, #RRGGBBAA (full RGBA).
+    return typeof s === "string" && /^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(s);
   }
 
   /**

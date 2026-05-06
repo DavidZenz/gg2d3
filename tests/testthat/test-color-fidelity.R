@@ -128,7 +128,9 @@ test_that("isHexColor accepts 4 and 8 digit hex (constants.js regex)", {
   src <- readLines("../../inst/htmlwidgets/modules/constants.js", warn = FALSE)
   joined <- paste(src, collapse = "\n")
   # Find the isHexColor function body.
-  fn_match <- regmatches(joined, regexpr("function isHexColor[\\s\\S]*?\\}", joined, perl = TRUE))
+  # Match through the line-leading closing brace (function body ends with a `}` at line start,
+  # not the inner `{3,4}` quantifier braces). Lazy match up to first newline-anchored `}`.
+  fn_match <- regmatches(joined, regexpr("function isHexColor[\\s\\S]*?\\n  \\}", joined, perl = TRUE))
   expect_length(fn_match, 1L)
   # Regex must accept 8-digit hex (full RGBA: #RRGGBBAA) and 4-digit (short RGBA: #RGBA).
   expect_match(fn_match, "\\[0-9a-f\\]\\{8\\}|\\[0-9a-f\\]\\{6,8\\}|\\[0-9a-f\\]\\{3,8\\}")
