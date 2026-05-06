@@ -125,5 +125,12 @@ test_that("D-14 manual out-of-range factor maps to na.value", {
 # ---------------------------------------------------------------------------
 
 test_that("isHexColor accepts 4 and 8 digit hex (constants.js regex)", {
-  skip("pending plan 14-02")
+  src <- readLines("../../inst/htmlwidgets/modules/constants.js", warn = FALSE)
+  joined <- paste(src, collapse = "\n")
+  # Find the isHexColor function body.
+  fn_match <- regmatches(joined, regexpr("function isHexColor[\\s\\S]*?\\}", joined, perl = TRUE))
+  expect_length(fn_match, 1L)
+  # Regex must accept 8-digit hex (full RGBA: #RRGGBBAA) and 4-digit (short RGBA: #RGBA).
+  expect_match(fn_match, "\\[0-9a-f\\]\\{8\\}|\\[0-9a-f\\]\\{6,8\\}|\\[0-9a-f\\]\\{3,8\\}")
+  expect_match(fn_match, "\\[0-9a-f\\]\\{4\\}|\\[0-9a-f\\]\\{3,4\\}|\\[0-9a-f\\]\\{3,8\\}")
 })
