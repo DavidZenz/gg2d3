@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Release Hardening
-status: phase-complete
-stopped_at: Completed 13-07-orchestrator-shrink-PLAN.md (Phase 13 complete)
-last_updated: "2026-05-04T11:15:00.000Z"
-last_activity: 2026-05-04
+status: in-progress
+stopped_at: Completed 14-01-test-scaffold-PLAN.md (Phase 14 wave 0 done)
+last_updated: "2026-05-06T19:50:30.030Z"
+last_activity: 2026-05-06
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+  total_plans: 14
+  completed_plans: 8
+  percent: 57
 ---
 
 # Project State
@@ -22,23 +22,23 @@ See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 
-**Current focus:** Phase 13 complete — ready for `/gsd-verify-work`, then Phase 14 (Color Fidelity)
+**Current focus:** Phase 14 (Color Fidelity) — wave 0 scaffold landed; wave 1 (14-02/03/04) ready to execute
 
 ## Current Position
 
 Milestone: v1.1 Release Hardening
-Phase: 13 (internals-refactor) — COMPLETE
-Plan: 7 of 7 (all plans complete)
-Status: Phase complete; awaiting verification
-Last activity: 2026-05-04
+Phase: 14 (color-fidelity) — in progress
+Plan: 1 of 7 complete (wave 0 scaffold)
+Status: Wave 0 complete — wave 1 ready
+Last activity: 2026-05-06
 
-Progress: [██████████] 100%
+Progress: [██████░░░░] 57%
 
 ## Session Continuity
 
-Last session: 2026-05-04T11:15:00.000Z
-Stopped at: Completed 13-07-orchestrator-shrink-PLAN.md (Phase 13 complete)
-Next action: `/gsd-verify-work` to validate Phase 13, then `/gsd-plan-phase 14` (Color Fidelity)
+Last session: 2026-05-06T19:49:22Z
+Stopped at: Completed 14-01-test-scaffold-PLAN.md (Phase 14 wave 0 done)
+Next action: Execute wave 1 — plans 14-02, 14-03, 14-04 in parallel
 
 ## Accumulated Context
 
@@ -49,6 +49,7 @@ Next action: `/gsd-verify-work` to validate Phase 13, then `/gsd-plan-phase 14` 
 - Known tech debt from v1.0 audit targeted for v1.1
 - 17+ commits ahead of origin/master (unpushed v1.0 work)
 - Phase 13 (Internals Refactor) complete 2026-05-04: R/as_d3_ir.R 1,151 -> 120 lines (118-line function body); 5 ir_*.R extractors; calc_element chokepointed in R/ir_theme.R; 551 PASS / 8 baseline FAIL; NAMESPACE unchanged; visual diff approved on 8-plot corpus
+- Phase 14 plan 01 (test scaffold) complete 2026-05-06: tests/testthat/helper-color.R (8 helpers) + tests/testthat/test-color-fidelity.R (20 skip-pending stubs) landed; suite baseline preserved (551 PASS / 8 FAIL / 21 SKIP)
 
 ---
 *State initialized: 2026-02-07*
