@@ -16,7 +16,8 @@ Each requirement maps to exactly one phase. v1.0 requirements live in `MILESTONE
 
 ### Color
 
-- [ ] **COLOR-01**: ggplot2 viridis, brewer, and manual color/fill scales render in D3 with the same colors ggplot2 produces (verified by visual diff against `ggplot_build()` output)
+- [x] **COLOR-01
+**: ggplot2 viridis, brewer, and manual color/fill scales render in D3 with the same colors ggplot2 produces (verified by visual diff against `ggplot_build()` output)
 - [ ] **COLOR-02**: Continuous color scales render as a colorbar legend (gradient with axis ticks), not as a discrete key fallback
 
 ### Axes
