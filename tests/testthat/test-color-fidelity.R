@@ -19,42 +19,205 @@
 
 test_that("viridis_c per-row mark hex equals ggplot_build", {
   library(ggplot2)
-  skip("pending plan 14-07")
+  set.seed(14)
+  df <- data.frame(x = 1:10, y = 1:10, v = seq(1, 100, length.out = 10))
+  p <- ggplot(df, aes(x, y, colour = v)) + geom_point() + scale_color_viridis_c()
+
+  build_col <- build_colours(p)
+  ir_col    <- ir_layer_colours(p)
+  expect_identical(ir_col, build_col)
+
+  g <- guide_by_aes(p, "colour")
+  expect_equal(g$type, "colorbar")
+  expect_gte(length(g$colors), 30L)
+
+  scale_obj <- scale_by_aes(p, "colour")
+  ref_legend <- scale_obj$map(scale_obj$get_breaks(scale_obj$get_limits()))
+  snap <- list(
+    per_row     = ir_col,
+    legend_hex  = unname(ref_legend),
+    breaks      = unname(g$breaks),
+    labels      = g$labels,
+    is_steps    = g$is_steps
+  )
+  expect_snapshot_value(snap, style = "json2")
 })
 
 test_that("viridis_d per-row mark hex equals ggplot_build (8-hex RGBA)", {
   library(ggplot2)
-  skip("pending plan 14-07")
+  set.seed(14)
+  df <- data.frame(x = 1:5, y = 1:5, g = factor(letters[1:5]))
+  p <- ggplot(df, aes(x, y, colour = g)) + geom_point() + scale_color_viridis_d()
+
+  build_col <- build_colours(p)
+  ir_col    <- ir_layer_colours(p)
+  expect_identical(ir_col, build_col)
+  expect_true(all(grepl("^#[0-9A-Fa-f]{8}$", build_col)))
+
+  g <- guide_by_aes(p, "colour")
+  expect_equal(g$type, "legend")
+
+  scale_obj <- scale_by_aes(p, "colour")
+  ref_legend <- scale_obj$map(scale_obj$get_breaks(scale_obj$get_limits()))
+  snap <- list(
+    per_row    = ir_col,
+    legend_hex = unname(ref_legend),
+    is_steps   = g$is_steps
+  )
+  expect_snapshot_value(snap, style = "json2")
 })
 
 test_that("brewer (discrete fill) per-row hex parity", {
   library(ggplot2)
-  skip("pending plan 14-07")
+  set.seed(14)
+  df <- data.frame(x = 1:9, y = 1:9, g = factor(rep(c("a","b","c"), each = 3)))
+  p <- ggplot(df, aes(x, y, fill = g)) + geom_point(shape = 21, size = 4) +
+    scale_fill_brewer(palette = "Set1")
+
+  build_fill <- build_fills(p)
+  ir_fill    <- ir_layer_fills(p)
+  expect_identical(ir_fill, build_fill)
+
+  g <- guide_by_aes(p, "fill")
+  expect_false(is.null(g))
+  expect_equal(g$type, "legend")
+
+  scale_obj <- scale_by_aes(p, "fill")
+  ref_legend <- scale_obj$map(scale_obj$get_breaks(scale_obj$get_limits()))
+  snap <- list(
+    per_row    = ir_fill,
+    legend_hex = unname(ref_legend),
+    is_steps   = g$is_steps
+  )
+  expect_snapshot_value(snap, style = "json2")
 })
 
 test_that("distiller per-row hex parity", {
   library(ggplot2)
-  skip("pending plan 14-07")
+  set.seed(14)
+  df <- data.frame(x = 1:10, y = 1:10, v = seq(1, 100, length.out = 10))
+  p <- ggplot(df, aes(x, y, colour = v)) + geom_point() +
+    scale_color_distiller(palette = "Spectral")
+
+  build_col <- build_colours(p)
+  ir_col    <- ir_layer_colours(p)
+  expect_identical(ir_col, build_col)
+
+  g <- guide_by_aes(p, "colour")
+  expect_equal(g$type, "colorbar")
+  expect_gte(length(g$colors), 30L)
+
+  scale_obj <- scale_by_aes(p, "colour")
+  ref_legend <- scale_obj$map(scale_obj$get_breaks(scale_obj$get_limits()))
+  snap <- list(
+    per_row    = ir_col,
+    legend_hex = unname(ref_legend),
+    breaks     = unname(g$breaks),
+    labels     = g$labels,
+    is_steps   = g$is_steps
+  )
+  expect_snapshot_value(snap, style = "json2")
 })
 
 test_that("scale_color_manual (named) per-row hex parity", {
   library(ggplot2)
-  skip("pending plan 14-07")
+  set.seed(14)
+  df <- data.frame(x = 1:9, y = 1:9, g = factor(rep(c("a","b","c"), each = 3)))
+  p <- ggplot(df, aes(x, y, colour = g)) + geom_point() +
+    scale_color_manual(values = c(a = "#FF0000", b = "#00FF00", c = "#0000FF"))
+
+  build_col <- build_colours(p)
+  ir_col    <- ir_layer_colours(p)
+  expect_identical(ir_col, build_col)
+
+  g <- guide_by_aes(p, "colour")
+  expect_equal(g$type, "legend")
+
+  scale_obj <- scale_by_aes(p, "colour")
+  ref_legend <- scale_obj$map(scale_obj$get_breaks(scale_obj$get_limits()))
+  snap <- list(
+    per_row    = ir_col,
+    legend_hex = unname(ref_legend),
+    is_steps   = g$is_steps
+  )
+  expect_snapshot_value(snap, style = "json2")
 })
 
 test_that("scale_color_manual (unnamed) per-row hex parity", {
   library(ggplot2)
-  skip("pending plan 14-07")
+  set.seed(14)
+  df <- data.frame(x = 1:9, y = 1:9, g = factor(rep(c("a","b","c"), each = 3)))
+  p <- ggplot(df, aes(x, y, colour = g)) + geom_point() +
+    scale_color_manual(values = c("#FF0000", "#00FF00", "#0000FF"))
+
+  build_col <- build_colours(p)
+  ir_col    <- ir_layer_colours(p)
+  expect_identical(ir_col, build_col)
+
+  g <- guide_by_aes(p, "colour")
+  expect_equal(g$type, "legend")
+
+  scale_obj <- scale_by_aes(p, "colour")
+  ref_legend <- scale_obj$map(scale_obj$get_breaks(scale_obj$get_limits()))
+  snap <- list(
+    per_row    = ir_col,
+    legend_hex = unname(ref_legend),
+    is_steps   = g$is_steps
+  )
+  expect_snapshot_value(snap, style = "json2")
 })
 
 test_that("scale_fill_manual per-row hex parity", {
   library(ggplot2)
-  skip("pending plan 14-07")
+  set.seed(14)
+  df <- data.frame(x = 1:9, y = 1:9, g = factor(rep(c("a","b","c"), each = 3)))
+  p <- ggplot(df, aes(x, y, fill = g)) + geom_point(shape = 21, size = 4) +
+    scale_fill_manual(values = c(a = "#1f77b4", b = "#ff7f0e", c = "#2ca02c"))
+
+  build_fill <- build_fills(p)
+  ir_fill    <- ir_layer_fills(p)
+  expect_identical(ir_fill, build_fill)
+
+  g <- guide_by_aes(p, "fill")
+  expect_false(is.null(g))
+  expect_equal(g$type, "legend")
+
+  scale_obj <- scale_by_aes(p, "fill")
+  ref_legend <- scale_obj$map(scale_obj$get_breaks(scale_obj$get_limits()))
+  snap <- list(
+    per_row    = ir_fill,
+    legend_hex = unname(ref_legend),
+    is_steps   = g$is_steps
+  )
+  expect_snapshot_value(snap, style = "json2")
 })
 
 test_that("scale_color_steps per-row hex parity", {
   library(ggplot2)
-  skip("pending plan 14-07")
+  set.seed(14)
+  df <- data.frame(x = 1:10, y = 1:10, v = seq(1, 100, length.out = 10))
+  p <- ggplot(df, aes(x, y, colour = v)) + geom_point() + scale_color_steps()
+
+  build_col <- build_colours(p)
+  ir_col    <- ir_layer_colours(p)
+  expect_identical(ir_col, build_col)
+
+  g <- guide_by_aes(p, "colour")
+  expect_equal(g$type, "colorbar")
+  expect_true(isTRUE(g$is_steps))
+  expect_gte(length(g$bin_colors %||% character(0)), 1L)
+
+  scale_obj <- scale_by_aes(p, "colour")
+  ref_legend <- scale_obj$map(scale_obj$get_breaks(scale_obj$get_limits()))
+  snap <- list(
+    per_row     = ir_col,
+    legend_hex  = unname(ref_legend),
+    breaks      = unname(g$breaks),
+    labels      = g$labels,
+    is_steps    = g$is_steps,
+    bin_colors  = g$bin_colors
+  )
+  expect_snapshot_value(snap, style = "json2")
 })
 
 # ---------------------------------------------------------------------------
