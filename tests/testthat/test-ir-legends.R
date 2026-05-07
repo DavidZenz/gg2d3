@@ -63,3 +63,60 @@ test_that("viridis_c carries is_steps FALSE (smooth, not binned)", {
   expect_equal(c_guide$type, "colorbar")
   expect_false(isTRUE(c_guide$is_steps))
 })
+
+test_that("colorbar guide carries breaks/labels/na.value/domain/is_continuous", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg, colour = hp)) + geom_point() + scale_color_viridis_c()
+  b <- ggplot_build(p)
+  L <- extract_legends_ir(b, p)
+  g <- Filter(function(x) identical(x$aesthetic, "colour"), L$guides)[[1]]
+  expect_equal(g$type, "colorbar")
+  expect_true(is.numeric(g$breaks))
+  expect_true(is.character(g$labels))
+  expect_equal(length(g$breaks), length(g$labels))
+  expect_true(is.character(g$na.value))
+  expect_true(is.numeric(g$domain))
+  expect_equal(length(g$domain), 2L)
+  expect_true(isTRUE(g$is_continuous))
+})
+
+test_that("colorbar orientation flips per legend.position theme (D-10)", {
+  library(ggplot2)
+  base <- ggplot(mtcars, aes(wt, mpg, colour = hp)) + geom_point() + scale_color_viridis_c()
+
+  # Default theme — vertical.
+  p_default <- base
+  g_def <- Filter(function(x) identical(x$aesthetic, "colour"),
+                  extract_legends_ir(ggplot_build(p_default), p_default)$guides)[[1]]
+  expect_equal(g_def$orientation, "vertical")
+
+  # legend.position = "bottom" — horizontal.
+  p_bot <- base + theme(legend.position = "bottom")
+  g_bot <- Filter(function(x) identical(x$aesthetic, "colour"),
+                  extract_legends_ir(ggplot_build(p_bot), p_bot)$guides)[[1]]
+  expect_equal(g_bot$orientation, "horizontal")
+  expect_equal(g_bot$legend_position, "bottom")
+
+  # legend.position = "top" — horizontal.
+  p_top <- base + theme(legend.position = "top")
+  g_top <- Filter(function(x) identical(x$aesthetic, "colour"),
+                  extract_legends_ir(ggplot_build(p_top), p_top)$guides)[[1]]
+  expect_equal(g_top$orientation, "horizontal")
+
+  # legend.position = "right" — vertical (default-ish).
+  p_right <- base + theme(legend.position = "right")
+  g_right <- Filter(function(x) identical(x$aesthetic, "colour"),
+                    extract_legends_ir(ggplot_build(p_right), p_right)$guides)[[1]]
+  expect_equal(g_right$orientation, "vertical")
+})
+
+test_that("steps colorbar guide carries bin_colors when is_steps TRUE", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg, colour = hp)) + geom_point() + scale_color_steps()
+  b <- ggplot_build(p)
+  L <- extract_legends_ir(b, p)
+  g <- Filter(function(x) identical(x$aesthetic, "colour"), L$guides)[[1]]
+  expect_true(isTRUE(g$is_steps))
+  expect_false(is.null(g$bin_colors))
+  expect_true(length(g$bin_colors) >= 1L)
+})

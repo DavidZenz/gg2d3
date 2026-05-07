@@ -92,12 +92,26 @@ test_that("scale_color_steps emits guide.type colorbar with is_steps TRUE", {
 
 test_that("colorbar IR carries breaks labels na.value domain is_continuous", {
   library(ggplot2)
-  skip("pending plan 14-05")
+  p <- ggplot(mtcars, aes(wt, mpg, colour = hp)) + geom_point() + scale_color_viridis_c()
+  scale_obj <- scale_by_aes(p, "colour")
+  ref_breaks <- scale_reference_breaks(scale_obj)
+  ref_labels <- scale_reference_labels(scale_obj, ref_breaks)
+  g <- guide_by_aes(p, "colour")
+  expect_equal(g$breaks, unname(ref_breaks))
+  expect_equal(g$labels, as.character(ref_labels))
+  expect_equal(g$na.value, scale_obj$na.value %||% "grey50")
+  expect_equal(g$domain, unname(scale_obj$get_limits()))
+  expect_true(isTRUE(g$is_continuous))
 })
 
 test_that("colorbar IR orientation defaults vertical and flips horizontal for legend.position bottom", {
   library(ggplot2)
-  skip("pending plan 14-05")
+  p_v <- ggplot(mtcars, aes(wt, mpg, colour = hp)) + geom_point() + scale_color_viridis_c()
+  p_h <- p_v + theme(legend.position = "bottom")
+  g_v <- guide_by_aes(p_v, "colour")
+  g_h <- guide_by_aes(p_h, "colour")
+  expect_equal(g_v$orientation, "vertical")
+  expect_equal(g_h$orientation, "horizontal")
 })
 
 test_that("renderColorbar tick logic uses breaks (not first/last keys)", {
