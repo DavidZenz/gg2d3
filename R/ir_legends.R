@@ -102,19 +102,65 @@ extract_legends_ir <- function(b, p) {
         keys_list[[i]] <- key
       }
 
+      # Colorbar enrichment — fields needed by renderColorbar (plan 14-06):
+      # breaks/labels (D-08), na.value (D-11), domain (tick positions), is_continuous,
+      # bin_colors (D-06 banded gradient), orientation (D-10).
       colors_array <- NULL
+      breaks <- NULL
+      labels <- NULL
+      na_value <- NULL
+      domain <- NULL
+      bin_colors <- NULL
+      orientation <- NULL
+      legend_position_g <- NULL
+
       if (guide_type == "colorbar") {
         scale_domain <- tryCatch(
           scale_obj$get_limits(),
           error = function(e) c(0, 1)
         )
+        domain <- unname(scale_domain)
 
+        # Smooth gradient sampling — Pitfall 4 keeps the existing 30-stop sample.
         color_values <- seq(scale_domain[1], scale_domain[2], length.out = 30)
-
         colors_array <- tryCatch(
           scale_obj$map(color_values),
           error = function(e) NULL
         )
+
+        breaks <- tryCatch(
+          unname(scale_obj$get_breaks(scale_domain)),
+          error = function(e) NULL
+        )
+        labels <- tryCatch(
+          as.character(scale_obj$get_labels(breaks)),
+          error = function(e) NULL
+        )
+        na_value <- tryCatch(
+          as.character(scale_obj$na.value %||% "grey50"),
+          error = function(e) "grey50"
+        )
+
+        # For banded (ScaleBinned) colorbars: emit one color per bin so the JS
+        # renderer can build a 2-stop-per-bin gradient (D-06).
+        if (isTRUE(is_steps) && !is.null(breaks) && length(breaks) >= 2L) {
+          midpoints <- (head(breaks, -1L) + tail(breaks, -1L)) / 2
+          bin_colors <- tryCatch(
+            scale_obj$map(midpoints),
+            error = function(e) NULL
+          )
+        }
+
+        # Orientation per D-10: legend.position drives layout. Vertical default;
+        # horizontal when position is "top" or "bottom". Plot-level theme overrides
+        # global theme; both fall back to "right" -> vertical.
+        pos_raw <- tryCatch(b$plot$theme$legend.position, error = function(e) NULL)
+        if (is.null(pos_raw)) {
+          pos_raw <- tryCatch(ggplot2::theme_get()$legend.position, error = function(e) NULL)
+        }
+        if (is.null(pos_raw)) pos_raw <- "right"
+        legend_position_g <- if (is.character(pos_raw)) pos_raw[[1]] else "right"
+        orientation <- if (legend_position_g %in% c("top", "bottom")) "horizontal" else "vertical"
       }
 
       guide_spec <- list(
@@ -124,7 +170,15 @@ extract_legends_ir <- function(b, p) {
         title = as.character(title),
         keys = keys_list,
         colors = colors_array,
-        is_steps = isTRUE(is_steps)
+        is_steps = isTRUE(is_steps),
+        is_continuous = isTRUE(is_continuous),
+        breaks = breaks,
+        labels = labels,
+        na.value = na_value,
+        domain = domain,
+        bin_colors = bin_colors,
+        orientation = orientation,
+        legend_position = legend_position_g
       )
 
       guides_ir[[length(guides_ir) + 1]] <- guide_spec
