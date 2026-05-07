@@ -115,13 +115,28 @@ test_that("colorbar IR orientation defaults vertical and flips horizontal for le
 })
 
 test_that("renderColorbar tick logic uses breaks (not first/last keys)", {
-  library(ggplot2)
-  skip("pending plan 14-06")
+  src <- paste(readLines("../../inst/htmlwidgets/modules/legend.js", warn = FALSE), collapse = "\n")
+  fn <- regmatches(src, regexpr("function renderColorbar[\\s\\S]*?\\n  \\}\\n", src, perl = TRUE))
+  expect_length(fn, 1L)
+  # Must consume IR fields rather than reinventing them.
+  expect_match(fn, "guide\\.breaks")
+  expect_match(fn, "guide\\.labels")
+  expect_match(fn, "guide\\.domain")
+  expect_match(fn, "guide\\.is_steps|guide\\.bin_colors")
+  # The endKeys hardcode must be gone.
+  expect_false(grepl("guide\\.keys\\[guide\\.keys\\.length - 1\\]", fn))
 })
 
 test_that("renderColorbar branches on guide.orientation for horizontal layout", {
-  library(ggplot2)
-  skip("pending plan 14-06")
+  src <- paste(readLines("../../inst/htmlwidgets/modules/legend.js", warn = FALSE), collapse = "\n")
+  fn <- regmatches(src, regexpr("function renderColorbar[\\s\\S]*?\\n  \\}\\n", src, perl = TRUE))
+  expect_length(fn, 1L)
+  # Must consult guide.orientation.
+  expect_match(fn, "guide\\.orientation")
+  # Must compare against the literal "horizontal" — no other source of "horizontal" expected in renderColorbar.
+  expect_match(fn, "\"horizontal\"")
+  # Horizontal gradient must set x2 to "100%" (smooth) — present somewhere in the function.
+  expect_match(fn, "x2\"?,?\\s*[\"']100%[\"']")
 })
 
 # ---------------------------------------------------------------------------
