@@ -36,7 +36,6 @@
    * @param {Function} xScale - D3 x scale
    * @param {Function} yScale - D3 y scale
    * @param {Object} options - Rendering options
-   * @param {Function} options.colorScale - D3 color scale (if defined)
    * @returns {number} Number of marks drawn (for debugging)
    *
    * @example
@@ -115,7 +114,6 @@
    *
    * @param {Object} layer - Layer object from IR
    * @param {Object} options - Rendering options
-   * @param {Function} options.colorScale - D3 color scale (if defined)
    * @returns {Object} Accessor functions {strokeColor, fillColor, opacity}
    *
    * @example
@@ -127,7 +125,6 @@
   function makeColorAccessors(layer, options) {
     const aes = layer.aes || {};
     const params = layer.params || {};
-    const colorScale = options.colorScale || (() => null);
 
     // Get helper functions
     const val = window.gg2d3.helpers.val;
@@ -140,6 +137,10 @@
     /**
      * Get stroke/border color for a data point.
      * Priority: aes.color (mapped) > params.colour (static) > 'currentColor'
+     *
+     * ggplot_build() resolves colour to hex strings before IR construction
+     * (Pitfall 6). The fast path is isValidColor → convertColor. Any
+     * unrecognized value falls through to the static param.
      */
     const strokeColor = d => {
       if (aes.color) {
@@ -149,9 +150,8 @@
         // Try R color conversion (e.g., "grey50" -> "#7F7F7F")
         const converted = convertColor(v);
         if (converted !== v) return converted;
-        // Otherwise map through color scale
-        const mapped = colorScale(v);
-        return mapped || convertColor(params.colour) || "currentColor";
+        // Fall through to static param
+        return convertColor(params.colour) || "currentColor";
       }
       return convertColor(params.colour) || "currentColor";
     };
@@ -168,9 +168,8 @@
         // Try R color conversion (e.g., "grey70" -> "#B3B3B3")
         const converted = convertColor(v);
         if (converted !== v) return converted;
-        // Otherwise map through color scale
-        const mapped = colorScale(v);
-        return mapped || convertColor(params.fill) || "grey35";
+        // Fall through to static param
+        return convertColor(params.fill) || "grey35";
       }
       return convertColor(params.fill) || "grey35";
     };

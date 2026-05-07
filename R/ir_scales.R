@@ -292,14 +292,5 @@ extract_scales_ir <- function(b, pp_x, pp_y, is_flip = FALSE) {
     ))
   )
 
-  # Color scale — lifted from the orchestrator's `allc` + `dom(allc)` block.
-  allc <- unlist(lapply(b$data, function(df) if ("colour" %in% names(df)) df$colour))
-  if (length(allc)) {
-    scales$color <- list(
-      type = if (is.numeric(allc)) "continuous" else "categorical",
-      domain = unname(dom(allc))
-    )
-  }
-
   scales
 }

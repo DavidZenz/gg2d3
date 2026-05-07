@@ -75,14 +75,6 @@ HTMLWidgets.widget({
       // Clipped group for data
       const gClipped = g.append("g").attr("clip-path", "url(#" + clipId + ")");
 
-      // Color scale (same for all panels)
-      const cdesc = ir.scales && ir.scales.color;
-      const colorScale = cdesc
-        ? (cdesc.type === "continuous"
-            ? d3.scaleSequential(d3.interpolateTurbo).domain(d3.extent(cdesc.domain || [0, 1]))
-            : d3.scaleOrdinal(d3.schemeTableau10).domain(cdesc.domain || []))
-        : function() { return null; };
-
       // Render layers - filter by PANEL
       let drawn = 0;
       (ir.layers || []).forEach(function(layer) {
@@ -98,7 +90,7 @@ HTMLWidgets.widget({
           gClipped,
           xScale,
           yScale,
-          { colorScale: colorScale, plotWidth: w, plotHeight: h, flip: flip }
+          { plotWidth: w, plotHeight: h, flip: flip }
         );
         drawn += count;
       });
