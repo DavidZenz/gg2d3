@@ -30,7 +30,7 @@ Full details: .planning/milestones/v1.0-ROADMAP.md
 ### v1.1 Release Hardening (Phases 13-18)
 
 - [x] **Phase 13: Internals Refactor** — Modularize `as_d3_ir()` and harden private-API usage so subsequent v1.1 work has clean seams. (completed 2026-05-04)
-- [ ] **Phase 14: Color Fidelity** — ggplot2 color/fill scales (viridis, brewer, manual) render with identical hex codes; continuous color renders as a colorbar legend.
+- [x] **Phase 14: Color Fidelity** — ggplot2 color/fill scales (viridis, brewer, manual) render with identical hex codes; continuous color renders as a colorbar legend. (completed 2026-05-07)
 - [ ] **Phase 15: Secondary Axes** — `sec.axis` produces a real rendered secondary axis (ticks, labels, title) on the D3 side.
 - [ ] **Phase 16: Robustness & Edge Cases** — Non-finite handling, browser/R error surfacing, rect clipping, GeomPolygon dispatch fix, coord_flip + facet_grid regression.
 - [ ] **Phase 17: CRAN Packaging** — DESCRIPTION imports, full metadata, `R CMD check --as-cran` clean.
@@ -71,8 +71,8 @@ Full details: .planning/milestones/v1.0-ROADMAP.md
   - [ ] 14-03-binned-detection-PLAN.md — Route ScaleBinned to colorbar; emit is_steps flag (Pitfall 2)
   - [ ] 14-04-colorscale-cleanup-PLAN.md — Delete dead ir.scales.color + colorScale path (Pitfalls 3+7)
   - [ ] 14-05-colorbar-ir-PLAN.md — Enrich colorbar IR with breaks/labels/na.value/domain/bin_colors (Pitfall 4)
-  - [ ] 14-06-colorbar-render-PLAN.md — Rewrite renderColorbar for breaks-driven ticks + banded variant (Pitfalls 5+8)
-  - [ ] 14-07-snapshots-PLAN.md — 7 base + 4 edge-case snapshots (D-11..D-14)
+  - [x] 14-06-colorbar-render-PLAN.md — Rewrite renderColorbar for breaks-driven ticks + banded variant (Pitfalls 5+8)
+  - [x] 14-07-snapshots-PLAN.md — 8 base + 4 edge-case snapshots (D-11..D-14) + horizontal colorbar (D-10) visual verification
 
 ### Phase 15: Secondary Axes
 **Goal**: `sec.axis` on x or y produces a fully rendered secondary axis in D3 — ticks, tick labels, and axis title — using the user-supplied transformation, not just reserved layout space.
@@ -138,7 +138,7 @@ Full details: .planning/milestones/v1.0-ROADMAP.md
 | 11. Advanced Interactivity | v1.0 | 4/4 | Complete | 2026-02-16 |
 | 12. Date/Time Scales | v1.0 | 3/3 | Complete | 2026-02-16 |
 | 13. Internals Refactor | v1.1 | 7/7 | Complete | 2026-05-04 |
-| 14. Color Fidelity | v1.1 | 0/0 | Not started | - |
+| 14. Color Fidelity | v1.1 | 7/7 | Complete | 2026-05-07 |
 | 15. Secondary Axes | v1.1 | 0/0 | Not started | - |
 | 16. Robustness & Edge Cases | v1.1 | 0/0 | Not started | - |
 | 17. CRAN Packaging | v1.1 | 0/0 | Not started | - |
