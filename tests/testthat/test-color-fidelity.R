@@ -308,22 +308,55 @@ test_that("renderColorbar branches on guide.orientation for horizontal layout", 
 
 test_that("D-11 NA colour row renders as #7F7F7F (grey50)", {
   library(ggplot2)
-  skip("pending plan 14-07")
+  df <- data.frame(x = 1:5, y = 1:5, v = c(1, 2, NA, 4, 5))
+  p <- ggplot(df, aes(x, y, colour = v)) + geom_point() + scale_color_viridis_c()
+  build_col <- build_colours(p)
+  ir_col    <- ir_layer_colours(p)
+  expect_identical(ir_col, build_col)
+  expect_true("grey50" %in% ir_col || any(grepl("^#7F7F7F$", ir_col, ignore.case = TRUE)))
+  expect_snapshot_value(list(per_row = ir_col), style = "json2")
 })
 
 test_that("D-12 dual color+fill produces 2 guides without merge", {
   library(ggplot2)
-  skip("pending plan 14-07")
+  df <- data.frame(x = 1:9, y = 1:9, c = factor(rep(c("a","b","c"), each = 3)), f = 1:9)
+  p <- ggplot(df, aes(x, y, colour = c, fill = f)) + geom_point(shape = 21) +
+    scale_color_brewer(palette = "Set1") + scale_fill_viridis_c()
+  ir <- as_d3_ir(p)
+  aes_seen <- vapply(ir$guides, function(g) g$aesthetic %||% NA_character_, character(1))
+  expect_true("colour" %in% aes_seen)
+  expect_true("fill"   %in% aes_seen)
+  expect_gte(sum(aes_seen %in% c("colour","fill")), 2L)
+  expect_snapshot_value(list(
+    per_row_colour = ir_layer_colours(p),
+    per_row_fill   = ir_layer_fills(p),
+    aes_seen       = aes_seen
+  ), style = "json2")
 })
 
 test_that("D-13 RGBA hex round-trips identically", {
   library(ggplot2)
-  skip("pending plan 14-07")
+  df <- data.frame(x = 1:5, y = 1:5, v = factor(letters[1:5]))
+  p <- ggplot(df, aes(x, y, colour = v)) + geom_point() + scale_color_viridis_d()
+  build_col <- build_colours(p)
+  ir_col    <- ir_layer_colours(p)
+  expect_identical(ir_col, build_col)
+  expect_true(all(grepl("^#[0-9A-Fa-f]{8}$", build_col)))
+  expect_snapshot_value(list(per_row = ir_col), style = "json2")
 })
 
 test_that("D-14 manual out-of-range factor maps to na.value", {
   library(ggplot2)
-  skip("pending plan 14-07")
+  df <- data.frame(x = 1:3, y = 1:3, g = factor(c("a","b","x"), levels = c("a","b","x")))
+  p <- suppressWarnings(
+    ggplot(df, aes(x, y, colour = g)) + geom_point() +
+      scale_color_manual(values = c(a = "#FF0000", b = "#00FF00"))
+  )
+  build_col <- suppressWarnings(build_colours(p))
+  ir_col    <- suppressWarnings(ir_layer_colours(p))
+  expect_identical(ir_col, build_col)
+  expect_true(any(is.na(build_col) | grepl("grey50|^#7F7F7F$", build_col, ignore.case = TRUE)))
+  expect_snapshot_value(list(per_row = ir_col), style = "json2")
 })
 
 # ---------------------------------------------------------------------------
