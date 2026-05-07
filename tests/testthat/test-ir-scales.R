@@ -26,20 +26,18 @@ test_that("extract_scales_ir handles categorical x scale", {
   expect_true(all(c("4", "6", "8") %in% as.character(s$x$domain)))
 })
 
-test_that("extract_scales_ir emits a color scale when colour aesthetic is mapped", {
+test_that("ir$scales$color is no longer emitted (Pitfall 3 dead-code removed)", {
   library(ggplot2)
-  # Note: ggplot_build resolves the colour aesthetic to hex strings before
-  # extract_scales_ir sees them, so even a numeric source column produces
-  # a categorical color scale (preserved v1.0 behaviour — matches the
-  # full-pipeline equivalence test below).
-  p <- ggplot(mtcars, aes(wt, mpg, colour = hp)) + geom_point()
-  b <- ggplot_build(p)
+  p_cont <- ggplot(mtcars, aes(wt, mpg, colour = hp)) + geom_point()
+  p_disc <- ggplot(mtcars, aes(wt, mpg, colour = factor(cyl))) + geom_point()
+  expect_null(as_d3_ir(p_cont)$scales$color)
+  expect_null(as_d3_ir(p_disc)$scales$color)
+
+  b <- ggplot_build(p_cont)
   pp_x <- b$layout$panel_params[[1]]$x
   pp_y <- b$layout$panel_params[[1]]$y
   s <- extract_scales_ir(b, pp_x, pp_y, is_flip = FALSE)
-  expect_true(!is.null(s$color))
-  expect_true(s$color$type %in% c("continuous", "categorical"))
-  expect_true(length(s$color$domain) >= 1)
+  expect_null(s$color)
 })
 
 test_that("extract_scales_ir output equals the v1.0 as_d3_ir scales slice", {
