@@ -164,17 +164,31 @@
           totalHeight = Math.max(totalHeight, height);
         }
       } else if (guide.type === "colorbar") {
-        // Colorbar — only min/max labels shown
-        const barWidth = defaults.keySize;
-        const barHeight = 5 * defaults.keySize;
-        const endLabels = guide.keys && guide.keys.length > 0 ?
-          [guide.keys[0], guide.keys[guide.keys.length - 1]] : [];
-        const maxLabelWidth = endLabels.length > 0 ?
-          Math.max(...endLabels.map(k => estimateTextWidth(String(k.label || ""), defaults.textSize))) : 0;
+        // Colorbar — orientation-aware sizing (D-10).
+        const isHoriz = guide.orientation === "horizontal";
+        const barWidth  = isHoriz ? 12 * defaults.keySize : defaults.keySize;
+        const barHeight = isHoriz ? defaults.keySize : 5 * defaults.keySize;
+        // Use full breaks for horizontal label-width estimation (labels span the bar);
+        // for vertical, only end labels are shown to the right so end labels suffice.
+        const allLabels = Array.isArray(guide.labels) && guide.labels.length > 0
+          ? guide.labels.map(String)
+          : (guide.keys || []).map(k => String(k.label || ""));
+        const maxLabelWidth = allLabels.length > 0
+          ? Math.max(...allLabels.map(l => estimateTextWidth(l, defaults.textSize)))
+          : 0;
 
-        const barContentWidth = barWidth + 5 + maxLabelWidth + defaults.margin * 2;
-        const width = Math.max(barContentWidth, titleWidth);
-        const height = titleHeight + barHeight + defaults.margin * 2;
+        let barContentWidth, width, height;
+        if (isHoriz) {
+          // Horizontal: bar is wide; labels sit below ticks; height = title + bar + tick + label.
+          barContentWidth = Math.max(barWidth, maxLabelWidth) + defaults.margin * 2;
+          width = Math.max(barContentWidth, titleWidth);
+          height = titleHeight + barHeight + 5 + defaults.textSize + defaults.margin * 2;
+        } else {
+          // Vertical: bar narrow; labels right of ticks.
+          barContentWidth = barWidth + 5 + maxLabelWidth + defaults.margin * 2;
+          width = Math.max(barContentWidth, titleWidth);
+          height = titleHeight + barHeight + defaults.margin * 2;
+        }
 
         if (isVertical) {
           totalWidth = Math.max(totalWidth, width);
@@ -442,7 +456,8 @@
     const isHorizontal = guide.orientation === "horizontal";
 
     // Bar dimensions: vertical = tall+narrow; horizontal = wide+short.
-    const barWidth  = isHorizontal ? 5 * defaults.keySize : defaults.keySize;
+    // Horizontal width is generous to give tick labels room (matches ggplot2 default).
+    const barWidth  = isHorizontal ? 12 * defaults.keySize : defaults.keySize;
     const barHeight = isHorizontal ? defaults.keySize : 5 * defaults.keySize;
 
     let currentY = defaults.margin;
@@ -525,6 +540,10 @@
     breaks.forEach((b, i) => {
       if (b == null || !isFinite(b)) return;
       const proportion = (b - d0) / range;
+      // Skip out-of-domain breaks — ggplot2's get_breaks() can return values
+      // past the limits (e.g. pretty(c(52,335)) -> 50,100,...,350); without
+      // this, ticks render outside the bar and labels overflow.
+      if (proportion < 0 || proportion > 1) return;
 
       if (isHorizontal) {
         const tickX = barX + proportion * barWidth;
