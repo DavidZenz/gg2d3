@@ -56,7 +56,11 @@ extract_legends_ir <- function(b, p) {
       scale_obj <- b$plot$scales$get_scales(aes_name)
       if (is.null(scale_obj)) next
 
-      is_continuous <- inherits(scale_obj, "ScaleContinuous")
+      # ScaleBinned (scale_*_steps / scale_*_binned) does NOT inherit from ScaleContinuous,
+      # so we must enumerate both. ggplot2's default guide for binned color is
+      # guide_coloursteps, which is a banded colorbar — see Phase 14 D-06.
+      is_continuous <- inherits(scale_obj, c("ScaleContinuous", "ScaleBinned"))
+      is_steps <- inherits(scale_obj, "ScaleBinned")
       is_color_aes <- aes_name %in% c("colour", "fill")
       guide_type <- if (is_continuous && is_color_aes) "colorbar" else "legend"
 
@@ -119,7 +123,8 @@ extract_legends_ir <- function(b, p) {
         type = guide_type,
         title = as.character(title),
         keys = keys_list,
-        colors = colors_array
+        colors = colors_array,
+        is_steps = isTRUE(is_steps)
       )
 
       guides_ir[[length(guides_ir) + 1]] <- guide_spec
