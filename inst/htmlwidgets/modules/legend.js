@@ -434,14 +434,21 @@
     const defaults = getThemeDefaults(theme);
     const convertColor = window.gg2d3.scales.convertColor;
 
-    // Create colorbar group
     const g = svg.append("g")
       .attr("class", "gg2d3-colorbar")
       .attr("transform", `translate(${x}, ${y})`);
 
-    let currentY = defaults.margin;
+    // ----- Orientation branch (D-10) -----------------------------------------
+    const isHorizontal = guide.orientation === "horizontal";
 
-    // Draw title if present
+    // Bar dimensions: vertical = tall+narrow; horizontal = wide+short.
+    const barWidth  = isHorizontal ? 5 * defaults.keySize : defaults.keySize;
+    const barHeight = isHorizontal ? defaults.keySize : 5 * defaults.keySize;
+
+    let currentY = defaults.margin;
+    const barX = defaults.margin;
+
+    // Title (always above the bar).
     if (guide.title) {
       g.append("text")
         .attr("class", "colorbar-title")
@@ -452,36 +459,58 @@
         .style("font-weight", "normal")
         .style("font-family", "sans-serif")
         .text(guide.title);
-
       currentY += defaults.titleSize + defaults.titleSpacing;
     }
-
-    // Colorbar dimensions
-    const barWidth = defaults.keySize;
-    const barHeight = 5 * defaults.keySize;
-    const barX = defaults.margin;
     const barY = currentY;
 
-    // Create gradient
+    // ----- Gradient axis depends on orientation ------------------------------
+    // Vertical: bottom (domain[0]) -> top (domain[1]) — y goes 100% -> 0%.
+    // Horizontal: left (domain[0]) -> right (domain[1]) — x goes 0% -> 100%.
     const gradientId = `legend-grad-${Math.random().toString(36).substr(2, 9)}`;
     const defs = svg.append("defs");
-    const gradient = defs.append("linearGradient")
-      .attr("id", gradientId)
-      .attr("x1", "0%")
-      .attr("x2", "0%")
-      .attr("y1", "100%") // Bottom
-      .attr("y2", "0%");  // Top
+    const gradient = defs.append("linearGradient").attr("id", gradientId);
+    if (isHorizontal) {
+      gradient.attr("x1", "0%").attr("x2", "100%").attr("y1", "0%").attr("y2", "0%");
+    } else {
+      gradient.attr("x1", "0%").attr("x2", "0%").attr("y1", "100%").attr("y2", "0%");
+    }
 
-    // Add color stops
-    const colors = guide.colors || (guide.keys ? guide.keys.map(k => k.colour || k.fill || "#4D4D4D") : ["#4D4D4D"]);
-    colors.forEach((color, idx) => {
-      const offset = (idx / (colors.length - 1)) * 100;
-      gradient.append("stop")
-        .attr("offset", `${offset}%`)
-        .attr("stop-color", convertColor(color));
-    });
+    const domain = Array.isArray(guide.domain) && guide.domain.length === 2 ? guide.domain : [0, 1];
+    const d0 = domain[0];
+    const d1 = domain[1];
+    const range = (d1 - d0) || 1;
 
-    // Draw gradient rectangle
+    const breaks = Array.isArray(guide.breaks) ? guide.breaks : [];
+    const labels = Array.isArray(guide.labels) ? guide.labels : breaks.map(String);
+
+    if (guide.is_steps && Array.isArray(guide.bin_colors) && breaks.length >= 2) {
+      // Banded: two stops per bin sharing one color (D-06, Pitfall 8).
+      console.assert(
+        guide.bin_colors.length === breaks.length - 1,
+        "renderColorbar: bin_colors length must equal breaks.length - 1, got",
+        guide.bin_colors.length, "vs", breaks.length - 1
+      );
+      for (let i = 0; i < guide.bin_colors.length; i++) {
+        const lo = breaks[i];
+        const hi = breaks[i + 1];
+        if (lo == null || hi == null) continue;
+        const colorHex = convertColor(guide.bin_colors[i]);
+        const offsetLo = ((lo - d0) / range) * 100;
+        const offsetHi = ((hi - d0) / range) * 100;
+        gradient.append("stop").attr("offset", `${offsetLo}%`).attr("stop-color", colorHex);
+        gradient.append("stop").attr("offset", `${offsetHi}%`).attr("stop-color", colorHex);
+      }
+    } else {
+      // Smooth: existing 30-stop sample (D-09 unchanged).
+      const colors = guide.colors || (guide.keys ? guide.keys.map(k => k.colour || k.fill || "#4D4D4D") : ["#4D4D4D"]);
+      colors.forEach((color, idx) => {
+        const offset = colors.length > 1 ? (idx / (colors.length - 1)) * 100 : 0;
+        gradient.append("stop")
+          .attr("offset", `${offset}%`)
+          .attr("stop-color", convertColor(color));
+      });
+    }
+
     g.append("rect")
       .attr("class", "colorbar-gradient")
       .attr("x", barX)
@@ -492,21 +521,33 @@
       .attr("stroke", convertColor("grey50"))
       .attr("stroke-width", 0.5);
 
-    // Draw tick marks and labels (only min and max)
-    if (guide.keys && guide.keys.length > 0) {
-      const domain = guide.keys.map(k => parseFloat(k.value || 0));
-      const minVal = Math.min(...domain);
-      const maxVal = Math.max(...domain);
-      const range = maxVal - minVal;
+    // ----- Ticks: one per guide.breaks element (Pitfall 5 fix) ---------------
+    breaks.forEach((b, i) => {
+      if (b == null || !isFinite(b)) return;
+      const proportion = (b - d0) / range;
 
-      // Only show first and last key (min/max)
-      const endKeys = [guide.keys[0], guide.keys[guide.keys.length - 1]];
-
-      endKeys.forEach(key => {
-        const value = parseFloat(key.value || 0);
-        const proportion = range !== 0 ? (value - minVal) / range : 0;
+      if (isHorizontal) {
+        const tickX = barX + proportion * barWidth;
+        g.append("line")
+          .attr("class", "colorbar-tick")
+          .attr("x1", tickX)
+          .attr("x2", tickX)
+          .attr("y1", barY + barHeight)
+          .attr("y2", barY + barHeight + 3)
+          .attr("stroke", defaults.textColour)
+          .attr("stroke-width", 0.5);
+        g.append("text")
+          .attr("class", "colorbar-label")
+          .attr("x", tickX)
+          .attr("y", barY + barHeight + 5 + defaults.textSize)
+          .attr("text-anchor", "middle")
+          .attr("fill", defaults.textColour)
+          .style("font-size", `${defaults.textSize}px`)
+          .style("font-family", "sans-serif")
+          .text(String(labels[i] != null ? labels[i] : b));
+      } else {
+        // Vertical: y inverted so domain[0] at bottom.
         const tickY = barY + barHeight - (proportion * barHeight);
-
         g.append("line")
           .attr("class", "colorbar-tick")
           .attr("x1", barX + barWidth)
@@ -515,7 +556,6 @@
           .attr("y2", tickY)
           .attr("stroke", defaults.textColour)
           .attr("stroke-width", 0.5);
-
         g.append("text")
           .attr("class", "colorbar-label")
           .attr("x", barX + barWidth + 5)
@@ -524,9 +564,9 @@
           .attr("fill", defaults.textColour)
           .style("font-size", `${defaults.textSize}px`)
           .style("font-family", "sans-serif")
-          .text(String(key.label || ""));
-      });
-    }
+          .text(String(labels[i] != null ? labels[i] : b));
+      }
+    });
 
     return g;
   }
