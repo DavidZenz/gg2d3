@@ -63,17 +63,31 @@ test_that("scale_color_steps per-row hex parity", {
 
 test_that("viridis_c emits guide.type colorbar with >=30 stops", {
   library(ggplot2)
-  skip("pending plan 14-03")
+  p <- ggplot(mtcars, aes(wt, mpg, colour = hp)) + geom_point() +
+    scale_color_viridis_c()
+  g <- guide_by_aes(p, "colour")
+  expect_false(is.null(g))
+  expect_equal(g$type, "colorbar")
+  expect_gte(length(g$colors), 30L)
 })
 
 test_that("distiller emits guide.type colorbar", {
   library(ggplot2)
-  skip("pending plan 14-03")
+  p <- ggplot(mtcars, aes(wt, mpg, colour = hp)) + geom_point() +
+    scale_color_distiller(palette = "Spectral")
+  g <- guide_by_aes(p, "colour")
+  expect_false(is.null(g))
+  expect_equal(g$type, "colorbar")
 })
 
 test_that("scale_color_steps emits guide.type colorbar with is_steps TRUE", {
   library(ggplot2)
-  skip("pending plan 14-03")
+  p <- ggplot(mtcars, aes(wt, mpg, colour = hp)) + geom_point() +
+    scale_color_steps()
+  g <- guide_by_aes(p, "colour")
+  expect_false(is.null(g))
+  expect_equal(g$type, "colorbar")
+  expect_true(isTRUE(g$is_steps))
 })
 
 test_that("colorbar IR carries breaks labels na.value domain is_continuous", {

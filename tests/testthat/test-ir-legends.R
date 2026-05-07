@@ -43,3 +43,23 @@ test_that("extract_legends_ir handles a plot with no legend-eligible aesthetic",
   L <- extract_legends_ir(b, p)
   expect_equal(length(L$guides), 0L)
 })
+
+test_that("ScaleBinned (scale_color_steps) routes to colorbar with is_steps TRUE", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg, colour = hp)) + geom_point() + scale_color_steps()
+  b <- ggplot_build(p)
+  L <- extract_legends_ir(b, p)
+  steps_guide <- Filter(function(g) identical(g$aesthetic, "colour"), L$guides)[[1]]
+  expect_equal(steps_guide$type, "colorbar")
+  expect_true(isTRUE(steps_guide$is_steps))
+})
+
+test_that("viridis_c carries is_steps FALSE (smooth, not binned)", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(wt, mpg, colour = hp)) + geom_point() + scale_color_viridis_c()
+  b <- ggplot_build(p)
+  L <- extract_legends_ir(b, p)
+  c_guide <- Filter(function(g) identical(g$aesthetic, "colour"), L$guides)[[1]]
+  expect_equal(c_guide$type, "colorbar")
+  expect_false(isTRUE(c_guide$is_steps))
+})
