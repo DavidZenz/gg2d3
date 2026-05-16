@@ -14,6 +14,14 @@ test_that("coord_flip swaps axis labels correctly", {
   #                  y visual axis (left) should show x aesthetic (cyl)
   expect_equal(ir$axes$x$label, "mpg")
   expect_equal(ir$axes$y$label, "factor(cyl)")
+
+  # Tick labels must match the displayed (post-flip) axes too, otherwise the
+  # layout under-allocates left-margin and the y-axis title overlaps tick
+  # labels. Bug from Phase 19 pkgdown inspection.
+  # Bottom (x) axis = continuous mpg → numeric tick labels.
+  # Left (y) axis = factor(cyl) → "4", "6", "8".
+  expect_setequal(ir$axes$y$tickLabels, c("4", "6", "8"))
+  expect_true(all(grepl("^[0-9.]+$", ir$axes$x$tickLabels)))
 })
 
 test_that("facet_wrap with coord_flip preserves IR structure", {
