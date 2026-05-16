@@ -426,7 +426,7 @@ A realistic example combining multiple features:
 # warning = FALSE: loess emits "neighborhood too small" / "pseudoinverse"
 # notes when fit per (class × year) — some classes have <4 points per
 # facet. The fit still renders; the messages are expected for this demo.
-ggplot(mpg, aes(displ, hwy, color = class)) +
+(ggplot(mpg, aes(displ, hwy, color = class)) +
   geom_point(size = 2) +
   geom_smooth(method = "loess", se = TRUE) +
   facet_wrap(~year) +
@@ -437,7 +437,7 @@ ggplot(mpg, aes(displ, hwy, color = class)) +
     x = "Displacement (L)",
     y = "Highway MPG"
   ) +
-  theme_minimal() |>
+  theme_minimal()) |>
   gg2d3() |>
   d3_tooltip() |>
   d3_hover() |>
