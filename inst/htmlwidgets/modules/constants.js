@@ -249,11 +249,50 @@
   /**
    * Shared helper utilities
    */
+  // ggplot2 linetype → SVG stroke-dasharray.
+  // Accepts numeric codes (0..6), names ("solid", "dashed", ...) and hex
+  // patterns ("44", "1343"). Unknown / null / undefined → solid line.
+  var DASH_BY_NAME = {
+    blank: "0,10",
+    solid: null,
+    dashed: "4,4",
+    dotted: "1,3",
+    dotdash: "1,3,4,3",
+    longdash: "8,4",
+    twodash: "2,2,6,2"
+  };
+  var DASH_BY_CODE = [
+    "0,10",          // 0 blank
+    null,            // 1 solid
+    "4,4",           // 2 dashed
+    "1,3",           // 3 dotted
+    "1,3,4,3",       // 4 dotdash
+    "8,4",           // 5 longdash
+    "2,2,6,2"        // 6 twodash
+  ];
+  function getDashArray(lt) {
+    if (lt === null || lt === undefined) return null;
+    if (typeof lt === "number") {
+      var v = DASH_BY_CODE[lt];
+      return v === undefined ? null : v;
+    }
+    var s = String(lt);
+    if (Object.prototype.hasOwnProperty.call(DASH_BY_NAME, s)) return DASH_BY_NAME[s];
+    if (/^\d+$/.test(s)) {
+      // Hex pattern: pairs of digits = dash,gap,dash,gap...
+      var parts = [];
+      for (var i = 0; i < s.length; i++) parts.push(s.charAt(i));
+      return parts.join(",");
+    }
+    return null;
+  }
+
   window.gg2d3.helpers = {
     val: val,
     num: num,
     isHexColor: isHexColor,
     isValidColor: isValidColor,
-    asRows: asRows
+    asRows: asRows,
+    getDashArray: getDashArray
   };
 })();
