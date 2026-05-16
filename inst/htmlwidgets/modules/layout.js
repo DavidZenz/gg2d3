@@ -319,7 +319,7 @@
    * @returns {LayoutResult} Complete position data for all components
    */
   function calculateLayout(config) {
-    const { width, height, theme, titles, axes, legend, coord, facets } = config;
+    const { width, height, theme, titles, axes, legend, coord, facets, panels: panelsIR } = config;
 
     // --- Determine if faceted ---
     const isFaceted = facets && (facets.type === "wrap" || facets.type === "grid") &&
@@ -476,11 +476,48 @@
     let colStripsArr = null;
     let rowStripsArr = null;
 
+    // Per-axis gap extras for free scales: when scales="free"/"free_y",
+    // each non-leftmost panel renders its own primary y-axis whose labels
+    // extend LEFTWARD from the panel's left edge into the inter-column gap.
+    // Same for free_x and per-panel x-axes extending UPWARD into the row gap.
+    // Without this reservation the labels overlap the previous panel's data.
+    function computeFreeAxisExtras() {
+      const scalesMode = (facets && facets.scales) || "fixed";
+      const isFreeY = scalesMode === "free" || scalesMode === "free_y";
+      const isFreeX = scalesMode === "free" || scalesMode === "free_x";
+      let colExtra = 0;
+      let rowExtra = 0;
+      if (isFreeY) {
+        let maxYWidth = estimateMaxTextWidth(axes.y.tickLabels || [], axisTextSize.y);
+        if (panelsIR && Array.isArray(panelsIR)) {
+          for (let i = 0; i < panelsIR.length; i++) {
+            const p = panelsIR[i];
+            let labs = p && p.y_tickLabels;
+            if ((!labs || !labs.length) && p && p.y_breaks && p.y_breaks.length) {
+              labs = p.y_breaks.map(function(v) { return String(v); });
+            }
+            if (labs && labs.length) {
+              const w = estimateMaxTextWidth(labs, axisTextSize.y);
+              if (w > maxYWidth) maxYWidth = w;
+            }
+          }
+        }
+        colExtra = tickLength + maxYWidth + 4;
+      }
+      if (isFreeX) {
+        rowExtra = tickLength + estimateTextHeight(axisTextSize.x) + 4;
+      }
+      return { colExtra: colExtra, rowExtra: rowExtra };
+    }
+    const freeExtras = computeFreeAxisExtras();
+
     if (isFaceted && !isFacetGrid) {
       // facet_wrap layout calculation
       const nrow = facets.nrow;
       const ncol = facets.ncol;
-      const spacing = facets.spacing || 7.3;
+      const baseSpacing = facets.spacing || 7.3;
+      const colSpacing = baseSpacing + freeExtras.colExtra;
+      const rowSpacing = baseSpacing + freeExtras.rowExtra;
 
       // Available space is the computed single-panel area
       const availX = panel.x;
@@ -489,8 +526,8 @@
       const availH = panel.h;
 
       // Total spacing between panels
-      const totalSpacingX = (ncol - 1) * spacing;
-      const totalSpacingY = (nrow - 1) * spacing;
+      const totalSpacingX = (ncol - 1) * colSpacing;
+      const totalSpacingY = (nrow - 1) * rowSpacing;
 
       // Total strip height (hierarchical rows of headers)
       const totalStripHeightPerRow = numColVars * stripHeight;
@@ -505,13 +542,13 @@
         const col = item.COL - 1;  // 0-indexed
         const row = item.ROW - 1;
 
-        // Each row occupies: totalStripHeightPerRow + panelH + spacing
+        // Each row occupies: totalStripHeightPerRow + panelH + rowSpacing
         const rowBlockH = totalStripHeightPerRow + panelH;
 
         return {
           PANEL: item.PANEL,
-          x: availX + col * (panelW + spacing),
-          y: availY + row * (rowBlockH + spacing) + totalStripHeightPerRow,
+          x: availX + col * (panelW + colSpacing),
+          y: availY + row * (rowBlockH + rowSpacing) + totalStripHeightPerRow,
           w: panelW,
           h: panelH,
           clipId: "panel-" + item.PANEL + "-clip-" + Math.random().toString(36).substr(2, 6)
@@ -556,7 +593,9 @@
       // facet_grid layout calculation (2D grid with row and column strips)
       const nrow = facets.nrow;
       const ncol = facets.ncol;
-      const spacing = facets.spacing || 7.3;
+      const baseSpacing = facets.spacing || 7.3;
+      const colSpacing = baseSpacing + freeExtras.colExtra;
+      const rowSpacing = baseSpacing + freeExtras.rowExtra;
 
       // Available space is the computed single-panel area
       const availX = panel.x;
@@ -573,8 +612,8 @@
       const panelAreaH = availH - totalColStripHeight;
 
       // Total spacing between panels
-      const totalSpacingX = (ncol - 1) * spacing;
-      const totalSpacingY = (nrow - 1) * spacing;
+      const totalSpacingX = (ncol - 1) * colSpacing;
+      const totalSpacingY = (nrow - 1) * rowSpacing;
 
       // Panel dimensions after accounting for spacing
       const panelW = (panelAreaW - totalSpacingX) / ncol;
@@ -587,8 +626,8 @@
 
         return {
           PANEL: item.PANEL,
-          x: availX + col * (panelW + spacing),
-          y: availY + totalColStripHeight + row * (panelH + spacing),
+          x: availX + col * (panelW + colSpacing),
+          y: availY + totalColStripHeight + row * (panelH + rowSpacing),
           w: panelW,
           h: panelH,
           clipId: "panel-" + item.PANEL + "-clip-" + Math.random().toString(36).substr(2, 6)
@@ -605,7 +644,7 @@
             colStripsArr.push({
               COL: strip.COL,
               level: level,
-              x: availX + col * (panelW + spacing),
+              x: availX + col * (panelW + colSpacing),
               y: availY + (level - 1) * stripHeight,
               w: panelW,
               h: stripHeight,
@@ -627,7 +666,7 @@
               ROW: strip.ROW,
               level: level,
               x: availX + panelAreaW + (level - 1) * stripHeight,
-              y: availY + totalColStripHeight + rowIdx * (panelH + spacing),
+              y: availY + totalColStripHeight + rowIdx * (panelH + rowSpacing),
               w: stripHeight,
               h: panelH,
               label: strip.label,

@@ -281,7 +281,8 @@ HTMLWidgets.widget({
           col_strips: ir.facets.col_strips || null,    // facet_grid
           scales: ir.facets.scales || "fixed",
           spacing: ir.facets.spacing || 7.3
-        } : null
+        } : null,
+        panels: ir.panels || null
       };
 
       const layout = window.gg2d3.layout.calculateLayout(layoutConfig);
