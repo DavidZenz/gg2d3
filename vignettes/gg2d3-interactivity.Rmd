@@ -1,0 +1,257 @@
+---
+title: "Interactivity with gg2d3"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Interactivity with gg2d3}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = requireNamespace("gg2d3", quietly = TRUE) &&
+    requireNamespace("ggplot2", quietly = TRUE)
+)
+```
+
+gg2d3 provides a composable pipe-based API for adding interactivity to D3
+widgets. Each function (`d3_tooltip()`, `d3_hover()`, `d3_zoom()`,
+`d3_brush()`) takes a widget and returns a widget, so they chain naturally and
+every verb is optional.
+
+## The pipe API
+
+Call `gg2d3()` on any ggplot, then pipe the result through whichever
+interactivity verbs you want. Order within the chain does not matter — the
+functions are additive and non-destructive.
+
+```{r}
+library(ggplot2)
+library(gg2d3)
+
+p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
+  geom_point(size = 3)
+
+# Full interactive stack — tooltip + hover + zoom + brush
+gg2d3(p) |>
+  d3_tooltip() |>
+  d3_hover() |>
+  d3_zoom() |>
+  d3_brush()
+```
+
+You can use any subset:
+
+```{r}
+# Tooltip and zoom only
+gg2d3(p) |> d3_tooltip() |> d3_zoom()
+
+# Brush only
+gg2d3(p) |> d3_brush()
+```
+
+## Tooltips (`d3_tooltip`)
+
+`d3_tooltip()` shows a floating tooltip containing data values when the user
+hovers over a visual element (point, bar, line segment, etc.).
+
+**Signature:** `d3_tooltip(widget, fields = NULL, formatter = NULL)`
+
+```{r}
+p <- ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) + geom_point()
+
+# Default: show all mapped aesthetics
+gg2d3(p) |> d3_tooltip()
+
+# Show only a subset of fields
+gg2d3(p) |> d3_tooltip(fields = c("wt", "mpg"))
+
+# Custom JavaScript formatter
+# formatter receives (field, value) and returns a display string
+gg2d3(p) |> d3_tooltip(
+  formatter = "function(field, value) {
+    if (field === 'mpg') return field + ': ' + value + ' mpg';
+    return field + ': ' + value;
+  }"
+)
+```
+
+Tooltip behavior:
+
+- When `fields = NULL` (default), all aesthetics except internal fields
+  (those starting with underscore, plus `PANEL`, `group`, etc.) are shown.
+- Date and datetime values are automatically formatted using the browser's
+  locale.
+- The tooltip follows the cursor and disappears on mouse-out.
+
+## Hover highlighting (`d3_hover`)
+
+`d3_hover()` dims non-hovered elements so the hovered point or group stands
+out visually.
+
+**Signature:** `d3_hover(widget, opacity = 0.7, stroke = NULL, stroke_width = NULL)`
+
+```{r}
+p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
+  geom_point(size = 3)
+
+# Default: dim others to 70% opacity; no highlight stroke
+gg2d3(p) |> d3_hover()
+
+# Stronger dimming
+gg2d3(p) |> d3_hover(opacity = 0.2)
+
+# Add a visible outline on the hovered element
+gg2d3(p) |> d3_hover(opacity = 0.3, stroke = "black", stroke_width = 2)
+
+# Combine with tooltip
+gg2d3(p) |> d3_tooltip() |> d3_hover(opacity = 0.5)
+```
+
+Hover behavior:
+
+- The hovered element always has opacity 1.0; `opacity` controls the
+  non-hovered elements only.
+- `stroke` and `stroke_width` are only applied to the hovered element; if
+  `stroke = NULL` (default), no outline is added.
+- When a brush selection is active, hover dimming is automatically disabled to
+  avoid visual conflicts. Hover resumes when the brush is cleared.
+
+## Zoom and pan (`d3_zoom`)
+
+`d3_zoom()` enables scroll-wheel zoom and drag-to-pan. Double-click resets
+to the original view.
+
+**Signature:** `d3_zoom(widget, scale_extent = c(1, 8), direction = c("both", "x", "y"))`
+
+```{r}
+p <- ggplot(economics, aes(date, unemploy)) + geom_line()
+
+# Default: zoom both axes, 1x minimum to 8x maximum
+gg2d3(p) |> d3_zoom()
+
+# Zoom x-axis only (useful for time series)
+gg2d3(p) |> d3_zoom(direction = "x")
+
+# Zoom y-axis only
+gg2d3(p) |> d3_zoom(direction = "y")
+
+# Allow up to 20x zoom
+gg2d3(p) |> d3_zoom(scale_extent = c(1, 20))
+
+# x-axis only with wider zoom range
+gg2d3(p) |> d3_zoom(direction = "x", scale_extent = c(1, 20))
+```
+
+Zoom behavior:
+
+- `scale_extent[1]` must be >= 1 (no zoom out beyond the original view).
+- Axes — including temporal axes and secondary axes — update dynamically
+  during zoom. Date formatting is preserved.
+- Drag-to-pan is constrained to the panel background so that clicking data
+  elements does not trigger accidental panning.
+- Double-click resets zoom and pan to the original view.
+
+## Brush selection (`d3_brush`)
+
+`d3_brush()` lets users drag to define a rectangular selection. Selected
+elements remain at full opacity; unselected elements are dimmed. Double-click
+clears the selection.
+
+**Signature:** `d3_brush(widget, direction = c("xy", "x", "y"), on_brush = NULL, fill = "#3b82f6", opacity = 0.15)`
+
+```{r}
+p <- ggplot(iris, aes(Sepal.Length, Petal.Length, color = Species)) +
+  geom_point(size = 2)
+
+# Default: 2D rectangular brush, blue overlay, non-selected dims to 0.15
+gg2d3(p) |> d3_brush()
+
+# Horizontal band only (select by x range)
+gg2d3(p) |> d3_brush(direction = "x")
+
+# Vertical band only (select by y range)
+gg2d3(p) |> d3_brush(direction = "y")
+
+# Custom overlay color and non-selected opacity
+gg2d3(p) |> d3_brush(fill = "#ef4444", opacity = 0.3)
+
+# JavaScript callback receiving selected data array
+gg2d3(p) |> d3_brush(
+  on_brush = "function(selectedData) {
+    console.log(selectedData.length + ' points selected');
+  }"
+)
+
+# Combine with tooltip
+gg2d3(p) |> d3_tooltip() |> d3_brush()
+```
+
+Brush behavior:
+
+- `fill` is the color of the translucent brush overlay rectangle
+  (default `"#3b82f6"`, a light blue).
+- `opacity` controls unselected elements; selected elements are always at
+  opacity 1.0.
+- `on_brush` receives the selected data rows as a JavaScript array; each
+  element is the row object as passed to D3.
+- Double-click anywhere in the panel clears the brush and restores all
+  elements to full opacity.
+
+## Linked views with Crosstalk
+
+gg2d3 integrates with the
+[crosstalk](https://rstudio.github.io/crosstalk/) package for linked
+brushing across multiple widgets. Wrap your data frame in
+`crosstalk::SharedData$new()` before building the ggplot, then give that
+shared data to each widget. Brushing in one widget automatically
+cross-highlights the corresponding observations in all linked widgets.
+
+```{r, eval = FALSE}
+library(crosstalk)
+
+# Wrap dataset in SharedData — both plots share the same group
+shared_iris <- SharedData$new(iris)
+
+p1 <- ggplot(shared_iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
+  geom_point(size = 2)
+
+p2 <- ggplot(shared_iris, aes(Petal.Length, Petal.Width, color = Species)) +
+  geom_point(size = 2)
+
+# Each widget gets its own brush; brushing either highlights both
+w1 <- gg2d3(p1) |> d3_tooltip() |> d3_brush()
+w2 <- gg2d3(p2) |> d3_tooltip() |> d3_brush()
+
+# Display side by side in R Markdown or Shiny
+htmltools::browsable(htmltools::tagList(w1, w2))
+```
+
+Crosstalk behavior:
+
+- **No Shiny required** — linked views work in static HTML documents (e.g.,
+  knitted R Markdown or `htmltools::save_html()`).
+- The `SharedData` group name defaults to a random UUID; pass
+  `group = "my_group"` to `SharedData$new()` if you need to link widgets
+  across separate code chunks.
+- Each widget can independently carry any combination of `d3_tooltip()`,
+  `d3_hover()`, `d3_zoom()`, and `d3_brush()` — Crosstalk operates at the
+  data key level, not at the interactivity verb level.
+
+## Interaction caveats
+
+- **Brush overrides hover** — when a brush selection is active, hover dimming
+  is suspended. Hover resumes as soon as the brush is cleared (double-click).
+- **Zoom and brush coexist** — zooming does not clear an existing brush
+  selection; the selection rectangle scales with the view.
+- **Large datasets** — for datasets above ~10 k rows, prefer `d3_tooltip()`
+  over `d3_hover()`. Tooltip hit-testing is O(1) per element; hover dimming
+  iterates all elements on every mouse event.
+- **Faceted plots** — brush selection is per-panel. Selecting in one facet
+  does not dim elements in other facets; use Crosstalk for cross-panel
+  linking.
+- **Zoom extent** — `scale_extent[1]` must be >= 1. Setting it below 1 would
+  allow zooming further out than the original view, which distorts axis
+  labels; the function raises an error instead.
