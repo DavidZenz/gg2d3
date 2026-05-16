@@ -113,6 +113,7 @@
 
         // Draw filled area
         g.append("path")
+          .datum(pts)
           .attr("class", "geom-density")
           .attr("d", area(pts))
           .attr("fill", fillColor(firstPoint))
@@ -135,6 +136,7 @@
         const strokeWidth = linewidthVal != null ? mmToPxLinewidth(linewidthVal) : 1.42;
 
         g.append("path")
+          .datum(pts)
           .attr("class", "geom-density-outline")
           .attr("d", line(pts))
           .attr("fill", "none")

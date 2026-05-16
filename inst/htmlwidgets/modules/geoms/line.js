@@ -110,6 +110,7 @@
         const strokeWidth = linewidthVal != null ? mmToPxLinewidth(linewidthVal) : 1.42;
 
         g.append("path")
+          .datum(pts)
           .attr("class", "geom-line")
           .attr("d", line(pts))
           .attr("fill", "none")
