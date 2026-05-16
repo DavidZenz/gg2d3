@@ -107,6 +107,7 @@
         const firstPoint = pts[0].d;
 
         g.append("path")
+          .datum(pts)
           .attr("class", "geom-area")
           .attr("d", area(pts))
           .attr("fill", fillColor(firstPoint))
