@@ -422,7 +422,10 @@ Crosstalk works in static HTML documents — no Shiny server required.
 
 A realistic example combining multiple features:
 
-```{r}
+```{r warning = FALSE, message = FALSE}
+# warning = FALSE: loess emits "neighborhood too small" / "pseudoinverse"
+# notes when fit per (class × year) — some classes have <4 points per
+# facet. The fit still renders; the messages are expected for this demo.
 ggplot(mpg, aes(displ, hwy, color = class)) +
   geom_point(size = 2) +
   geom_smooth(method = "loess", se = TRUE) +
