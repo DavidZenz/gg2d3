@@ -705,14 +705,20 @@ as_d3_ir <- function(p, width = 640, height = 400,
     y_label <- b$plot$labels$y %||% ""
   }
 
+  # Tick labels mirror the displayed (post-flip) axes — matches the swap
+  # applied to x_label/y_label below. Use the unswapped panel_params because
+  # ggplot_build already orients panel_params$x/$y to the rendered axes.
+  pp_x_display <- b$layout$panel_params[[1]]$x
+  pp_y_display <- b$layout$panel_params[[1]]$y
+
   x_tick_labels <- tryCatch({
-    labs <- pp_x$get_labels()
+    labs <- pp_x_display$get_labels()
     labs <- labs[!is.na(labs)]
     as.character(labs)
   }, error = function(e) character(0))
 
   y_tick_labels <- tryCatch({
-    labs <- pp_y$get_labels()
+    labs <- pp_y_display$get_labels()
     labs <- labs[!is.na(labs)]
     as.character(labs)
   }, error = function(e) character(0))
