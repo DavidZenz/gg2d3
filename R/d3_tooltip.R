@@ -5,8 +5,13 @@
 #'
 #' @param widget A gg2d3 widget object created by \code{gg2d3()}
 #' @param fields Character vector of field names to display in tooltip.
-#'   If \code{NULL} (default), shows all aesthetics except internal fields
-#'   (those starting with underscore or internal keys like PANEL, group, etc.)
+#'   Accepts either original data variable names (e.g. \code{"wt"},
+#'   \code{"mpg"}) or internal aesthetic keys (e.g. \code{"x"}, \code{"y"},
+#'   \code{"colour"}). Variable names are resolved via the plot's aesthetic
+#'   mapping; mapped expressions like \code{factor(cyl)} can only be addressed
+#'   by aesthetic key. If \code{NULL} (default), shows all aesthetics except
+#'   internal fields (those starting with underscore or internal keys like
+#'   PANEL, group, etc.)
 #' @param formatter Optional JavaScript function as string for custom value
 #'   formatting. Function signature: \code{function(field, value) { return formatted_string; }}
 #'
