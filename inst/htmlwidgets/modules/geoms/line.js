@@ -89,21 +89,32 @@
           const xVal = isXBand ? val(get(d, aes.x)) : num(get(d, aes.x));
           const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
           return { x: xVal, y: yVal, d };
-        })
-        .filter(p => p.x != null && p.y != null);
+        });
 
-      // Only sort for geom_line (and only if x is numeric)
-      if (layer.geom === "line" && !isXBand) {
+      // Keep non-finite points so d3.line().defined() can render visible gaps.
+      // Use a defined() predicate that handles both band (string) and numeric scales.
+      const isDefined = p => {
+        const xOk = isXBand ? (p.x != null && p.x !== "") : Number.isFinite(p.x);
+        const yOk = isYBand ? (p.y != null && p.y !== "") : Number.isFinite(p.y);
+        return xOk && yOk;
+      };
+
+      // Only sort for geom_line (and only if x is numeric).
+      // Skip sort when any point is non-defined — preserving data order keeps
+      // the null/NaN at its original index so d3.line().defined() can break
+      // the sub-path at the correct visual position. Typical line data
+      // arrives in row order (= x order) so this is rarely visible.
+      if (layer.geom === "line" && !isXBand && pts.every(isDefined)) {
         pts = pts.sort((a, b) => d3.ascending(a.x, b.x));
       }
 
-      if (pts.length >= 2) {
+      if (pts.filter(isDefined).length >= 2) {
         const xOff = isXBand ? xScale.bandwidth() / 2 : 0;
         const yOff = isYBand ? yScale.bandwidth() / 2 : 0;
         // When flip: cx=yScale(y), cy=xScale(x)
         const line = flip
-          ? d3.line().x(p => yScale(p.y) + yOff).y(p => xScale(p.x) + xOff)
-          : d3.line().x(p => xScale(p.x) + xOff).y(p => yScale(p.y) + yOff);
+          ? d3.line().defined(isDefined).x(p => yScale(p.y) + yOff).y(p => xScale(p.x) + xOff)
+          : d3.line().defined(isDefined).x(p => xScale(p.x) + xOff).y(p => yScale(p.y) + yOff);
         const firstPoint = pts[0].d;
         const linewidthVal = val(get(firstPoint, "linewidth"));
         // ggplot2 default linewidth: 0.5mm ≈ 1.42px (0.5 * 72.27/25.4)

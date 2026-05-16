@@ -455,7 +455,15 @@
         }
 
         const baseOpacity = parseFloat(elem.attr('data-original-opacity') || '1');
-        const legendKey = elem.attr('data-legend-key') || resolveLegendKeyForDatum(controller, d);
+        // Prefer controller-resolved key over the geom's data-legend-key:
+        // geoms write the post-mapping aesthetic value (e.g. "colour::#00BA38"),
+        // but the legend's keys use the pre-mapping factor level
+        // (e.g. "colour::4"). resolveLegendKeyForDatum bridges them via
+        // the controller's candidate set (which includes both the level and
+        // its resolved color/shape/size). Fall back to the attribute if no
+        // controller match (e.g. no guides in IR).
+        const resolvedKey = resolveLegendKeyForDatum(controller, d);
+        const legendKey = resolvedKey || elem.attr('data-legend-key');
         const legendLevel = elem.attr('data-legend-level') || '';
         const legendAesthetic = elem.attr('data-legend-aesthetic') || '';
         const crosstalkKey = elem.attr('data-crosstalk-key');

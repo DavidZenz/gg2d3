@@ -129,9 +129,15 @@
       const titleHeight = guide.title ?
         estimateTextHeight(defaults.titleSize) + defaults.titleSpacing : 0;
 
-      // Title width (may be wider than keys)
+      // Title width (may be wider than keys). For discrete legends, the
+      // rendered title row also includes a "Reset" control to its right —
+      // include it here so layout reserves enough horizontal space, otherwise
+      // the Reset text overflows into the panel area.
+      const isDiscrete = guide.type === "legend";
+      const resetWidth = isDiscrete ?
+        estimateTextWidth("Reset", defaults.textSize) + defaults.keySpacing : 0;
       const titleWidth = guide.title ?
-        estimateTextWidth(guide.title, defaults.titleSize) + defaults.margin * 2 : 0;
+        estimateTextWidth(guide.title, defaults.titleSize) + resetWidth + defaults.margin * 2 : 0;
 
       if (guide.type === "legend") {
         // Discrete legend
