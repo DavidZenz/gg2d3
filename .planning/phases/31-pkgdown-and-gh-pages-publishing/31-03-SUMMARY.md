@@ -101,7 +101,30 @@ Human re-inspected after Round 1 fixes. The path chunk now renders correctly as 
 6. **`d3_tooltip(fields = c("wt", "mpg"))` shows "undefined"** — field-filtering tooltip path is broken; default `d3_tooltip()` (no args) works. Likely cause: tooltip JS looks up original variable names but IR stores aesthetic names. **Out of Phase 31 scope.** Spawned follow-up task "Fix d3_tooltip(fields = ...) showing undefined instead of values".
 7. **`d3_zoom()` on `geom_line()` plot** — axes zoom/pan correctly but the line itself stays static. Affects default zoom, `direction = "x"`, `direction = "y"`, and `scale_extent` variants. Zoom transform not propagated to line/path geom rendering. **Out of Phase 31 scope.** Spawned follow-up task "Fix d3_zoom not transforming line/path geoms".
 
-### Round 3 — pending sign-off
+### Round 3 — rebuild on master with all 5 fixes merged, new issue surfaced
+
+After porting Phase 19 → Phase 31 on master and confirming all 5 spawned gg2d3 fixes were merged (commits 96dedc1, 1f78131, 2bb8d92, d178f8e/fd01f1c, fee31ae), rebuilt locally on branch `claude/phase-29-pkgdown`:
+
+- `R CMD INSTALL .` → DONE
+- `pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)` → exit 0, **0 build warnings**, all 45 widget divs serialized correctly in `docs/articles/gg2d3.html`.
+- All 10 D-14 automated proxies still pass.
+- All 5 fixes confirmed wired in (source-level grep).
+
+**However:** browser inspection at `http://localhost:4321/articles/gg2d3.html` shows only the first **12 of 45 widgets render**. From "Statistical geoms" onwards (widgets 13–45), the div is present and the JSON IR data block is present, but the div stays empty.
+
+Diagnostics:
+- `binding.find(document)` returns 45 widgets → htmlwidgets sees them all.
+- `binding.renderValue()` works on every widget when manually invoked → gg2d3's renderer is sound.
+- Calling `HTMLWidgets.staticRender()` a SECOND time after page load renders all remaining 33 widgets cleanly (12 → 45).
+- 0 console errors throughout.
+
+Conclusion: the bug is in HTMLWidgets' first staticRender pass silently aborting after the 12th widget. **Not a gg2d3 bug per se** — but blocks Phase 31 publishing because the published site would show empty divs for two-thirds of the Get-started article.
+
+**Spawned follow-up task:** "Fix HTMLWidgets.staticRender halting partway through pkgdown article" — bisect the 5 recent fixes, inspect htmlwidgets-1.6.4 staticRender source, and resolve.
+
+### Sign-off (still pending)
+
+Phase 31 plans 31-04 (workflow + gh-pages bootstrap) and 31-05 (D-14 published-site verification) remain blocked until the staticRender bug is resolved. Publishing now would ship a site where 33 of 45 widgets render as empty boxes — worse than not shipping.
 
 The Phase 31 publishing infrastructure works. Five out-of-scope gg2d3 rendering bugs (coord_flip overlay, facet free-scale tick labels, vignette warnings, tooltip fields, zoom-line) are captured as spawned follow-up tasks. They will be visible on the published site until those tasks land — acceptable trade-off for shipping pkgdown today vs. waiting on a polish backlog.
 
