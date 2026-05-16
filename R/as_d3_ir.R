@@ -309,6 +309,28 @@ as_d3_ir <- function(p, width = 640, height = 400,
       for (cn in y_cols) if (is.numeric(df[[cn]])) df[[cn]] <- df[[cn]] * 1000
     }
 
+    # Build aesthetic -> original variable name map for this layer
+    # (e.g., list(x = "wt", y = "mpg", colour = "factor(cyl)")).
+    # Used to let tooltip users reference original column names instead of
+    # internal aesthetic keys.
+    plot_mapping <- as.list(b$plot$mapping %||% list())
+    layer_mapping <- as.list(b$plot$layers[[i]]$mapping %||% list())
+    combined_mapping <- utils::modifyList(plot_mapping, layer_mapping)
+    var_names <- list()
+    if (length(combined_mapping) > 0) {
+      for (nm in names(combined_mapping)) {
+        label <- tryCatch(
+          rlang::as_label(combined_mapping[[nm]]),
+          error = function(e) NULL
+        )
+        if (!is.null(label) && nzchar(label)) var_names[[nm]] <- label
+      }
+      # ggplot2 normalizes "color" -> "colour" internally
+      if (!is.null(var_names$color) && is.null(var_names$colour)) {
+        var_names$colour <- var_names$color
+      }
+    }
+
     # Extract geom-specific parameters
     g_params <- b$plot$layers[[i]]$aes_params
     if (gcl == "GeomRug") {
@@ -341,14 +363,16 @@ as_d3_ir <- function(p, width = 640, height = 400,
         data       = to_rows(df),
         aes        = aes,
         params     = g_params,
-        crs        = sf_layer_crs
+        crs        = sf_layer_crs,
+        var_names  = var_names
       )
     } else {
       list(
         geom   = gname,          # <-- now always a non-NULL string like "point"
         data   = to_rows(df),
         aes    = aes,
-        params = g_params
+        params = g_params,
+        var_names = var_names
       )
     }
   })
@@ -901,12 +925,26 @@ as_d3_ir <- function(p, width = 640, height = 400,
     panels_ir <<- list(list(PANEL = 1L, x_range = unname(scales$x$domain), y_range = unname(scales$y$domain), x_breaks = unname(x_breaks), y_breaks = unname(y_breaks)))
   })
 
+  # Build reverse map: variable name -> aesthetic key (first layer wins on collision).
+  # Lets tooltip lookups resolve user-supplied variable names (e.g. "wt") back
+  # to the aesthetic key under which the value is actually stored ("x").
+  aes_by_var <- list()
+  for (lyr in layers) {
+    vn <- lyr$var_names
+    if (is.null(vn) || length(vn) == 0) next
+    for (aes_name in names(vn)) {
+      var_name <- vn[[aes_name]]
+      if (is.null(aes_by_var[[var_name]])) aes_by_var[[var_name]] <- aes_name
+    }
+  }
+
   ir <- list(
     width = width, height = height, padding = padding,
     coord  = c(list(type = coord_type, flip = is_flip, ratio = coord_ratio), polar_meta, sf_coord_meta),
     title  = b$plot$labels$title %||% "", subtitle = subtitle_text, caption = caption_text,
     axes   = list(x = list(orientation = "bottom", label = x_label, tickLabels = x_tick_labels), y = list(orientation = "left",  label = y_label, tickLabels = y_tick_labels), x2 = if (has_sec_x) list(enabled = TRUE) else NULL, y2 = if (has_sec_y) list(enabled = TRUE) else NULL),
-    facets = facets_ir, panels = panels_ir, scales = scales, layers = layers, guides = guides_ir, legend = list(enabled = TRUE, position = legend_position), theme = theme_ir
+    facets = facets_ir, panels = panels_ir, scales = scales, layers = layers, guides = guides_ir, legend = list(enabled = TRUE, position = legend_position), theme = theme_ir,
+    aes_by_var = aes_by_var
   )
   validate_ir(ir)
 }

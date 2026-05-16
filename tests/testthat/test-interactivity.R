@@ -15,6 +15,25 @@ test_that("d3_tooltip() with fields parameter", {
   expect_equal(w$x$interactivity$tooltip$fields, c("x", "y"))
 })
 
+test_that("IR exposes aes_by_var so tooltip fields accept original variable names", {
+  library(ggplot2)
+  p <- ggplot(mtcars, aes(x = wt, y = mpg, color = factor(cyl))) + geom_point()
+  ir <- as_d3_ir(p)
+
+  expect_equal(ir$aes_by_var$wt, "x")
+  expect_equal(ir$aes_by_var$mpg, "y")
+  # mapped expressions are also indexed under their label
+  expect_equal(ir$aes_by_var[["factor(cyl)"]], "colour")
+
+  # row data still uses aesthetic keys; aes_by_var lets tooltip.js translate
+  row <- ir$layers[[1]]$data[[1]]
+  expect_true("x" %in% names(row))
+  expect_true("y" %in% names(row))
+  expect_false("wt" %in% names(row))
+  expect_equal(ir$layers[[1]]$var_names$x, "wt")
+  expect_equal(ir$layers[[1]]$var_names$y, "mpg")
+})
+
 test_that("d3_tooltip() with formatter parameter", {
   library(ggplot2)
   p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point()

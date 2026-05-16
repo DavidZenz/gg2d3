@@ -142,9 +142,19 @@
       }
     }
 
+    // Build variable-name -> aesthetic-key reverse map for lookup fallback.
+    // gg2d3 stores row data under aesthetic keys (x, y, colour, ...) but users
+    // pass original variable names (wt, mpg, cyl) in `fields`. Translate misses.
+    const aesByVar = (ir && ir.aes_by_var) || {};
+
     // Generate HTML for each field
     const lines = fields.map(field => {
-      const value = d[field];
+      let aesField = field;
+      let value = d[field];
+      if (value === undefined && Object.prototype.hasOwnProperty.call(aesByVar, field)) {
+        aesField = aesByVar[field];
+        value = d[aesField];
+      }
 
       // Format value
       let formatted;
@@ -153,7 +163,7 @@
       } else {
         // Default formatting
         let displayValue = value;
-        const temporalScale = getTemporalScale(field, ir);
+        const temporalScale = getTemporalScale(aesField, ir);
         if (temporalScale && typeof value === 'number') {
           // Format temporal values as dates, not raw milliseconds
           displayValue = formatTemporalValue(value, temporalScale);
