@@ -2,7 +2,7 @@ Package: gg2d3
 Title: gg2d3: Render ggplot2 with D3
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
+    person("David", "Zenz", , "office@davidzenz.com", role = c("aut", "cre"))
 Description: Translates ggplot2 objects into a small intermediate
     representation and renders them with D3 via htmlwidgets.
 License: MIT + file LICENSE
