@@ -1,4 +1,25 @@
-url: ~
+url: https://davidzenz.github.io/gg2d3/
+
 template:
   bootstrap: 5
 
+development:
+  mode: release
+
+reference:
+- title: Main entry
+  desc: Convert a ggplot to an interactive D3 widget.
+  contents:
+  - gg2d3
+- title: Interactivity
+  desc: Composable interactivity layers (pipe with `|>`).
+  contents:
+  - d3_tooltip
+  - d3_hover
+  - d3_zoom
+  - d3_brush
+- title: Internals
+  desc: Lower-level functions exposed for advanced use and testing.
+  contents:
+  - as_d3_ir
+  - validate_ir

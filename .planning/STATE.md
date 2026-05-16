@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Choropleth Map Research
-status: verifying
-stopped_at: Completed 28-02-PLAN.md
-last_updated: "2026-04-04T18:50:54.330Z"
-last_activity: 2026-04-04
+status: paused
+stopped_at: Phase 31 plan-03 WIP — local pkgdown build green, paused before workflow commit
+last_updated: "2026-05-16T00:00:00.000Z"
+last_activity: 2026-05-16 — Phase 31 pkgdown-and-gh-pages-publishing ported from v1.1 stupefied-austin branch (was Phase 19 there); plans 31-01/02 marked complete, 31-03 WIP, 31-04/05 pending
 progress:
   total_phases: 4
   completed_phases: 2

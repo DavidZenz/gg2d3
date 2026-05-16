@@ -123,7 +123,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 27 → 28 → 29 → 30
+Phases execute in numeric order: 27 → 28 → 29 → 30 → 31
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -131,6 +131,9 @@ Phases execute in numeric order: 27 → 28 → 29 → 30
 | 28. D3 Renderer Prototyping | v1.7 | 2/2 | Complete    | 2026-04-04 |
 | 29. Interactivity Design | v1.7 | 0/? | Not started | - |
 | 30. Edge Cases and Blueprint | v1.7 | 0/? | Not started | - |
+| 31. pkgdown and GH Pages Publishing | distribution | 2/5 | In progress | - |
+
+**Phase 31 note:** Orthogonal to v1.7 choropleth work. Ported from the v1.1 stupefied-austin branch where it was planned as Phase 19. Sets up pkgdown site + GitHub Pages deploy workflow + gh-pages bootstrap. Plans 31-01/02 complete; 31-03 WIP (local build green, paused on rendering bug triage now resolved by fixes merged 2026-05-16); 31-04 (workflow + bootstrap) and 31-05 (published-site D-14 verification) pending.
 
 ---
-*Roadmap updated: 2026-04-04*
+*Roadmap updated: 2026-05-16*

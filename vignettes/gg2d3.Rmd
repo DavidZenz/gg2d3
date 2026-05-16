@@ -11,7 +11,8 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = FALSE
+  eval = requireNamespace("gg2d3", quietly = TRUE) &&
+    requireNamespace("ggplot2", quietly = TRUE)
 )
 ```
 
@@ -48,18 +49,21 @@ size, shape, alpha, linewidth) are carried through to D3.
 
 ```{r}
 # Scatter plot
-ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
-  geom_point(size = 3) |>
+(ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
+  geom_point(size = 3)) |>
   gg2d3()
 
 # Line chart (connects points in x order)
-ggplot(economics, aes(date, unemploy)) +
-  geom_line() |>
+(ggplot(economics, aes(date, unemploy)) +
+  geom_line()) |>
   gg2d3()
 
 # Path (connects points in data order)
-ggplot(data.frame(x = cos(1:50), y = sin(1:50)), aes(x, y)) +
-  geom_path() |>
+(ggplot(data.frame(x = cos(seq(0, 2 * pi, length.out = 60)),
+                    y = sin(seq(0, 2 * pi, length.out = 60))),
+        aes(x, y)) +
+  geom_path() +
+  coord_fixed()) |>
   gg2d3()
 ```
 
@@ -67,13 +71,13 @@ ggplot(data.frame(x = cos(1:50), y = sin(1:50)), aes(x, y)) +
 
 ```{r}
 # geom_bar (counts)
-ggplot(mpg, aes(class, fill = class)) +
-  geom_bar() |>
+(ggplot(mpg, aes(class, fill = class)) +
+  geom_bar()) |>
   gg2d3()
 
 # geom_col (values) with stacking
-ggplot(mpg, aes(class, fill = drv)) +
-  geom_bar(position = "stack") |>
+(ggplot(mpg, aes(class, fill = drv)) +
+  geom_bar(position = "stack")) |>
   gg2d3()
 ```
 
@@ -81,13 +85,13 @@ ggplot(mpg, aes(class, fill = drv)) +
 
 ```{r}
 # Heatmap with geom_tile
-ggplot(faithfuld, aes(waiting, eruptions, fill = density)) +
-  geom_tile() |>
+(ggplot(faithfuld, aes(waiting, eruptions, fill = density)) +
+  geom_tile()) |>
   gg2d3()
 
 # Text labels
-ggplot(mtcars, aes(wt, mpg, label = rownames(mtcars))) +
-  geom_text(size = 3) |>
+(ggplot(mtcars, aes(wt, mpg, label = rownames(mtcars))) +
+  geom_text(size = 3)) |>
   gg2d3()
 ```
 
@@ -95,25 +99,25 @@ ggplot(mtcars, aes(wt, mpg, label = rownames(mtcars))) +
 
 ```{r}
 # Area chart
-ggplot(economics, aes(date, unemploy)) +
-  geom_area(fill = "steelblue", alpha = 0.5) |>
+(ggplot(economics, aes(date, unemploy)) +
+  geom_area(fill = "steelblue", alpha = 0.5)) |>
   gg2d3()
 
 # Ribbon (confidence band)
-ggplot(economics, aes(date, unemploy)) +
+(ggplot(economics, aes(date, unemploy)) +
   geom_ribbon(aes(ymin = unemploy - 500, ymax = unemploy + 500),
               alpha = 0.3) +
-  geom_line() |>
+  geom_line()) |>
   gg2d3()
 ```
 
 ### Segments and reference lines
 
 ```{r}
-ggplot(mtcars, aes(wt, mpg)) +
+(ggplot(mtcars, aes(wt, mpg)) +
   geom_point() +
   geom_hline(yintercept = 20, linetype = "dashed", color = "red") +
-  geom_vline(xintercept = 3, linetype = "dotted", color = "blue") |>
+  geom_vline(xintercept = 3, linetype = "dotted", color = "blue")) |>
   gg2d3()
 ```
 
@@ -126,24 +130,24 @@ by D3. No JavaScript statistics are needed.
 
 ```{r}
 # Boxplot
-ggplot(mpg, aes(class, hwy)) +
-  geom_boxplot() |>
+(ggplot(mpg, aes(class, hwy)) +
+  geom_boxplot()) |>
   gg2d3()
 
 # Violin
-ggplot(mpg, aes(class, hwy, fill = class)) +
-  geom_violin() |>
+(ggplot(mpg, aes(class, hwy, fill = class)) +
+  geom_violin()) |>
   gg2d3()
 
 # Density
-ggplot(diamonds, aes(price, fill = cut)) +
-  geom_density(alpha = 0.5) |>
+(ggplot(diamonds, aes(price, fill = cut)) +
+  geom_density(alpha = 0.5)) |>
   gg2d3()
 
 # Smooth (loess or lm)
-ggplot(mpg, aes(displ, hwy)) +
+(ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
-  geom_smooth(method = "loess") |>
+  geom_smooth(method = "loess")) |>
   gg2d3()
 ```
 
@@ -154,9 +158,9 @@ ggplot(mpg, aes(displ, hwy)) +
 Log, sqrt, and reverse transforms work as expected:
 
 ```{r}
-ggplot(diamonds, aes(carat, price)) +
+(ggplot(diamonds, aes(carat, price)) +
   geom_point(alpha = 0.1) +
-  scale_y_log10() |>
+  scale_y_log10()) |>
   gg2d3()
 ```
 
@@ -172,10 +176,10 @@ df <- data.frame(
   value = cumsum(rnorm(12))
 )
 
-ggplot(df, aes(date, value)) +
+(ggplot(df, aes(date, value)) +
   geom_line() +
   geom_point() +
-  scale_x_date(date_labels = "%b %Y") |>
+  scale_x_date(date_labels = "%b %Y")) |>
   gg2d3()
 ```
 
@@ -187,14 +191,60 @@ df <- data.frame(
   temp = 15 + 5 * sin(seq(0, 2 * pi, length.out = 24)) + rnorm(24, sd = 0.5)
 )
 
-ggplot(df, aes(time, temp)) +
+(ggplot(df, aes(time, temp)) +
   geom_line() +
-  scale_x_datetime(date_labels = "%H:%M") |>
+  scale_x_datetime(date_labels = "%H:%M")) |>
   gg2d3()
 ```
 
 Timezone information from `scale_x_datetime(timezone = ...)` is preserved in
 tooltips.
+
+### Secondary axes
+
+Secondary axes are fully rendered — ticks, labels, and the axis title from
+`sec_axis()` all appear on the opposite side of the panel.
+
+```{r}
+# Secondary axis showing unemployment in millions
+(ggplot(economics, aes(date, unemploy)) +
+  geom_line() +
+  scale_y_continuous(
+    name = "Unemployment (thousands)",
+    sec.axis = sec_axis(~ . / 1000, name = "Millions")
+  )) |>
+  gg2d3()
+```
+
+## Color scales
+
+Continuous color and fill aesthetics render as a true colorbar legend (a
+gradient with axis ticks), not a stack of discrete keys. Discrete palettes —
+viridis, brewer, manual — produce identical hex codes to ggplot2's own output.
+
+```{r}
+# Viridis continuous → colorbar legend
+(ggplot(faithfuld, aes(waiting, eruptions, fill = density)) +
+  geom_tile() +
+  scale_fill_viridis_c()) |>
+  gg2d3()
+```
+
+```{r}
+# Brewer discrete
+(ggplot(mpg, aes(displ, hwy, color = class)) +
+  geom_point() +
+  scale_color_brewer(palette = "Set2")) |>
+  gg2d3()
+```
+
+```{r}
+# Manual
+(ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) +
+  geom_point(size = 3) +
+  scale_color_manual(values = c("4" = "#1b9e77", "6" = "#d95f02", "8" = "#7570b3"))) |>
+  gg2d3()
+```
 
 ## Coordinates
 
@@ -203,9 +253,9 @@ tooltips.
 Swaps x and y axes. All geoms and scales adapt automatically:
 
 ```{r}
-ggplot(mpg, aes(class, hwy)) +
+(ggplot(mpg, aes(class, hwy)) +
   geom_boxplot() +
-  coord_flip() |>
+  coord_flip()) |>
   gg2d3()
 ```
 
@@ -214,9 +264,9 @@ ggplot(mpg, aes(class, hwy)) +
 Enforces a fixed aspect ratio between x and y units:
 
 ```{r}
-ggplot(mtcars, aes(wt, mpg)) +
+(ggplot(mtcars, aes(wt, mpg)) +
   geom_point() +
-  coord_fixed(ratio = 1) |>
+  coord_fixed(ratio = 1)) |>
   gg2d3()
 ```
 
@@ -227,18 +277,18 @@ ggplot(mtcars, aes(wt, mpg)) +
 Wraps panels into rows by one or more variables:
 
 ```{r}
-ggplot(mpg, aes(displ, hwy)) +
+(ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
-  facet_wrap(~class) |>
+  facet_wrap(~class)) |>
   gg2d3()
 ```
 
 With free scales:
 
 ```{r}
-ggplot(mpg, aes(displ, hwy)) +
+(ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
-  facet_wrap(~class, scales = "free") |>
+  facet_wrap(~class, scales = "free")) |>
   gg2d3()
 ```
 
@@ -247,18 +297,18 @@ ggplot(mpg, aes(displ, hwy)) +
 Lays out panels in a grid defined by row and column variables:
 
 ```{r}
-ggplot(mpg, aes(displ, hwy)) +
+(ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
-  facet_grid(drv ~ cyl) |>
+  facet_grid(drv ~ cyl)) |>
   gg2d3()
 ```
 
 Free scales work per-row (`"free_y"`) or per-column (`"free_x"`):
 
 ```{r}
-ggplot(mpg, aes(displ, hwy)) +
+(ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
-  facet_grid(drv ~ cyl, scales = "free") |>
+  facet_grid(drv ~ cyl, scales = "free")) |>
   gg2d3()
 ```
 
@@ -276,9 +326,9 @@ legend types are supported:
 Legends can be positioned with `theme(legend.position = ...)`:
 
 ```{r}
-ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
+(ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
   geom_point() +
-  theme(legend.position = "bottom") |>
+  theme(legend.position = "bottom")) |>
   gg2d3()
 ```
 
@@ -292,11 +342,11 @@ single legend automatically.
 gg2d3 translates ggplot2 theme elements to SVG styling:
 
 ```{r}
-ggplot(mtcars, aes(wt, mpg)) +
+(ggplot(mtcars, aes(wt, mpg)) +
   geom_point() +
   theme_minimal() +
   ggtitle("Minimal theme") +
-  labs(subtitle = "Rendered with D3", caption = "Source: mtcars") |>
+  labs(subtitle = "Rendered with D3", caption = "Source: mtcars")) |>
   gg2d3()
 ```
 
@@ -314,8 +364,8 @@ gg2d3 provides a composable pipe-based API for adding interactivity.
 Each function takes a widget and returns a widget, so they chain naturally:
 
 ```{r}
-ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
-  geom_point(size = 3) |>
+(ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
+  geom_point(size = 3)) |>
   gg2d3() |>
   d3_tooltip() |>
   d3_hover() |>
@@ -400,7 +450,7 @@ gg2d3 supports [crosstalk](https://rstudio.github.io/crosstalk/) for
 linking multiple widgets. Brushing in one widget highlights the same
 observations in all linked widgets.
 
-```{r}
+```{r, eval = FALSE}
 library(crosstalk)
 
 shared <- SharedData$new(iris)
@@ -444,10 +494,48 @@ A realistic example combining multiple features:
   d3_zoom()
 ```
 
+## Error handling and edge cases
+
+gg2d3 provides three observable guarantees when data or geoms fall outside
+normal rendering scope:
+
+1. **Non-finite values** — `NA`, `NaN`, and `Inf` are filtered from each layer
+   with a single R warning per layer. Remaining finite points render normally;
+   line/path geoms show a visible gap where the non-finite rows were removed.
+2. **Unsupported geoms** — when a geom type has no D3 renderer, an in-panel
+   message appears (e.g., "unsupported geom: polygon") rather than producing
+   silently empty output.
+3. **R-level errors during build** — if `ggplot_build()` itself errors (e.g.,
+   incompatible stat/geom combinations), the error is surfaced as an R
+   condition before any D3 rendering is attempted.
+
+```{r}
+# Non-finite values: filtered with a single warning per layer;
+# remaining points render with visible gaps
+df <- data.frame(x = 1:10, y = c(1:4, NA, 6:9, NaN))
+(ggplot(df, aes(x, y)) +
+  geom_point() +
+  geom_line()) |>
+  gg2d3()
+# Warning: Removed 2 rows containing non-finite values (geom_point).
+# The geom_line connects the finite segments and shows a visible gap.
+```
+
+```{r}
+# Unsupported geom: in-panel message instead of silent blank
+(ggplot(map_data("state"), aes(long, lat, group = group)) +
+  geom_polygon()) |>
+  gg2d3()
+# Renders an in-panel "unsupported geom: polygon" note rather than empty output.
+```
+
 ## Tips
 
-- **Pipe from ggplot directly:** `ggplot(...) + geom_point() |> gg2d3()`
-  works because the pipe binds tighter than `+`.
+- **Pipe from ggplot directly:** wrap the ggplot expression in parentheses so
+  `+` resolves before `|>`:
+  `(ggplot(...) + geom_point()) |> gg2d3()`. Without the parens, `|>` binds
+  tighter than `+` and `gg2d3()` receives only the last geom — not the plot.
+  The cleaner alternative is to assign first: `p <- ggplot(...) + geom_point(); gg2d3(p)`.
 - **Inspect the IR:** Use `gg2d3:::as_d3_ir(p)` to see exactly what data
   is sent to D3. Useful for debugging unexpected rendering.
 - **Widget sizing:** In R Markdown, set chunk options `fig.width` and

@@ -6,7 +6,8 @@ Authors@R:
 Description: Translates ggplot2 objects into a small intermediate
     representation and renders them with D3 via htmlwidgets.
 License: MIT + file LICENSE
-URL: https://github.com/<you>/gg2d3
+URL: https://github.com/DavidZenz/gg2d3,
+    https://davidzenz.github.io/gg2d3/
 BugReports: https://github.com/<you>/gg2d3/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
