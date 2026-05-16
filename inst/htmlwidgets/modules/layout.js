@@ -769,6 +769,7 @@
   window.gg2d3.layout = {
     calculateLayout: calculateLayout,
     getStripTheme: getStripTheme,
+    getLegendTheme: getLegendTheme,
     // Export utilities for testing
     estimateTextWidth: estimateTextWidth,
     estimateTextHeight: estimateTextHeight,
