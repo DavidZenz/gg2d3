@@ -129,15 +129,16 @@
       const titleHeight = guide.title ?
         estimateTextHeight(defaults.titleSize) + defaults.titleSpacing : 0;
 
-      // Title width (may be wider than keys). For discrete legends, the
-      // rendered title row also includes a "Reset" control to its right —
-      // include it here so layout reserves enough horizontal space, otherwise
-      // the Reset text overflows into the panel area.
-      const isDiscrete = guide.type === "legend";
-      const resetWidth = isDiscrete ?
-        estimateTextWidth("Reset", defaults.textSize) + defaults.keySpacing : 0;
+      // Title width (no longer includes Reset — that's its own row below the keys).
       const titleWidth = guide.title ?
-        estimateTextWidth(guide.title, defaults.titleSize) + resetWidth + defaults.margin * 2 : 0;
+        estimateTextWidth(guide.title, defaults.titleSize) + defaults.margin * 2 : 0;
+
+      // Reset is rendered as a row below the keys for discrete legends.
+      // Reserve vertical space for it so the layout doesn't crop the row.
+      const isDiscrete = guide.type === "legend";
+      const resetRowHeight = isDiscrete
+        ? estimateTextHeight(defaults.textSize) + defaults.titleSpacing
+        : 0;
 
       if (guide.type === "legend") {
         // Discrete legend
@@ -150,7 +151,7 @@
             Math.max(...guide.keys.map(k => estimateTextWidth(String(k.label || ""), defaults.textSize))) : 0;
           const keysWidth = defaults.keySize + defaults.keySpacing + maxLabelWidth + defaults.margin * 2;
           width = Math.max(keysWidth, titleWidth);
-          height = titleHeight + (nKeys * (defaults.keySize + defaults.keySpacing)) + defaults.margin * 2;
+          height = titleHeight + (nKeys * (defaults.keySize + defaults.keySpacing)) + resetRowHeight + defaults.margin * 2;
         } else {
           // Horizontal: title left, then keys in a row, labels below keys
           const maxLabelWidth = guide.keys ?
@@ -160,8 +161,8 @@
           const inlineTitleWidth = guide.title ?
             estimateTextWidth(guide.title, defaults.titleSize) + defaults.keySpacing : 0;
           width = defaults.margin + inlineTitleWidth + nk * colWidth + defaults.margin;
-          // Height: single row of keys + labels below, no title row
-          height = defaults.keySize + defaults.textSize + defaults.margin * 2;
+          // Height: single row of keys + labels below + Reset row + margins
+          height = defaults.keySize + defaults.textSize + resetRowHeight + defaults.margin * 2;
         }
 
         if (isVertical) {
@@ -271,7 +272,10 @@
           .text(guide.title);
         currentX = defaults.margin + estimateTextWidth(guide.title, defaults.titleSize) + defaults.keySpacing;
       } else {
-        // Vertical: title above keys
+        // Vertical: title above keys (Reset control is rendered as its own
+        // row below the keys after the keys loop completes, not inline next
+        // to the title — keeps the title row visually clean and keeps Reset
+        // out of the panel boundary).
         titleElement = g.append("text")
           .attr("class", "legend-title")
           .attr("x", defaults.margin)
@@ -281,28 +285,6 @@
           .style("font-weight", "normal")
           .style("font-family", "sans-serif")
           .text(guide.title);
-
-        // Reset control next to title (discrete legends only)
-        const titleW = estimateTextWidth(guide.title, defaults.titleSize);
-        resetElement = g.append("text")
-          .attr("class", "legend-reset-control")
-          .attr("x", defaults.margin + titleW + defaults.keySpacing)
-          .attr("y", currentY + defaults.titleSize * 0.8)
-          .attr("fill", defaults.textColour)
-          .style("font-size", `${defaults.textSize}px`)
-          .style("font-family", "sans-serif")
-          .style("cursor", "pointer")
-          .text("Reset")
-          .on("click.legend", function(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            if (window.gg2d3 && window.gg2d3.events && window.gg2d3.events.dispatchLegend) {
-              const host = this.closest('.html-widget') || this.closest('.gg2d3');
-              if (host) {
-                window.gg2d3.events.dispatchLegend(host, 'legend:reset', {});
-              }
-            }
-          });
 
         currentY += defaults.titleSize + defaults.titleSpacing;
       }
@@ -480,18 +462,58 @@
     if (direction === "vertical") {
       const titleW = guide.title ?
         estimateTextWidth(guide.title, defaults.titleSize) + defaults.margin * 2 : 0;
-      const resetW = resetElement ? estimateTextWidth("Reset", defaults.textSize) + defaults.keySpacing : 0;
-      contentWidth = Math.max(contentWidth, titleW + resetW);
+      contentWidth = Math.max(contentWidth, titleW);
+    }
+
+    // Reset control: render BELOW the keys as its own row (for discrete
+    // legends — colorbars don't have a Reset). Positioned at left margin
+    // with a small gap above the keys row.
+    const isDiscrete = guide.type === "legend";
+    const resetRowHeight = isDiscrete
+      ? defaults.textSize + defaults.titleSpacing
+      : 0;
+    if (isDiscrete) {
+      let resetY;
+      if (direction === "horizontal") {
+        // Horizontal keys: label is below the swatch (keySize + textSize).
+        resetY = currentY + defaults.keySize + defaults.textSize + defaults.titleSpacing;
+      } else {
+        // Vertical keys: stack of nKeys swatches.
+        const lastKeyBottom = currentY + (nKeys > 0
+          ? (nKeys - 1) * (defaults.keySize + defaults.keySpacing) + defaults.keySize
+          : 0);
+        resetY = lastKeyBottom + defaults.titleSpacing;
+      }
+
+      resetElement = g.append("text")
+        .attr("class", "legend-reset-control")
+        .attr("x", defaults.margin)
+        .attr("y", resetY + defaults.textSize * 0.8)
+        .attr("fill", defaults.textColour)
+        .style("font-size", `${defaults.textSize}px`)
+        .style("font-family", "sans-serif")
+        .style("cursor", "pointer")
+        .text("Reset")
+        .on("click.legend", function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (window.gg2d3 && window.gg2d3.events && window.gg2d3.events.dispatchLegend) {
+            const host = this.closest('.html-widget') || this.closest('.gg2d3');
+            if (host) {
+              window.gg2d3.events.dispatchLegend(host, 'legend:reset', {});
+            }
+          }
+        });
     }
 
     // Draw legend background behind all content (insert as first child)
     if (defaults.legendBackground !== "transparent") {
       let bgHeight;
       if (direction === "horizontal") {
-        bgHeight = currentY + defaults.keySize + defaults.textSize + defaults.margin;
+        bgHeight = currentY + defaults.keySize + defaults.textSize + defaults.margin + resetRowHeight;
       } else {
         const lastKeyY = currentY + (nKeys > 0 ? (nKeys - 1) * (defaults.keySize + defaults.keySpacing) : 0);
-        bgHeight = lastKeyY + defaults.keySize + defaults.margin;
+        bgHeight = lastKeyY + defaults.keySize + defaults.margin + resetRowHeight;
       }
 
       g.insert("rect", ":first-child")

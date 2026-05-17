@@ -232,12 +232,23 @@
       return null;
     }
 
+    // Path geoms (violin, density, area, ribbon, smooth, line) bind an array
+    // of points as datum via .datum(pts). Aesthetic values are uniform across
+    // the array (one path per legend level), so probe the first row.
+    // Some geoms also wrap each point as {x, y, d} where `d` holds the
+    // original data row with the aesthetic columns; unwrap to that row.
+    let probe = Array.isArray(datum) ? (datum.length > 0 ? datum[0] : null) : datum;
+    if (probe && typeof probe === 'object' && probe.d && typeof probe.d === 'object' && !Array.isArray(probe.d)) {
+      probe = probe.d;
+    }
+    if (!probe) return null;
+
     for (let i = 0; i < controller.lookup.length; i++) {
       const entry = controller.lookup[i];
       const aliases = getLegendKeyAestheticAliases(entry.aesthetic);
 
       for (let j = 0; j < aliases.length; j++) {
-        const value = datum[aliases[j]];
+        const value = probe[aliases[j]];
         if (value === undefined || value === null) continue;
 
         if (entry.candidates.has(normalizeLegendValue(value))) {
