@@ -520,8 +520,10 @@ df <- data.frame(x = 1:10, y = c(1:4, NA, 6:9, NaN))
 # The geom_line connects the finite segments and shows a visible gap.
 ```
 
-```{r}
+```{r, eval = requireNamespace("maps", quietly = TRUE)}
 # Unsupported geom: in-panel message instead of silent blank
+# (eval guarded — `map_data("state")` needs the `maps` package which is
+# not a direct dependency of gg2d3)
 (ggplot(map_data("state"), aes(long, lat, group = group)) +
   geom_polygon()) |>
   gg2d3()
