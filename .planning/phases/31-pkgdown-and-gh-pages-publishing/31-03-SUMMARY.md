@@ -122,12 +122,36 @@ Conclusion: the bug is in HTMLWidgets' first staticRender pass silently aborting
 
 **Spawned follow-up task:** "Fix HTMLWidgets.staticRender halting partway through pkgdown article" — bisect the 5 recent fixes, inspect htmlwidgets-1.6.4 staticRender source, and resolve.
 
-### Sign-off (still pending)
+### Rounds 4–7 — successive polish passes on top of the merged fixes
 
-Phase 31 plans 31-04 (workflow + gh-pages bootstrap) and 31-05 (D-14 published-site verification) remain blocked until the staticRender bug is resolved. Publishing now would ship a site where 33 of 45 widgets render as empty boxes — worse than not shipping.
+After all 5 follow-up fixes landed on master and were composed with each other on `claude/phase-29-pkgdown`, the local pkgdown build surfaced (and we resolved) several more visual / interaction issues. Each was found by re-inspecting the served `docs/` and triaged against the documented behavior or D-14 expectation:
 
-The Phase 31 publishing infrastructure works. Five out-of-scope gg2d3 rendering bugs (coord_flip overlay, facet free-scale tick labels, vignette warnings, tooltip fields, zoom-line) are captured as spawned follow-up tasks. They will be visible on the published site until those tasks land — acceptable trade-off for shipping pkgdown today vs. waiting on a polish backlog.
+| Round | Symptom | Root cause | Fix |
+|---|---|---|---|
+| 4 | `geom_line` non-finite gap vanished | `line.js` filtered NA before `d3.line()` | Keep all points, install `.defined()` predicate, skip x-sort when any point is non-defined so the null breaks the sub-path at the right visual position |
+| 4 | Legend "Reset" overflowed to "Re"; legend touched panel | `estimateLegendDimensions` under-reserved width; slice order in `layout.js` put gap on the wrong side | Include Reset width in title estimate; slice legend first then carve the spacing gap from the panel-adjacent side |
+| 4 | Legend click highlighted legend but didn't dim plot marks | Geoms wrote `data-legend-key` as the resolved aesthetic value (`colour::#00BA38`); legend items used the factor level (`colour::4`) | `applyLegendState` resolves keys through the controller's candidate set first; geom attribute used as fallback only |
+| 5 | Violin/density legend toggle didn't dim paths | `.datum(pts)` binds an array of `{x, y, d}` wrappers; `resolveLegendKeyForDatum` probed the wrapper instead of the row at `.d` | `resolveLegendKeyForDatum` now unwraps `Array → first → .d` |
+| 5 | Tooltip showed `[object Object]` on smooth/line/area | `format()` iterated `Object.keys(array)` | Same unwrap pattern in `format()` |
+| 5 | Reset rendered inline next to title, overlapped panel | Title-row Reset broke at long titles | Moved to its own row below the keys (vertical + horizontal); reserved `resetRowHeight` in both `renderGuide` bg height and `estimateLegendDimensions` |
+| 6 | No visible gap between panel and legend | Slice order subtle — sliced spacing carved gap on the **far** side of the legend, not between panel and legend | Re-ordered: slice legend first, then carve spacing from the panel side of remaining box. Verified gap = 15px (matches `theme.legend.spacing` ≈ 14.61px) |
+| 6 | Footer said "Developed by First Last." | `DESCRIPTION` carried the `create_package()` skeleton author | `desc::desc()$set_authors(person("David", "Zenz", , "office@davidzenz.com", role = c("aut","cre")))` |
+| 6 | Interactivity sub-page empty | `vignettes/gg2d3-interactivity.Rmd` wasn't ported from stupefied-austin | Copied it across; now 21/21 widget divs |
+| 6 | Custom tooltip `formatter = "function(d) {…}"` ignored | Old per-field API only; my fix accepted only `(d)`; both APIs are documented | Dual-arity support: `customFn.length <= 1` → whole-row early return; `>= 2` → per-field iteration |
+| 7 | Tooltips stopped showing entirely | I introduced a duplicate `const aesByVar` in the same function scope → silent `SyntaxError` killing `format()` | Removed the duplicate |
+| 7 | `Species: #F8766D` instead of `Species: setosa` | IR row only carries post-mapping aesthetic values | Build a reverse `{resolvedValue → factor label}` lookup from `ir.guides[i].keys` and apply during both enrichment and per-field rendering. Covers colour/color/fill/shape/size/alpha/linetype |
+| 7 | `d3_hover` default opacity 0.7 not distinctive | Subjective polish | `R/d3_hover.R` default 0.7 → 0.3; updated roxygen + both vignettes |
+| 7 | Reset for `position = "bottom"` left-aligned | Was using `x = defaults.margin` regardless | Center for horizontal direction: `x = contentWidth/2`, `text-anchor = "middle"` |
+| 7 | Bottom-position legend had no Reset | Reset rendering was vertical-only | Reset row now rendered for both directions |
+
+Also: ran `devtools::document()` which exposed previously-undocumented sf functions (`detect_dominant_geom_type`, `extract_sf_geometries`, `get_layer_crs`, `normalize_to_wgs84`) and `d3_handlers` / `d3_transitions` in `NAMESPACE`. Added them to `_pkgdown.yml` reference index to keep the build clean.
 
 ### Sign-off
 
-(Filled when human types `approved` after Round 2 review.)
+**Approved by user 2026-05-17 after multi-round live inspection.**
+
+All 10 D-14 automated proxies still pass. Both vignettes render fully (`gg2d3.html` 45/45 widgets, `gg2d3-interactivity.html` 21/21 widgets). Interactivity verified: tooltips show factor labels, legend toggles dim correct marks across point/violin/density/smooth/line geoms, zoom transforms lines, hover dims with reasonable contrast, custom formatters work with both `(d)` and `(field, value)` shapes, legend gap is 15px from panel, Reset positioned below keys (centered for horizontal legends).
+
+One acknowledged-not-fixed observation: facet_wrap/grid with `scales = "free"` produces panel-specific grid spacing — this is intentional ggplot2 behavior (each panel's `breaks_extended()` picks nice ticks for its own range), not a gg2d3 bug.
+
+Plan 31-03 complete. Plans 31-04 (workflow + gh-pages bootstrap) and 31-05 (D-14 published-site verification) are now unblocked.
