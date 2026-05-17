@@ -137,53 +137,79 @@
       d = d.d;
     }
 
-    // Determine which fields to show
+    // Determine which fields to show. Default prefers the ORIGINAL variable
+    // names from the ggplot aes mapping (e.g. "wt", "mpg", "cyl") over the
+    // raw aesthetic keys in the row (x, y, colour). Variable names match
+    // what users see in their ggplot() call and what the documented per-field
+    // formatter API (function(field, value)) is expected to receive.
     let fields;
     if (config.fields) {
       fields = config.fields;
     } else {
-      // Show all fields except internals (underscore prefix, PANEL, group, SCALE_X, SCALE_Y)
       const internalKeys = ['PANEL', 'group', 'SCALE_X', 'SCALE_Y'];
-      fields = Object.keys(d).filter(k =>
-        !k.startsWith('_') && !internalKeys.includes(k)
-      );
+      const aesByVarLocal = (ir && ir.aes_by_var) || {};
+      const varNames = Object.keys(aesByVarLocal);
+      if (varNames.length > 0) {
+        // Use variable names as the primary field list; the lookup below
+        // resolves d[varName] via aes_by_var when needed.
+        fields = varNames.filter(k => !k.startsWith('_'));
+      } else {
+        // No aes_by_var (older IR or non-standard layer) — fall back to
+        // raw row keys minus internals.
+        fields = Object.keys(d).filter(k =>
+          !k.startsWith('_') && !internalKeys.includes(k)
+        );
+      }
     }
 
-    // Custom formatter if provided. Per the documented API
-    // (vignettes/gg2d3.Rmd: `formatter = "function(d) { return d.mpg + ' mpg'; }"`)
-    // the formatter receives the entire row and returns the whole tooltip
-    // content as a string. The string can be either a full function
-    // expression ("function(d) {...}" or "(d) => ...") or a raw body
-    // ("return d.mpg + ' mpg';"). Detect and compile appropriately.
+    // Custom formatter if provided. Two API shapes are supported (both
+    // documented in vignettes/gg2d3.Rmd):
+    //   - function(d) -> string : called ONCE with the whole row,
+    //     returns the entire tooltip content.
+    //   - function(field, value) -> string : called PER field,
+    //     returns one line of tooltip content.
+    // Arity is detected from customFn.length. The string can be either a
+    // full function expression ("function(...) {...}" or "(...) => ...")
+    // or a raw body (treated as single-arg `d` for backward compat).
+    let customFn = null;
     if (config.formatter) {
       try {
         const src = String(config.formatter).trim();
         const looksLikeFnExpr = /^\s*(function\b|\(?\s*\w*\s*\)?\s*=>)/.test(src);
-        const customFn = looksLikeFnExpr
+        customFn = looksLikeFnExpr
           ? (new Function('return (' + src + ');'))()
           : new Function('d', src);
         if (typeof customFn !== 'function') {
           throw new Error('formatter did not evaluate to a function');
         }
-        // Enrich the row so user formatters can refer to ORIGINAL variable
-        // names (d.mpg, d.cyl, ...) as well as aesthetic names (d.x, d.y,
-        // d.colour). The IR stores data under aesthetic keys; aes_by_var
-        // bridges them. Without this, the documented example
-        // `function(d) { return d.mpg + ' mpg'; }` returns "undefined mpg".
-        const aesByVar = (ir && ir.aes_by_var) || {};
-        const enriched = Object.assign({}, d);
-        Object.keys(aesByVar).forEach(function(varName) {
-          if (!Object.prototype.hasOwnProperty.call(enriched, varName)) {
-            const aesKey = aesByVar[varName];
-            if (aesKey && Object.prototype.hasOwnProperty.call(d, aesKey)) {
-              enriched[varName] = d[aesKey];
-            }
-          }
-        });
+      } catch (e) {
+        console.warn('gg2d3: Invalid tooltip formatter function:', e);
+        customFn = null;
+      }
+    }
+
+    // Enrich the row so user formatters can refer to ORIGINAL variable
+    // names (d.mpg, d.cyl) as well as aesthetic names (d.x, d.y, d.colour).
+    // Without this the documented `function(d) { return d.mpg + ' mpg'; }`
+    // returns "undefined mpg" because the IR row only carries aesthetic keys.
+    const aesByVar = (ir && ir.aes_by_var) || {};
+    const enriched = Object.assign({}, d);
+    Object.keys(aesByVar).forEach(function(varName) {
+      if (!Object.prototype.hasOwnProperty.call(enriched, varName)) {
+        const aesKey = aesByVar[varName];
+        if (aesKey && Object.prototype.hasOwnProperty.call(d, aesKey)) {
+          enriched[varName] = d[aesKey];
+        }
+      }
+    });
+
+    // Whole-row formatter — short-circuit, return its output as-is.
+    if (customFn && customFn.length <= 1) {
+      try {
         const out = customFn(enriched);
         return out == null ? '' : String(out);
       } catch (e) {
-        console.warn('gg2d3: Invalid tooltip formatter function:', e);
+        console.warn('gg2d3: tooltip formatter threw:', e);
       }
     }
 
@@ -201,10 +227,18 @@
         value = d[aesField];
       }
 
-      // Default formatting (custom formatter is handled above with an
-      // early return — see the config.formatter block).
+      // Per-field formatter (arity >= 2) wins if provided; otherwise
+      // default formatting. Whole-row formatter (arity <= 1) was handled
+      // above with an early return.
       let formatted;
-      {
+      if (customFn && customFn.length >= 2) {
+        try {
+          formatted = customFn(field, value);
+        } catch (e) {
+          console.warn('gg2d3: tooltip formatter threw:', e);
+          formatted = `<strong>${field}:</strong> ${value}`;
+        }
+      } else {
         let displayValue = value;
         const temporalScale = getTemporalScale(aesField, ir);
         if (temporalScale && typeof value === 'number') {
