@@ -4,13 +4,13 @@
 \alias{d3_hover}
 \title{Add hover effects to gg2d3 widget}
 \usage{
-d3_hover(widget, opacity = 0.7, stroke = NULL, stroke_width = NULL)
+d3_hover(widget, opacity = 0.3, stroke = NULL, stroke_width = NULL)
 }
 \arguments{
 \item{widget}{A gg2d3 widget object created by \code{gg2d3()}}
 
 \item{opacity}{Numeric opacity value (0-1) for non-hovered elements.
-Default is 0.7, which dims other elements while keeping them visible.
+Default is 0.3, which strongly dims other elements so the hovered one stands out.
 The hovered element always has opacity 1.0.}
 
 \item{stroke}{Optional stroke color for hovered element (e.g., "black", "#ff0000").

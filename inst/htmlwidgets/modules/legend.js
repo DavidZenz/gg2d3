@@ -485,10 +485,17 @@
         resetY = lastKeyBottom + defaults.titleSpacing;
       }
 
+      // Position: left-aligned for vertical legends (sits under the keys
+      // column), horizontally centered for horizontal legends (centered
+      // under the row of keys to mirror the keys' centering).
+      const resetX = direction === "horizontal" ? contentWidth / 2 : defaults.margin;
+      const resetAnchor = direction === "horizontal" ? "middle" : "start";
+
       resetElement = g.append("text")
         .attr("class", "legend-reset-control")
-        .attr("x", defaults.margin)
+        .attr("x", resetX)
         .attr("y", resetY + defaults.textSize * 0.8)
+        .attr("text-anchor", resetAnchor)
         .attr("fill", defaults.textColour)
         .style("font-size", `${defaults.textSize}px`)
         .style("font-family", "sans-serif")

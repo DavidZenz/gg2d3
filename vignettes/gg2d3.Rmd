@@ -398,11 +398,11 @@ Tooltips automatically format date/datetime values using the browser's locale.
 `d3_hover()` dims non-hovered elements so the hovered group stands out.
 
 ```{r}
-# Default: dim others to 70% opacity
+# Default: dim others to 30% opacity
 gg2d3(p) |> d3_hover()
 
-# Stronger dimming with highlight stroke
-gg2d3(p) |> d3_hover(opacity = 0.3, stroke = "black", stroke_width = 2)
+# Softer dimming + highlight stroke
+gg2d3(p) |> d3_hover(opacity = 0.5, stroke = "black", stroke_width = 2)
 ```
 
 When a brush selection is active, hover highlighting is automatically

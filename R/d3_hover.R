@@ -6,7 +6,7 @@
 #'
 #' @param widget A gg2d3 widget object created by \code{gg2d3()}
 #' @param opacity Numeric opacity value (0-1) for non-hovered elements.
-#'   Default is 0.7, which dims other elements while keeping them visible.
+#'   Default is 0.3, which strongly dims other elements so the hovered one stands out.
 #'   The hovered element always has opacity 1.0.
 #' @param stroke Optional stroke color for hovered element (e.g., "black", "#ff0000").
 #'   If \code{NULL}, no highlight stroke is added.
@@ -35,7 +35,7 @@
 #' }
 #'
 #' @export
-d3_hover <- function(widget, opacity = 0.7, stroke = NULL, stroke_width = NULL) {
+d3_hover <- function(widget, opacity = 0.3, stroke = NULL, stroke_width = NULL) {
   # Validate input
   if (!inherits(widget, "gg2d3")) {
     stop("d3_hover() requires a gg2d3 widget object. Did you call gg2d3() first?")
