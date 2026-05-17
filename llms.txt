@@ -1,0 +1,194 @@
+# gg2d3
+
+**gg2d3** renders **ggplot2** objects with **D3** in the browser (via
+**htmlwidgets**). Under the hood, gg2d3 converts a ggplot into a small
+intermediate representation (IR) and draws it in SVG with D3.
+
+## Installation
+
+Install the development version from GitHub:
+
+``` r
+
+# install.packages("devtools")
+devtools::install_github("DavidZenz/gg2d3")
+```
+
+## Quick start
+
+``` r
+
+library(ggplot2)
+library(gg2d3)
+
+p <- ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) +
+  geom_point() +
+  ggtitle("mpg vs wt")
+
+gg2d3(p)
+```
+
+## Features
+
+### Geoms
+
+| Category | Geoms |
+|----|----|
+| Basic | `geom_point`, `geom_line`, `geom_path`, `geom_bar`, `geom_col`, `geom_rect`, `geom_tile`, `geom_text` |
+| Area/Ribbon | `geom_area`, `geom_ribbon`, `geom_polygon` |
+| Intervals | `geom_segment`, `geom_errorbar`, `geom_linerange`, `geom_pointrange` |
+| Annotation | `geom_hline`, `geom_vline`, `geom_abline`, `geom_rug` |
+| Statistical | `geom_boxplot`, `geom_violin`, `geom_density`, `geom_smooth` (loess, gam, lm), `geom_dotplot` |
+
+### Scales & Coordinates
+
+- Continuous and categorical x/y scales with full parity
+- Advanced scale configuration: `breaks`, `minor_breaks`, `expand`, and
+  `oob` (squish/censor) logic
+- Log, sqrt, and reverse scale transforms
+- Date and datetime (POSIXct) scales with timezone parity
+- `coord_flip`, `coord_fixed`, and **`coord_polar`** (pie, coxcomb,
+  radar)
+
+### Layout & Guides
+
+- Centralized layout engine for high-fidelity panel, axis, and header
+  positioning
+- **Interactive Legends**: Click to toggle, Double-click to solo, Hover
+  to preview
+- Legends for color, fill, size, shape, and alpha aesthetics
+- Continuous colorbars with gradient rendering
+- Support for hierarchical facet headers (nested variables)
+
+### Theming
+
+- Deep theme inheritance (matches ggplot2 parent-child element tree)
+- Full support for `element_blank()` and detailed element styling
+- Text justifications (`hjust`, `vjust`), margins, and rotations
+- Legend box backgrounds and borders
+
+### Interactivity
+
+Composable pipe-based API:
+
+``` r
+
+gg2d3(p) |>
+  d3_tooltip() |>
+  d3_hover() |>
+  d3_zoom() |>
+  d3_brush() |>
+  d3_transitions() |>
+  d3_handlers(click = "console.log(d)")
+```
+
+- **Tooltips** — hover to see data values (with date/time and custom
+  formatting)
+- **Hover highlighting** — dim non-hovered groups with configurable
+  styles
+- **Zoom & pan** — scroll to zoom, drag to pan (smooth transitions)
+- **Brush selection** — drag to select data regions (rectangular or
+  axis-only)
+- **Animated Transitions** — smooth, object-constant enter/update/exit
+  animations
+- **Custom Handlers** — execute custom JavaScript on mark interaction
+- **Shiny Sync** — automatic synchronization of plot interactions with
+  Shiny inputs
+- **Linked views** — Crosstalk integration for cross-widget brushing
+
+## Troubleshooting
+
+- **Blank widget / only axes** Ensure D3 is bundled correctly in the
+  package (`inst/htmlwidgets/lib/d3/d3.v7.min.js`) and
+  `inst/htmlwidgets/gg2d3.yaml` declares it.
+
+- **Console says “no marks drawn”** Your layer may be missing a
+  recognized `geom` or data columns. Start with a simple scatter and
+  inspect the IR:
+
+  ``` r
+
+  ir <- gg2d3:::as_d3_ir(p)
+  str(ir$layers[[1]], max.level = 1)
+  ```
+
+## Development (for contributors)
+
+Vendor D3 v7 locally:
+
+``` r
+
+dir.create("inst/htmlwidgets/lib/d3", recursive = TRUE, showWarnings = FALSE)
+download.file(
+  "https://d3js.org/d3.v7.min.js",
+  destfile = "inst/htmlwidgets/lib/d3/d3.v7.min.js",
+  mode = "wb"
+)
+```
+
+Iterate:
+
+``` r
+
+devtools::document()
+devtools::load_all()
+devtools::test()
+```
+
+------------------------------------------------------------------------
+
+*Note:* `README.md` is generated from `README.Rmd`. Use
+`devtools::build_readme()` to re-render.
+
+# Package index
+
+## Main entry
+
+Convert a ggplot to an interactive D3 widget.
+
+- [`gg2d3()`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md) :
+  Render a ggplot as a D3 widget
+
+## Interactivity
+
+Composable interactivity layers (pipe with `|>`).
+
+- [`d3_tooltip()`](https://davidzenz.github.io/gg2d3/reference/d3_tooltip.md)
+  : Add tooltips to gg2d3 widget
+- [`d3_hover()`](https://davidzenz.github.io/gg2d3/reference/d3_hover.md)
+  : Add hover effects to gg2d3 widget
+- [`d3_zoom()`](https://davidzenz.github.io/gg2d3/reference/d3_zoom.md)
+  : Add zoom and pan to gg2d3 widget
+- [`d3_brush()`](https://davidzenz.github.io/gg2d3/reference/d3_brush.md)
+  : Add brush selection to gg2d3 widget
+- [`d3_handlers()`](https://davidzenz.github.io/gg2d3/reference/d3_handlers.md)
+  : Add custom JavaScript event handlers to the plot
+- [`d3_transitions()`](https://davidzenz.github.io/gg2d3/reference/d3_transitions.md)
+  : Configure D3 transitions for the widget
+
+## Internals
+
+Lower-level functions exposed for advanced use and testing.
+
+- [`as_d3_ir()`](https://davidzenz.github.io/gg2d3/reference/as_d3_ir.md)
+  : Build a D3-ready IR (intermediate representation) from a ggplot
+- [`validate_ir()`](https://davidzenz.github.io/gg2d3/reference/validate_ir.md)
+  : Validate the structure of a D3 intermediate representation
+- [`detect_dominant_geom_type()`](https://davidzenz.github.io/gg2d3/reference/detect_dominant_geom_type.md)
+  : Detect the dominant geometry type in an sf layer
+- [`extract_sf_geometries()`](https://davidzenz.github.io/gg2d3/reference/extract_sf_geometries.md)
+  : Extract sf geometries from ggplot_build layer data as GeoJSON
+  strings
+- [`get_layer_crs()`](https://davidzenz.github.io/gg2d3/reference/get_layer_crs.md)
+  : Get CRS information from an sf layer's geometry column
+- [`normalize_to_wgs84()`](https://davidzenz.github.io/gg2d3/reference/normalize_to_wgs84.md)
+  : Normalize an sfc column to WGS84 (EPSG:4326)
+
+# Articles
+
+### All vignettes
+
+- [Interactivity with
+  gg2d3](https://davidzenz.github.io/gg2d3/articles/gg2d3-interactivity.md):
+- [Getting started with
+  gg2d3](https://davidzenz.github.io/gg2d3/articles/gg2d3.md):
