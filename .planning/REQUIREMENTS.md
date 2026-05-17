@@ -32,6 +32,12 @@ Requirements for choropleth map research milestone. Each maps to roadmap phases.
 - [ ] **BLPR-02**: Define explicit anti-features with rationale (tile basemaps, JS-side projection, slippy zoom)
 - [ ] **BLPR-03**: Produce phase-by-phase implementation plan with concrete file changes for a future build milestone
 
+## Distribution
+
+Cross-milestone packaging / publishing requirements, satisfied independently of the choropleth research stream.
+
+- [x] **DOCS-02**: Public package site published to GitHub Pages, rebuilt and redeployed on every push to master (and on releases), with at least one verifiably interactive `gg2d3()` widget in the published "Get started" article. Met by Phase 31 on 2026-05-17 — site live at https://davidzenz.github.io/gg2d3/.
+
 ## Future Requirements
 
 ### Implementation (v1.8+ build milestone)
@@ -72,12 +78,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BLPR-01 | Phase 30 | Pending |
 | BLPR-02 | Phase 30 | Pending |
 | BLPR-03 | Phase 30 | Pending |
+| DOCS-02 | Phase 31 | Complete |
 
 **Coverage:**
-- v1.7 requirements: 13 total
-- Mapped to phases: 13
+- v1.7 requirements: 13 total — all mapped
+- Cross-milestone distribution requirements: 1 (DOCS-02, Phase 31)
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-04*
-*Last updated: 2026-04-04 — traceability populated after roadmap creation*
+*Last updated: 2026-05-17 — added DOCS-02 (Phase 31 pkgdown publishing) under cross-milestone Distribution*

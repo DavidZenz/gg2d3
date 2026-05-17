@@ -131,9 +131,18 @@ Phases execute in numeric order: 27 → 28 → 29 → 30 → 31
 | 28. D3 Renderer Prototyping | v1.7 | 2/2 | Complete    | 2026-04-04 |
 | 29. Interactivity Design | v1.7 | 0/? | Not started | - |
 | 30. Edge Cases and Blueprint | v1.7 | 0/? | Not started | - |
-| 31. pkgdown and GH Pages Publishing | distribution | 2/5 | In progress | - |
+| 31. pkgdown and GH Pages Publishing | distribution | 5/5 | Complete    | 2026-05-17 |
 
-**Phase 31 note:** Orthogonal to v1.7 choropleth work. Ported from the v1.1 stupefied-austin branch where it was planned as Phase 19. Sets up pkgdown site + GitHub Pages deploy workflow + gh-pages bootstrap. Plans 31-01/02 complete; 31-03 WIP (local build green, paused on rendering bug triage now resolved by fixes merged 2026-05-16); 31-04 (workflow + bootstrap) and 31-05 (published-site D-14 verification) pending.
+**Phase 31 note:** Orthogonal to v1.7 choropleth work. Ported from the v1.1 stupefied-austin branch where it was planned as Phase 19. Site live at https://davidzenz.github.io/gg2d3/ — rebuilds on every push to master via `.github/workflows/pkgdown.yaml` (r-lib v2-branch template, SHA-pinned deploy action). Satisfies the cross-milestone DOCS-02 requirement.
+
+**Goal:** A pkgdown site at https://davidzenz.github.io/gg2d3/ is rebuilt and redeployed on every push to master (and on releases), and at least one `gg2d3()` widget in the published "Get started" article is verifiably interactive in a user's browser.
+**Requirements:** DOCS-02
+**Plans:**
+- [x] 31-01 — preflight (pkgdown/usethis versions, PAT presence, manual-orphan bootstrap decision)
+- [x] 31-02 — config edits (rename vignette to gg2d3.Rmd, rewrite `_pkgdown.yml`, patch `.Rbuildignore`, extend DESCRIPTION URL)
+- [x] 31-03 — local build + D-15 preflight human interactivity check (7 rounds of polish on top of 6 cherry-picked fixes)
+- [x] 31-04 — `.github/workflows/pkgdown.yaml` + orphan gh-pages branch + GitHub Pages settings (`build_type: legacy`, source `gh-pages / (root)`) + first CI deploy ([Run 25996275369](https://github.com/DavidZenz/gg2d3/actions/runs/25996275369))
+- [x] 31-05 — D-14 published-site human checkpoint + repo About URL + REQUIREMENTS.md / ROADMAP.md finalize
 
 ---
-*Roadmap updated: 2026-05-16*
+*Roadmap updated: 2026-05-17*
