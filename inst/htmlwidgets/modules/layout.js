@@ -406,16 +406,23 @@
 
       // Only reserve space if legend has non-zero dimensions
       if (legendW > 0 || legendH > 0) {
-        let legendAmount;
-        if (legend.position === "right" || legend.position === "left") {
-          legendAmount = legendW + legendSpacing;
-        } else {
-          legendAmount = legendH + legendSpacing;
-        }
+        const legendAmount = (legend.position === "right" || legend.position === "left")
+          ? legendW
+          : legendH;
 
+        // Slice the legend first from the outer side.
         const legendResult = sliceSide(box, legend.position, legendAmount, legendAmount);
         legendBox = legendResult.sliced;
         box = legendResult.remaining;
+
+        // Then carve a true gap out of the panel-adjacent side of the
+        // remaining box so the panel doesn't grow back up against the
+        // legend. Without this slice the panel reflows to fill the whole
+        // remaining box and visually butts up against the legend.
+        if (legendSpacing > 0) {
+          const gapResult = sliceSide(box, legend.position, legendSpacing, legendSpacing);
+          box = gapResult.remaining;
+        }
       }
     }
 

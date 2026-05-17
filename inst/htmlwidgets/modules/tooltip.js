@@ -120,6 +120,23 @@
    * @returns {string} HTML string for tooltip content
    */
   function format(d, config, ir) {
+    // Path geoms (line, area, density, ribbon, smooth, violin) bind an
+    // array of points as datum via .datum(pts). Hovering anywhere on the
+    // path produces a single tooltip for the path; show the first point's
+    // values as representative. Without this, Object.keys(array) returns
+    // numeric indices "0","1",… and each d[i] stringifies as "[object Object]".
+    //
+    // Some geoms wrap each point as {x, y, d} where `d` is the original
+    // data row. Unwrap to that row when present so the tooltip shows the
+    // ggplot aesthetic columns (colour, fill, group, …) rather than the
+    // wrapper's plotting coordinates.
+    if (Array.isArray(d)) {
+      d = d.length > 0 ? d[0] : {};
+    }
+    if (d && typeof d === 'object' && d.d && typeof d.d === 'object' && !Array.isArray(d.d)) {
+      d = d.d;
+    }
+
     // Determine which fields to show
     let fields;
     if (config.fields) {
