@@ -189,18 +189,51 @@
     }
 
     // Enrich the row so user formatters can refer to ORIGINAL variable
-    // names (d.mpg, d.cyl) as well as aesthetic names (d.x, d.y, d.colour).
-    // Without this the documented `function(d) { return d.mpg + ' mpg'; }`
-    // returns "undefined mpg" because the IR row only carries aesthetic keys.
+    // names (d.mpg, d.Species) as well as aesthetic names (d.x, d.y, d.colour).
+    // For variable names mapped to a discrete aesthetic with a guide,
+    // prefer the original factor LABEL (e.g. "setosa") over the resolved
+    // aesthetic value (e.g. "#F8766D"). Without this:
+    //   - `function(d) { return d.mpg + ' mpg'; }` returns "undefined mpg"
+    //   - `d.Species` returns "#F8766D" instead of "setosa"
     const aesByVar = (ir && ir.aes_by_var) || {};
+
+    // Pre-build aesthetic → {resolvedValue → label} lookup from discrete guides.
+    const aestheticLabelMap = {};
+    if (ir && Array.isArray(ir.guides)) {
+      ir.guides.forEach(function(g) {
+        if (!g || g.type !== 'legend' || !Array.isArray(g.keys)) return;
+        const aesthetics = (Array.isArray(g.aesthetics) && g.aesthetics.length)
+          ? g.aesthetics
+          : (g.aesthetic ? [g.aesthetic] : []);
+        g.keys.forEach(function(k) {
+          if (!k) return;
+          const label = (k.label != null) ? String(k.label)
+                       : (k.value != null) ? String(k.value) : null;
+          if (label == null) return;
+          aesthetics.forEach(function(aes) {
+            ['colour', 'color', 'fill', 'shape', 'size', 'alpha', 'linetype'].forEach(function(prop) {
+              const v = k[prop];
+              if (v == null) return;
+              const m = aestheticLabelMap[aes] || (aestheticLabelMap[aes] = {});
+              m[String(v)] = label;
+            });
+          });
+        });
+      });
+    }
+
     const enriched = Object.assign({}, d);
     Object.keys(aesByVar).forEach(function(varName) {
-      if (!Object.prototype.hasOwnProperty.call(enriched, varName)) {
-        const aesKey = aesByVar[varName];
-        if (aesKey && Object.prototype.hasOwnProperty.call(d, aesKey)) {
-          enriched[varName] = d[aesKey];
-        }
-      }
+      if (Object.prototype.hasOwnProperty.call(enriched, varName)) return;
+      const aesKey = aesByVar[varName];
+      if (!aesKey || !Object.prototype.hasOwnProperty.call(d, aesKey)) return;
+      const rawValue = d[aesKey];
+      // Prefer factor label over resolved aesthetic value when available
+      const labelMap = aestheticLabelMap[aesKey];
+      const labeled = (labelMap && rawValue != null && labelMap[String(rawValue)] != null)
+        ? labelMap[String(rawValue)]
+        : rawValue;
+      enriched[varName] = labeled;
     });
 
     // Whole-row formatter — short-circuit, return its output as-is.
@@ -213,7 +246,7 @@
       }
     }
 
-    // aesByVar already built above; reuse for per-field lookup fallback.
+    // aesByVar and aestheticLabelMap already built above; reuse.
 
     // Generate HTML for each field
     const lines = fields.map(field => {
@@ -222,6 +255,13 @@
       if (value === undefined && Object.prototype.hasOwnProperty.call(aesByVar, field)) {
         aesField = aesByVar[field];
         value = d[aesField];
+      }
+
+      // If this aesthetic has a discrete guide, prefer the factor label
+      // over the resolved aesthetic value (e.g. "setosa" not "#F8766D").
+      if (aesField && aestheticLabelMap[aesField] != null && value != null) {
+        const label = aestheticLabelMap[aesField][String(value)];
+        if (label != null) value = label;
       }
 
       // Per-field formatter (arity >= 2) wins if provided; otherwise
