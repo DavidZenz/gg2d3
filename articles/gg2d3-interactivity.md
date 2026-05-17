@@ -38,6 +38,10 @@ You can use any subset:
 
 # Tooltip and zoom only
 gg2d3(p) |> d3_tooltip() |> d3_zoom()
+```
+
+``` r
+
 
 # Brush only
 gg2d3(p) |> d3_brush()
@@ -57,9 +61,17 @@ p <- ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) + geom_point()
 
 # Default: show all mapped aesthetics
 gg2d3(p) |> d3_tooltip()
+```
+
+``` r
+
 
 # Show only a subset of fields
 gg2d3(p) |> d3_tooltip(fields = c("wt", "mpg"))
+```
+
+``` r
+
 
 # Custom JavaScript formatter
 # formatter receives (field, value) and returns a display string
@@ -96,12 +108,24 @@ p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
 
 # Default: dim others to 30% opacity; no highlight stroke
 gg2d3(p) |> d3_hover()
+```
+
+``` r
+
 
 # Stronger dimming
 gg2d3(p) |> d3_hover(opacity = 0.2)
+```
+
+``` r
+
 
 # Add a visible outline on the hovered element
 gg2d3(p) |> d3_hover(opacity = 0.3, stroke = "black", stroke_width = 2)
+```
+
+``` r
+
 
 # Combine with tooltip
 gg2d3(p) |> d3_tooltip() |> d3_hover(opacity = 0.5)
@@ -132,15 +156,31 @@ p <- ggplot(economics, aes(date, unemploy)) + geom_line()
 
 # Default: zoom both axes, 1x minimum to 8x maximum
 gg2d3(p) |> d3_zoom()
+```
+
+``` r
+
 
 # Zoom x-axis only (useful for time series)
 gg2d3(p) |> d3_zoom(direction = "x")
+```
+
+``` r
+
 
 # Zoom y-axis only
 gg2d3(p) |> d3_zoom(direction = "y")
+```
+
+``` r
+
 
 # Allow up to 20x zoom
 gg2d3(p) |> d3_zoom(scale_extent = c(1, 20))
+```
+
+``` r
+
 
 # x-axis only with wider zoom range
 gg2d3(p) |> d3_zoom(direction = "x", scale_extent = c(1, 20))
@@ -173,15 +213,31 @@ p <- ggplot(iris, aes(Sepal.Length, Petal.Length, color = Species)) +
 
 # Default: 2D rectangular brush, blue overlay, non-selected dims to 0.15
 gg2d3(p) |> d3_brush()
+```
+
+``` r
+
 
 # Horizontal band only (select by x range)
 gg2d3(p) |> d3_brush(direction = "x")
+```
+
+``` r
+
 
 # Vertical band only (select by y range)
 gg2d3(p) |> d3_brush(direction = "y")
+```
+
+``` r
+
 
 # Custom overlay color and non-selected opacity
 gg2d3(p) |> d3_brush(fill = "#ef4444", opacity = 0.3)
+```
+
+``` r
+
 
 # JavaScript callback receiving selected data array
 gg2d3(p) |> d3_brush(
@@ -189,6 +245,10 @@ gg2d3(p) |> d3_brush(
     console.log(selectedData.length + ' points selected');
   }"
 )
+```
+
+``` r
+
 
 # Combine with tooltip
 gg2d3(p) |> d3_tooltip() |> d3_brush()

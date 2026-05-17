@@ -41,11 +41,19 @@ fill, size, shape, alpha, linewidth) are carried through to D3.
 (ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
   geom_point(size = 3)) |>
   gg2d3()
+```
+
+``` r
+
 
 # Line chart (connects points in x order)
 (ggplot(economics, aes(date, unemploy)) +
   geom_line()) |>
   gg2d3()
+```
+
+``` r
+
 
 # Path (connects points in data order)
 (ggplot(data.frame(x = cos(seq(0, 2 * pi, length.out = 60)),
@@ -64,6 +72,10 @@ fill, size, shape, alpha, linewidth) are carried through to D3.
 (ggplot(mpg, aes(class, fill = class)) +
   geom_bar()) |>
   gg2d3()
+```
+
+``` r
+
 
 # geom_col (values) with stacking
 (ggplot(mpg, aes(class, fill = drv)) +
@@ -79,6 +91,10 @@ fill, size, shape, alpha, linewidth) are carried through to D3.
 (ggplot(faithfuld, aes(waiting, eruptions, fill = density)) +
   geom_tile()) |>
   gg2d3()
+```
+
+``` r
+
 
 # Text labels
 (ggplot(mtcars, aes(wt, mpg, label = rownames(mtcars))) +
@@ -94,6 +110,10 @@ fill, size, shape, alpha, linewidth) are carried through to D3.
 (ggplot(economics, aes(date, unemploy)) +
   geom_area(fill = "steelblue", alpha = 0.5)) |>
   gg2d3()
+```
+
+``` r
+
 
 # Ribbon (confidence band)
 (ggplot(economics, aes(date, unemploy)) +
@@ -127,22 +147,35 @@ rendered by D3. No JavaScript statistics are needed.
 (ggplot(mpg, aes(class, hwy)) +
   geom_boxplot()) |>
   gg2d3()
+```
+
+``` r
+
 
 # Violin
 (ggplot(mpg, aes(class, hwy, fill = class)) +
   geom_violin()) |>
   gg2d3()
+```
+
+``` r
+
 
 # Density
 (ggplot(diamonds, aes(price, fill = cut)) +
   geom_density(alpha = 0.5)) |>
   gg2d3()
+```
+
+``` r
+
 
 # Smooth (loess or lm)
 (ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
   geom_smooth(method = "loess")) |>
   gg2d3()
+#> `geom_smooth()` using formula = 'y ~ x'
 ```
 
 ## Scales
@@ -200,7 +233,9 @@ preserved in tooltips.
 ### Secondary axes
 
 Secondary axes are fully rendered — ticks, labels, and the axis title
-from `sec_axis()` all appear on the opposite side of the panel.
+from
+[`sec_axis()`](https://ggplot2.tidyverse.org/reference/sec_axis.html)
+all appear on the opposite side of the panel.
 
 ``` r
 
@@ -398,9 +433,17 @@ aesthetics.
 
 # Default: show all aesthetics
 gg2d3(p) |> d3_tooltip()
+```
+
+``` r
+
 
 # Show specific fields only
 gg2d3(p) |> d3_tooltip(fields = c("wt", "mpg"))
+```
+
+``` r
+
 
 # Custom JavaScript formatter
 gg2d3(p) |> d3_tooltip(formatter = "function(d) { return d.mpg + ' mpg'; }")
@@ -418,6 +461,10 @@ dims non-hovered elements so the hovered group stands out.
 
 # Default: dim others to 30% opacity
 gg2d3(p) |> d3_hover()
+```
+
+``` r
+
 
 # Softer dimming + highlight stroke
 gg2d3(p) |> d3_hover(opacity = 0.5, stroke = "black", stroke_width = 2)
@@ -436,6 +483,10 @@ original view.
 
 # Default: zoom both axes, 1x to 8x
 gg2d3(p) |> d3_zoom()
+```
+
+``` r
+
 
 # Zoom x-axis only, up to 20x
 gg2d3(p) |> d3_zoom(direction = "x", scale_extent = c(1, 20))
@@ -454,9 +505,17 @@ at full opacity while others dim.
 
 # Default: 2D brush with blue overlay
 gg2d3(p) |> d3_brush()
+```
+
+``` r
+
 
 # Horizontal brush only
 gg2d3(p) |> d3_brush(direction = "x")
+```
+
+``` r
+
 
 # Custom callback receiving selected data
 gg2d3(p) |> d3_brush(
@@ -530,9 +589,10 @@ outside normal rendering scope:
 2.  **Unsupported geoms** — when a geom type has no D3 renderer, an
     in-panel message appears (e.g., “unsupported geom: polygon”) rather
     than producing silently empty output.
-3.  **R-level errors during build** — if `ggplot_build()` itself errors
-    (e.g., incompatible stat/geom combinations), the error is surfaced
-    as an R condition before any D3 rendering is attempted.
+3.  **R-level errors during build** — if
+    [`ggplot_build()`](https://ggplot2.tidyverse.org/reference/ggplot_build.html)
+    itself errors (e.g., incompatible stat/geom combinations), the error
+    is surfaced as an R condition before any D3 rendering is attempted.
 
 ``` r
 
@@ -543,6 +603,10 @@ df <- data.frame(x = 1:10, y = c(1:4, NA, 6:9, NaN))
   geom_point() +
   geom_line()) |>
   gg2d3()
+```
+
+``` r
+
 # Warning: Removed 2 rows containing non-finite values (geom_point).
 # The geom_line connects the finite segments and shows a visible gap.
 ```
@@ -550,6 +614,8 @@ df <- data.frame(x = 1:10, y = c(1:4, NA, 6:9, NaN))
 ``` r
 
 # Unsupported geom: in-panel message instead of silent blank
+# (eval guarded — `map_data("state")` needs the `maps` package which is
+# not a direct dependency of gg2d3)
 (ggplot(map_data("state"), aes(long, lat, group = group)) +
   geom_polygon()) |>
   gg2d3()

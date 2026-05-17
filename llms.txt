@@ -63,7 +63,9 @@ gg2d3(p)
 ### Theming
 
 - Deep theme inheritance (matches ggplot2 parent-child element tree)
-- Full support for `element_blank()` and detailed element styling
+- Full support for
+  [`element_blank()`](https://ggplot2.tidyverse.org/reference/element.html)
+  and detailed element styling
 - Text justifications (`hjust`, `vjust`), margins, and rotations
 - Legend box backgrounds and borders
 
