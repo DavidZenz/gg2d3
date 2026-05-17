@@ -213,10 +213,7 @@
       }
     }
 
-    // Build variable-name -> aesthetic-key reverse map for lookup fallback.
-    // gg2d3 stores row data under aesthetic keys (x, y, colour, ...) but users
-    // pass original variable names (wt, mpg, cyl) in `fields`. Translate misses.
-    const aesByVar = (ir && ir.aes_by_var) || {};
+    // aesByVar already built above; reuse for per-field lookup fallback.
 
     // Generate HTML for each field
     const lines = fields.map(field => {
