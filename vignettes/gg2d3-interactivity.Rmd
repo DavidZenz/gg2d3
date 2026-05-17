@@ -91,13 +91,13 @@ Tooltip behavior:
 `d3_hover()` dims non-hovered elements so the hovered point or group stands
 out visually.
 
-**Signature:** `d3_hover(widget, opacity = 0.7, stroke = NULL, stroke_width = NULL)`
+**Signature:** `d3_hover(widget, opacity = 0.3, stroke = NULL, stroke_width = NULL)`
 
 ```{r}
 p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
   geom_point(size = 3)
 
-# Default: dim others to 70% opacity; no highlight stroke
+# Default: dim others to 30% opacity; no highlight stroke
 gg2d3(p) |> d3_hover()
 
 # Stronger dimming

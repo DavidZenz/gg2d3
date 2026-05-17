@@ -149,11 +149,39 @@
       );
     }
 
-    // Custom formatter if provided
-    let formatter = null;
+    // Custom formatter if provided. Per the documented API
+    // (vignettes/gg2d3.Rmd: `formatter = "function(d) { return d.mpg + ' mpg'; }"`)
+    // the formatter receives the entire row and returns the whole tooltip
+    // content as a string. The string can be either a full function
+    // expression ("function(d) {...}" or "(d) => ...") or a raw body
+    // ("return d.mpg + ' mpg';"). Detect and compile appropriately.
     if (config.formatter) {
       try {
-        formatter = new Function('field', 'value', config.formatter);
+        const src = String(config.formatter).trim();
+        const looksLikeFnExpr = /^\s*(function\b|\(?\s*\w*\s*\)?\s*=>)/.test(src);
+        const customFn = looksLikeFnExpr
+          ? (new Function('return (' + src + ');'))()
+          : new Function('d', src);
+        if (typeof customFn !== 'function') {
+          throw new Error('formatter did not evaluate to a function');
+        }
+        // Enrich the row so user formatters can refer to ORIGINAL variable
+        // names (d.mpg, d.cyl, ...) as well as aesthetic names (d.x, d.y,
+        // d.colour). The IR stores data under aesthetic keys; aes_by_var
+        // bridges them. Without this, the documented example
+        // `function(d) { return d.mpg + ' mpg'; }` returns "undefined mpg".
+        const aesByVar = (ir && ir.aes_by_var) || {};
+        const enriched = Object.assign({}, d);
+        Object.keys(aesByVar).forEach(function(varName) {
+          if (!Object.prototype.hasOwnProperty.call(enriched, varName)) {
+            const aesKey = aesByVar[varName];
+            if (aesKey && Object.prototype.hasOwnProperty.call(d, aesKey)) {
+              enriched[varName] = d[aesKey];
+            }
+          }
+        });
+        const out = customFn(enriched);
+        return out == null ? '' : String(out);
       } catch (e) {
         console.warn('gg2d3: Invalid tooltip formatter function:', e);
       }
@@ -173,12 +201,10 @@
         value = d[aesField];
       }
 
-      // Format value
+      // Default formatting (custom formatter is handled above with an
+      // early return — see the config.formatter block).
       let formatted;
-      if (formatter) {
-        formatted = formatter(field, value);
-      } else {
-        // Default formatting
+      {
         let displayValue = value;
         const temporalScale = getTemporalScale(aesField, ir);
         if (temporalScale && typeof value === 'number') {

@@ -11,7 +11,6 @@ URL: https://github.com/DavidZenz/gg2d3,
 BugReports: https://github.com/<you>/gg2d3/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Suggests:
     testthat (>= 3.0.0),
     crosstalk,
@@ -19,3 +18,4 @@ Suggests:
     geojsonsf (>= 2.0.0),
     rnaturalearth
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

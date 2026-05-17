@@ -18,8 +18,14 @@ reference:
   - d3_hover
   - d3_zoom
   - d3_brush
+  - d3_handlers
+  - d3_transitions
 - title: Internals
   desc: Lower-level functions exposed for advanced use and testing.
   contents:
   - as_d3_ir
   - validate_ir
+  - detect_dominant_geom_type
+  - extract_sf_geometries
+  - get_layer_crs
+  - normalize_to_wgs84
