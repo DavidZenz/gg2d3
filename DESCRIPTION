@@ -8,9 +8,15 @@ Description: Translates ggplot2 objects into a small intermediate
 License: MIT + file LICENSE
 URL: https://github.com/DavidZenz/gg2d3,
     https://davidzenz.github.io/gg2d3/
-BugReports: https://github.com/<you>/gg2d3/issues
+BugReports: https://github.com/DavidZenz/gg2d3/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
+Imports:
+    ggplot2,
+    htmlwidgets,
+    jsonlite,
+    grid,
+    rlang
 Suggests:
     testthat (>= 3.0.0),
     crosstalk,
