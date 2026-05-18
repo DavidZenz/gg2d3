@@ -402,22 +402,19 @@ function zoomed(event) {
 | A3 | `vector-effect="non-scaling-stroke"` survives `htmlwidgets::saveWidget(selfcontained=TRUE)` serialization in current pkgdown setup | Zoom Architecture Divergence Rationale | LOW — presentation attributes are part of the serialized SVG by definition, but worth a 30-second smoke check during build-phase implementation. |
 | A4 | Phase 28's `data-cx`/`data-cy` naming was provisional and superseded by D-02's `data-centroid` | Critical Inconsistency | MEDIUM — user/planner may reasonably choose to keep `data-cx`/`data-cy` and update CONTEXT.md instead. The planner MUST address this in the design doc, not silently pick. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **`data-centroid` vs `data-cx`/`data-cy` resolution.**
+1. **RESOLVED: `data-centroid` vs `data-cx`/`data-cy` resolution.**
    - What we know: CONTEXT.md D-02 says `data-centroid`; existing Phase 28 code uses `data-cx`/`data-cy`.
-   - What's unclear: Which the design doc should canonicalize.
-   - Recommendation: Planner directs the design doc to explicitly pick one with documented rationale (see Critical Inconsistency section). Either is defensible.
+   - Resolution: Plan 29-01 (Task 2) canonicalizes `data-centroid="x,y"` (Option A) per CONTEXT.md D-02, with the Phase 28 rename scheduled as a build-phase task (IMPL-04). The design doc explicitly documents both names and the migration.
 
-2. **Combined doc vs split-per-requirement.**
+2. **RESOLVED: Combined doc vs split-per-requirement.**
    - What we know: CONTEXT.md leaves this to Claude's Discretion.
-   - What's unclear: Final length depends on how much rationale prose the planner specifies for each decision.
-   - Recommendation: Plan a single combined `29-01-SF-INTERACTIVITY-DESIGN.md`; if mid-plan it exceeds ~600 lines, split into three at section boundaries.
+   - Resolution: Plan 29-01 produces a single combined `29-01-SF-INTERACTIVITY-DESIGN.md`. If it exceeds ~600 lines during writing, split at section boundaries.
 
-3. **Whether the design doc itself should be a Verification artifact (per workflow.verifier=true).**
+3. **RESOLVED: Whether the design doc itself should be a Verification artifact.**
    - What we know: `.planning/config.json` shows `verifier: true`.
-   - What's unclear: For a design-doc-only phase, what does the verifier check? Typically checks file existence and presence of each required sub-section.
-   - Recommendation: Planner includes an explicit "success rubric" in the plan: each of D-01..D-11 has a corresponding section/subsection in the design doc; the Critical Inconsistency is addressed; the comparison matrix is present.
+   - Resolution: Plan 29-01 (Task 1) creates `verify-design-doc.sh`, a grep-based success rubric verifying each D-01..D-11 has its own section, the Critical Inconsistency is addressed, and the comparison matrix is present.
 
 ## Environment Availability
 
