@@ -120,7 +120,9 @@ Plans:
   1. A written document covers at minimum three edge cases — mixed geometry types in a single layer, multiple stacked geom_sf layers, and faceted sf maps — with specific findings on how each interacts with the existing pipeline and what handling is required
   2. A written anti-features list exists with at least three explicitly deferred capabilities (e.g., tile basemaps, JS-side projection, slippy zoom), each with a rationale sentence explaining why it is out of scope
   3. A phase-by-phase implementation plan exists that names specific files to create or modify, describes the concrete changes in each file, and is sequenced to match the existing gg2d3 phase/plan conventions — sufficient for `/gsd:plan-phase` to execute without requiring new research
-**Plans**: TBD
+**Plans:** 1 plans
+Plans:
+- [ ] 30-01-PLAN.md — Single combined blueprint covering BLPR-01 (edge cases via empirical R prototypes), BLPR-02 (3-item anti-features list), and BLPR-03 (phase-by-phase impl plan at file/line specificity)
 
 ## Progress
 
