@@ -68,7 +68,7 @@ See .planning/milestones/v1.6-ROADMAP.md for full details.
 
 - [x] **Phase 27: R IR Extraction Feasibility** - Verify and prototype the R-side geometry extraction pipeline for geom_sf layers (completed 2026-04-04)
 - [x] **Phase 28: D3 Renderer Prototyping** - Prototype basic polygon rendering via d3.geoPath and validate the visual output (completed 2026-04-04)
-- [ ] **Phase 29: Interactivity Design** - Document and evaluate the interactivity extension strategy for map regions
+- [x] **Phase 29: Interactivity Design** - Document and evaluate the interactivity extension strategy for map regions (completed 2026-05-18)
 - [ ] **Phase 30: Edge Cases and Blueprint** - Investigate complex scenarios and produce the implementation blueprint
 
 ## Phase Details
@@ -108,9 +108,9 @@ Plans:
   1. A written document describes exactly how to extend `d3_tooltip()` and `d3_hover()` to include `path.geom-sf` selectors, including which data attributes must be present on each `<path>` element and how tooltip content maps to region aesthetics
   2. A written comparison of centroid-based brush selection vs. polygon hit-testing for sf regions exists, with a clear recommendation and rationale (including why the other approach was rejected), sufficient for a developer to implement without revisiting the decision
   3. A written decision on zoom architecture for sf panels exists — either a concrete implementation approach (e.g., SVG group transform with documented stroke-width tradeoff) or an explicit deferral with rationale — leaving no ambiguity for the build phase
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 29-01-PLAN.md — Combined SF interactivity design doc (INTR-01 tooltip/hover, INTR-02 brush, INTR-03 zoom) covering D-01..D-11 and the data-centroid vs data-cx/data-cy resolution
+- [x] 29-01-PLAN.md — Combined SF interactivity design doc (INTR-01 tooltip/hover, INTR-02 brush, INTR-03 zoom) covering D-01..D-11 and the data-centroid vs data-cx/data-cy resolution
 
 ### Phase 30: Edge Cases and Blueprint
 **Goal**: A complete, actionable implementation blueprint exists that documents complex real-world scenarios, explicit anti-features, and a phase-by-phase build plan with concrete file changes — ready to hand directly to a build milestone
@@ -131,7 +131,7 @@ Phases execute in numeric order: 27 → 28 → 29 → 30 → 31
 |-------|-----------|----------------|--------|-----------|
 | 27. R IR Extraction Feasibility | v1.7 | 2/2 | Complete    | 2026-04-04 |
 | 28. D3 Renderer Prototyping | v1.7 | 2/2 | Complete    | 2026-04-04 |
-| 29. Interactivity Design | v1.7 | 0/? | Not started | - |
+| 29. Interactivity Design | v1.7 | 1/1 | Complete    | 2026-05-18 |
 | 30. Edge Cases and Blueprint | v1.7 | 0/? | Not started | - |
 | 31. pkgdown and GH Pages Publishing | distribution | 5/5 | Complete    | 2026-05-17 |
 

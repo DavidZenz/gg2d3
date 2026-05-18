@@ -75,9 +75,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REND-01 | Phase 28 | Complete |
 | REND-02 | Phase 28 | Complete |
 | REND-03 | Phase 28 | Complete |
-| INTR-01 | Phase 29 | Pending |
-| INTR-02 | Phase 29 | Pending |
-| INTR-03 | Phase 29 | Pending |
+| INTR-01 | Phase 29 | Complete |
+| INTR-02 | Phase 29 | Complete |
+| INTR-03 | Phase 29 | Complete |
 | BLPR-01 | Phase 30 | Pending |
 | BLPR-02 | Phase 30 | Pending |
 | BLPR-03 | Phase 30 | Pending |
