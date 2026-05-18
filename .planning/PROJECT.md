@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 28 complete (D3 geom_sf renderer prototype working with polygon/multipolygon rendering, hole handling, and aesthetic passthrough).
+v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 29 complete (SF interactivity design doc specifies INTR-01/02/03 wiring for IMPL-04 build phase: centroid-based tooltip/brush, group-transform zoom with non-scaling stroke).
 
 ## Current Milestone: v1.7 Choropleth Map Research
 
@@ -67,7 +67,7 @@ v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 28 complete (D
 - [x] Map polygon/multipolygon geometries to IR layer — Validated in Phase 27
 - [x] Evaluate D3 `d3.geoPath()` rendering for geographic shapes — Validated in Phase 28
 - [x] Assess CRS → D3 projection handling — Validated in Phase 27 (unconditional WGS84 normalization)
-- [ ] Document interactivity integration for map regions — v1.7
+- [x] Document interactivity integration for map regions — Validated in Phase 29 (29-01-SF-INTERACTIVITY-DESIGN.md)
 - [ ] Produce feasibility assessment and implementation blueprint — v1.7
 
 ### Out of Scope
@@ -112,4 +112,4 @@ gg2d3 shipped v1.6 with ~7,300 lines of R + JavaScript source code. The three-la
 | Standardized onRender pattern | All d3_* functions use consistent onRender + setTimeout for reliable event attachment | ✓ Good — eliminated race conditions |
 
 ---
-*Last updated: 2026-04-04 after Phase 28 completion*
+*Last updated: 2026-05-18 after Phase 29 completion*
