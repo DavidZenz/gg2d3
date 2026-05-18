@@ -2,26 +2,26 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Choropleth Map Research
-status: milestone_complete
+status: completed
 stopped_at: Phase 30 context gathered
-last_updated: "2026-05-18T13:50:57.139Z"
+last_updated: "2026-05-18T14:04:02.677Z"
 last_activity: 2026-05-18
 progress:
   total_phases: 4
-  completed_phases: 5
+  completed_phases: 4
   total_plans: 6
   completed_plans: 6
-  percent: 125
+  percent: 100
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-04)
+See: .planning/PROJECT.md (updated 2026-05-18 after v1.7 milestone)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** Phase 30 — edge-cases-and-blueprint
+**Current focus:** Between milestones — v1.7 shipped 2026-05-18; next milestone TBD (run `/gsd-new-milestone`)
 
 ## Current Position
 
@@ -78,6 +78,15 @@ Recent decisions affecting current work:
 ### Pending Todos
 
 None yet.
+
+## Deferred Items
+
+Items acknowledged and deferred at milestone close on 2026-05-18:
+
+| Category | Item | Status |
+|----------|------|--------|
+| uat_gap | Phase 29 29-HUMAN-UAT.md (4 pending subjective design-doc reads) | partial |
+| verification_gap | Phase 29 29-VERIFICATION.md | human_needed |
 
 ### Blockers/Concerns
 

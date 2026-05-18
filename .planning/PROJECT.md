@@ -10,21 +10,36 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 29 complete (SF interactivity design doc specifies INTR-01/02/03 wiring for IMPL-04 build phase: centroid-based tooltip/brush, group-transform zoom with non-scaling stroke).
+v1.7 shipped 2026-05-18 — Choropleth Map Research milestone complete. Build-ready blueprint exists for adding `geom_sf` choropleth support: R-side IR extraction is prototyped and merged (`R/sf_utils.R`, GeomSf/CoordSf dispatch in `as_d3_ir.R`), a D3 sf renderer prototype is human-verified (`inst/htmlwidgets/modules/geoms/sf.js`), and the interactivity contract + phase-by-phase implementation blueprint are documented (`.planning/milestones/v1.7-phases/.../30-01-BLUEPRINT.md`). The public package site is live at https://davidzenz.github.io/gg2d3/ via pkgdown + GitHub Pages (Phase 31, cross-milestone — satisfies DOCS-02).
 
-## Current Milestone: v1.7 Choropleth Map Research
+## Next Milestone Goals
 
-**Goal:** Investigate how gg2d3 can support choropleth map rendering via `geom_sf()` and document a clear implementation plan for future build.
+No active milestone. Likely next candidate: **v1.8 sf build milestone (IMPL-04)** — execute Build Phases A/B/C from the v1.7 blueprint to turn the sf prototype into production:
 
-**Target features:**
-- Investigate `geom_sf()` / sf geometry extraction through `ggplot_build()`
-- Determine how polygon/multipolygon geometries map to the IR layer
-- Evaluate D3 `d3.geoPath()` rendering approach for geographic shapes
-- Assess projection handling (CRS → D3 projection)
-- Document integration points with existing interactivity (hover, tooltip, brush on regions)
-- Produce a feasibility assessment and implementation blueprint
+- Canonicalize centroid attribute (`data-centroid="x,y"`) and migrate tooltip/hover/brush wiring
+- Implement zoom architecture (`.sf-zoom-layer` SVG group transform + `vector-effect="non-scaling-stroke"`)
+- Handle edge cases (mixed geometry sentinel + warn-not-drop; per-panel bbox for faceted sf)
+- Production-grade tests covering the three edge cases and live interactivity flows
 
-**Shipped through v1.6:**
+Run `/gsd-new-milestone` to plan.
+
+<details>
+<summary>Previous focus (v1.7 Choropleth Map Research — shipped 2026-05-18)</summary>
+
+**Goal:** Investigate how gg2d3 can support choropleth map rendering via `geom_sf()` and produce a build-ready implementation blueprint.
+
+**Delivered:**
+- R sf extraction pipeline: `sf_utils.R` + GeomSf/CoordSf dispatch in `as_d3_ir.R`, WGS84 normalization, IR schema doc
+- D3 sf renderer prototype: `sf.js` with `geoIdentity().reflectY(true).fitExtent()`, evenodd fill-rule for holes, centroid attrs
+- SF interactivity design contract (29-01-SF-INTERACTIVITY-DESIGN.md, 654 lines, 11 design decisions)
+- Implementation blueprint (30-01-BLUEPRINT.md, 734 lines) with edge cases, three explicit anti-features, and Build Phase A/B/C plan
+- Cross-milestone: pkgdown site live with 44 interactive widgets in the Get Started vignette (Phase 31 → DOCS-02)
+
+See `.planning/milestones/v1.7-ROADMAP.md` and `.planning/milestones/v1.7-MILESTONE-AUDIT.md` for full details.
+
+</details>
+
+**Shipped through v1.7:**
 - 25 geom types with full interactivity (hover, tooltip, brush, zoom)
 - Composable pipe-based interactivity API (`d3_tooltip`, `d3_zoom`, `d3_brush`, `d3_hover`, `d3_transitions`, `d3_handlers`)
 - Interactive legends with toggle/solo/reset/hover
@@ -32,6 +47,8 @@ v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 29 complete (S
 - Non-Cartesian coordinates (polar) and advanced stats (density, smooth)
 - Comprehensive theme parity and reference geoms
 - Performance optimized for >5000 points
+- `geom_sf` prototype + build-ready blueprint (v1.7 research)
+- Public pkgdown site at https://davidzenz.github.io/gg2d3/ (Phase 31 distribution)
 
 ## Requirements
 
@@ -60,15 +77,17 @@ v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 29 complete (S
 - ✓ Non-Cartesian systems and advanced stats — v1.5
 - ✓ Specialized geoms (dotplot, rug, errorbar, linerange, pointrange) — v1.6
 - ✓ Full interactivity wiring for all 25 geoms — v1.6
+- ✓ `geom_sf()` IR extraction via `ggplot_build()` + GeomSf/CoordSf dispatch — v1.7 (Phase 27)
+- ✓ Polygon/multipolygon geometry mapping to IR layer (GeoJSON via geojsonsf) — v1.7 (Phase 27)
+- ✓ D3 `d3.geoPath()` + `geoIdentity().reflectY().fitExtent()` rendering prototype — v1.7 (Phase 28)
+- ✓ CRS handling — unconditional WGS84 normalization in R (no JS reprojection) — v1.7 (Phase 27)
+- ✓ Interactivity design contract for `path.geom-sf` (tooltip/brush/zoom) — v1.7 (Phase 29)
+- ✓ Choropleth implementation blueprint with edge cases + anti-features + Build Phase A/B/C — v1.7 (Phase 30)
+- ✓ Public pkgdown site at https://davidzenz.github.io/gg2d3/ with live widgets in Get Started — v1.7 distribution (Phase 31, DOCS-02)
 
 ### Active
 
-- [x] Investigate `geom_sf()` geometry extraction via `ggplot_build()` — Validated in Phase 27
-- [x] Map polygon/multipolygon geometries to IR layer — Validated in Phase 27
-- [x] Evaluate D3 `d3.geoPath()` rendering for geographic shapes — Validated in Phase 28
-- [x] Assess CRS → D3 projection handling — Validated in Phase 27 (unconditional WGS84 normalization)
-- [x] Document interactivity integration for map regions — Validated in Phase 29 (29-01-SF-INTERACTIVITY-DESIGN.md)
-- [ ] Produce feasibility assessment and implementation blueprint — v1.7
+(None — next milestone TBD; run `/gsd-new-milestone`)
 
 ### Out of Scope
 
@@ -79,13 +98,15 @@ v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 29 complete (S
 
 ## Context
 
-gg2d3 shipped v1.6 with ~7,300 lines of R + JavaScript source code. The three-layer pipeline (R → IR → D3) is mature: R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, which D3.js renders as SVG through a registry-based geom dispatch system. The package supports 25 geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, non-Cartesian coordinates, and a composable pipe-based interactivity API. Test coverage spans 16 test files across 638+ tests.
+gg2d3 shipped v1.7 (Choropleth Map Research) with the package source tree at ~14,900 LOC across R + JavaScript + Rmd. The three-layer pipeline (R → IR → D3) now extends to `geom_sf` via a prototype path (`R/sf_utils.R`, GeomSf/CoordSf dispatch in `as_d3_ir.R`, `inst/htmlwidgets/modules/geoms/sf.js`) with sf and geojsonsf added to Suggests (no GDAL/GEOS/PROJ forced on users). The public package site is live and rebuilt on every push to master.
 
 **Known tech debt:**
 - Monolithic `as_d3_ir()` function (~1000 lines) needs modularization
 - Private API dependency on `ggplot2:::calc_element()` creates fragility
-- Orphaned GeomPolygon reference (no renderer)
+- Orphaned GeomPolygon reference (no renderer) — flagged in v1.7 blueprint as deferred deferred item, not anti-feature
 - rect geom edge cases with out-of-bounds rendering
+- Phase 29 design-doc human-UAT items remain pending (4 subjective reads); programmatic verification of the doc passed (6/6 truths)
+- Phase 31 user-setup plan (31-04 GitHub Pages enablement) and Phase 31 itself have no formal SUMMARY/VERIFICATION artifacts despite live deployment
 
 ## Constraints
 
@@ -110,6 +131,16 @@ gg2d3 shipped v1.6 with ~7,300 lines of R + JavaScript source code. The three-la
 | Crosstalk for linked views | Client-side linked brushing without Shiny dependency | ✓ Good — works in static HTML |
 | Scoped INTERACTIVE_SELECTORS | Each interactivity module maintains its own selector array for geom classes | ✓ Good — extensible, caught as gap in v1.6 audit |
 | Standardized onRender pattern | All d3_* functions use consistent onRender + setTimeout for reliable event attachment | ✓ Good — eliminated race conditions |
+| sf research before sf build | Investigate `geom_sf()` end-to-end (IR + D3 + interactivity + edge cases) before committing to a build milestone, to avoid scope explosion mid-build | ✓ Good — v1.7 shipped a build-ready blueprint; IMPL-04 can execute against file/line-anchored plan |
+| `geojsonsf::sfc_geojson()` for sf serialization | Native sfc → GeoJSON in R is faster and lossless vs. jsonlite roundtrip | ✓ Good — adopted in `sf_utils.R` |
+| Unconditional WGS84 normalization in R | `sf::st_transform(geom_col, 4326)` before serialization eliminates need for JS-side reprojection (an explicit anti-feature) | ✓ Good — `coord.bbox` always WGS84 |
+| `d3.geoIdentity().reflectY(true).fitExtent()` for sf rendering | Avoid JS reprojection while still aligning SVG y-axis correctly; one-line projection setup | ✓ Good — works for NC and world borders prototypes |
+| `fill-rule="evenodd"` for multipolygon holes | SVG default winding rule renders holes as filled; evenodd correctly renders holes as transparent | ✓ Good — verified visually with world borders |
+| Centroid-based brush (reject polygon hit-testing) for sf | Centroid storage is O(N) cheap; polygon hit-test cost grows with vertex count and offers minor UX benefit | ✓ Good — D-06 with three documented rationales (memory/compute/UX) |
+| SVG group-transform zoom for sf (diverge from element-repositioning) | Reapplying geoPath on every zoom is expensive; group transform with non-scaling-stroke achieves same UX cheaply | ✓ Good — D-08/09/10 in 29-01 design doc |
+| `vector-effect="non-scaling-stroke"` as SVG presentation attribute (not CSS) | CSS rules don't survive `saveWidget` serialization; presentation attributes do | ✓ Good — D-09 explicit NOT-CSS framing |
+| Three explicit sf anti-features (tile basemaps, JS reprojection, slippy zoom) | Each conflicts with SVG-only mandate or existing zoom architecture — durable rationales prevent scope creep | ✓ Good — distinguished from "deferred" items |
+| pkgdown via r-lib v2-branch template + SHA-pinned deploy action | Match the canonical r-lib pattern (auditable, well-supported); SHA-pin deploy action mitigates supply-chain risk | ✓ Good — site live with widgets on 2026-05-17 |
 
 ---
-*Last updated: 2026-05-18 after Phase 29 completion*
+*Last updated: 2026-05-18 after v1.7 Choropleth Map Research milestone shipped*

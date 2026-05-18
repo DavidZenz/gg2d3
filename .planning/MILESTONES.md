@@ -1,5 +1,30 @@
 # Milestones
 
+## v1.7 Choropleth Map Research (Shipped: 2026-05-18)
+
+**Phases completed:** 4 research phases (27-30) + 1 cross-milestone distribution phase (31)
+**Plans:** 10 (6 v1.7 + 4 distribution, plus user-setup plan 31-04)
+**Timeline:** 45 days (2026-04-04 → 2026-05-18)
+**Git range:** cc31fad → c7a5c22 (30 files changed, 1,897 insertions, 164 deletions)
+
+**Delivered:** A complete, build-ready blueprint for adding `geom_sf` choropleth support to gg2d3 — backed by working R-side IR extraction, a D3 sf renderer prototype with human-verified visual fidelity, an interactivity design contract covering tooltip/brush/zoom, and edge-case empirical findings with explicit anti-features. The public package site went live at https://davidzenz.github.io/gg2d3/ via pkgdown + GitHub Pages on every push to master.
+
+**Known deferred items at close:** 2 (see STATE.md Deferred Items — Phase 29 human-UAT/verification gaps; 4 subjective design-doc reads pending)
+
+**Key accomplishments:**
+
+- **R sf extraction (Phase 27):** `R/sf_utils.R` with 4 utility functions (geojsonsf::sfc_geojson serialization, unconditional WGS84 normalization, geometry-type detection, CRS extraction), wired into `as_d3_ir.R` via GeomSf/CoordSf dispatch, with IR-SCHEMA-SF.md documenting the schema extension. 26 tests across NC shapefile, rnaturalearth world borders, EPSG:3857 projected CRS.
+- **D3 sf renderer (Phase 28):** `inst/htmlwidgets/modules/geoms/sf.js` (113 lines) uses `d3.geoIdentity().reflectY(true).fitExtent()` (no JS reprojection) with `fill-rule="evenodd"` for multipolygon holes; centroids pre-computed and emitted as `data-cx`/`data-cy`. Human-verified for REND-01/02/03 via NC choropleth and world-borders test HTMLs.
+- **Interactivity design contract (Phase 29):** `29-01-SF-INTERACTIVITY-DESIGN.md` (654 lines, 11 design decisions D-01..D-11) covers tooltip/hover, brush (centroid-only with documented rejection of polygon hit-testing), and zoom (SVG group transform + `vector-effect="non-scaling-stroke"` as presentation attribute). Resolves the `data-centroid` vs `data-cx/data-cy` inconsistency with named build-phase migration.
+- **Implementation blueprint (Phase 30):** `30-01-BLUEPRINT.md` (734 lines) — three edge cases empirically resolved (mixed-geometry sentinel, multi-layer union-bbox confirmed, per-panel-bbox finding for faceted sf), three explicit anti-features (tile basemaps, JS-side reprojection, slippy zoom), and a phase-by-phase Build Phase A/B/C plan with file/line-anchored change callouts ready for `/gsd-plan-phase` to consume.
+- **Cross-milestone distribution (Phase 31):** pkgdown site live at https://davidzenz.github.io/gg2d3/, rebuilds on every push to master via `.github/workflows/pkgdown.yaml` (r-lib v2-branch template, SHA-pinned JamesIves deploy action). Vignette gg2d3.html embeds 44 interactive `gg2d3()` widget divs; D-14 published-site human checkpoint passed on 2026-05-17. Satisfies cross-milestone requirement DOCS-02.
+
+**Requirements:** 14/14 satisfied — FEAS-01..04, REND-01..03, INTR-01..03, BLPR-01..03, DOCS-02.
+
+**Audit:** .planning/milestones/v1.7-MILESTONE-AUDIT.md (status: tech_debt — no critical blockers; verification-artifact gaps non-blocking for a research milestone)
+
+---
+
 ## v1.6 Advanced Geoms & API Polish (Shipped: 2026-04-04)
 
 **Phases completed:** 14 phases, 17 plans, 9 tasks
