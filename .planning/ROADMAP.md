@@ -69,7 +69,7 @@ See .planning/milestones/v1.6-ROADMAP.md for full details.
 - [x] **Phase 27: R IR Extraction Feasibility** - Verify and prototype the R-side geometry extraction pipeline for geom_sf layers (completed 2026-04-04)
 - [x] **Phase 28: D3 Renderer Prototyping** - Prototype basic polygon rendering via d3.geoPath and validate the visual output (completed 2026-04-04)
 - [x] **Phase 29: Interactivity Design** - Document and evaluate the interactivity extension strategy for map regions (completed 2026-05-18)
-- [ ] **Phase 30: Edge Cases and Blueprint** - Investigate complex scenarios and produce the implementation blueprint
+- [x] **Phase 30: Edge Cases and Blueprint** - Investigate complex scenarios and produce the implementation blueprint (completed 2026-05-18)
 
 ## Phase Details
 
@@ -120,9 +120,9 @@ Plans:
   1. A written document covers at minimum three edge cases — mixed geometry types in a single layer, multiple stacked geom_sf layers, and faceted sf maps — with specific findings on how each interacts with the existing pipeline and what handling is required
   2. A written anti-features list exists with at least three explicitly deferred capabilities (e.g., tile basemaps, JS-side projection, slippy zoom), each with a rationale sentence explaining why it is out of scope
   3. A phase-by-phase implementation plan exists that names specific files to create or modify, describes the concrete changes in each file, and is sequenced to match the existing gg2d3 phase/plan conventions — sufficient for `/gsd:plan-phase` to execute without requiring new research
-**Plans:** 1 plans
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 30-01-PLAN.md — Single combined blueprint covering BLPR-01 (edge cases via empirical R prototypes), BLPR-02 (3-item anti-features list), and BLPR-03 (phase-by-phase impl plan at file/line specificity)
+- [x] 30-01-PLAN.md — Single combined blueprint covering BLPR-01 (edge cases via empirical R prototypes), BLPR-02 (3-item anti-features list), and BLPR-03 (phase-by-phase impl plan at file/line specificity)
 
 ## Progress
 
@@ -134,7 +134,7 @@ Phases execute in numeric order: 27 → 28 → 29 → 30 → 31
 | 27. R IR Extraction Feasibility | v1.7 | 2/2 | Complete    | 2026-04-04 |
 | 28. D3 Renderer Prototyping | v1.7 | 2/2 | Complete    | 2026-04-04 |
 | 29. Interactivity Design | v1.7 | 1/1 | Complete    | 2026-05-18 |
-| 30. Edge Cases and Blueprint | v1.7 | 0/? | Not started | - |
+| 30. Edge Cases and Blueprint | v1.7 | 1/1 | Complete    | 2026-05-18 |
 | 31. pkgdown and GH Pages Publishing | distribution | 5/5 | Complete    | 2026-05-17 |
 
 **Phase 31 note:** Orthogonal to v1.7 choropleth work. Ported from the v1.1 stupefied-austin branch where it was planned as Phase 19. Site live at https://davidzenz.github.io/gg2d3/ — rebuilds on every push to master via `.github/workflows/pkgdown.yaml` (r-lib v2-branch template, SHA-pinned deploy action). Satisfies the cross-milestone DOCS-02 requirement.
