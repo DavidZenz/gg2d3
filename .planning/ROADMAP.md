@@ -108,7 +108,9 @@ Plans:
   1. A written document describes exactly how to extend `d3_tooltip()` and `d3_hover()` to include `path.geom-sf` selectors, including which data attributes must be present on each `<path>` element and how tooltip content maps to region aesthetics
   2. A written comparison of centroid-based brush selection vs. polygon hit-testing for sf regions exists, with a clear recommendation and rationale (including why the other approach was rejected), sufficient for a developer to implement without revisiting the decision
   3. A written decision on zoom architecture for sf panels exists — either a concrete implementation approach (e.g., SVG group transform with documented stroke-width tradeoff) or an explicit deferral with rationale — leaving no ambiguity for the build phase
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 29-01-PLAN.md — Combined SF interactivity design doc (INTR-01 tooltip/hover, INTR-02 brush, INTR-03 zoom) covering D-01..D-11 and the data-centroid vs data-cx/data-cy resolution
 
 ### Phase 30: Edge Cases and Blueprint
 **Goal**: A complete, actionable implementation blueprint exists that documents complex real-world scenarios, explicit anti-features, and a phase-by-phase build plan with concrete file changes — ready to hand directly to a build milestone
