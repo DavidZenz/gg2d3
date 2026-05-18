@@ -22,9 +22,12 @@ Requirements for choropleth map research milestone. Each maps to roadmap phases.
 
 ### Interactivity
 
-- [ ] **INTR-01**: Document hover/tooltip extension strategy for `path.geom-sf` elements
-- [ ] **INTR-02**: Evaluate brush selection approach (centroid-based vs polygon hit-testing)
-- [ ] **INTR-03**: Determine zoom architecture for sf panels (suppress, SVG group transform, or geoPath re-render)
+- [x] **INTR-01
+**: Document hover/tooltip extension strategy for `path.geom-sf` elements
+- [x] **INTR-02
+**: Evaluate brush selection approach (centroid-based vs polygon hit-testing)
+- [x] **INTR-03
+**: Determine zoom architecture for sf panels (suppress, SVG group transform, or geoPath re-render)
 
 ### Blueprint
 
