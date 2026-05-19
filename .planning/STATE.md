@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Choropleth Map Research
-status: executing
-stopped_at: Phase 29 executing
-last_updated: "2026-05-19T20:25:27.333Z"
-last_activity: 2026-05-19 - Phase 29 execution started
+status: ready
+stopped_at: Completed 29-01-PLAN.md
+last_updated: "2026-05-19T20:33:13.417Z"
+last_activity: 2026-05-19 - Phase 29 plan 01 completed
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 5
-  completed_plans: 4
-  percent: 80
+  completed_plans: 5
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** Phase 29 - interactivity-design
+**Current focus:** Phase 30 - edge cases and blueprint
 
 ## Current Position
 
-Phase: 29 (interactivity-design) - EXECUTING
-Plan: 1 of 1
-Status: Executing Phase 29
-Last activity: 2026-05-19 - Phase 29 execution started
+Phase: 30 (edge cases and blueprint) - READY
+Plan: TBD
+Status: Ready for Phase 30 planning
+Last activity: 2026-05-19 - Phase 29 plan 01 completed
 
-Progress: [########--] 80% (4/5 v1.7 plans complete)
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [########--] 80% (4/5 v1.7 plans complete)
 | Phase 27-r-ir-extraction-feasibility P02 | 525626 | 2 tasks | 4 files |
 | Phase 28-d3-renderer-prototyping P01 | 8 | 2 tasks | 4 files |
 | Phase 28-d3-renderer-prototyping P02 | 10 | 2 tasks | 1 files |
+| Phase 29-interactivity-design P01 | 3 min | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,9 @@ Recent decisions affecting current work:
 - [Phase 28-d3-renderer-prototyping]: sf.js uses geoIdentity+reflectY+fitExtent; xScale/yScale received but ignored; centroids pre-computed in single pass
 - [Phase 28-d3-renderer-prototyping]: Visual tests use skip_if_not_installed() guards for all optional spatial packages so CI passes without GDAL/GEOS/PROJ
 - [Phase 28-d3-renderer-prototyping]: REND-01/02/03 all human-verified passing via browser inspection of NC choropleth and world borders HTML files
+- [Phase 29-interactivity-design]: Future geom_sf tooltip and hover support extends existing selectors with path.geom-sf and keeps bound rows as the tooltip data source
+- [Phase 29-interactivity-design]: Future geom_sf brush support selects regions by data-cx/data-cy centroid containment, not polygon overlap
+- [Phase 29-interactivity-design]: First geom_sf build suppresses d3_zoom() from R with a warning; map zoom is deferred to projection/path re-rendering
 
 ### Pending Todos
 
@@ -76,13 +80,13 @@ None yet.
 ### Blockers/Concerns
 
 - Phase 27 feasibility gate: Must empirically verify `ggplot_build()` preserves the `sfc` geometry list-column before writing any extraction code. Run `b <- ggplot_build(ggplot(nc) + geom_sf()); "geometry" %in% names(b$data[[1]])`. If FALSE, fallback to pre-build layer extraction requires design rework.
-- Phase 30 research flag: Zoom architecture decision (SVG group transform vs. geoPath re-render vs. explicit suppression) needs a short spike before committing to the blueprint.
+- Phase 30 should use `.planning/phases/29-interactivity-design/29-INTERACTIVITY-DESIGN.md` as the locked interactivity input for blueprint work.
 
 ## Session Continuity
 
-Last session: 2026-05-19T19:15:49.998Z
-Stopped at: Phase 29 context gathered
-Resume file: .planning/phases/29-interactivity-design/29-CONTEXT.md
+Last session: 2026-05-19T20:33:13.417Z
+Stopped at: Completed 29-01-PLAN.md
+Resume file: None
 
 ---
 *State initialized: 2026-02-07*

@@ -22,9 +22,12 @@ Requirements for choropleth map research milestone. Each maps to roadmap phases.
 
 ### Interactivity
 
-- [ ] **INTR-01**: Document hover/tooltip extension strategy for `path.geom-sf` elements
-- [ ] **INTR-02**: Evaluate brush selection approach (centroid-based vs polygon hit-testing)
-- [ ] **INTR-03**: Determine zoom architecture for sf panels (suppress, SVG group transform, or geoPath re-render)
+- [x] **INTR-01
+**: Document hover/tooltip extension strategy for `path.geom-sf` elements
+- [x] **INTR-02
+**: Evaluate brush selection approach (centroid-based vs polygon hit-testing)
+- [x] **INTR-03
+**: Determine zoom architecture for sf panels (suppress, SVG group transform, or geoPath re-render)
 
 ### Blueprint
 
@@ -72,9 +75,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REND-01 | Phase 28 | Complete |
 | REND-02 | Phase 28 | Complete |
 | REND-03 | Phase 28 | Complete |
-| INTR-01 | Phase 29 | Pending |
-| INTR-02 | Phase 29 | Pending |
-| INTR-03 | Phase 29 | Pending |
+| INTR-01 | Phase 29 | Complete |
+| INTR-02 | Phase 29 | Complete |
+| INTR-03 | Phase 29 | Complete |
 | BLPR-01 | Phase 30 | Pending |
 | BLPR-02 | Phase 30 | Pending |
 | BLPR-03 | Phase 30 | Pending |
