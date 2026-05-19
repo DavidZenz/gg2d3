@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Choropleth Map Research
-status: ready
+status: ready_to_plan
 stopped_at: Completed 29-01-PLAN.md
 last_updated: "2026-05-19T20:33:13.417Z"
 last_activity: 2026-05-19 - Phase 29 plan 01 completed
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 
 ## Current Position
 
-Phase: 30 (edge cases and blueprint) - READY
-Plan: TBD
-Status: Ready for Phase 30 planning
-Last activity: 2026-05-19 - Phase 29 plan 01 completed
+Phase: 30
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-05-19
 
 Progress: [██████████] 100%
 
@@ -36,7 +36,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 0 (v1.7 milestone)
+- Total plans completed: 1 (v1.7 milestone)
 - Average duration: unknown
 - Total execution time: 0 hours
 
@@ -44,7 +44,7 @@ Progress: [██████████] 100%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 29 | 1 | - | - |
 
 *Updated after each plan completion*
 | Phase 27-r-ir-extraction-feasibility P01 | 10 | 3 tasks | 3 files |

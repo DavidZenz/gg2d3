@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 28 complete (D3 geom_sf renderer prototype working with polygon/multipolygon rendering, hole handling, and aesthetic passthrough).
+v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 29 complete (geom_sf interactivity strategy documented for tooltip/hover, centroid brushing, and first-build zoom suppression).
 
 ## Current Milestone: v1.7 Choropleth Map Research
 
@@ -67,7 +67,7 @@ v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 28 complete (D
 - [x] Map polygon/multipolygon geometries to IR layer — Validated in Phase 27
 - [x] Evaluate D3 `d3.geoPath()` rendering for geographic shapes — Validated in Phase 28
 - [x] Assess CRS → D3 projection handling — Validated in Phase 27 (unconditional WGS84 normalization)
-- [ ] Document interactivity integration for map regions — v1.7
+- [x] Document interactivity integration for map regions — Validated in Phase 29
 - [ ] Produce feasibility assessment and implementation blueprint — v1.7
 
 ### Out of Scope
@@ -110,6 +110,7 @@ gg2d3 shipped v1.6 with ~7,300 lines of R + JavaScript source code. The three-la
 | Crosstalk for linked views | Client-side linked brushing without Shiny dependency | ✓ Good — works in static HTML |
 | Scoped INTERACTIVE_SELECTORS | Each interactivity module maintains its own selector array for geom classes | ✓ Good — extensible, caught as gap in v1.6 audit |
 | Standardized onRender pattern | All d3_* functions use consistent onRender + setTimeout for reliable event attachment | ✓ Good — eliminated race conditions |
+| geom_sf interactivity contract | Tooltip/hover should extend existing `path.geom-sf` selectors, brush should use centroid `data-cx`/`data-cy`, and zoom should be suppressed for first sf build | ✓ Good — validated in Phase 29 design contract |
 
 ---
-*Last updated: 2026-04-04 after Phase 28 completion*
+*Last updated: 2026-05-19 after Phase 29 completion*
