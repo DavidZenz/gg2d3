@@ -59,3 +59,46 @@ Update `isElementInPixelRect()` so `node.matches('path.geom-sf')` prefers `data-
 ### Callback data shape
 
 `collectSelectedData()` should preserve the current callback contract by returning bound row objects for selected sf regions. `d3_brush()` callbacks must not return GeoJSON payloads for sf paths; geometry internals such as `_geom` are implementation details attached to the row for rendering, while the callback shape remains the selected row object. This covers D-07.
+
+## INTR-03 - Zoom Architecture Decision
+
+For the first sf build, d3_zoom() is suppressed for widgets containing sf layers. `R/d3_zoom.R` is the primary guard location because it can prevent broken zoom attachment before `htmlwidgets::onRender()` registers `window.gg2d3.zoom.attach(...)`. The R warning text should be `d3_zoom() is not supported for geom_sf layers yet; zoom was not attached.` This covers D-09 and D-10.
+
+SVG group transform is rejected because it scales stroke widths, which conflicts with gg2d3's existing Cartesian zoom principle of preserving mark stroke widths. The deferred future candidate is projection/path re-rendering: update the map projection and recompute each `path.geom-sf` `d` attribute rather than applying a scaled SVG wrapper. This preserves D-11 and D-12.
+
+`inst/htmlwidgets/modules/zoom.js` may later add a JavaScript fallback guard, but the first-build contract is R-visible suppression through `R/d3_zoom.R` so users are warned at the API call site and no broken zoom state is attached.
+
+## Implementation Hook Checklist
+
+- `inst/htmlwidgets/modules/events.js`: add `'path.geom-sf'` to `INTERACTIVE_SELECTORS` so `d3_tooltip()` and `d3_hover()` attach to sf paths.
+- `inst/htmlwidgets/modules/tooltip.js`: keep `format(d, config, ir)` centered on the bound row and `ir.aes_by_var`; do not add sf-specific DOM attribute tooltip parsing.
+- `inst/htmlwidgets/modules/brush.js`: add `'path.geom-sf'` to the module-local selector list and update `isElementInPixelRect()` to prefer numeric `data-cx` and `data-cy` for `node.matches('path.geom-sf')`.
+- `inst/htmlwidgets/modules/zoom.js`: treat any future sf support as projection/path re-rendering work; do not apply SVG group transform zoom to sf paths.
+- `inst/htmlwidgets/modules/geoms/sf.js`: continue binding row objects to paths and emitting `data-row-id`, `data-cx`, and `data-cy` attributes for future interactivity modules.
+- `R/d3_zoom.R`: detect sf layers before setting `widget$x$interactivity$zoom`, warn with `d3_zoom() is not supported for geom_sf layers yet; zoom was not attached.`, and return without attaching zoom.
+
+## Decision Traceability
+
+| Decision | Requirement | Status |
+|----------|-------------|--------|
+| D-01 - Tooltip prioritizes mapped variables through `ir.aes_by_var`. | INTR-01 | Covered |
+| D-02 - Hover reuses existing behavior with `path.geom-sf` selectors. | INTR-01 | Covered |
+| D-03 - Tooltip content comes from bound row objects; `data-row-id` is not primary tooltip data. | INTR-01 | Covered |
+| D-04 - Tooltip values are not duplicated into DOM `data-*` attributes. | INTR-01 | Covered |
+| D-05 - Brush selects sf regions by centroid. | INTR-02 | Covered |
+| D-06 - Centroid-based selection is documented instead of polygon-overlap selection. | INTR-02 | Covered |
+| D-07 - Brush callbacks return bound row objects, not GeoJSON payloads. | INTR-02 | Covered |
+| D-08 - `brush.js` prefers `data-cx` and `data-cy` for `path.geom-sf`. | INTR-02 | Covered |
+| D-09 - First build suppresses `d3_zoom()` for sf panels. | INTR-03 | Covered |
+| D-10 - Zoom suppression is visible from R as a warning. | INTR-03 | Covered |
+| D-11 - Map zoom is deferred to projection/path re-rendering. | INTR-03 | Covered |
+| D-12 - SVG group transform is rejected because it scales stroke widths. | INTR-03 | Covered |
+
+## Checker Sign-Off
+
+- [ ] INTR-01 covered
+- [ ] INTR-02 covered
+- [ ] INTR-03 covered
+- [ ] D-01 through D-12 covered
+- [ ] No production source edits required
+- [ ] Map zoom deferred to projection/path re-rendering candidate
