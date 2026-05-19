@@ -131,7 +131,7 @@ Phases execute in numeric order: 27 → 28 → 29 → 30 → 31
 |-------|-----------|----------------|--------|-----------|
 | 27. R IR Extraction Feasibility | v1.7 | 2/2 | Complete    | 2026-04-04 |
 | 28. D3 Renderer Prototyping | v1.7 | 2/2 | Complete    | 2026-04-04 |
-| 29. Interactivity Design | v1.7 | 0/? | Not started | - |
+| 29. Interactivity Design | v1.7 | 0/1 | Planned | - |
 | 30. Edge Cases and Blueprint | v1.7 | 0/? | Not started | - |
 | 31. pkgdown and GH Pages Publishing | distribution | 5/5 | Complete    | 2026-05-17 |
 
