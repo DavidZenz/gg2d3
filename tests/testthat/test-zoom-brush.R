@@ -83,6 +83,23 @@ test_that("d3_zoom() adds onRender callback", {
   expect_s3_class(w, "htmlwidget")
 })
 
+test_that("d3_zoom() warns and suppresses zoom for geom_sf widgets", {
+  skip_if_not_installed("sf")
+  library(ggplot2)
+
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  p <- ggplot(nc) + geom_sf()
+
+  expect_warning(
+    w <- gg2d3(p) |> d3_zoom(),
+    "geom_sf.*zoom|zoom.*geom_sf"
+  )
+
+  expect_s3_class(w, "gg2d3")
+  expect_s3_class(w, "htmlwidget")
+  expect_null(w$x$interactivity$zoom)
+})
+
 # d3_brush() tests
 
 test_that("d3_brush() requires gg2d3 widget", {

@@ -58,6 +58,13 @@ d3_zoom <- function(widget, scale_extent = c(1, 8), direction = c("both", "x", "
   direction <- match.arg(direction)
 
   has_sf_layer <- widget_has_sf_layer(widget)
+  if (has_sf_layer) {
+    warning(
+      "d3_zoom() does not support geom_sf layers yet; zoom has been suppressed.",
+      call. = FALSE
+    )
+    return(widget)
+  }
 
   # Initialize interactivity config if not present
   if (is.null(widget$x$interactivity)) {
