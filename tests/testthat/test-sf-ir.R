@@ -99,3 +99,93 @@ test_that("data rows are parallel to geometries", {
   ir <- as_d3_ir(ggplot2::ggplot(nc) + ggplot2::geom_sf())
   expect_equal(length(ir$layers[[1]]$data), length(ir$layers[[1]]$geometries))
 })
+
+# ============================================================
+# Phase 32 - filtered sf IR diagnostics
+# ============================================================
+
+sf_ir_square_ring <- function(xmin = 0, ymin = 0, xmax = 1, ymax = 1) {
+  matrix(
+    c(
+      xmin, ymin,
+      xmax, ymin,
+      xmax, ymax,
+      xmin, ymax,
+      xmin, ymin
+    ),
+    ncol = 2,
+    byrow = TRUE
+  )
+}
+
+test_that("as_d3_ir filters unsupported sf rows and preserves source row_id", {
+  polygon <- sf::st_polygon(list(sf_ir_square_ring()))
+  point <- sf::st_point(c(10, 10))
+  multipolygon <- sf::st_multipolygon(list(
+    list(sf_ir_square_ring(2, 0, 3, 1)),
+    list(sf_ir_square_ring(4, 0, 5, 1))
+  ))
+
+  mixed <- sf::st_sf(
+    id = 1:3,
+    label = c("polygon", "point", "multipolygon"),
+    geometry = sf::st_sfc(polygon, point, multipolygon, crs = 4326)
+  )
+
+  expect_warning(
+    ir <- as_d3_ir(ggplot2::ggplot(mixed) + ggplot2::geom_sf()),
+    regexp = "skipped 1"
+  )
+
+  layer <- ir$layers[[1]]
+  row_ids <- vapply(layer$data, function(row) row$row_id, numeric(1))
+
+  expect_equal(layer$geom, "sf")
+  expect_equal(length(layer$data), length(layer$geometries))
+  expect_equal(row_ids, c(1, 3))
+  expect_equal(layer$sf_diagnostics$accepted_rows, c(1L, 3L))
+  expect_equal(layer$sf_diagnostics$skipped_rows, 2L)
+  expect_true("POINT" %in% layer$sf_diagnostics$unsupported_geometry_types)
+  expect_no_warning(validate_ir(ir))
+})
+
+test_that("as_d3_ir warns for missing CRS and records sf diagnostics", {
+  missing_crs <- sf::st_sf(
+    id = 1L,
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(sf_ir_square_ring())),
+      crs = NA_character_
+    )
+  )
+
+  expect_warning(
+    ir <- as_d3_ir(ggplot2::ggplot(missing_crs) + ggplot2::geom_sf()),
+    regexp = "missing CRS"
+  )
+
+  layer <- ir$layers[[1]]
+  expect_true(layer$sf_diagnostics$missing_crs)
+  expect_equal(layer$sf_diagnostics$accepted_rows, 1L)
+  expect_equal(layer$crs$epsg, NA_integer_)
+  expect_no_warning(validate_ir(ir))
+})
+
+test_that("validate_ir errors on malformed sf layer structures", {
+  ir <- as_d3_ir(ggplot2::ggplot(nc) + ggplot2::geom_sf())
+
+  missing_geometries <- ir
+  missing_geometries$layers[[1]]$geometries <- NULL
+  expect_error(validate_ir(missing_geometries), regexp = "sf layer.*geometries")
+
+  mismatched_geometries <- ir
+  mismatched_geometries$layers[[1]]$geometries <- mismatched_geometries$layers[[1]]$geometries[-1]
+  expect_error(validate_ir(mismatched_geometries), regexp = "sf layer.*geometries")
+
+  missing_diagnostics <- ir
+  missing_diagnostics$layers[[1]]$sf_diagnostics <- NULL
+  expect_error(validate_ir(missing_diagnostics), regexp = "sf layer.*sf_diagnostics")
+
+  missing_rows <- ir
+  missing_rows$layers[[1]]$sf_diagnostics$accepted_rows <- NULL
+  expect_error(validate_ir(missing_rows), regexp = "sf layer.*accepted_rows")
+})
