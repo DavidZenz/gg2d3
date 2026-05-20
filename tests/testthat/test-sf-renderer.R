@@ -75,6 +75,22 @@ test_that("panel renderer filters sf data and geometries together", {
   expect_match(gg2d3_js, "geometries: filteredPairs\\.map")
 })
 
+test_that("skipped sf rows cannot become selectable paths", {
+  gg2d3_js <- read_repo_file("inst/htmlwidgets/gg2d3.js")
+  sf_js <- read_repo_file("inst/htmlwidgets/modules/geoms/sf.js")
+
+  expect_match(gg2d3_js, "sfPairs")
+  expect_match(gg2d3_js, "filteredPairs\\.map\\(function\\(pair\\) \\{ return pair\\.data; \\}\\)")
+  expect_match(gg2d3_js, "geometries: filteredPairs\\.map\\(function\\(pair\\) \\{ return pair\\.geometry; \\}\\)")
+
+  expect_match(sf_js, "path\\.geom-sf")
+  expect_match(sf_js, "\\.data\\(rows\\)")
+  expect_match(sf_js, "data-row-id")
+  expect_match(sf_js, "data-cx")
+  expect_match(sf_js, "data-cy")
+  expect_match(sf_js, "d\\.row_id")
+})
+
 test_that("panel renderer passes sf bbox state to geom renderers", {
   gg2d3_js <- read_repo_file("inst/htmlwidgets/gg2d3.js")
 

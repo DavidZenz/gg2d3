@@ -152,6 +152,51 @@ test_that("as_d3_ir filters unsupported sf rows and preserves source row_id", {
   expect_no_warning(validate_ir(ir))
 })
 
+test_that("as_d3_ir keeps skipped sf rows out of accepted row ids", {
+  polygon <- sf::st_polygon(list(sf_ir_square_ring()))
+  point <- sf::st_point(c(10, 10))
+  empty_polygon <- sf::st_polygon()
+  bowtie <- sf::st_polygon(list(matrix(
+    c(
+      20, 0,
+      21, 1,
+      21, 0,
+      20, 1,
+      20, 0
+    ),
+    ncol = 2,
+    byrow = TRUE
+  )))
+  multipolygon <- sf::st_multipolygon(list(
+    list(sf_ir_square_ring(30, 0, 31, 1))
+  ))
+
+  mixed <- sf::st_sf(
+    id = 1:5,
+    label = c("polygon", "point", "empty", "invalid", "multipolygon"),
+    geometry = sf::st_sfc(polygon, point, empty_polygon, bowtie, multipolygon, crs = 4326)
+  )
+
+  expect_warning(
+    ir <- as_d3_ir(ggplot2::ggplot(mixed) + ggplot2::geom_sf()),
+    regexp = "skipped 3"
+  )
+
+  layer <- ir$layers[[1]]
+  row_ids <- vapply(layer$data, function(row) row$row_id, numeric(1))
+  skipped_rows <- layer$sf_diagnostics$skipped_rows
+
+  expect_equal(length(layer$data), length(layer$geometries))
+  expect_equal(row_ids, layer$sf_diagnostics$accepted_rows)
+  expect_equal(row_ids, c(1, 5))
+  expect_equal(skipped_rows, c(2L, 3L, 4L))
+  expect_false(any(skipped_rows %in% row_ids))
+  expect_equal(length(layer$geometries), length(layer$sf_diagnostics$accepted_rows))
+  expect_equal(layer$sf_diagnostics$accepted_geometry_types, c("MULTIPOLYGON", "POLYGON"))
+  expect_true("POINT" %in% layer$sf_diagnostics$unsupported_geometry_types)
+  expect_no_warning(validate_ir(ir))
+})
+
 test_that("stacked sf layers share one panel sf_bbox", {
   base_sf <- sf::st_sf(
     id = 1L,

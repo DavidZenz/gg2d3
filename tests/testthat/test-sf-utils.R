@@ -265,6 +265,45 @@ test_that("prepare_sf_geometry_ir keeps polygon family and reports unsupported t
   expect_true(all(grepl('\\{"type":', result$geometries)))
 })
 
+test_that("prepare_sf_geometry_ir records skipped mixed sf rows", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("geojsonsf")
+
+  polygon <- sf::st_polygon(list(square_ring()))
+  point <- sf::st_point(c(10, 10))
+  empty_polygon <- sf::st_polygon()
+  bowtie <- sf::st_polygon(list(matrix(
+    c(
+      20, 0,
+      21, 1,
+      21, 0,
+      20, 1,
+      20, 0
+    ),
+    ncol = 2,
+    byrow = TRUE
+  )))
+  multipolygon <- sf::st_multipolygon(list(
+    list(square_ring(30, 0, 31, 1))
+  ))
+
+  df <- data.frame(label = c("polygon", "point", "empty", "invalid", "multipolygon"))
+  df$geometry <- sf::st_sfc(polygon, point, empty_polygon, bowtie, multipolygon, crs = 4326)
+
+  expect_warning(
+    result <- prepare_sf_geometry_ir(df),
+    regexp = "skipped 3"
+  )
+
+  expect_equal(nrow(result$data), length(result$geometries))
+  expect_equal(result$data$row_id, c(1L, 5L))
+  expect_equal(result$sf_diagnostics$accepted_rows, c(1L, 5L))
+  expect_equal(result$sf_diagnostics$skipped_rows, c(2L, 3L, 4L))
+
+  reasons <- vapply(result$sf_diagnostics$skipped, function(item) item$reason, character(1))
+  expect_equal(reasons, c("unsupported", "empty", "invalid"))
+})
+
 test_that("prepare_sf_geometry_ir skips empty polygon geometry", {
   skip_if_not_installed("sf")
   skip_if_not_installed("geojsonsf")
