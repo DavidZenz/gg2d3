@@ -49,6 +49,11 @@ test_that("d3_zoom() validates scale_extent", {
   expect_error(gg2d3(p) |> d3_zoom(scale_extent = c(1)), "length 2")
   expect_error(gg2d3(p) |> d3_zoom(scale_extent = c(1, 2, 3)), "length 2")
 
+  # Missing and non-finite values
+  expect_error(gg2d3(p) |> d3_zoom(scale_extent = c(NA_real_, 8)), "finite numeric vector")
+  expect_error(gg2d3(p) |> d3_zoom(scale_extent = c(NaN, 8)), "finite numeric vector")
+  expect_error(gg2d3(p) |> d3_zoom(scale_extent = c(1, Inf)), "finite numeric vector")
+
   # Minimum < 1
   expect_error(gg2d3(p) |> d3_zoom(scale_extent = c(0.5, 8)), "must be >= 1")
 

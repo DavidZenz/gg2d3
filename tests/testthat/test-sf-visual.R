@@ -213,18 +213,13 @@ test_that("REND-01: NC counties render as filled choropleth via gg2d3 pipeline",
   skip_if_not_installed("sf")
   skip_if_not_installed("geojsonsf")
 
-  out_dir <- .test_output_dir()
-  dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
-
   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   p <- ggplot2::ggplot(nc, ggplot2::aes(fill = BIR74)) + ggplot2::geom_sf()
 
   w <- gg2d3(p)
   expect_s3_class(w, "htmlwidget")
 
-  outpath <- file.path(out_dir, "phase28-nc-choropleth.html")
-  htmlwidgets::saveWidget(w, file = normalizePath(outpath, mustWork = FALSE),
-                          selfcontained = TRUE)
+  outpath <- .phase35_save_widget(w, "phase28-nc-choropleth.html")
   expect_true(file.exists(outpath))
 
   # Verify the IR contains expected sf layer structure
@@ -240,9 +235,6 @@ test_that("REND-02/03: World borders render with multipolygon holes and correct 
   skip_if_not_installed("geojsonsf")
   skip_if_not_installed("rnaturalearth")
 
-  out_dir <- .test_output_dir()
-  dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
-
   # Use scale="small" which is bundled with rnaturalearth (no rnaturalearthdata needed)
   world <- rnaturalearth::ne_countries(scale = "small", returnclass = "sf")
   p <- ggplot2::ggplot(world) +
@@ -254,9 +246,7 @@ test_that("REND-02/03: World borders render with multipolygon holes and correct 
   )
   expect_s3_class(w, "htmlwidget")
 
-  outpath <- file.path(out_dir, "phase28-world-holes.html")
-  htmlwidgets::saveWidget(w, file = normalizePath(outpath, mustWork = FALSE),
-                          selfcontained = TRUE)
+  outpath <- .phase35_save_widget(w, "phase28-world-holes.html")
   expect_true(file.exists(outpath))
 
   # Verify IR structure

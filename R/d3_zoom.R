@@ -48,8 +48,9 @@ d3_zoom <- function(widget, scale_extent = c(1, 8), direction = c("both", "x", "
   }
 
   # Validate scale_extent
-  if (!is.numeric(scale_extent) || length(scale_extent) != 2) {
-    stop("scale_extent must be a numeric vector of length 2")
+  if (!is.numeric(scale_extent) || length(scale_extent) != 2 ||
+      any(!is.finite(scale_extent))) {
+    stop("scale_extent must be a finite numeric vector of length 2")
   }
   if (scale_extent[1] < 1) {
     stop("scale_extent minimum must be >= 1 (no zoom out beyond original view)")
