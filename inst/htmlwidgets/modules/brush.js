@@ -257,6 +257,12 @@
    * Check if an SVG element's position falls within the pixel rectangle.
    * Uses element attributes directly — no data-domain conversion needed.
    */
+  function isPointInPixelRect(x, y, rect) {
+    return Number.isFinite(x) && Number.isFinite(y) &&
+           x >= rect.px0 && x <= rect.px1 &&
+           y >= rect.py0 && y <= rect.py1;
+  }
+
   function isElementInPixelRect(node, rect) {
     var tagName = node.tagName.toLowerCase();
 
@@ -264,8 +270,7 @@
       // Point-in-rect check for circles (use center)
       var cx = parseFloat(node.getAttribute('cx'));
       var cy = parseFloat(node.getAttribute('cy'));
-      return cx >= rect.px0 && cx <= rect.px1 &&
-             cy >= rect.py0 && cy <= rect.py1;
+      return isPointInPixelRect(cx, cy, rect);
     }
 
     if (tagName === 'rect') {
@@ -282,8 +287,7 @@
       // Point-in-rect check for text (use anchor position)
       var tx = parseFloat(node.getAttribute('x'));
       var ty = parseFloat(node.getAttribute('y'));
-      return tx >= rect.px0 && tx <= rect.px1 &&
-             ty >= rect.py0 && ty <= rect.py1;
+      return isPointInPixelRect(tx, ty, rect);
     }
 
     if (tagName === 'line') {
@@ -304,6 +308,12 @@
     }
 
     if (tagName === 'path') {
+      if (node.classList && node.classList.contains('geom-sf')) {
+        var sfCx = parseFloat(node.getAttribute('data-cx'));
+        var sfCy = parseFloat(node.getAttribute('data-cy'));
+        return isPointInPixelRect(sfCx, sfCy, rect);
+      }
+
       // Use bounding box center for path elements
       try {
         var bbox = node.getBBox();

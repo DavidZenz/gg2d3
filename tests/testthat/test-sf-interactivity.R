@@ -47,3 +47,18 @@ test_that("brush module targets sf paths without dropping existing geoms", {
   expect_match(brush_js, "path\\.geom-line")
   expect_match(brush_js, "rect\\.geom-bar")
 })
+
+test_that("brush module uses sf centroid attrs before generic path bbox", {
+  brush_js <- read_module("inst/htmlwidgets/modules/brush.js")
+
+  expect_match(brush_js, "classList\\.contains\\('geom-sf'\\)")
+  expect_match(brush_js, "data-cx")
+  expect_match(brush_js, "data-cy")
+  expect_match(brush_js, "Number\\.isFinite")
+  expect_match(brush_js, "getBBox")
+
+  sf_branch <- regexpr("classList\\.contains\\('geom-sf'\\)", brush_js)
+  bbox_branch <- regexpr("getBBox", brush_js)
+  expect_true(sf_branch[[1]] > 0)
+  expect_true(bbox_branch[[1]] > sf_branch[[1]])
+})
