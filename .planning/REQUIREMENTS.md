@@ -27,8 +27,8 @@ Requirements for the production `geom_sf` polygon MVP milestone. Each maps to ex
 
 ### SF Documentation and Validation
 
-- [ ] **SFDOC-01**: Package-facing docs describe supported `geom_sf` polygon behavior, unsupported geometry handling, and explicit map anti-features.
-- [ ] **SFDOC-02**: Automated and human/browser validation fixtures cover single-panel choropleths, stacked sf overlays, faceted sf maps, unsupported geometry behavior, and interactivity smoke checks.
+- [x] **SFDOC-01**: Package-facing docs describe supported `geom_sf` polygon behavior, unsupported geometry handling, and explicit map anti-features.
+- [x] **SFDOC-02**: Automated and human/browser validation fixtures cover single-panel choropleths, stacked sf overlays, faceted sf maps, unsupported geometry behavior, and interactivity smoke checks.
 
 ## Future Requirements
 
@@ -74,8 +74,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SFINTR-01 | Phase 33 | Complete |
 | SFINTR-02 | Phase 33 | Complete |
 | SFINTR-03 | Phase 33 | Complete |
-| SFDOC-01 | Phase 35 | Pending |
-| SFDOC-02 | Phase 35 | Pending |
+| SFDOC-01 | Phase 35 | Complete |
+| SFDOC-02 | Phase 35 | Complete |
 
 **Coverage:**
 - v1.8 requirements: 11 total

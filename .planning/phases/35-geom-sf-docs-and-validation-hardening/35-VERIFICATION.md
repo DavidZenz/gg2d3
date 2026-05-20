@@ -5,7 +5,7 @@ status: passed
 score: 10/10 must-haves verified
 overrides_applied: 0
 re_verification:
-  previous_status: gaps_found
+  previous_result: gaps_found
   previous_score: 9/10
   gaps_closed:
     - "Validation covers unsupported, empty, invalid, and missing sf geometry skip behavior."

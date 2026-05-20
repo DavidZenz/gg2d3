@@ -100,7 +100,7 @@
 Plans:
 - [x] 35-01-PLAN.md — Update package-facing sf support docs and generated README/help output.
 - [x] 35-02-PLAN.md — Harden automated skipped-row, selectable-path, interactivity, and zoom validation.
-- [ ] 35-03-PLAN.md — Add Phase 35 HTML fixtures and run the final docs/sf validation sweep.
+- [x] 35-03-PLAN.md — Add Phase 35 HTML fixtures and run the final docs/sf validation sweep.
 
 **Success criteria:**
 1. Package docs describe supported polygon behavior, unsupported geometry handling, zoom suppression, and map anti-features.
@@ -194,7 +194,7 @@ See `.planning/milestones/v1.7-ROADMAP.md` and phase history for distribution de
 | 32. geom_sf IR Foundation | v1.8 | 2/2 | Complete    | 2026-05-20 |
 | 33. Single-Panel Renderer and Interactivity | v1.8 | 3/3 | Complete    | 2026-05-20 |
 | 34. Stacked and Faceted Projection Alignment | v1.8 | 2/2 | Complete | 2026-05-20 |
-| 35. geom_sf Docs and Validation Hardening | v1.8 | SFDOC-01, SFDOC-02 | Pending | — |
+| 35. geom_sf Docs and Validation Hardening | v1.8 | 3/3 | Complete    | 2026-05-20 |
 
 ---
 *Roadmap updated: 2026-05-20 after completing Phase 34*
