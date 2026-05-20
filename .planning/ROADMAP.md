@@ -9,7 +9,7 @@
 - ✅ **v1.4 Comprehensive Theme Parity & Reference Geoms** — Phases 20-21 (shipped 2026-03-31)
 - ✅ **v1.5 Non-Cartesian Systems & Advanced Stats** — Phases 22-23 (shipped 2026-03-31)
 - ✅ **v1.6 Advanced Geoms & API Polish** — Phases 24-26 (shipped 2026-04-04)
-- 🚧 **v1.7 Choropleth Map Research** — Phases 27-30 (in progress)
+- ✅ **v1.7 Choropleth Map Research** — Phases 27-30 (completed 2026-05-20)
 
 ## Phases
 
