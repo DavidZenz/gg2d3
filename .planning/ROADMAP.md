@@ -185,7 +185,7 @@ See `.planning/milestones/v1.7-ROADMAP.md` and phase history for distribution de
 
 | Phase | Milestone | Requirements | Status | Completed |
 |-------|-----------|--------------|--------|-----------|
-| 32. geom_sf IR Foundation | v1.8 | SFIR-01, SFIR-02, SFIR-03 | Pending | — |
+| 32. geom_sf IR Foundation | v1.8 | 1/2 | In Progress|  |
 | 33. Single-Panel Renderer and Interactivity | v1.8 | SFREND-01, SFINTR-01, SFINTR-02, SFINTR-03 | Pending | — |
 | 34. Stacked and Faceted Projection Alignment | v1.8 | SFREND-02, SFREND-03 | Pending | — |
 | 35. geom_sf Docs and Validation Hardening | v1.8 | SFDOC-01, SFDOC-02 | Pending | — |
