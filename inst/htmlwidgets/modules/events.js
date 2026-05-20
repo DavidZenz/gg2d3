@@ -53,6 +53,17 @@
     return String(value).trim().toLowerCase();
   }
 
+  function sanitizeEventDatum(d) {
+    if (!d || typeof d !== 'object' || Array.isArray(d)) return d;
+
+    const sanitized = {};
+    Object.keys(d).forEach(function(key) {
+      if (key.startsWith('_')) return;
+      sanitized[key] = d[key];
+    });
+    return sanitized;
+  }
+
   function getLegendKeyAestheticAliases(aesthetic) {
     if (aesthetic === 'colour') return ['colour', 'color', 'fill'];
     if (aesthetic === 'color') return ['color', 'colour', 'fill'];
@@ -667,22 +678,23 @@
 
       if (clickHandler || shinyId) {
         selection.on('click.custom', function(event, d) {
-          if (clickHandler) clickHandler.call(this, event, d);
+          const publicDatum = sanitizeEventDatum(d);
+          if (clickHandler) clickHandler.call(this, event, publicDatum);
           if (shinyId && window.Shiny) {
-            window.Shiny.setInputValue(shinyId, d);
+            window.Shiny.setInputValue(shinyId, publicDatum);
           }
         });
       }
 
       if (mouseoverHandler) {
         selection.on('mouseover.custom', function(event, d) {
-          mouseoverHandler.call(this, event, d);
+          mouseoverHandler.call(this, event, sanitizeEventDatum(d));
         });
       }
 
       if (mouseoutHandler) {
         selection.on('mouseout.custom', function(event, d) {
-          mouseoutHandler.call(this, event, d);
+          mouseoutHandler.call(this, event, sanitizeEventDatum(d));
         });
       }
     });

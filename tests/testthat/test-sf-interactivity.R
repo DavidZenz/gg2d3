@@ -28,6 +28,18 @@ test_that("events module targets sf paths without dropping existing geoms", {
   expect_match(events_js, "rect\\.geom-bar")
 })
 
+test_that("events module sanitizes sf custom handler data", {
+  events_js <- read_module("inst/htmlwidgets/modules/events.js")
+
+  expect_match(events_js, "sanitizeEventDatum")
+  expect_match(events_js, "startsWith\\('_'\\)")
+  expect_match(events_js, "publicDatum")
+  expect_match(events_js, "setInputValue\\(shinyId, publicDatum\\)")
+  expect_match(events_js, "clickHandler\\.call\\(this, event, publicDatum\\)")
+  expect_match(events_js, "mouseoverHandler\\.call\\(this, event, sanitizeEventDatum\\(d\\)\\)")
+  expect_match(events_js, "mouseoutHandler\\.call\\(this, event, sanitizeEventDatum\\(d\\)\\)")
+})
+
 test_that("tooltip module sanitizes sf renderer internals", {
   tooltip_js <- read_module("inst/htmlwidgets/modules/tooltip.js")
 
