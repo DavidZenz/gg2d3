@@ -29,6 +29,11 @@ Enables mouse-wheel zoom and click-drag pan for a gg2d3 widget. Users can
 zoom in/out with the mouse wheel, pan by dragging, and double-click to reset
 to the original view.
 }
+\details{
+\code{d3_zoom()} does not currently support widgets containing \code{geom_sf()} layers.
+Those widgets are returned unchanged with the warning "d3_zoom() does not
+support geom_sf layers yet; zoom has been suppressed."
+}
 \examples{
 \dontrun{
 library(ggplot2)

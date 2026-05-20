@@ -18,5 +18,7 @@ A list with fields:
 }
 \description{
 Returns a list with the EPSG code (integer or NA) and WKT string for
-the coordinate reference system of the geometry column.
+the coordinate reference system of the geometry column. Known CRS inputs are
+normalized to WGS84 in the \code{geom_sf()} IR path; missing CRS layers warn that
+coordinates will be serialized as-is.
 }

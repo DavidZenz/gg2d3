@@ -68,6 +68,7 @@ extract_sf_geometries <- function(df) {
 #' @param warn Whether to emit user-facing warnings for skipped rows and missing CRS
 #' @return A list with filtered data, GeoJSON geometries, normalized geometry,
 #'   CRS metadata, dominant accepted geometry type, and sf diagnostics
+#' @noRd
 prepare_sf_geometry_ir <- function(df,
                                    supported_types = c("POLYGON", "MULTIPOLYGON"),
                                    warn = TRUE) {

@@ -18,3 +18,11 @@ Extracts the sfc geometry column from a data.frame produced by
 and serializes each geometry as a GeoJSON geometry string via
 \code{geojsonsf::sfc_geojson()} (per D-10).
 }
+\details{
+gg2d3's public \code{geom_sf()} renderer is limited to polygon-family
+\code{POLYGON} and \code{MULTIPOLYGON} layers. Missing CRS emits
+"geom_sf layer has missing CRS; coordinates will be serialized as-is".
+Unsupported, empty, invalid, or missing geometries emit
+"geom_sf layer skipped \%d unsupported, empty, invalid, or missing geometries"
+and are skipped before rendering.
+}
