@@ -334,16 +334,16 @@ All claims in this research were verified or cited; no user confirmation is need
 |---|-------|---------|---------------|
 | — | — | — | — |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Dedicated `geom_sf` vignette or existing main vignette section?** [VERIFIED: 35-CONTEXT.md]
+1. **Dedicated `geom_sf` vignette or existing main vignette section? (RESOLVED)** [VERIFIED: 35-CONTEXT.md]
    - What we know: Either option is allowed if the support story is discoverable. [VERIFIED: 35-CONTEXT.md]
-   - What's unclear: The preferred documentation IA is not locked. [VERIFIED: 35-CONTEXT.md]
+   - Resolution: Use the existing main vignette section for Phase 35, with README pointing to it and diagnostics carrying the detailed boundary/anti-feature story. [VERIFIED: .planning/phases/35-geom-sf-docs-and-validation-hardening/35-01-PLAN.md]
    - Recommendation: Use the existing main vignette unless the section grows beyond a concise usage/contract block; this minimizes new vignette maintenance. [VERIFIED: vignettes/gg2d3.Rmd, 35-CONTEXT.md]
 
-2. **Cheap browser smoke check availability?** [VERIFIED: 35-CONTEXT.md]
+2. **Cheap browser smoke check availability? (RESOLVED)** [VERIFIED: 35-CONTEXT.md]
    - What we know: Manual HTML fixtures plus structural assertions are acceptable. [VERIFIED: 35-CONTEXT.md]
-   - What's unclear: No local browser DOM harness is established in the current test suite. [VERIFIED: tests/testthat directory scan]
+   - Resolution: Require manual HTML fixture inspection and automated structural/file-existence assertions only; do not make browser automation, screenshot diffing, or DOM harness setup a Phase 35 gate. [VERIFIED: .planning/phases/35-geom-sf-docs-and-validation-hardening/35-03-PLAN.md]
    - Recommendation: Plan structural HTML/file existence checks as required; make browser DOM inspection optional if a cheap local harness is already available during execution. [VERIFIED: 35-CONTEXT.md]
 
 ## Environment Availability
