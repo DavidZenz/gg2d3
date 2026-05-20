@@ -215,3 +215,119 @@ test_that("extract_sf_geometries on projected EPSG:3857 data produces valid WGS8
     info = "Latitude values must be in WGS84 range after normalization"
   )
 })
+
+# ============================================================
+# Phase 32 — polygon-family preparation helper
+# ============================================================
+
+square_ring <- function(xmin = 0, ymin = 0, xmax = 1, ymax = 1) {
+  matrix(
+    c(
+      xmin, ymin,
+      xmax, ymin,
+      xmax, ymax,
+      xmin, ymax,
+      xmin, ymin
+    ),
+    ncol = 2,
+    byrow = TRUE
+  )
+}
+
+test_that("prepare_sf_geometry_ir keeps polygon family and reports unsupported types", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("geojsonsf")
+
+  polygon <- sf::st_polygon(list(square_ring()))
+  multipolygon <- sf::st_multipolygon(list(
+    list(square_ring(2, 0, 3, 1)),
+    list(square_ring(4, 0, 5, 1))
+  ))
+  point <- sf::st_point(c(0.5, 0.5))
+  line <- sf::st_linestring(matrix(c(0, 0, 1, 1), ncol = 2, byrow = TRUE))
+
+  df <- data.frame(label = c("poly", "multi", "point", "line"))
+  df$geometry <- sf::st_sfc(polygon, multipolygon, point, line, crs = 4326)
+
+  expect_warning(
+    result <- prepare_sf_geometry_ir(df),
+    regexp = "skipped 2"
+  )
+
+  expect_equal(nrow(result$data), length(result$geometries))
+  expect_equal(length(result$data$row_id), length(result$geometries))
+  expect_equal(result$data$row_id, c(1L, 2L))
+  expect_equal(result$sf_diagnostics$accepted_rows, c(1L, 2L))
+  expect_equal(result$sf_diagnostics$skipped_rows, c(3L, 4L))
+  expect_true(all(c("POINT", "LINESTRING") %in% result$sf_diagnostics$unsupported_geometry_types))
+  expect_true(all(c("POLYGON", "MULTIPOLYGON") %in% result$sf_diagnostics$accepted_geometry_types))
+  expect_type(result$geometries, "character")
+  expect_true(all(grepl('\\{"type":', result$geometries)))
+})
+
+test_that("prepare_sf_geometry_ir skips empty polygon geometry", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("geojsonsf")
+
+  empty_polygon <- sf::st_polygon()
+  valid_polygon <- sf::st_polygon(list(square_ring()))
+  df <- data.frame(label = c("empty", "valid"))
+  df$geometry <- sf::st_sfc(empty_polygon, valid_polygon, crs = 4326)
+
+  expect_warning(
+    result <- prepare_sf_geometry_ir(df),
+    regexp = "skipped 1"
+  )
+
+  expect_equal(result$data$row_id, 2L)
+  expect_equal(result$sf_diagnostics$skipped_rows, 1L)
+  expect_equal(result$sf_diagnostics$skipped[[1]]$reason, "empty")
+})
+
+test_that("prepare_sf_geometry_ir skips invalid bowtie polygon", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("geojsonsf")
+
+  bowtie <- sf::st_polygon(list(matrix(
+    c(
+      0, 0,
+      1, 1,
+      1, 0,
+      0, 1,
+      0, 0
+    ),
+    ncol = 2,
+    byrow = TRUE
+  )))
+  valid_polygon <- sf::st_polygon(list(square_ring(2, 0, 3, 1)))
+  df <- data.frame(label = c("invalid", "valid"))
+  df$geometry <- sf::st_sfc(bowtie, valid_polygon, crs = 3857)
+
+  expect_warning(
+    result <- prepare_sf_geometry_ir(df),
+    regexp = "skipped 1"
+  )
+
+  expect_equal(result$data$row_id, 2L)
+  expect_equal(result$sf_diagnostics$skipped_rows, 1L)
+  expect_equal(result$sf_diagnostics$skipped[[1]]$reason, "invalid")
+})
+
+test_that("prepare_sf_geometry_ir warns for missing CRS and serializes as-is", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("geojsonsf")
+
+  df <- data.frame(label = "missing-crs")
+  df$geometry <- sf::st_sfc(sf::st_polygon(list(square_ring())), crs = NA_character_)
+
+  expect_warning(
+    result <- prepare_sf_geometry_ir(df),
+    regexp = "missing CRS"
+  )
+
+  expect_true(result$sf_diagnostics$missing_crs)
+  expect_equal(result$data$row_id, 1L)
+  expect_equal(result$sf_diagnostics$accepted_rows, 1L)
+  expect_equal(result$crs$epsg, NA_integer_)
+  expect_length(result$geometries, 1L)
+})
