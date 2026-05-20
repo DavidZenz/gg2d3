@@ -158,6 +158,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
     return(NULL)
   }
 
+  sf_coord_geometries <- list()
+
   layers <- lapply(seq_along(b$data), function(i) {
     df <- b$data[[i]]
 
@@ -343,6 +345,9 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
     if (gname == "sf") {
       sf_prepared <- prepare_sf_geometry_ir(df)
+      if (length(sf_prepared$geometry) > 0L) {
+        sf_coord_geometries[[length(sf_coord_geometries) + 1L]] <<- sf_prepared$geometry
+      }
       list(
         geom           = "sf",
         geom_type      = sf_prepared$geom_type,
@@ -698,11 +703,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
   # sf coord metadata: compute WGS84 bounding box from all sf layers
   sf_coord_meta <- if (is_sf_coord) {
-    all_sf_geoms <- do.call(c, Filter(Negate(is.null), lapply(seq_along(b$data), function(i) {
-      df_i <- b$data[[i]]
-      gcol <- names(df_i)[vapply(df_i, inherits, logical(1L), "sfc")][1L]
-      if (!is.na(gcol)) normalize_to_wgs84(df_i[[gcol]]) else NULL
-    })))
+    all_sf_geoms <- if (length(sf_coord_geometries) > 0L) do.call(c, sf_coord_geometries) else NULL
     bbox_vals <- if (!is.null(all_sf_geoms)) unname(as.numeric(sf::st_bbox(all_sf_geoms))) else NULL
     list(bbox = bbox_vals)
   } else {

@@ -146,6 +146,8 @@ test_that("as_d3_ir filters unsupported sf rows and preserves source row_id", {
   expect_equal(layer$sf_diagnostics$accepted_rows, c(1L, 3L))
   expect_equal(layer$sf_diagnostics$skipped_rows, 2L)
   expect_true("POINT" %in% layer$sf_diagnostics$unsupported_geometry_types)
+  expect_lt(ir$coord$bbox[[3]], 6)
+  expect_lt(ir$coord$bbox[[4]], 2)
   expect_no_warning(validate_ir(ir))
 })
 
