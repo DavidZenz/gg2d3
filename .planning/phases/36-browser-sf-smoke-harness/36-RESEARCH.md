@@ -333,22 +333,22 @@ htmlwidgets::saveWidget(
 | A2 | Brush can be tested through either pointer gestures or in-page brush movement without changing production code. | Common Pitfalls / Open Questions | BRSF-02 centroid brush may need a documented gap plus strongest feasible callback assertion per D-09. |
 | A3 | Console/page error collection can be wired cleanly with chromote Runtime events in synchronous testthat helpers. | Common Pitfalls / Code Examples | BRSF-01 no-error assertion may need helper iteration or narrower accepted error scope. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Brush gesture implementation**
    - What we know: `brush.js` uses `d3.brush()` and selects sf paths by `data-cx`/`data-cy`. [VERIFIED: inst/htmlwidgets/modules/brush.js:118-129; VERIFIED: inst/htmlwidgets/modules/brush.js:310-315]
-   - What's unclear: Whether headless pointer events or programmatic brush movement is more reliable through `chromote`. [ASSUMED]
-   - Recommendation: Plan a small Wave 0 spike inside the helper test file before broadening fixture assertions. [ASSUMED]
+   - Resolution: Plan 36-03 chooses programmatic brush movement through the existing `panelGroup.node().__gg2d3_brush.group.call(panelGroup.node().__gg2d3_brush.behavior.move, [[cx - 2, cy - 2], [cx + 2, cy + 2]])` path, using the first sf path's finite `data-cx` and `data-cy`. This avoids relying on headless pointer drag fidelity while still exercising the production D3 brush behavior and `on_brush` callback.
+   - Fallback: If programmatic movement proves unreliable during execution, follow D-09: document the gap in the plan summary and keep the strongest feasible assertion over centroid attributes and sanitized callback plumbing before considering a non-`chromote` browser stack.
 
 2. **Console/page error capture helper shape**
    - What we know: CDP Runtime exposes `consoleAPICalled` and `exceptionThrown` events, and chromote wraps CDP commands/events. [CITED: https://chromedevtools.github.io/devtools-protocol/tot/Runtime/; CITED: https://rstudio.github.io/chromote/articles/commands-and-events.html]
-   - What's unclear: The cleanest R helper for accumulating those events while tests run synchronously. [ASSUMED]
-   - Recommendation: Implement helper-level logging first and require tests to fail on `error`, `assert`, and unhandled exception entries; document whether warnings are allowed or captured-only. [ASSUMED]
+   - Resolution: Plans 36-01 and 36-03 choose centralized helper functions in `tests/testthat/helper-browser-sf.R`: `browser_console_collector(session)`, `assert_no_browser_errors(logs)`, and `write_browser_failure_artifacts(name, html_path, logs, session = NULL)`. Runtime listeners must be registered before any `go_to()` call.
+   - Failure policy: Treat `Runtime.consoleAPICalled` types `error` and `assert`, plus all `Runtime.exceptionThrown` entries, as test failures. Persist deterministic `<fixture>-console.log` and `<fixture>-page-errors.log` files. Warnings may be captured for diagnostics but are not the Phase 36 fail condition unless execution discovers package-specific warnings that should be promoted.
 
 3. **Fixture file ownership**
    - What we know: `test_output/` and HTML fixture files are ignored locally. [VERIFIED: .gitignore:10; VERIFIED: .gitignore:50]
-   - What's unclear: Whether browser-smoke artifacts should go directly under `test_output/` or a `test_output/browser-sf/` subdirectory. [ASSUMED]
-   - Recommendation: Use `test_output/browser-sf/` to keep failure logs and optional screenshots discoverable without mixing them with Phase 35 manual fixtures. [ASSUMED]
+   - Resolution: Plans 36-01 and 36-02 choose `test_output/browser-sf/` via `browser_sf_artifact_dir()`, implemented as `file.path(.test_output_dir(), "browser-sf")`. Generated HTML, console logs, page-error logs, and optional screenshots should live under that subdirectory.
+   - Ownership rule: Source fixtures should be shared through `tests/testthat/helper-sf-fixtures.R` when extraction is useful; generated fixture files remain ignored local artifacts and must not be committed.
 
 ## Environment Availability
 
