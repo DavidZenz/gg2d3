@@ -57,6 +57,8 @@ d3_zoom <- function(widget, scale_extent = c(1, 8), direction = c("both", "x", "
   # Validate direction
   direction <- match.arg(direction)
 
+  has_sf_layer <- widget_has_sf_layer(widget)
+
   # Initialize interactivity config if not present
   if (is.null(widget$x$interactivity)) {
     widget$x$interactivity <- list()
@@ -82,4 +84,15 @@ d3_zoom <- function(widget, scale_extent = c(1, 8), direction = c("both", "x", "
   ")
 
   return(widget)
+}
+
+widget_has_sf_layer <- function(widget) {
+  layers <- widget$x$ir$layers
+  if (!is.list(layers)) {
+    return(FALSE)
+  }
+
+  any(vapply(layers, function(layer) {
+    is.list(layer) && identical(layer$geom, "sf")
+  }, logical(1)))
 }
