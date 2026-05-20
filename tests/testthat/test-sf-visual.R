@@ -40,7 +40,7 @@
   htmlwidgets::saveWidget(
     widget,
     file = normalizePath(outpath, mustWork = FALSE),
-    selfcontained = TRUE
+    selfcontained = FALSE
   )
   expect_true(file.exists(outpath))
   outpath
