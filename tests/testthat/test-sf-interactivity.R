@@ -62,3 +62,14 @@ test_that("brush module uses sf centroid attrs before generic path bbox", {
   expect_true(sf_branch[[1]] > 0)
   expect_true(bbox_branch[[1]] > sf_branch[[1]])
 })
+
+test_that("brush module sanitizes sf callback data", {
+  brush_js <- read_module("inst/htmlwidgets/modules/brush.js")
+
+  expect_match(brush_js, "sanitizeSelectedDatum")
+  expect_match(brush_js, "startsWith\\('_'\\)")
+  expect_match(brush_js, "collectSelectedData")
+  expect_match(brush_js, "sanitizeSelectedDatum\\(d\\)")
+  private_fields <- c("_geom", "_centroid")
+  expect_true(all(startsWith(private_fields, "_")))
+})

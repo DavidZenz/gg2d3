@@ -395,6 +395,20 @@
   }
 
   /**
+   * Remove renderer-private fields before exposing selected rows to callbacks.
+   */
+  function sanitizeSelectedDatum(d) {
+    if (!d || typeof d !== 'object' || Array.isArray(d)) return d;
+
+    var sanitized = {};
+    Object.keys(d).forEach(function(key) {
+      if (key.startsWith('_')) return;
+      sanitized[key] = d[key];
+    });
+    return sanitized;
+  }
+
+  /**
    * Collect data from selected elements (for on_brush callback).
    */
   function collectSelectedData(panelGroup, pixelRect) {
@@ -407,7 +421,7 @@
       clippedGroup.selectAll(selector).each(function(d) {
         if (!d) return;
         if (isElementInPixelRect(this, pixelRect)) {
-          selectedData.push(d);
+          selectedData.push(sanitizeSelectedDatum(d));
         }
       });
     });
