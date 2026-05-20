@@ -10,19 +10,17 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 29 complete (geom_sf interactivity strategy documented for tooltip/hover, centroid brushing, and first-build zoom suppression).
+v1.7 shipped 2026-05-20. The choropleth research milestone is complete: gg2d3 now has verified `geom_sf` R extraction research, a D3 polygon renderer prototype, interactivity design guidance, and a future implementation blueprint for production sf work.
 
-## Current Milestone: v1.7 Choropleth Map Research
+## Next Milestone Goals
 
-**Goal:** Investigate how gg2d3 can support choropleth map rendering via `geom_sf()` and document a clear implementation plan for future build.
+Start the next milestone with `$gsd-new-milestone`. The likely direction is a v1.8 production `geom_sf` build that starts from `.planning/phases/30-edge-cases-and-blueprint/30-EDGE-CASE-BLUEPRINT.md`.
 
-**Target features:**
-- Investigate `geom_sf()` / sf geometry extraction through `ggplot_build()`
-- Determine how polygon/multipolygon geometries map to the IR layer
-- Evaluate D3 `d3.geoPath()` rendering approach for geographic shapes
-- Assess projection handling (CRS → D3 projection)
-- Document integration points with existing interactivity (hover, tooltip, brush on regions)
-- Produce a feasibility assessment and implementation blueprint
+Candidate focus areas:
+- Production-safe single-panel polygon choropleths with tooltip, hover, centroid brush, and zoom suppression.
+- Shared per-panel projection/bbox for stacked sf layers.
+- Faceted sf maps using per-panel projection from each panel's `PANEL` rows.
+- Explicit unsupported geometry behavior and documentation hardening.
 
 **Shipped through v1.6:**
 - 25 geom types with full interactivity (hover, tooltip, brush, zoom)
@@ -60,15 +58,17 @@ v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 29 complete (g
 - ✓ Non-Cartesian systems and advanced stats — v1.5
 - ✓ Specialized geoms (dotplot, rug, errorbar, linerange, pointrange) — v1.6
 - ✓ Full interactivity wiring for all 25 geoms — v1.6
+- ✓ `geom_sf()` extraction feasibility, CRS normalization, and IR schema — v1.7
+- ✓ D3 polygon rendering prototype for `geom_sf` with multipolygon hole and aesthetic passthrough validation — v1.7
+- ✓ `geom_sf` interactivity design for tooltip, hover, centroid brush, and zoom suppression — v1.7
+- ✓ Future `geom_sf` implementation blueprint with edge cases, anti-features, file targets, and validation gates — v1.7
 
 ### Active
 
-- [x] Investigate `geom_sf()` geometry extraction via `ggplot_build()` — Validated in Phase 27
-- [x] Map polygon/multipolygon geometries to IR layer — Validated in Phase 27
-- [x] Evaluate D3 `d3.geoPath()` rendering for geographic shapes — Validated in Phase 28
-- [x] Assess CRS → D3 projection handling — Validated in Phase 27 (unconditional WGS84 normalization)
-- [x] Document interactivity integration for map regions — Validated in Phase 29
-- [ ] Produce feasibility assessment and implementation blueprint — v1.7
+- [ ] Production `geom_sf` polygon MVP — future v1.8+ milestone candidate
+- [ ] Shared projection alignment for stacked sf layers — future v1.8+ milestone candidate
+- [ ] Faceted sf maps with per-panel bbox/projection behavior — future v1.8+ milestone candidate
+- [ ] Unsupported sf geometry and documentation hardening — future v1.8+ milestone candidate
 
 ### Out of Scope
 
@@ -76,10 +76,13 @@ v1.6 shipped 2026-04-04. v1.7 research milestone active — Phase 29 complete (g
 - Custom D3 extensions unrelated to ggplot2 mapping — not the package's purpose
 - ggplot2 extension packages (ggridges, ggrepel, etc.) — focus on core ggplot2 first
 - Mobile-specific optimizations — web-first
+- Tile basemaps/slippy-map controls — gg2d3 remains an SVG/htmlwidgets renderer focused on ggplot parity, not a tiled map engine
+- JavaScript-side CRS reprojection — first production build should consume R-normalized WGS84 data
+- Polygon-overlap brushing and large-map performance guarantees — deferred until polygon MVP behavior is stable
 
 ## Context
 
-gg2d3 shipped v1.6 with ~7,300 lines of R + JavaScript source code. The three-layer pipeline (R → IR → D3) is mature: R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, which D3.js renders as SVG through a registry-based geom dispatch system. The package supports 25 geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, non-Cartesian coordinates, and a composable pipe-based interactivity API. Test coverage spans 16 test files across 638+ tests.
+gg2d3 shipped v1.7 with a mature three-layer pipeline (R → IR → D3) plus a complete research handoff for `geom_sf`. R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, D3 renders SVG through a registry-based geom dispatch system, and htmlwidgets bridges the browser output. The package supports 25 geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, non-Cartesian coordinates, and a composable pipe-based interactivity API. The sf research stream validated geometry extraction, CRS normalization, GeoJSON serialization, D3 path rendering, centroid attributes, and future interactivity semantics.
 
 **Known tech debt:**
 - Monolithic `as_d3_ir()` function (~1000 lines) needs modularization
@@ -110,7 +113,11 @@ gg2d3 shipped v1.6 with ~7,300 lines of R + JavaScript source code. The three-la
 | Crosstalk for linked views | Client-side linked brushing without Shiny dependency | ✓ Good — works in static HTML |
 | Scoped INTERACTIVE_SELECTORS | Each interactivity module maintains its own selector array for geom classes | ✓ Good — extensible, caught as gap in v1.6 audit |
 | Standardized onRender pattern | All d3_* functions use consistent onRender + setTimeout for reliable event attachment | ✓ Good — eliminated race conditions |
+| geojsonsf for sf serialization | C++-backed `sfc` to GeoJSON serialization is reliable and avoids ad hoc JSON construction | ✓ Good — validated in Phase 27 |
+| R-side WGS84 normalization | Keep CRS handling in R via `sf::st_transform()` rather than implementing browser reprojection | ✓ Good — preserves simple D3 renderer boundary |
+| `d3.geoIdentity().reflectY(true).fitExtent()` for sf prototype | Fits R-normalized GeoJSON polygons into SVG space without a full JS projection system | ✓ Good — validated visually in Phase 28 |
 | geom_sf interactivity contract | Tooltip/hover should extend existing `path.geom-sf` selectors, brush should use centroid `data-cx`/`data-cy`, and zoom should be suppressed for first sf build | ✓ Good — validated in Phase 29 design contract |
+| polygon-first `geom_sf` build blueprint | First production build should support `POLYGON`/`MULTIPOLYGON`, shared per-panel projection, explicit anti-features, and validation gates | ✓ Good — locked in Phase 30 blueprint |
 
 ---
-*Last updated: 2026-05-19 after Phase 29 completion*
+*Last updated: 2026-05-20 after v1.7 milestone*

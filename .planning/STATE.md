@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Choropleth Map Research
-status: milestone_complete
-stopped_at: Phase 30 complete
-last_updated: "2026-05-20T10:58:40Z"
-last_activity: 2026-05-20 - Phase 30 completed and v1.7 milestone complete
+status: completed
+stopped_at: v1.7 milestone archived
+last_updated: "2026-05-20T11:15:00Z"
+last_activity: 2026-05-20 - v1.7 milestone archived
 progress:
   total_phases: 4
   completed_phases: 4
@@ -18,17 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-04)
+See: .planning/PROJECT.md (updated 2026-05-20)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** v1.7 choropleth research milestone complete
+**Current focus:** Planning next milestone
 
 ## Current Position
 
 Phase: 30 (edge-cases-and-blueprint) - COMPLETE
 Plan: 1 of 1
-Status: Milestone complete
-Last activity: 2026-05-20 - Phase 30 completed and v1.7 milestone complete
+Status: v1.7 milestone archived
+Last activity: 2026-05-20 - v1.7 milestone archived
 
 Progress: [██████████] 100%
 
@@ -84,13 +84,13 @@ None yet.
 
 ### Blockers/Concerns
 
-None for v1.7. Future production geom_sf work should start from `.planning/phases/30-edge-cases-and-blueprint/30-EDGE-CASE-BLUEPRINT.md`.
+None for v1.7. Future production geom_sf work should start from `.planning/phases/30-edge-cases-and-blueprint/30-EDGE-CASE-BLUEPRINT.md` or its archived milestone context.
 
 ## Session Continuity
 
 Last session: 2026-05-20T09:28:13.617Z
-Stopped at: Phase 30 complete
-Resume file: .planning/phases/30-edge-cases-and-blueprint/30-EDGE-CASE-BLUEPRINT.md
+Stopped at: v1.7 milestone archived
+Resume file: .planning/milestones/v1.7-ROADMAP.md
 
 ---
 *State initialized: 2026-02-07*

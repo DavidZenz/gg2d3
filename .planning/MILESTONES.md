@@ -1,5 +1,21 @@
 # Milestones
 
+## v1.7 Choropleth Map Research (Shipped: 2026-05-20)
+
+**Phases completed:** 4 phases, 6 plans, 16 tasks
+
+**Key accomplishments:**
+
+- Four sf geometry utility functions shipping geojsonsf::sfc_geojson() serialization with unconditional WGS84 normalization, dynamic sfc column detection, and 26 tests covering NC shapefile, rnaturalearth world borders, and EPSG:3857 projected CRS
+- geom_sf extraction wired into as_d3_ir with GeomSf/CoordSf dispatch, WGS84-normalized GeoJSON geometries in IR, and validate_ir updated to recognize sf layers and skip Cartesian panel checks
+- NC counties choropleth and world-borders MULTIPOLYGON hole tests generated and human-verified — all three REND requirements confirmed passing via browser inspection.
+- geom_sf interactivity contract covering bound-row tooltips, selector-based hover, centroid brushing, and first-build zoom suppression
+- geom_sf handoff blueprint covering polygon-first edge cases, explicit GIS anti-features, future build sequencing, file targets, and validation gates
+
+**Known deferred items at close:** 0 open artifacts. One non-blocking validation-process note is recorded in `.planning/milestones/v1.7-MILESTONE-AUDIT.md`.
+
+---
+
 ## v1.6 Advanced Geoms & API Polish (Shipped: 2026-04-04)
 
 **Phases completed:** 14 phases, 17 plans, 9 tasks
