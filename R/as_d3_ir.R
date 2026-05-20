@@ -159,6 +159,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
   }
 
   sf_coord_geometries <- list()
+  sf_panel_geometries <- list()
 
   layers <- lapply(seq_along(b$data), function(i) {
     df <- b$data[[i]]
@@ -347,6 +348,20 @@ as_d3_ir <- function(p, width = 640, height = 400,
       sf_prepared <- prepare_sf_geometry_ir(df)
       if (length(sf_prepared$geometry) > 0L) {
         sf_coord_geometries[[length(sf_coord_geometries) + 1L]] <<- sf_prepared$geometry
+        panel_values <- if ("PANEL" %in% names(sf_prepared$data)) {
+          as.integer(sf_prepared$data$PANEL)
+        } else {
+          rep(1L, length(sf_prepared$geometry))
+        }
+        for (geom_idx in seq_along(sf_prepared$geometry)) {
+          panel_key <- as.character(panel_values[[geom_idx]])
+          existing <- sf_panel_geometries[[panel_key]]
+          sf_panel_geometries[[panel_key]] <<- if (is.null(existing)) {
+            sf_prepared$geometry[geom_idx]
+          } else {
+            c(existing, sf_prepared$geometry[geom_idx])
+          }
+        }
       }
       list(
         geom           = "sf",
@@ -704,7 +719,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
   # sf coord metadata: compute WGS84 bounding box from all sf layers
   sf_coord_meta <- if (is_sf_coord) {
     all_sf_geoms <- if (length(sf_coord_geometries) > 0L) do.call(c, sf_coord_geometries) else NULL
-    bbox_vals <- if (!is.null(all_sf_geoms)) unname(as.numeric(sf::st_bbox(all_sf_geoms))) else NULL
+    bbox_vals <- sf_bbox_values(all_sf_geoms)
     list(bbox = bbox_vals)
   } else {
     NULL
@@ -913,6 +928,14 @@ as_d3_ir <- function(p, width = 640, height = 400,
     facets_ir <<- list(type = "null", vars = list(), nrow = 1L, ncol = 1L, layout = list(list(PANEL = 1L, ROW = 1L, COL = 1L, SCALE_X = 1L, SCALE_Y = 1L)), strips = list())
     panels_ir <<- list(list(PANEL = 1L, x_range = unname(scales$x$domain), y_range = unname(scales$y$domain), x_breaks = unname(x_breaks), y_breaks = unname(y_breaks)))
   })
+
+  if (is_sf_coord && !is.null(panels_ir)) {
+    panels_ir <- lapply(panels_ir, function(panel) {
+      panel_key <- as.character(panel$PANEL %||% 1L)
+      panel$sf_bbox <- sf_bbox_values(sf_panel_geometries[[panel_key]])
+      panel
+    })
+  }
 
   # Build reverse map: variable name -> aesthetic key (first layer wins on collision).
   # Lets tooltip lookups resolve user-supplied variable names (e.g. "wt") back

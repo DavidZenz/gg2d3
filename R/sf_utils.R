@@ -177,6 +177,15 @@ prepare_sf_geometry_ir <- function(df,
 }
 
 
+sf_bbox_values <- function(geom) {
+  if (is.null(geom) || length(geom) == 0L) {
+    return(NULL)
+  }
+
+  unname(as.numeric(sf::st_bbox(geom)))
+}
+
+
 #' Normalize an sfc column to WGS84 (EPSG:4326)
 #'
 #' Transforms any projected or geographic CRS to EPSG:4326. Returns the input

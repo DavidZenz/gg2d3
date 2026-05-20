@@ -179,6 +179,11 @@ validate_ir <- function(ir) {
       } else if (!is_sf && !is.null(panel$y_range) && !is.character(panel$y_range) && length(panel$y_range) != 2) {
         warning(sprintf("Panel %d has invalid y_range (not categorical and length != 2)", i), call. = FALSE)
       }
+      if (is_sf && !is.null(panel$sf_bbox)) {
+        if (!is.numeric(panel$sf_bbox) || length(panel$sf_bbox) != 4 || any(!is.finite(panel$sf_bbox))) {
+          warning(sprintf("Panel %d has invalid sf_bbox (must be 4 finite numeric values)", i), call. = FALSE)
+        }
+      }
     }
   }
 

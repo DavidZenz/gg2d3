@@ -148,7 +148,47 @@ test_that("as_d3_ir filters unsupported sf rows and preserves source row_id", {
   expect_true("POINT" %in% layer$sf_diagnostics$unsupported_geometry_types)
   expect_lt(ir$coord$bbox[[3]], 6)
   expect_lt(ir$coord$bbox[[4]], 2)
+  expect_equal(ir$panels[[1]]$sf_bbox, ir$coord$bbox)
   expect_no_warning(validate_ir(ir))
+})
+
+test_that("stacked sf layers share one panel sf_bbox", {
+  base_sf <- sf::st_sf(
+    id = 1L,
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(sf_ir_square_ring(0, 0, 1, 1))),
+      crs = 4326
+    )
+  )
+  overlay_sf <- sf::st_sf(
+    id = 1L,
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(sf_ir_square_ring(10, 20, 11, 21))),
+      crs = 4326
+    )
+  )
+
+  ir <- as_d3_ir(
+    ggplot2::ggplot() +
+      ggplot2::geom_sf(data = base_sf) +
+      ggplot2::geom_sf(data = overlay_sf)
+  )
+
+  expect_equal(ir$panels[[1]]$sf_bbox, c(0, 0, 11, 21))
+  expect_equal(ir$coord$bbox, c(0, 0, 11, 21))
+  expect_no_warning(validate_ir(ir))
+})
+
+test_that("validate_ir warns on malformed sf_bbox metadata", {
+  ir <- as_d3_ir(ggplot2::ggplot(nc) + ggplot2::geom_sf())
+
+  short_bbox <- ir
+  short_bbox$panels[[1]]$sf_bbox <- c(0, 1, 2)
+  expect_warning(validate_ir(short_bbox), regexp = "sf_bbox")
+
+  non_finite_bbox <- ir
+  non_finite_bbox$panels[[1]]$sf_bbox <- c(0, 1, Inf, 3)
+  expect_warning(validate_ir(non_finite_bbox), regexp = "sf_bbox")
 })
 
 test_that("as_d3_ir warns for missing CRS and records sf diagnostics", {
