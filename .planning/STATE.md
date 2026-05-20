@@ -4,12 +4,12 @@ milestone: v1.9
 milestone_name: sf Robustness and Expansion
 status: planning
 stopped_at: Phase 36 context gathered
-last_updated: "2026-05-20T19:41:57.660Z"
+last_updated: "2026-05-20T20:27:09.497Z"
 last_activity: 2026-05-20 — Created v1.9 roadmap and mapped all active requirements.
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 3
   completed_plans: 0
   percent: 0
 ---
@@ -84,3 +84,5 @@ Items acknowledged and carried forward from previous milestone close:
 Last session: 2026-05-20T19:41:57.655Z
 Stopped at: Phase 36 context gathered
 Resume file: .planning/phases/36-browser-sf-smoke-harness/36-CONTEXT.md
+
+**Planned Phase:** 36 (browser-sf-smoke-harness) — 3 plans — 2026-05-20T20:27:09.489Z
