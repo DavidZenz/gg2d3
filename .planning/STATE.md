@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Production geom_sf Polygon MVP
-status: planning
-stopped_at: defining requirements
-last_updated: "2026-05-20T11:30:00Z"
-last_activity: 2026-05-20 - Milestone v1.8 started
+status: planned
+stopped_at: roadmap created
+last_updated: "2026-05-20T11:45:00Z"
+last_activity: 2026-05-20 - Milestone v1.8 roadmap created
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-20)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** Defining v1.8 requirements
+**Current focus:** Phase 32 - geom_sf IR Foundation
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 32 (geom_sf IR Foundation) - PENDING
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-20 — Milestone v1.8 started
+Status: Roadmap ready
+Last activity: 2026-05-20 — Milestone v1.8 roadmap created
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -36,7 +36,7 @@ Progress: [░░░░░░░░░░] 0%
 
 **Velocity:**
 
-- Total plans completed: 6 (v1.7 milestone)
+- Total plans completed: 0 (v1.8 milestone)
 - Average duration: unknown
 - Total execution time: 0 hours
 
@@ -44,16 +44,9 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 29 | 1 | - | - |
-| 30 | 1 | - | - |
+| 32 | 0 | - | - |
 
 *Updated after each plan completion*
-| Phase 27-r-ir-extraction-feasibility P01 | 10 | 3 tasks | 3 files |
-| Phase 27-r-ir-extraction-feasibility P02 | 525626 | 2 tasks | 4 files |
-| Phase 28-d3-renderer-prototyping P01 | 8 | 2 tasks | 4 files |
-| Phase 28-d3-renderer-prototyping P02 | 10 | 2 tasks | 1 files |
-| Phase 29-interactivity-design P01 | 3 min | 3 tasks | 1 files |
-| Phase 30-edge-cases-and-blueprint P01 | 9 min | 4 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -89,13 +82,12 @@ None for v1.8. This milestone starts from the archived v1.7 blueprint context an
 ## Session Continuity
 
 Last session: 2026-05-20T09:28:13.617Z
-Stopped at: defining v1.8 requirements
-Resume file: .planning/REQUIREMENTS.md
+Stopped at: v1.8 roadmap created
+Resume file: .planning/ROADMAP.md
 
 ---
 *State initialized: 2026-02-07*
 *v1.0 shipped: 2026-02-16*
 *v1.1-v1.6 shipped: 2026-03-31 to 2026-04-04*
 *v1.7 milestone started: 2026-04-04*
-
-**Planned Phase:** 30 (Edge Cases and Blueprint) — 1 plans — 2026-05-20T10:35:14.514Z
+*v1.8 milestone started: 2026-05-20*

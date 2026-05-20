@@ -65,23 +65,23 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SFIR-01 | TBD | Pending |
-| SFIR-02 | TBD | Pending |
-| SFIR-03 | TBD | Pending |
-| SFREND-01 | TBD | Pending |
-| SFREND-02 | TBD | Pending |
-| SFREND-03 | TBD | Pending |
-| SFINTR-01 | TBD | Pending |
-| SFINTR-02 | TBD | Pending |
-| SFINTR-03 | TBD | Pending |
-| SFDOC-01 | TBD | Pending |
-| SFDOC-02 | TBD | Pending |
+| SFIR-01 | Phase 32 | Pending |
+| SFIR-02 | Phase 32 | Pending |
+| SFIR-03 | Phase 32 | Pending |
+| SFREND-01 | Phase 33 | Pending |
+| SFREND-02 | Phase 34 | Pending |
+| SFREND-03 | Phase 34 | Pending |
+| SFINTR-01 | Phase 33 | Pending |
+| SFINTR-02 | Phase 33 | Pending |
+| SFINTR-03 | Phase 33 | Pending |
+| SFDOC-01 | Phase 35 | Pending |
+| SFDOC-02 | Phase 35 | Pending |
 
 **Coverage:**
 - v1.8 requirements: 11 total
-- Mapped to phases: 0
-- Unmapped: 11
+- Mapped to phases: 11
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-20*
-*Last updated: 2026-05-20 after milestone initialization*
+*Last updated: 2026-05-20 after roadmap creation*
