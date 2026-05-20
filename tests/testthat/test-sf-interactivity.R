@@ -38,3 +38,12 @@ test_that("tooltip module sanitizes sf renderer internals", {
   private_fields <- c("_geom", "_centroid")
   expect_true(all(startsWith(private_fields, "_")))
 })
+
+test_that("brush module targets sf paths without dropping existing geoms", {
+  brush_js <- read_module("inst/htmlwidgets/modules/brush.js")
+
+  expect_match(brush_js, "path\\.geom-sf")
+  expect_match(brush_js, "circle\\.geom-point")
+  expect_match(brush_js, "path\\.geom-line")
+  expect_match(brush_js, "rect\\.geom-bar")
+})

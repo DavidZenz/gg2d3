@@ -36,6 +36,7 @@
     'path.geom-smooth',
     'path.geom-ribbon',
     'path.geom-violin',
+    'path.geom-sf',
     'text.geom-text',
     'line.geom-segment',
     'rect.geom-boxplot-box',
