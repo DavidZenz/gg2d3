@@ -94,12 +94,12 @@
 
 **Requirements:** SFDOC-01, SFDOC-02
 **Depends on:** Phase 34
-**Status:** Pending
+**Status:** In Progress
 **Plans:** 3 plans
 
 Plans:
-- [ ] 35-01-PLAN.md — Update package-facing sf support docs and generated README/help output.
-- [ ] 35-02-PLAN.md — Harden automated skipped-row, selectable-path, interactivity, and zoom validation.
+- [x] 35-01-PLAN.md — Update package-facing sf support docs and generated README/help output.
+- [x] 35-02-PLAN.md — Harden automated skipped-row, selectable-path, interactivity, and zoom validation.
 - [ ] 35-03-PLAN.md — Add Phase 35 HTML fixtures and run the final docs/sf validation sweep.
 
 **Success criteria:**
