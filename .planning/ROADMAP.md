@@ -41,7 +41,11 @@
   1. Developer can run automated browser smoke tests that open saved sf widgets and assert live `path.geom-sf` DOM nodes, non-empty path data, stable row ids, finite anchor attributes, and no page or console errors.
   2. Polygon sf fixtures prove choropleth, stacked overlay, faceted panel, skipped-row filtering, sanitized tooltip/handler payload, centroid brush, and zoom-suppression regressions are caught.
   3. Browser fixture generation produces non-self-contained htmlwidgets output, skips cleanly when optional browser or spatial dependencies are unavailable, and leaves useful local failure artifacts.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 36-01-PLAN.md — Add optional chromote dependency, extract shared sf fixtures, and create browser smoke helpers.
+- [ ] 36-02-PLAN.md — Add live browser DOM assertions for the Phase 35 polygon sf fixture matrix.
+- [ ] 36-03-PLAN.md — Add browser runtime error, sanitized payload, brush, and zoom-suppression assertions.
 **UI hint**: yes
 
 ### Phase 37: Non-Polygon sf IR And Renderer
