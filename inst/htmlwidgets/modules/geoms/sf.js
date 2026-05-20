@@ -10,6 +10,10 @@
 (function() {
   'use strict';
 
+  function isFiniteNumber(value) {
+    return typeof value === 'number' && Number.isFinite(value);
+  }
+
   /**
    * Render sf geom as SVG paths.
    *
@@ -97,10 +101,10 @@
         .attr("opacity", function(d) { return opacityFn(d); })
         .attr("fill-rule", "evenodd")
         .attr("data-cx", function(d) {
-          return isFinite(d._centroid[0]) ? d._centroid[0] : null;
+          return isFiniteNumber(d._centroid[0]) ? d._centroid[0] : null;
         })
         .attr("data-cy", function(d) {
-          return isFinite(d._centroid[1]) ? d._centroid[1] : null;
+          return isFiniteNumber(d._centroid[1]) ? d._centroid[1] : null;
         })
         .attr("data-row-id", function(d) {
           return d.row_id != null ? d.row_id : null;
