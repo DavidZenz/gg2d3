@@ -45,6 +45,138 @@ extract_sf_geometries <- function(df) {
 }
 
 
+#' Prepare sf geometries for gg2d3 IR
+#'
+#' Internal helper used by the geom_sf IR path. Filters unsupported or
+#' non-renderable rows before GeoJSON serialization, while preserving source row
+#' identity for downstream data/geometry joins.
+#'
+#' @param df A data.frame containing an sfc geometry column
+#' @param supported_types Character vector of geometry types to retain
+#' @param warn Whether to emit user-facing warnings for skipped rows and missing CRS
+#' @return A list with filtered data, GeoJSON geometries, normalized geometry,
+#'   CRS metadata, dominant accepted geometry type, and sf diagnostics
+prepare_sf_geometry_ir <- function(df,
+                                   supported_types = c("POLYGON", "MULTIPOLYGON"),
+                                   warn = TRUE) {
+  if (!requireNamespace("sf", quietly = TRUE)) {
+    stop(
+      "The 'sf' package is required for geom_sf support. ",
+      "Install with: install.packages('sf')",
+      call. = FALSE
+    )
+  }
+  if (!requireNamespace("geojsonsf", quietly = TRUE)) {
+    stop(
+      "The 'geojsonsf' package is required for geom_sf support. ",
+      "Install with: install.packages('geojsonsf')",
+      call. = FALSE
+    )
+  }
+
+  geom_col_name <- attr(df, "sf_column")
+  if (is.null(geom_col_name)) {
+    candidates <- names(df)[vapply(df, inherits, logical(1L), "sfc")]
+    geom_col_name <- if (length(candidates) > 0L) candidates[[1L]] else NA_character_
+  }
+  if (is.na(geom_col_name) || is.null(geom_col_name)) {
+    stop("Could not find sfc geometry column in sf layer data", call. = FALSE)
+  }
+
+  geom_col <- df[[geom_col_name]]
+  source_rows <- seq_len(nrow(df))
+  geometry_types <- as.character(sf::st_geometry_type(geom_col, by_geometry = TRUE))
+  empty <- sf::st_is_empty(geom_col)
+  missing_geometry <- is.na(geom_col)
+  valid <- tryCatch(
+    sf::st_is_valid(geom_col),
+    error = function(e) rep(FALSE, length(geom_col))
+  )
+  valid[is.na(valid)] <- FALSE
+
+  supported <- geometry_types %in% supported_types
+  accepted <- supported & !empty & !missing_geometry & valid
+  skipped <- !accepted
+  missing_crs <- is.na(sf::st_crs(geom_col))
+
+  if (warn && missing_crs) {
+    warning(
+      "geom_sf layer has missing CRS; coordinates will be serialized as-is",
+      call. = FALSE
+    )
+  }
+  if (warn && any(skipped)) {
+    warning(
+      sprintf(
+        "geom_sf layer skipped %d unsupported, empty, invalid, or missing geometries",
+        sum(skipped)
+      ),
+      call. = FALSE
+    )
+  }
+
+  accepted_geom <- geom_col[accepted]
+  accepted_geom <- normalize_to_wgs84(accepted_geom)
+
+  accepted_data <- df[accepted, , drop = FALSE]
+  accepted_data[[geom_col_name]] <- accepted_geom
+  accepted_data[["row_id"]] <- source_rows[accepted]
+  attr(accepted_data, "sf_column") <- geom_col_name
+
+  geometries <- if (length(accepted_geom) > 0L) {
+    as.character(geojsonsf::sfc_geojson(accepted_geom))
+  } else {
+    character()
+  }
+
+  accepted_geometry_types <- unique(geometry_types[accepted])
+  unsupported_geometry_types <- sort(unique(geometry_types[!supported]))
+
+  skip_reason <- function(i) {
+    if (missing_geometry[[i]]) return("missing")
+    if (empty[[i]]) return("empty")
+    if (!valid[[i]]) return("invalid")
+    if (!supported[[i]]) return("unsupported")
+    "skipped"
+  }
+  skipped_details <- lapply(which(skipped), function(i) {
+    list(
+      row = source_rows[[i]],
+      geometry_type = geometry_types[[i]],
+      reason = skip_reason(i)
+    )
+  })
+
+  crs <- sf::st_crs(accepted_geom)
+  geom_type <- if (length(accepted_geometry_types) == 0L) {
+    NA_character_
+  } else if (length(accepted_geometry_types) == 1L) {
+    accepted_geometry_types[[1L]]
+  } else {
+    "GEOMETRY"
+  }
+
+  list(
+    data = accepted_data,
+    geometries = geometries,
+    geometry = accepted_geom,
+    crs = list(
+      epsg = if (!is.na(crs)) crs$epsg else NA_integer_,
+      wkt = if (!is.na(crs)) crs$wkt else NA_character_
+    ),
+    geom_type = geom_type,
+    sf_diagnostics = list(
+      accepted_rows = source_rows[accepted],
+      skipped_rows = source_rows[skipped],
+      skipped = skipped_details,
+      missing_crs = missing_crs,
+      accepted_geometry_types = sort(accepted_geometry_types),
+      unsupported_geometry_types = unsupported_geometry_types
+    )
+  )
+}
+
+
 #' Normalize an sfc column to WGS84 (EPSG:4326)
 #'
 #' Transforms any projected or geographic CRS to EPSG:4326. Returns the input
