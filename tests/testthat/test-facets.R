@@ -147,3 +147,57 @@ test_that("facet theme elements are correctly extracted", {
   expect_equal(ir$theme$strip$text$angle, 45)
   expect_equal(ir$theme$strip$text$hjust, 1)
 })
+
+facet_sf_square_ring <- function(xmin, ymin, xmax, ymax) {
+  matrix(
+    c(
+      xmin, ymin,
+      xmax, ymin,
+      xmax, ymax,
+      xmin, ymax,
+      xmin, ymin
+    ),
+    ncol = 2,
+    byrow = TRUE
+  )
+}
+
+facet_panel_by_label <- function(ir, label) {
+  layout <- ir$facets$layout
+  panel_id <- layout[[which(vapply(layout, function(entry) {
+    as.character(entry$facet) == label
+  }, logical(1)))]]$PANEL
+  ir$panels[[which(vapply(ir$panels, function(panel) panel$PANEL, integer(1)) == panel_id)]]
+}
+
+test_that("facet_wrap sf panels use per-panel sf_bbox from their own rows", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("geojsonsf")
+
+  sf_data <- sf::st_sf(
+    facet = factor(c("A", "B"), levels = c("A", "B")),
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(facet_sf_square_ring(0, 0, 1, 1))),
+      sf::st_polygon(list(facet_sf_square_ring(100, 0, 101, 1))),
+      crs = 4326
+    )
+  )
+
+  ir <- as_d3_ir(
+    ggplot2::ggplot(sf_data) +
+      ggplot2::geom_sf() +
+      ggplot2::facet_wrap(~facet)
+  )
+
+  panel_a <- facet_panel_by_label(ir, "A")
+  panel_b <- facet_panel_by_label(ir, "B")
+
+  expect_equal(ir$facets$type, "wrap")
+  expect_equal(length(ir$panels), 2)
+  expect_false(is.null(panel_a$sf_bbox))
+  expect_false(is.null(panel_b$sf_bbox))
+  expect_lt(panel_a$sf_bbox[[3]], 10)
+  expect_gt(panel_b$sf_bbox[[1]], 90)
+  expect_false(identical(panel_a$sf_bbox, panel_b$sf_bbox))
+  expect_no_warning(validate_ir(ir))
+})

@@ -140,3 +140,70 @@ test_that("facet_grid panels have breaks", {
     expect_true(length(panel$y_breaks) > 0)
   }
 })
+
+facet_grid_sf_square_ring <- function(xmin, ymin, xmax, ymax) {
+  matrix(
+    c(
+      xmin, ymin,
+      xmax, ymin,
+      xmax, ymax,
+      xmin, ymax,
+      xmin, ymin
+    ),
+    ncol = 2,
+    byrow = TRUE
+  )
+}
+
+facet_grid_panel_by_values <- function(ir, row_value, col_value) {
+  layout <- ir$facets$layout
+  panel_id <- layout[[which(vapply(layout, function(entry) {
+    as.character(entry$row_var) == row_value &&
+      as.character(entry$col_var) == col_value
+  }, logical(1)))]]$PANEL
+  ir$panels[[which(vapply(ir$panels, function(panel) panel$PANEL, integer(1)) == panel_id)]]
+}
+
+test_that("facet_grid sf panels preserve layout and isolate sf_bbox", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("geojsonsf")
+
+  sf_data <- sf::st_sf(
+    row_var = factor(c("A", "A", "B"), levels = c("A", "B")),
+    col_var = factor(c("X", "Y", "X"), levels = c("X", "Y")),
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(facet_grid_sf_square_ring(0, 0, 1, 1))),
+      sf::st_polygon(list(facet_grid_sf_square_ring(80, 0, 81, 1))),
+      sf::st_polygon(list(facet_grid_sf_square_ring(160, 0, 161, 1))),
+      crs = 4326
+    )
+  )
+
+  ir <- as_d3_ir(
+    ggplot2::ggplot(sf_data) +
+      ggplot2::geom_sf() +
+      ggplot2::facet_grid(row_var ~ col_var)
+  )
+
+  panel_ax <- facet_grid_panel_by_values(ir, "A", "X")
+  panel_ay <- facet_grid_panel_by_values(ir, "A", "Y")
+  panel_bx <- facet_grid_panel_by_values(ir, "B", "X")
+  panel_by <- facet_grid_panel_by_values(ir, "B", "Y")
+
+  expect_equal(ir$facets$type, "grid")
+  expect_equal(length(ir$panels), 4)
+  expect_equal(ir$facets$nrow, 2L)
+  expect_equal(ir$facets$ncol, 2L)
+  for (entry in ir$facets$layout) {
+    expect_true(is.integer(entry$PANEL))
+    expect_true(is.integer(entry$ROW))
+    expect_true(is.integer(entry$COL))
+  }
+
+  expect_lt(panel_ax$sf_bbox[[3]], 10)
+  expect_gt(panel_ay$sf_bbox[[1]], 70)
+  expect_lt(panel_ay$sf_bbox[[3]], 90)
+  expect_gt(panel_bx$sf_bbox[[1]], 150)
+  expect_true(is.null(panel_by$sf_bbox))
+  expect_no_warning(validate_ir(ir))
+})
