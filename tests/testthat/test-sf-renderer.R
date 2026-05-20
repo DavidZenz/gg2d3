@@ -6,6 +6,15 @@ if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
 
 nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
 
+read_repo_file <- function(path) {
+  candidates <- c(path, file.path("..", "..", path))
+  existing <- candidates[file.exists(candidates)]
+  if (length(existing) == 0L) {
+    stop("Could not find file: ", path, call. = FALSE)
+  }
+  paste(readLines(existing[[1]], warn = FALSE), collapse = "\n")
+}
+
 test_that("sf IR data rows include row_id field", {
   ir <- as_d3_ir(ggplot2::ggplot(nc) + ggplot2::geom_sf())
   layer <- ir$layers[[1]]
@@ -54,4 +63,36 @@ test_that("non-sf geom layers do NOT contain row_id in their data rows", {
   expect_true(length(layer$data) > 0)
   expect_false("row_id" %in% names(layer$data[[1]]),
     info = "Non-sf layers must not have row_id in data rows")
+})
+
+test_that("panel renderer filters sf data and geometries together", {
+  gg2d3_js <- read_repo_file("inst/htmlwidgets/gg2d3.js")
+
+  expect_match(gg2d3_js, 'layer\\.geom === "sf"')
+  expect_match(gg2d3_js, "Array\\.isArray\\(layer\\.geometries\\)")
+  expect_match(gg2d3_js, "sfPairs")
+  expect_match(gg2d3_js, "pair\\.data\\.PANEL === panelNum")
+  expect_match(gg2d3_js, "geometries: filteredPairs\\.map")
+})
+
+test_that("panel renderer passes sf bbox state to geom renderers", {
+  gg2d3_js <- read_repo_file("inst/htmlwidgets/gg2d3.js")
+
+  expect_match(gg2d3_js, "panelData: panelData")
+  expect_match(gg2d3_js, "sfBBox:")
+  expect_match(gg2d3_js, "panelData\\.sf_bbox")
+  expect_match(gg2d3_js, "plotWidth")
+  expect_match(gg2d3_js, "plotHeight")
+})
+
+test_that("sf renderer consumes shared panel bbox when available", {
+  sf_js <- read_repo_file("inst/htmlwidgets/modules/geoms/sf.js")
+
+  expect_match(sf_js, "bboxToFeatureCollection")
+  expect_match(sf_js, "options\\.sfBBox")
+  expect_match(sf_js, "fitSource")
+  expect_match(sf_js, "reflectY\\(true\\)")
+  expect_match(sf_js, "data-row-id")
+  expect_match(sf_js, "data-cx")
+  expect_match(sf_js, "data-cy")
 })

@@ -14,6 +14,34 @@
     return typeof value === 'number' && Number.isFinite(value);
   }
 
+  function bboxToFeatureCollection(bbox) {
+    if (!Array.isArray(bbox) || bbox.length !== 4) return null;
+
+    var xmin = bbox[0];
+    var ymin = bbox[1];
+    var xmax = bbox[2];
+    var ymax = bbox[3];
+    if (![xmin, ymin, xmax, ymax].every(isFiniteNumber)) return null;
+
+    return {
+      type: "FeatureCollection",
+      features: [{
+        type: "Feature",
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [xmin, ymin],
+            [xmax, ymin],
+            [xmax, ymax],
+            [xmin, ymax],
+            [xmin, ymin]
+          ]]
+        },
+        properties: {}
+      }]
+    };
+  }
+
   /**
    * Render sf geom as SVG paths.
    *
@@ -53,13 +81,14 @@
     if (validFeatures.length === 0) return 0;
 
     var fc = { type: "FeatureCollection", features: validFeatures };
+    var fitSource = bboxToFeatureCollection(options.sfBBox) || fc;
 
     // Build projection: geoIdentity + reflectY (Pitfall 2: required for SVG y-axis)
     // UI-SPEC: 4px padding on all sides
     var padding = 4;
     var proj = d3.geoIdentity()
       .reflectY(true)
-      .fitExtent([[padding, padding], [w - padding, h - padding]], fc);
+      .fitExtent([[padding, padding], [w - padding, h - padding]], fitSource);
 
     var pathGen = d3.geoPath().projection(proj);
 

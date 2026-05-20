@@ -87,12 +87,31 @@ HTMLWidgets.widget({
       // Render layers - filter by PANEL
       let drawn = 0;
       (ir.layers || []).forEach(function(layer) {
-        // Create a copy of the layer with filtered data for this panel
-        const filteredData = isFaceted
-          ? layer.data.filter(function(d) { return d.PANEL === panelNum; })
-          : layer.data;  // non-faceted: use all data
+        const layerData = layer.data || [];
+        let filteredLayer;
 
-        const filteredLayer = Object.assign({}, layer, { data: filteredData });
+        // sf layers keep data and geometries as parallel arrays, so facet
+        // filtering must preserve the original data/geometry index pairs.
+        if (layer.geom === "sf" && Array.isArray(layer.geometries)) {
+          const sfPairs = layerData.map(function(d, i) {
+            return { data: d, geometry: layer.geometries[i] };
+          });
+          const filteredPairs = isFaceted
+            ? sfPairs.filter(function(pair) {
+                return pair.data && pair.data.PANEL === panelNum;
+              })
+            : sfPairs;
+          filteredLayer = Object.assign({}, layer, {
+            data: filteredPairs.map(function(pair) { return pair.data; }),
+            geometries: filteredPairs.map(function(pair) { return pair.geometry; })
+          });
+        } else {
+          // Create a copy of the layer with filtered data for this panel
+          const filteredData = isFaceted
+            ? layerData.filter(function(d) { return d.PANEL === panelNum; })
+            : layerData;  // non-faceted: use all data
+          filteredLayer = Object.assign({}, layer, { data: filteredData });
+        }
 
         const count = window.gg2d3.geomRegistry.render(
           filteredLayer,
@@ -105,7 +124,9 @@ HTMLWidgets.widget({
             plotHeight: h, 
             flip: flip, 
             coord: ir.coord,
-            scales: ir.scales 
+            scales: ir.scales,
+            panelData: panelData,
+            sfBBox: panelData && panelData.sf_bbox ? panelData.sf_bbox : null
           }
         );
         drawn += count;
