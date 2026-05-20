@@ -60,6 +60,17 @@
   )
 }
 
+.phase35_make_adjacent_sf <- function() {
+  sf::st_sf(
+    value = c(10, 20),
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(.phase35_square_ring(0, 0, 1, 1))),
+      sf::st_polygon(list(.phase35_square_ring(1.4, 0, 2.4, 1))),
+      crs = 4326
+    )
+  )
+}
+
 .phase35_make_mixed_sf <- function() {
   sf::st_sf(
     label = c("polygon", "point", "empty", "invalid", "multipolygon"),
@@ -79,7 +90,7 @@
         ncol = 2,
         byrow = TRUE
       ))),
-      sf::st_multipolygon(list(list(.phase35_square_ring(30, 0, 31, 1)))),
+      sf::st_multipolygon(list(list(.phase35_square_ring(1.4, 0, 2.4, 1)))),
       crs = 4326
     )
   )
@@ -108,17 +119,17 @@
   )
   .phase35_expect_sf_layer(as_d3_ir(choropleth))
 
-  base_sf <- .phase35_make_two_panel_sf()
+  stacked_sf <- .phase35_make_adjacent_sf()
   overlay_sf <- sf::st_sf(
     outline = c("A", "B"),
     geometry = sf::st_sfc(
       sf::st_polygon(list(.phase35_square_ring(0.2, 0.2, 0.8, 0.8))),
-      sf::st_polygon(list(.phase35_square_ring(100.2, 10.2, 100.8, 10.8))),
+      sf::st_polygon(list(.phase35_square_ring(1.6, 0.2, 2.2, 0.8))),
       crs = 4326
     )
   )
   stacked <- ggplot2::ggplot() +
-    ggplot2::geom_sf(data = base_sf, ggplot2::aes(fill = value)) +
+    ggplot2::geom_sf(data = stacked_sf, ggplot2::aes(fill = value)) +
     ggplot2::geom_sf(data = overlay_sf, fill = NA, colour = "#111111")
   fixtures[["phase35-sf-stacked-overlay.html"]] <- .phase35_save_widget(
     gg2d3(stacked),
@@ -129,7 +140,8 @@
   .phase35_expect_sf_layer(stacked_ir, 1L)
   .phase35_expect_sf_layer(stacked_ir, 2L)
 
-  facet_wrap_plot <- ggplot2::ggplot(base_sf, ggplot2::aes(fill = value)) +
+  facet_sf <- .phase35_make_two_panel_sf()
+  facet_wrap_plot <- ggplot2::ggplot(facet_sf, ggplot2::aes(fill = value)) +
     ggplot2::geom_sf() +
     ggplot2::facet_wrap(~facet)
   fixtures[["phase35-sf-facet-wrap.html"]] <- .phase35_save_widget(
@@ -142,7 +154,7 @@
   expect_true(all(vapply(wrap_ir$panels, function(panel) !is.null(panel$sf_bbox), logical(1))))
   expect_false(identical(wrap_ir$panels[[1]]$sf_bbox, wrap_ir$panels[[2]]$sf_bbox))
 
-  facet_grid_plot <- ggplot2::ggplot(base_sf, ggplot2::aes(fill = value)) +
+  facet_grid_plot <- ggplot2::ggplot(facet_sf, ggplot2::aes(fill = value)) +
     ggplot2::geom_sf() +
     ggplot2::facet_grid(row ~ col, drop = FALSE)
   fixtures[["phase35-sf-facet-grid.html"]] <- .phase35_save_widget(
