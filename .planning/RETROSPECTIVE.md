@@ -2,6 +2,45 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.8 — Production geom_sf Polygon MVP
+
+**Shipped:** 2026-05-20
+**Phases:** 4 | **Plans:** 11
+
+### What Was Built
+- Production `geom_sf()` polygon-family IR extraction with CRS normalization, skipped-row diagnostics, accepted-geometry bbox metadata, and source-row alignment.
+- Single-panel D3 `path.geom-sf` renderer with multipolygon hole support, row ids, centroid attributes, and sf-specific interactivity hooks.
+- Tooltip, hover, custom handler, Shiny handler, brush, and zoom behavior integrated with the existing interactivity APIs while sanitizing renderer-private fields.
+- Shared panel-level projection metadata for stacked sf layers plus facet-aware per-panel bbox/projection behavior for `facet_wrap()` and `facet_grid()`.
+- Documentation, diagnostics, generated help, automated tests, and browser fixtures that describe and validate the polygon-first support contract.
+
+### What Worked
+- The v1.7 research handoff made v1.8 implementation unusually direct: each production phase could trace back to a concrete blueprint, anti-feature list, and validation gate.
+- Keeping unsupported geometries explicit turned a risky edge case into a clear public contract with warnings, diagnostics, and row-alignment tests.
+- The final verifier caught a subtle missing-geometry coverage gap before archive, and the fix improved both behavior and tests.
+
+### What Was Inefficient
+- Manual browser fixture review was useful, but the project still lacks automated DOM-level smoke coverage for rendered sf paths.
+- `phase.complete` and `milestone.complete` needed manual cleanup around stale state fields, duplicate progress counting, and noisy accomplishment extraction.
+- `selfcontained = TRUE` in htmlwidgets fixtures initially pulled in Pandoc unnecessarily; switching fixtures to non-self-contained HTML removed that dependency.
+
+### Patterns Established
+- Spatial renderer features should validate three boundaries: R helper diagnostics, IR/data alignment, and JS source-contract behavior.
+- Faceted sf support needs panel-scoped geometry metadata rather than global or layer-local fitting.
+- Milestone audits should distinguish blocking requirement gaps from non-blocking validation hardening debt.
+
+### Key Lessons
+1. Missing sf geometries should be tested at the helper boundary because literal `NA` geometry rows can fail inside ggplot2/sf before gg2d3 sees them.
+2. For htmlwidgets validation fixtures, non-self-contained output is usually the better smoke-test artifact because it avoids Pandoc and keeps dependencies inspectable.
+3. Source-contract tests are valuable for modular JavaScript renderers, but browser DOM smoke tests are the next step for higher confidence.
+
+### Cost Observations
+- Model mix: not tracked.
+- Sessions: one concentrated GSD run across Phase 32-35 execution and closeout on 2026-05-20.
+- Notable: Research/spec artifacts paid off; most rework came from closeout tooling quirks rather than core implementation uncertainty.
+
+---
+
 ## Milestone: v1.7 — Choropleth Map Research
 
 **Shipped:** 2026-05-20
@@ -80,6 +119,7 @@
 
 | Milestone | Phases | Plans | Key Pattern |
 |-----------|--------|-------|-------------|
+| v1.8 | 4 | 11 | Research handoff → production implementation → docs/validation hardening |
 | v1.7 | 4 | 6 | Research → prototype → design contract → implementation blueprint |
 | v1.6 | 3 | 4 | Milestone audit → gap closure phase |
 
@@ -88,8 +128,10 @@
 - Integration gaps when features span multiple modules (selectors, handlers, renderers)
 - Documentation regeneration deferred and forgotten
 - Validation metadata can become stale even when phase verification passes
+- Milestone closeout tooling can leave stale state or noisy summaries that need human review before archive commits
 
 ### What to Watch
 
 - As geom count grows (25+), INTERACTIVE_SELECTORS maintenance becomes a scaling concern — consider auto-registration pattern
 - Spatial support should not expand into GIS-engine behavior without explicit product intent and validation budget
+- Browser-side sf behavior would benefit from an automated DOM smoke layer before adding more geometry types

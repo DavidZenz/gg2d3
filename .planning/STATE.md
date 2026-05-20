@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Production geom_sf Polygon MVP
-status: milestone_complete
-stopped_at: v1.8 milestone complete
-last_updated: "2026-05-20T15:50:09.786Z"
+status: milestone_archived
+stopped_at: v1.8 milestone archived
+last_updated: "2026-05-20T18:46:08.375Z"
 last_activity: 2026-05-20
 progress:
   total_phases: 4
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-20)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** v1.8 milestone complete — ready for milestone audit/archive or next milestone planning
+**Current focus:** v1.8 archived — ready for next milestone planning
 
 ## Current Position
 
 Phase: 35
 Plan: Not started
-Status: Milestone complete
+Status: v1.8 milestone archived
 Last activity: 2026-05-20
 
 Progress: [██████████] 100%

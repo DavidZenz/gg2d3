@@ -1,5 +1,22 @@
 # Milestones
 
+## v1.8 Production geom_sf Polygon MVP (Shipped: 2026-05-20)
+
+**Phases completed:** 4 phases, 11 plans, 21 tasks
+
+**Key accomplishments:**
+
+- Polygon-family sf IR extraction with CRS normalization, source-row diagnostics, accepted-geometry bbox metadata, and structural validation.
+- D3 `path.geom-sf` rendering for single-panel choropleths, including multipolygon holes, stable row ids, and centroid attributes.
+- Existing tooltip, hover, handler, and brush APIs now work for sf paths with sanitized public callback payloads.
+- Stacked sf overlays share panel-level projection metadata, and faceted sf maps isolate projection/bbox behavior per panel.
+- `d3_zoom()` now suppresses unsupported sf Cartesian zoom with a clear warning while preserving other interactivity config.
+- README, vignettes, diagnostics docs, generated help, automated checks, and browser fixtures now tell one truthful polygon-first sf support story.
+
+**Known deferred items at close:** 0 blockers. One non-blocking validation debt item is recorded in `.planning/milestones/v1.8-MILESTONE-AUDIT.md`.
+
+---
+
 ## v1.7 Choropleth Map Research (Shipped: 2026-05-20)
 
 **Phases completed:** 4 phases, 6 plans, 16 tasks

@@ -12,15 +12,19 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 v1.8 is complete. Phases 32 through 35 shipped the production `geom_sf` polygon MVP: polygon-family sf layers preserve source row identity and diagnostics, render as `path.geom-sf`, support tooltip/hover/handler targeting, brush by projected centroid, suppress unsupported Cartesian zoom, share one panel-level bbox/projection across stacked sf layers, isolate faceted sf panels by their own `PANEL` rows, and document plus validate supported and unsupported behavior with automated and browser fixture coverage.
 
-## Current Milestone: v1.8 Production geom_sf Polygon MVP
+## Last Shipped Milestone: v1.8 Production geom_sf Polygon MVP
 
 **Goal:** Ship production-safe `geom_sf` polygon rendering for gg2d3, starting with polygon-family choropleths and the interactivity behaviors proven in v1.7.
 
-**Target features:**
+**Shipped features:**
 - Production-safe single-panel `geom_sf` polygon choropleths with tooltip, hover, centroid brush, and zoom suppression.
 - Shared per-panel projection/bbox for stacked sf layers so overlays align.
 - Faceted sf maps using per-panel projection from each panel's `PANEL` rows.
 - Explicit unsupported geometry behavior and documentation hardening.
+
+## Next Milestone Goals
+
+Next milestone goals have not been defined yet. Start with `$gsd-new-milestone` to choose the next focus, likely from deferred sf expansion, DOM-level browser smoke coverage, or broader package hardening.
 
 **Shipped through v1.6:**
 - 25 geom types with full interactivity (hover, tooltip, brush, zoom)
@@ -83,13 +87,14 @@ v1.8 is complete. Phases 32 through 35 shipped the production `geom_sf` polygon 
 
 ## Context
 
-gg2d3 shipped v1.7 with a mature three-layer pipeline (R → IR → D3) plus a complete research handoff for `geom_sf`. R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, D3 renders SVG through a registry-based geom dispatch system, and htmlwidgets bridges the browser output. The package supports 25 geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, non-Cartesian coordinates, and a composable pipe-based interactivity API. The sf research stream validated geometry extraction, CRS normalization, GeoJSON serialization, D3 path rendering, centroid attributes, and future interactivity semantics.
+gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus production polygon-family `geom_sf()` support. R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, D3 renders SVG through a registry-based geom dispatch system, and htmlwidgets bridges the browser output. The package supports 25 non-sf geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, non-Cartesian coordinates, a composable pipe-based interactivity API, and polygon-first sf rendering with tooltip, hover, handler, centroid brush, stacked-layer alignment, and faceted panel projection behavior.
 
 **Known tech debt:**
 - Monolithic `as_d3_ir()` function (~1000 lines) needs modularization
 - Private API dependency on `ggplot2:::calc_element()` creates fragility
 - Orphaned GeomPolygon reference (no renderer)
 - rect geom edge cases with out-of-bounds rendering
+- Browser-side sf behavior is covered by source-contract tests and generated/manual HTML fixtures; a future DOM-level smoke test would reduce regression risk
 
 ## Constraints
 
@@ -142,4 +147,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-20 after completing Phase 35*
+*Last updated: 2026-05-20 after archiving v1.8*
