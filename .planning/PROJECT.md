@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.8 is active. Phases 32 through 34 completed the production `geom_sf` polygon path through shared projection alignment: polygon-family sf layers preserve source row identity and diagnostics, render as `path.geom-sf`, support tooltip/hover/handler targeting, brush by projected centroid, suppress unsupported Cartesian zoom, share one panel-level bbox/projection across stacked sf layers, and isolate faceted sf panels by their own `PANEL` rows. The milestone now moves to Phase 35 documentation and validation hardening.
+v1.8 is complete. Phases 32 through 35 shipped the production `geom_sf` polygon MVP: polygon-family sf layers preserve source row identity and diagnostics, render as `path.geom-sf`, support tooltip/hover/handler targeting, brush by projected centroid, suppress unsupported Cartesian zoom, share one panel-level bbox/projection across stacked sf layers, isolate faceted sf panels by their own `PANEL` rows, and document plus validate supported and unsupported behavior with automated and browser fixture coverage.
 
 ## Current Milestone: v1.8 Production geom_sf Polygon MVP
 
@@ -65,10 +65,11 @@ v1.8 is active. Phases 32 through 34 completed the production `geom_sf` polygon 
 - ✓ `geom_sf()` polygon-family IR extraction with CRS normalization, skipped-row diagnostics, accepted-geometry bbox metadata, and source-row alignment — v1.8 Phase 32
 - ✓ Production single-panel `geom_sf` polygon renderer and interactivity with tooltip/hover/handler selectors, centroid brush, private-field sanitization, and zoom suppression — v1.8 Phase 33
 - ✓ Shared projection alignment for stacked sf layers and facet-aware per-panel bbox/projection behavior for `facet_wrap()` and `facet_grid()` — v1.8 Phase 34
+- ✓ Documentation and validation hardening for supported and unsupported sf behavior — v1.8 Phase 35
 
 ### Active
 
-- [ ] Documentation and validation hardening for supported and unsupported sf behavior — v1.8
+- No active v1.8 requirements remain.
 
 ### Out of Scope
 
@@ -121,6 +122,7 @@ gg2d3 shipped v1.7 with a mature three-layer pipeline (R → IR → D3) plus a c
 | helper-driven sf IR preparation | Keep unsupported geometry filtering, CRS warnings, GeoJSON serialization, row identity, diagnostics, and accepted-geometry bbox calculation in the R IR layer | ✓ Good — implemented and verified in Phase 32 |
 | sanitized sf interactivity payloads | `path.geom-sf` reuses existing tooltip, hover, handler, and brush APIs, but renderer-private `_geom`/`_centroid` fields must not become user-facing callback data | ✓ Good — implemented and verified in Phase 33 |
 | panel-scoped sf projection metadata | Stacked and faceted sf layers should use `sf_bbox` from accepted geometries in the current panel, with the renderer filtering data/geometry pairs together by original row index | ✓ Good — implemented and verified in Phase 34 |
+| documented polygon-first sf contract | The first production `geom_sf` support should be explicit about polygon-family support, skipped unsupported/empty/invalid/missing geometries, zoom suppression, and map anti-features | ✓ Good — implemented and verified in Phase 35 |
 
 ## Evolution
 
@@ -140,4 +142,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-20 after completing Phase 34*
+*Last updated: 2026-05-20 after completing Phase 35*
