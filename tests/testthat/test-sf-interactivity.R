@@ -73,3 +73,29 @@ test_that("brush module sanitizes sf callback data", {
   private_fields <- c("_geom", "_centroid")
   expect_true(all(startsWith(private_fields, "_")))
 })
+
+test_that("sf interactivity remains composable when zoom is suppressed", {
+  skip_if_not_installed("sf")
+
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  p <- ggplot2::ggplot(nc) + ggplot2::geom_sf()
+
+  w <- gg2d3(p) |>
+    d3_brush() |>
+    d3_tooltip() |>
+    d3_hover()
+
+  expect_true(w$x$interactivity$brush$enabled)
+  expect_true(w$x$interactivity$tooltip$enabled)
+  expect_true(w$x$interactivity$hover$enabled)
+
+  expect_warning(
+    w_zoom <- w |> d3_zoom(),
+    "geom_sf.*zoom|zoom.*geom_sf"
+  )
+
+  expect_true(w_zoom$x$interactivity$brush$enabled)
+  expect_true(w_zoom$x$interactivity$tooltip$enabled)
+  expect_true(w_zoom$x$interactivity$hover$enabled)
+  expect_null(w_zoom$x$interactivity$zoom)
+})
