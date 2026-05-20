@@ -109,3 +109,44 @@ D-05 makes this blueprint a build-phase roadmap, D-06 requires exact file target
 | JavaScript structure checks | Check shared projection handoff, `path.geom-sf` output, `data-row-id`, `data-cx`, `data-cy`, malformed geometry guards, and selector coverage. |
 | documentation checks | Check the sf blueprint vignette, diagnostics anti-features, README support status, and generated `man/gg2d3.Rd` help text. |
 | human/browser visual comparisons | Compare single-panel choropleths, stacked overlays, facet wrap maps, and facet grid maps in a browser before declaring future sf builds complete. |
+
+## Decision Traceability
+
+| Decision | Blueprint coverage | Status |
+|----------|--------------------|--------|
+| D-01 | Representative edge-case suite in BLPR-01. | Covered |
+| D-02 | Polygon-family first-build support in BLPR-01 and BLPR-03. | Covered |
+| D-03 | Shared per-panel projection for stacked sf layers in BLPR-01 and BLPR-03. | Covered |
+| D-04 | Per-panel faceted sf projection in BLPR-01 and BLPR-03. | Covered |
+| D-05 | Build-phase roadmap in BLPR-03. | Covered |
+| D-06 | Concrete file-by-file checklist. | Covered |
+| D-07 | First future build phase names single-panel polygon choropleths with tooltip, hover, centroid brush, and zoom suppression. | Covered |
+| D-08 | Validation Gates mix R IR tests, JavaScript structure checks, documentation checks, and human/browser visual comparisons. | Covered |
+| D-09 | Anti-feature table includes tile basemaps, slippy zoom/pan, JavaScript-side reprojection, polygon-overlap brushing, and large-map performance guarantees. | Covered |
+| D-10 | Anti-feature table includes rationale and revisit condition for every deferral. | Covered |
+| D-11 | Tile basemaps and slippy controls are deferred because gg2d3 remains an SVG/htmlwidgets renderer focused on ggplot parity. | Covered |
+| D-12 | Large-map performance guarantees are deferred with revisit conditions. | Covered |
+| D-13 | Validation relies on lightweight document checks for this phase and future executable gates for build phases. | Covered |
+| D-14 | Faceted sf validation covers `PANEL`, panel bbox/projection behavior, and future tests. | Covered |
+| D-15 | Mixed geometry validation covers unsupported-case test planning. | Covered |
+| D-16 | Roadmap, file targets, sequencing, anti-features, and validation gates leave no unresolved implementation choices. | Covered |
+
+## Requirement Traceability
+
+| Requirement | Blueprint coverage | Status |
+|-------------|--------------------|--------|
+| BLPR-01 | Edge-case matrix documents mixed geometry types, stacked geom_sf layers, faceted sf maps, CRS risks, and missing/invalid geometry handling. | Covered |
+| BLPR-02 | Anti-feature table documents first-build behavior, rationale, and revisit conditions. | Covered |
+| BLPR-03 | Future build roadmap, file checklist, and validation gates define the implementation handoff. | Covered |
+
+Phase 30 leaves no unresolved implementation choices for the first future build milestone.
+
+## Checker Sign-Off
+
+- [ ] BLPR-01 covered
+- [ ] BLPR-02 covered
+- [ ] BLPR-03 covered
+- [ ] D-01 through D-16 covered
+- [ ] No production source edits required
+- [ ] Anti-features include revisit conditions
+- [ ] Future build roadmap names file targets and validation gates
