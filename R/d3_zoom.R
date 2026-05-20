@@ -4,6 +4,10 @@
 #' zoom in/out with the mouse wheel, pan by dragging, and double-click to reset
 #' to the original view.
 #'
+#' `d3_zoom()` does not currently support widgets containing `geom_sf()` layers.
+#' Those widgets are returned unchanged with the warning "d3_zoom() does not
+#' support geom_sf layers yet; zoom has been suppressed."
+#'
 #' @param widget A gg2d3 widget object created by \code{gg2d3()}
 #' @param scale_extent Numeric vector of length 2 specifying the minimum and
 #'   maximum zoom scale factors. Default is \code{c(1, 8)}, allowing up to 8x zoom.

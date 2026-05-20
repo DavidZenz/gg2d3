@@ -57,6 +57,10 @@ gg2d3(p)
 | Annotation | `geom_hline`, `geom_vline`, `geom_abline`, `geom_rug` |
 | Statistical | `geom_boxplot`, `geom_violin`, `geom_density`, `geom_smooth` (loess, gam, lm), `geom_dotplot` |
 
+gg2d3 also supports `geom_sf()` for polygon-family choropleths and polygon
+overlays, limited to `POLYGON` and `MULTIPOLYGON` geometries. See the main
+vignette for CRS, skipped-row, and map-feature caveats.
+
 ### Scales & Coordinates
 
 - Continuous and categorical x/y scales with full parity

@@ -5,6 +5,13 @@
 #' and serializes each geometry as a GeoJSON geometry string via
 #' `geojsonsf::sfc_geojson()` (per D-10).
 #'
+#' gg2d3's public `geom_sf()` renderer is limited to polygon-family
+#' `POLYGON` and `MULTIPOLYGON` layers. Missing CRS emits
+#' "geom_sf layer has missing CRS; coordinates will be serialized as-is".
+#' Unsupported, empty, invalid, or missing geometries emit
+#' "geom_sf layer skipped %d unsupported, empty, invalid, or missing geometries"
+#' and are skipped before rendering.
+#'
 #' @param df A data.frame from `ggplot_build()$data[[i]]` containing an sfc column
 #' @return Character vector of GeoJSON geometry strings, one per row
 #' @export
@@ -50,6 +57,11 @@ extract_sf_geometries <- function(df) {
 #' Internal helper used by the geom_sf IR path. Filters unsupported or
 #' non-renderable rows before GeoJSON serialization, while preserving source row
 #' identity for downstream data/geometry joins.
+#'
+#' Only `POLYGON` and `MULTIPOLYGON` geometries are accepted by default. Missing
+#' CRS warns with "geom_sf layer has missing CRS; coordinates will be serialized
+#' as-is". Skipped rows warn with "geom_sf layer skipped %d unsupported, empty,
+#' invalid, or missing geometries".
 #'
 #' @param df A data.frame containing an sfc geometry column
 #' @param supported_types Character vector of geometry types to retain
@@ -190,7 +202,9 @@ sf_bbox_values <- function(geom) {
 #'
 #' Transforms any projected or geographic CRS to EPSG:4326. Returns the input
 #' unchanged if it is not an sfc object. If the CRS is already EPSG:4326,
-#' no transformation is performed.
+#' no transformation is performed. If an sf geometry has missing CRS, the
+#' `geom_sf()` IR path warns "geom_sf layer has missing CRS; coordinates will be
+#' serialized as-is" and leaves coordinates unchanged.
 #'
 #' @param geom_col An sfc geometry column, or any other R object
 #' @return The sfc column transformed to EPSG:4326, or the input unchanged if
@@ -222,7 +236,8 @@ normalize_to_wgs84 <- function(geom_col) {
 #'
 #' Returns the summary geometry type for the sfc column in the data.frame.
 #' When the column contains mixed types, `sf::st_geometry_type()` with
-#' `by_geometry = FALSE` returns the shared type or "GEOMETRY".
+#' `by_geometry = FALSE` returns the shared type or "GEOMETRY". gg2d3 renders
+#' polygon-family `geom_sf()` layers only: `POLYGON` and `MULTIPOLYGON`.
 #'
 #' @param df A data.frame from `ggplot_build()$data[[i]]` containing an sfc column
 #' @return Character string such as "MULTIPOLYGON", "POLYGON", "POINT", "LINESTRING", etc.
@@ -253,7 +268,9 @@ detect_dominant_geom_type <- function(df) {
 #' Get CRS information from an sf layer's geometry column
 #'
 #' Returns a list with the EPSG code (integer or NA) and WKT string for
-#' the coordinate reference system of the geometry column.
+#' the coordinate reference system of the geometry column. Known CRS inputs are
+#' normalized to WGS84 in the `geom_sf()` IR path; missing CRS layers warn that
+#' coordinates will be serialized as-is.
 #'
 #' @param df A data.frame from `ggplot_build()$data[[i]]` containing an sfc column
 #' @return A list with fields:

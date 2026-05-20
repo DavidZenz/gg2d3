@@ -251,6 +251,11 @@ Crosstalk behavior:
 - **Faceted plots** — brush selection is per-panel. Selecting in one facet
   does not dim elements in other facets; use Crosstalk for cross-panel
   linking.
+- **`geom_sf` layers** — tooltip, hover, and custom handlers target
+  `path.geom-sf` marks. Brush selection uses centroid attributes rather than
+  polygon-overlap brushing. `d3_zoom()` warns with `d3_zoom() does not support
+  geom_sf layers yet; zoom has been suppressed.` and returns the unzoomed
+  widget.
 - **Zoom extent** — `scale_extent[1]` must be >= 1. Setting it below 1 would
   allow zooming further out than the original view, which distorts axis
   labels; the function raises an error instead.

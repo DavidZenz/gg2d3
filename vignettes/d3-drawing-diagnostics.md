@@ -6,10 +6,27 @@ from what ggplot2 produces.
 
 ## Geom coverage
 
-gg2d3 supports 15 geom types (point, line, path, bar, col, rect, tile, text,
-area, ribbon, segment, hline/vline/abline, boxplot, violin, density, smooth).
-Geoms not in this list (e.g. `geom_polygon`, `geom_contour`, `geom_sf`) will
-log a warning and not render.
+gg2d3 supports core Cartesian geoms (point, line, path, bar, col, rect, tile,
+text, area, ribbon, segment, hline/vline/abline, boxplot, violin, density,
+smooth) plus polygon-family `geom_sf`.
+
+Geoms outside this set (for example `geom_contour`) log a warning and do not
+render.
+
+## Polygon-family `geom_sf` support
+
+`geom_sf()` support exists for polygon-family layers: `POLYGON` and
+`MULTIPOLYGON` geometries render as SVG paths for choropleths and polygon
+overlays. Known CRS inputs are normalized to WGS84 in R before serialization.
+If a layer has no CRS, gg2d3 warns that coordinates will be serialized as-is.
+
+Unsupported, empty, invalid, or missing sf geometries are skipped with a
+warning while valid polygon rows remain renderable. Non-polygon sf rendering is
+not supported in v1.8.
+
+Map anti-features are explicit: no tile basemaps, no slippy map controls, no
+JavaScript-side CRS reprojection, no polygon-overlap brushing, no non-polygon
+sf rendering, and no large-map performance guarantees.
 
 ## Text options
 
