@@ -18,3 +18,12 @@ test_that("sf renderer exposes path row and centroid attributes", {
   expect_match(sf_js, "reflectY\\(true\\)")
   expect_match(sf_js, "Number\\.isFinite")
 })
+
+test_that("events module targets sf paths without dropping existing geoms", {
+  events_js <- read_module("inst/htmlwidgets/modules/events.js")
+
+  expect_match(events_js, "path\\.geom-sf")
+  expect_match(events_js, "circle\\.geom-point")
+  expect_match(events_js, "path\\.geom-line")
+  expect_match(events_js, "rect\\.geom-bar")
+})
