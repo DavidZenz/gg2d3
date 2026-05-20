@@ -10,7 +10,16 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.8 is complete. Phases 32 through 35 shipped the production `geom_sf` polygon MVP: polygon-family sf layers preserve source row identity and diagnostics, render as `path.geom-sf`, support tooltip/hover/handler targeting, brush by projected centroid, suppress unsupported Cartesian zoom, share one panel-level bbox/projection across stacked sf layers, isolate faceted sf panels by their own `PANEL` rows, and document plus validate supported and unsupported behavior with automated and browser fixture coverage.
+v1.9 is starting. v1.8 shipped the production `geom_sf` polygon MVP: polygon-family sf layers preserve source row identity and diagnostics, render as `path.geom-sf`, support tooltip/hover/handler targeting, brush by projected centroid, suppress unsupported Cartesian zoom, share one panel-level bbox/projection across stacked sf layers, isolate faceted sf panels by their own `PANEL` rows, and document plus validate supported and unsupported behavior with automated and browser fixture coverage. The next milestone extends that foundation into automated browser validation, non-polygon sf support, and targeted package hardening.
+
+## Current Milestone: v1.9 sf Robustness and Expansion
+
+**Goal:** Strengthen the `geom_sf` foundation with automated browser validation, non-polygon sf geometry support, and core package hardening.
+
+**Target features:**
+- DOM-level smoke coverage for rendered `path.geom-sf` nodes, centroid attributes, brushing behavior, and fixture automation.
+- Non-polygon sf support for point and line geometry families without weakening the polygon-first contracts.
+- Package hardening around high-risk internals such as the monolithic IR converter, private ggplot2 API usage, and known renderer edge cases.
 
 ## Last Shipped Milestone: v1.8 Production geom_sf Polygon MVP
 
@@ -21,10 +30,6 @@ v1.8 is complete. Phases 32 through 35 shipped the production `geom_sf` polygon 
 - Shared per-panel projection/bbox for stacked sf layers so overlays align.
 - Faceted sf maps using per-panel projection from each panel's `PANEL` rows.
 - Explicit unsupported geometry behavior and documentation hardening.
-
-## Next Milestone Goals
-
-Next milestone goals have not been defined yet. Start with `$gsd-new-milestone` to choose the next focus, likely from deferred sf expansion, DOM-level browser smoke coverage, or broader package hardening.
 
 **Shipped through v1.6:**
 - 25 geom types with full interactivity (hover, tooltip, brush, zoom)
@@ -73,7 +78,7 @@ Next milestone goals have not been defined yet. Start with `$gsd-new-milestone` 
 
 ### Active
 
-- No active v1.8 requirements remain.
+- v1.9 requirements are being defined for browser validation hardening, non-polygon sf support, and package hardening.
 
 ### Out of Scope
 
@@ -147,4 +152,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-20 after archiving v1.8*
+*Last updated: 2026-05-20 after starting v1.9*

@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.8
-milestone_name: Production geom_sf Polygon MVP
-status: milestone_archived
-stopped_at: v1.8 milestone archived
-last_updated: "2026-05-20T18:46:08.375Z"
+milestone: v1.9
+milestone_name: sf Robustness and Expansion
+status: defining_requirements
+stopped_at: defining v1.9 requirements
+last_updated: "2026-05-20T20:50:00.000Z"
 last_activity: 2026-05-20
 progress:
   total_phases: 4
-  completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-20)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** v1.8 archived — ready for next milestone planning
+**Current focus:** v1.9 sf Robustness and Expansion — defining requirements
 
 ## Current Position
 
-Phase: 35
-Plan: Not started
-Status: v1.8 milestone archived
-Last activity: 2026-05-20
+Phase: Not started
+Plan: -
+Status: Defining requirements
+Last activity: 2026-05-20 — Milestone v1.9 started
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 11 (v1.8 milestone)
+- Total plans completed: 0 (v1.9 milestone)
 - Average duration: unknown
 - Total execution time: 0 hours
 
@@ -89,13 +89,13 @@ None yet.
 
 ### Blockers/Concerns
 
-None for v1.8. This milestone starts from the archived v1.7 blueprint context and keeps tile basemaps, slippy map controls, browser reprojection, polygon-overlap brushing, and large-map performance guarantees out of scope.
+None for v1.9 yet. The milestone starts from the archived v1.8 polygon MVP and will define requirements for browser validation hardening, non-polygon sf support, and package hardening.
 
 ## Session Continuity
 
 Last session: 2026-05-20T14:40:02Z
-Stopped at: Phase 35 context gathered
-Resume file: .planning/phases/35-geom-sf-docs-and-validation-hardening/35-CONTEXT.md
+Stopped at: defining v1.9 requirements
+Resume file: .planning/PROJECT.md
 
 ---
 *State initialized: 2026-02-07*
@@ -103,5 +103,6 @@ Resume file: .planning/phases/35-geom-sf-docs-and-validation-hardening/35-CONTEX
 *v1.1-v1.6 shipped: 2026-03-31 to 2026-04-04*
 *v1.7 milestone started: 2026-04-04*
 *v1.8 milestone started: 2026-05-20*
+*v1.9 milestone started: 2026-05-20*
 
-**Planned Phase:** 35 (geom_sf Docs and Validation Hardening) — 3 plans — 2026-05-20T15:17:45.409Z
+**Planned milestone:** v1.9 sf Robustness and Expansion — requirements in progress — 2026-05-20
