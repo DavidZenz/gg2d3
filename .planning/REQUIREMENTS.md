@@ -15,13 +15,13 @@ Requirements for the production `geom_sf` polygon MVP milestone. Each maps to ex
 
 ### SF Rendering
 
-- [ ] **SFREND-01**: Single-panel `geom_sf` polygon choropleths render as SVG `path.geom-sf` elements with fill, stroke, and multipolygon hole behavior matching the v1.7 prototype.
+- [x] **SFREND-01**: Single-panel `geom_sf` polygon choropleths render as SVG `path.geom-sf` elements with fill, stroke, and multipolygon hole behavior matching the v1.7 prototype.
 - [ ] **SFREND-02**: Multiple sf layers in the same panel share a per-panel bbox/projection so polygon overlays align instead of being fitted independently.
 - [ ] **SFREND-03**: Faceted sf maps render with facet-aware `PANEL` filtering and per-panel bbox/projection behavior for both `facet_wrap()` and `facet_grid()`.
 
 ### SF Interactivity
 
-- [ ] **SFINTR-01**: Existing tooltip and hover APIs work for `path.geom-sf` using bound row data and the existing selector architecture.
+- [x] **SFINTR-01**: Existing tooltip and hover APIs work for `path.geom-sf` using bound row data and the existing selector architecture.
 - [ ] **SFINTR-02**: Existing brush APIs can select `geom_sf` regions using centroid attributes (`data-cx`, `data-cy`) on sf paths.
 - [ ] **SFINTR-03**: `d3_zoom()` suppresses unsupported sf zoom behavior with a clear warning instead of attaching misleading Cartesian zoom behavior.
 
@@ -68,10 +68,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SFIR-01 | Phase 32 | Complete |
 | SFIR-02 | Phase 32 | Complete |
 | SFIR-03 | Phase 32 | Complete |
-| SFREND-01 | Phase 33 | Pending |
+| SFREND-01 | Phase 33 | Complete |
 | SFREND-02 | Phase 34 | Pending |
 | SFREND-03 | Phase 34 | Pending |
-| SFINTR-01 | Phase 33 | Pending |
+| SFINTR-01 | Phase 33 | Complete |
 | SFINTR-02 | Phase 33 | Pending |
 | SFINTR-03 | Phase 33 | Pending |
 | SFDOC-01 | Phase 35 | Pending |
