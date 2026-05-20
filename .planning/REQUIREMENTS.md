@@ -22,7 +22,7 @@ Requirements for the production `geom_sf` polygon MVP milestone. Each maps to ex
 ### SF Interactivity
 
 - [x] **SFINTR-01**: Existing tooltip and hover APIs work for `path.geom-sf` using bound row data and the existing selector architecture.
-- [ ] **SFINTR-02**: Existing brush APIs can select `geom_sf` regions using centroid attributes (`data-cx`, `data-cy`) on sf paths.
+- [x] **SFINTR-02**: Existing brush APIs can select `geom_sf` regions using centroid attributes (`data-cx`, `data-cy`) on sf paths.
 - [ ] **SFINTR-03**: `d3_zoom()` suppresses unsupported sf zoom behavior with a clear warning instead of attaching misleading Cartesian zoom behavior.
 
 ### SF Documentation and Validation
@@ -72,7 +72,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SFREND-02 | Phase 34 | Pending |
 | SFREND-03 | Phase 34 | Pending |
 | SFINTR-01 | Phase 33 | Complete |
-| SFINTR-02 | Phase 33 | Pending |
+| SFINTR-02 | Phase 33 | Complete |
 | SFINTR-03 | Phase 33 | Pending |
 | SFDOC-01 | Phase 35 | Pending |
 | SFDOC-02 | Phase 35 | Pending |
