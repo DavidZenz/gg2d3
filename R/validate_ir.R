@@ -74,6 +74,28 @@ validate_ir <- function(ir) {
     if (!layer$geom %in% known_geoms) {
       warning(sprintf("Layer %d uses unrecognized geom type '%s'", i, layer$geom), call. = FALSE)
     }
+
+    if (layer$geom == "sf") {
+      if (!"geometries" %in% names(layer) || !is.character(layer$geometries)) {
+        stop(sprintf("Layer %d sf layer geometries must be a character vector", i), call. = FALSE)
+      }
+
+      if (length(layer$geometries) != length(layer$data)) {
+        stop(sprintf("Layer %d sf layer geometries length must match data length", i), call. = FALSE)
+      }
+
+      if (!"sf_diagnostics" %in% names(layer) || !is.list(layer$sf_diagnostics)) {
+        stop(sprintf("Layer %d sf layer sf_diagnostics must be present", i), call. = FALSE)
+      }
+
+      missing_diag <- setdiff(c("accepted_rows", "skipped_rows"), names(layer$sf_diagnostics))
+      if (length(missing_diag) > 0L) {
+        stop(
+          sprintf("Layer %d sf layer sf_diagnostics missing %s", i, missing_diag[[1L]]),
+          call. = FALSE
+        )
+      }
+    }
   }
 
   # Validate guides structure (optional - may not exist for older IR)
