@@ -9,9 +9,9 @@ Requirements for the production `geom_sf` polygon MVP milestone. Each maps to ex
 
 ### SF IR
 
-- [ ] **SFIR-01**: `gg2d3()` can extract `geom_sf` layers whose geometries are `POLYGON` or `MULTIPOLYGON` into JSON-serializable sf IR.
-- [ ] **SFIR-02**: `gg2d3()` normalizes known sf CRS inputs to WGS84 in R before serialization and records bbox/projection metadata needed by the renderer.
-- [ ] **SFIR-03**: Unsupported, empty, invalid, or missing sf geometries warn or skip predictably without breaking row/geometry alignment for valid polygon rows.
+- [x] **SFIR-01**: `gg2d3()` can extract `geom_sf` layers whose geometries are `POLYGON` or `MULTIPOLYGON` into JSON-serializable sf IR.
+- [x] **SFIR-02**: `gg2d3()` normalizes known sf CRS inputs to WGS84 in R before serialization and records bbox/projection metadata needed by the renderer.
+- [x] **SFIR-03**: Unsupported, empty, invalid, or missing sf geometries warn or skip predictably without breaking row/geometry alignment for valid polygon rows.
 
 ### SF Rendering
 
@@ -65,9 +65,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SFIR-01 | Phase 32 | Pending |
-| SFIR-02 | Phase 32 | Pending |
-| SFIR-03 | Phase 32 | Pending |
+| SFIR-01 | Phase 32 | Complete |
+| SFIR-02 | Phase 32 | Complete |
+| SFIR-03 | Phase 32 | Complete |
 | SFREND-01 | Phase 33 | Pending |
 | SFREND-02 | Phase 34 | Pending |
 | SFREND-03 | Phase 34 | Pending |

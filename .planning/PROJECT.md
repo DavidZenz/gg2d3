@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.8 is active. This milestone turns the v1.7 `geom_sf` research handoff into production polygon choropleth support while keeping gg2d3's SVG/htmlwidgets boundary intact.
+v1.8 is active. Phase 32 completed the R-side `geom_sf` IR foundation: polygon-family sf layers now flow through a helper that filters unsupported rows, preserves source row identity, records diagnostics, normalizes known CRS inputs to WGS84, and computes bbox metadata from accepted geometries. The milestone now moves to Phase 33 renderer and interactivity work while keeping gg2d3's SVG/htmlwidgets boundary intact.
 
 ## Current Milestone: v1.8 Production geom_sf Polygon MVP
 
@@ -62,13 +62,14 @@ v1.8 is active. This milestone turns the v1.7 `geom_sf` research handoff into pr
 - ✓ D3 polygon rendering prototype for `geom_sf` with multipolygon hole and aesthetic passthrough validation — v1.7
 - ✓ `geom_sf` interactivity design for tooltip, hover, centroid brush, and zoom suppression — v1.7
 - ✓ Future `geom_sf` implementation blueprint with edge cases, anti-features, file targets, and validation gates — v1.7
+- ✓ `geom_sf()` polygon-family IR extraction with CRS normalization, skipped-row diagnostics, accepted-geometry bbox metadata, and source-row alignment — v1.8 Phase 32
 
 ### Active
 
-- [ ] Production `geom_sf` polygon MVP — v1.8
+- [ ] Production `geom_sf` polygon renderer and interactivity — v1.8
 - [ ] Shared projection alignment for stacked sf layers — v1.8
 - [ ] Faceted sf maps with per-panel bbox/projection behavior — v1.8
-- [ ] Unsupported sf geometry and documentation hardening — v1.8
+- [ ] Documentation and validation hardening for supported and unsupported sf behavior — v1.8
 
 ### Out of Scope
 
@@ -118,6 +119,7 @@ gg2d3 shipped v1.7 with a mature three-layer pipeline (R → IR → D3) plus a c
 | `d3.geoIdentity().reflectY(true).fitExtent()` for sf prototype | Fits R-normalized GeoJSON polygons into SVG space without a full JS projection system | ✓ Good — validated visually in Phase 28 |
 | geom_sf interactivity contract | Tooltip/hover should extend existing `path.geom-sf` selectors, brush should use centroid `data-cx`/`data-cy`, and zoom should be suppressed for first sf build | ✓ Good — validated in Phase 29 design contract |
 | polygon-first `geom_sf` build blueprint | First production build should support `POLYGON`/`MULTIPOLYGON`, shared per-panel projection, explicit anti-features, and validation gates | ✓ Good — locked in Phase 30 blueprint |
+| helper-driven sf IR preparation | Keep unsupported geometry filtering, CRS warnings, GeoJSON serialization, row identity, diagnostics, and accepted-geometry bbox calculation in the R IR layer | ✓ Good — implemented and verified in Phase 32 |
 
 ## Evolution
 
@@ -137,4 +139,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-20 after starting v1.8 milestone*
+*Last updated: 2026-05-20 after completing Phase 32*
