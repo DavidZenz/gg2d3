@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.8 is active. Phase 32 completed the R-side `geom_sf` IR foundation: polygon-family sf layers now flow through a helper that filters unsupported rows, preserves source row identity, records diagnostics, normalizes known CRS inputs to WGS84, and computes bbox metadata from accepted geometries. The milestone now moves to Phase 33 renderer and interactivity work while keeping gg2d3's SVG/htmlwidgets boundary intact.
+v1.8 is active. Phases 32 and 33 completed the single-panel `geom_sf` polygon path from R IR through D3 rendering and interactivity: polygon-family sf layers now preserve source row identity and diagnostics, render as `path.geom-sf`, support tooltip/hover/handler targeting, brush by projected centroid, and suppress unsupported Cartesian zoom. The milestone now moves to Phase 34 shared projection alignment for stacked and faceted sf maps.
 
 ## Current Milestone: v1.8 Production geom_sf Polygon MVP
 
@@ -63,10 +63,10 @@ v1.8 is active. Phase 32 completed the R-side `geom_sf` IR foundation: polygon-f
 - ✓ `geom_sf` interactivity design for tooltip, hover, centroid brush, and zoom suppression — v1.7
 - ✓ Future `geom_sf` implementation blueprint with edge cases, anti-features, file targets, and validation gates — v1.7
 - ✓ `geom_sf()` polygon-family IR extraction with CRS normalization, skipped-row diagnostics, accepted-geometry bbox metadata, and source-row alignment — v1.8 Phase 32
+- ✓ Production single-panel `geom_sf` polygon renderer and interactivity with tooltip/hover/handler selectors, centroid brush, private-field sanitization, and zoom suppression — v1.8 Phase 33
 
 ### Active
 
-- [ ] Production `geom_sf` polygon renderer and interactivity — v1.8
 - [ ] Shared projection alignment for stacked sf layers — v1.8
 - [ ] Faceted sf maps with per-panel bbox/projection behavior — v1.8
 - [ ] Documentation and validation hardening for supported and unsupported sf behavior — v1.8
@@ -120,6 +120,7 @@ gg2d3 shipped v1.7 with a mature three-layer pipeline (R → IR → D3) plus a c
 | geom_sf interactivity contract | Tooltip/hover should extend existing `path.geom-sf` selectors, brush should use centroid `data-cx`/`data-cy`, and zoom should be suppressed for first sf build | ✓ Good — validated in Phase 29 design contract |
 | polygon-first `geom_sf` build blueprint | First production build should support `POLYGON`/`MULTIPOLYGON`, shared per-panel projection, explicit anti-features, and validation gates | ✓ Good — locked in Phase 30 blueprint |
 | helper-driven sf IR preparation | Keep unsupported geometry filtering, CRS warnings, GeoJSON serialization, row identity, diagnostics, and accepted-geometry bbox calculation in the R IR layer | ✓ Good — implemented and verified in Phase 32 |
+| sanitized sf interactivity payloads | `path.geom-sf` reuses existing tooltip, hover, handler, and brush APIs, but renderer-private `_geom`/`_centroid` fields must not become user-facing callback data | ✓ Good — implemented and verified in Phase 33 |
 
 ## Evolution
 
@@ -139,4 +140,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-20 after completing Phase 32*
+*Last updated: 2026-05-20 after completing Phase 33*
