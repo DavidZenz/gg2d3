@@ -1,217 +1,197 @@
-# Stack Research
+# Technology Stack
 
-**Domain:** gg2d3 v1.7 choropleth map rendering — geom_sf / geographic geometry additions
-**Researched:** 2026-04-04
-**Confidence:** HIGH (R-side), MEDIUM (JS projection strategy)
+**Project:** gg2d3 v1.9 sf Robustness and Expansion
+**Researched:** 2026-05-20
+**Research mode:** Stack
+**Overall confidence:** HIGH for browser-test stack and sf geometry stack; MEDIUM for exact CI wiring because repository CI files were not part of the requested read set.
 
----
+## Recommendation
 
-## Context
+Keep the production rendering stack unchanged: R, ggplot2, htmlwidgets, vendored D3 v7, sf, and geojsonsf are already the right boundaries. For v1.9, add only one new optional testing dependency: `chromote`. Use it from `testthat` to open generated htmlwidget files in headless Chrome and assert DOM-level sf contracts.
 
-This document covers ONLY net-new stack additions required for choropleth / geom_sf support. The existing v1.6 stack (D3 v7.9.0, htmlwidgets 1.6.4, ggplot2, jsonlite, scales) remains unchanged. Nothing in the existing pipeline is removed or replaced.
+Do not add Playwright, Puppeteer, Selenium, webshot2, shinytest2, Leaflet, mapdeck, topojson-client, turf.js, proj4js, or a JS test runner. They solve adjacent problems but add dependency surface that is not needed for DOM smoke tests, sf point/line rendering, or package hardening.
 
----
+## Recommended Stack Additions
 
-## Recommended Stack
+### Browser DOM Smoke Tests
 
-### Core Technologies (new for v1.7)
+| Technology | Version | DESCRIPTION Placement | Purpose | Why |
+|------------|---------|-----------------------|---------|-----|
+| `chromote` | `>= 0.5.1` | `Suggests` | Drive headless Chrome from R tests and inspect rendered widget DOM | It is an R implementation of the Chrome DevTools Protocol, supports synchronous browser commands, can navigate to local HTML files, evaluate JavaScript, inspect DOM attributes, and is already the lower-level browser layer used by R tooling such as shinytest2 and webshot2. |
+| `testthat` | keep existing `>= 3.0.0`; optional bump to `>= 3.3.0` only if helper code uses newer expectations | already `Suggests` | Test harness for guarded browser smoke tests | Existing package convention uses testthat. Browser tests should remain ordinary testthat files with explicit skip guards. |
+| `htmlwidgets::saveWidget()` | existing `htmlwidgets 1.6.4` | already `Imports` | Generate temporary or `test_output/` HTML fixtures for browser tests | Current visual fixture flow already uses `saveWidget(..., selfcontained = FALSE)`. Browser tests can reuse this instead of adding a fixture server. |
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| sf (R pkg) | **1.1-0** (CRAN Feb 2026) | sf object inspection, CRS detection, WGS84 transform | The authoritative R package for simple features. Provides `st_crs()`, `st_transform()`, `st_geometry_type()`, and the `sfc` list-column that geom_sf uses. No alternative exists in the R ecosystem. Requires GDAL, GEOS, PROJ system libs — available as CRAN binary on macOS/Windows. |
-| geojsonsf (R pkg) | **2.0.3** (CRAN, updated Nov 2025) | Serialize sfc geometry column to GeoJSON strings | Fastest R→GeoJSON path. C++ backed via Rcpp. `sfc_geojson(sfc_col)` returns a character vector of per-row GeoJSON geometries. Dramatically simpler than jsonlite's sf serialization, which requires constructing a FeatureCollection when you only need geometry strings per row. |
-| d3-geo (within D3 v7) | **bundled in d3 v7.9.0** | `d3.geoPath()` SVG path generator, `d3.geoIdentity()`, `d3.geoMercator()`, `d3.geoEquirectangular()`, `d3.geoNaturalEarth1()` | Already vendored. No new JS library needed. `d3.geoPath` accepts GeoJSON objects directly and produces `<path d="...">` strings. The null-projection (`d3.geoIdentity()`) supports pre-projected coordinates; named projections support forward lon/lat→pixel. |
+**Where it fits:**
 
-### Supporting Libraries (new for v1.7)
+- Add a focused helper in tests, not production code, for example `tests/testthat/helper-browser.R`.
+- Add a dedicated smoke file such as `tests/testthat/test-sf-browser.R`.
+- Generate widgets through existing helpers or small fixtures, save with `htmlwidgets::saveWidget(selfcontained = FALSE)`, then navigate chromote to `file://...`.
+- Assert DOM facts, not screenshots:
+  - `document.querySelectorAll("path.geom-sf").length`
+  - every sf path has a non-empty `d`
+  - expected `data-row-id`, `data-cx`, and `data-cy` attributes exist and are finite where required
+  - tooltip/hover/click handlers attach to `path.geom-sf`
+  - brushing changes opacity or callback payload for centroid-selected sf rows
+  - private `_geom` and `_centroid` fields do not appear in public callback payloads
 
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| sf (R pkg) | 1.1-0 | System dependency detection, CRS introspection | Always when geom_sf layer is present. Use `inherits(layer_data, "sf")` or `"sfc" %in% class(col)` to detect. |
-| geojsonsf | 2.0.3 | `sfc_geojson()` — sfc column → character vector of GeoJSON geometry strings | In the R IR builder when extracting geom_sf geometry. Each row's geometry becomes an inline GeoJSON string sent to JS as part of the layer data. |
-| jsonlite (existing) | 2.0.0 | JSON serialization of IR — sfc columns need special handling | Already a dependency. Do NOT use `jsonlite::toJSON(sf_object)` for the IR — it wraps everything in FeatureCollection. Use geojsonsf for geometry, then include the GeoJSON strings as plain character fields in each row. |
-
-### Development Tools (v1.7 specific)
-
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| sf built-in datasets | `sf::st_read(system.file("shape/nc.shp", package="sf"))` | North Carolina counties shapefile ships with sf. Use as canonical test fixture — no internet required. |
-| rnaturalearth / rnaturalearthdata | World polygon data for integration testing | Optional, CRAN available. Use for world-scale choropleth smoke tests. |
-| R CMD check with sf in Suggests | Conditional sf usage so sf is not a hard DESCRIPTION Imports | geom_sf support should trigger only when sf is loaded; keeps sf in `Suggests:` to avoid making GDAL/GEOS/PROJ required system deps for all gg2d3 users. |
-
----
-
-## Integration Points with Existing IR Pipeline
-
-### R Layer: `R/as_d3_ir.R`
-
-The IR builder must handle geom_sf as a special case inside the existing layer loop.
-
-**Detection:** After `ggplot_build()`, a geom_sf layer's built data retains the `geometry` column as an `sfc` list-column. Detect with:
+**Guarding policy:**
 
 ```r
-has_sf_geom <- function(layer_data) {
-  "geometry" %in% names(layer_data) &&
-    inherits(layer_data$geometry, "sfc")
-}
+testthat::skip_on_cran()
+testthat::skip_if_not_installed("chromote")
+testthat::skip_if_not_installed("sf")
+testthat::skip_if_not_installed("geojsonsf")
 ```
 
-**CRS normalization:** `coord_sf()` (automatically added by `geom_sf()`) applies a CRS transform before rendering. The built data geometry column is already in the plot CRS. To send valid GeoJSON to D3, transform to WGS84 (EPSG:4326 / lon-lat) first — D3's geoPath expects spherical lon/lat in degrees:
+Then skip cleanly if Chrome cannot launch. This is important because chromote's own CRAN guidance says Chrome-dependent tests should not run on CRAN; run them in CI instead, ideally on a scheduled workflow as well as PRs.
+
+**CI policy:**
+
+- Run the chromote smoke tests on GitHub Actions or equivalent CI where Chrome availability is controlled.
+- Prefer system Chrome in CI for day-to-day compatibility.
+- If CI drift becomes noisy, use chromote's Chrome-for-Testing support outside CRAN, for example `chromote::local_chrome_version("latest-stable")` or the headless-shell binary.
+- Keep CRAN checks free of browser launch requirements.
+
+## Existing Stack To Keep
+
+### Core Framework
+
+| Technology | Current Version Evidence | Purpose | Decision |
+|------------|--------------------------|---------|----------|
+| R package + `testthat` | DESCRIPTION uses testthat edition 3; local testthat is 3.3.2 | Package and test harness | Keep. Add browser smoke tests as opt-in/CI-safe testthat tests. |
+| `ggplot2` | local 4.0.3; current code uses `ggplot2::ggplot_build()` and private theme helpers | Source plot build object | Keep. v1.9 hardening should isolate private calls behind wrappers, not replace ggplot2 integration. |
+| `htmlwidgets` | local 1.6.4; current widget and fixture pipeline | R-to-browser bridge | Keep. It is the package contract. |
+| `jsonlite` | local 2.0.0; current IR serialization path | Serialize non-geometry IR | Keep. Continue not using it for raw `sfc` geometry columns. |
+| D3 v7 | vendored at `inst/htmlwidgets/lib/d3/d3.v7.min.js`; yaml declares D3 version 7 | SVG rendering, geo path generation, interactions | Keep. No extra JS geospatial renderer is needed. |
+
+### Spatial Stack
+
+| Technology | Current Version Evidence | Purpose | Decision |
+|------------|--------------------------|---------|----------|
+| `sf` | DESCRIPTION `sf (>= 1.0.0)`; local 1.1.1 | Geometry inspection, CRS normalization, bbox, validity/empty checks, test fixtures | Keep in `Suggests`. Do not move to `Imports`; users without maps should not inherit GDAL/GEOS/PROJ installation cost. |
+| `geojsonsf` | DESCRIPTION `geojsonsf (>= 2.0.0)`; local 2.0.5 | Serialize accepted `sfc` rows into GeoJSON strings | Keep in `Suggests`. Continue using `geojsonsf::sfc_geojson()` rather than hand-built JSON or WKT. |
+| `rnaturalearth` | DESCRIPTION Suggests; local 1.2.0 | Optional world multipolygon fixture | Keep optional and skip guarded. Do not make it part of browser smoke minimums. |
+
+## sf Point And Line Support
+
+No new package is needed for point and line geometry support.
+
+Use the existing `prepare_sf_geometry_ir()` path and widen the accepted geometry families deliberately:
 
 ```r
-normalize_to_lonlat <- function(sfc_col) {
-  crs <- sf::st_crs(sfc_col)
-  if (is.na(crs) || crs == sf::st_crs(4326)) return(sfc_col)
-  sf::st_transform(sfc_col, 4326)
-}
+c(
+  "POINT", "MULTIPOINT",
+  "LINESTRING", "MULTILINESTRING",
+  "POLYGON", "MULTIPOLYGON"
+)
 ```
 
-**Geometry serialization:** Convert each row's geometry to an inline GeoJSON string using geojsonsf:
+D3's `geoPath()` officially renders GeoJSON `Point`, `MultiPoint`, `LineString`, `MultiLineString`, `Polygon`, and `MultiPolygon` objects. For points, set `pathGen.pointRadius(...)` before rendering. The lowest-risk v1.9 renderer shape is still one `path.geom-sf` per accepted sf row, even for points and lines, because the existing tooltip, hover, handler, and brush selector stack already targets `path.geom-sf`.
 
-```r
-geojson_strings <- geojsonsf::sfc_geojson(normalized_sfc)
-```
+Recommended renderer additions:
 
-This produces a character vector, one GeoJSON string per row (e.g., `'{"type":"Polygon","coordinates":[...]}'`). Include this as a new column in the row data sent to JS. Keep non-geometry aesthetics (fill, colour, alpha, label) in the same row object — they drive choropleth coloring.
+- Add `layer.geom_type` or per-row geometry type checks only where styling differs.
+- For point-family sf, use `d3.geoPath().pointRadius(radius)` and preserve `path.geom-sf`.
+- For line-family sf, use the same `path.geom-sf` path rendering with `fill="none"` by default unless ggplot2 supplies a fill aesthetic.
+- Keep `data-cx` and `data-cy` centroid attributes for all sf paths so brush remains centroid-based.
+- Add IR diagnostics that report accepted geometry types by family, not only dominant type.
 
-**IR schema addition for geom_sf layers:**
+Do not split sf points into `circle.geom-point` or lines into `path.geom-line` in v1.9. That would blur the sf interactivity contract, duplicate projection logic, and create inconsistent brush behavior across sf geometry families.
 
-```json
-{
-  "geom": "sf",
-  "data": [
-    {
-      "geometry": "{\"type\":\"Polygon\",\"coordinates\":[...]}",
-      "fill": "#3182bd",
-      "colour": "#000000",
-      "alpha": 1,
-      "label": "Wake County"
-    }
-  ],
-  "params": { "linewidth": 0.5 },
-  "aes": { "fill": "fill_col", "colour": "colour_col" },
-  "projection": "identity"
-}
-```
+## Package Hardening Stack
 
-The `"projection": "identity"` field signals to JS to use `d3.geoIdentity()` + `fitExtent` (coordinates are already in lon/lat, D3 does the lon/lat→pixel projection). If the gg2d3 user has applied `coord_sf(crs = something_else)` and ggplot_build has already projected to that CRS, we always re-normalize to WGS84 before serialization.
+### IR And Private API Hardening
 
-### JS Layer: new file `inst/htmlwidgets/modules/geoms/sf.js`
+No dependency addition is required.
 
-Register a `"sf"` geom renderer in the existing geom registry. The renderer:
+Use internal helper modules and test fixtures:
 
-1. Parses each row's `geometry` field with `JSON.parse()`.
-2. Constructs a `d3.geoIdentity().reflectY(true)` projection, then calls `.fitExtent([[0,0],[width,height]], featureCollection)` to auto-fit all features into the panel dimensions.
-3. Creates a `d3.geoPath().projection(proj)` path generator.
-4. Appends one `<path class="geom-sf">` per row, setting `d` from the path generator and `fill`/`stroke` from aesthetics.
+| Area | Stack Decision | Rationale |
+|------|----------------|-----------|
+| `as_d3_ir()` modularization | Extract private helpers inside existing R files or new internal files under `R/`; no new framework | The risk is maintainability, not missing tooling. Smaller helpers make sf expansion and private API fallbacks testable. |
+| ggplot2 private APIs | Wrap `ggplot2:::calc_element()` and `ggplot2:::plot_theme()` behind internal `gg2d3_*` helpers with graceful fallbacks | Current code calls private ggplot2 functions multiple times. Centralizing them reduces future breakage from ggplot2 internals. |
+| IR schema validation | Extend `validate_ir()`; no JSON Schema dependency | The IR is an R list with package-specific invariants. `validate_ir()` already exists and should learn sf point/line geometry contracts, centroid requirements, and malformed renderer-edge cases. |
+| JS renderer contracts | Keep source-contract tests plus new chromote DOM tests | Source tests catch selector regressions cheaply; browser tests catch runtime DOM failures. |
 
-**Why geoIdentity with reflectY + fitExtent (not a named projection like Mercator):**
+### Renderer Edge-Case Hardening
 
-- The R side (ggplot2's `coord_sf`) has already handled the projection choice and applied it to the built data before `ggplot_build()` returns. If we re-project in JS using Mercator or Albers, we double-project.
-- `geoIdentity()` treats coordinates as-is (no spherical math) but **fitExtent** auto-scales them to fill the panel — which is exactly what ggplot2's layout engine does.
-- `reflectY(true)` is required because SVG's y-axis is inverted relative to geographic convention.
-- For the common WGS84 (lon/lat) case, `geoIdentity + fitExtent` on lon/lat coordinates produces correct aspect-ratio-preserving maps without requiring us to replicate ggplot2's projection logic in JavaScript.
+No new JS dependency is needed.
 
-**Named D3 projections (geoMercator, geoNaturalEarth1, etc.):** Available in d3 v7 bundle without additional libraries. Use only if the IR explicitly requests a projection by name — a post-v1.7 feature. For v1.7, identity is the correct default.
+Prioritize tests and local guards around:
 
----
+- `geom_sf` empty accepted geometry set: should render zero paths without JS errors.
+- malformed GeoJSON string in `layer.geometries`: should skip/null safely without breaking the whole widget.
+- mismatched `layer.data` and `layer.geometries`: should fail in `validate_ir()` before browser render.
+- non-finite `sf_bbox`: already warns in `validate_ir()`; keep coverage.
+- point radius defaults and aesthetics for point-family sf.
+- line fill defaults so line-family sf does not accidentally produce filled shapes.
+- existing `geom_rect` out-of-bounds behavior and orphaned `GeomPolygon` mapping as package-hardening items, but do not pull them into the sf stack.
 
-## DESCRIPTION Changes
+## What NOT To Add
 
-```r
-# Add to Suggests (NOT Imports — sf has heavy system deps)
+| Do Not Add | Why Not | Use Instead |
+|------------|---------|-------------|
+| Node Playwright or Puppeteer | Requires Node/npm toolchain, browser downloads, and a parallel JS test ecosystem for a package that already tests through R | `chromote` inside `testthat` |
+| Selenium / RSelenium | Heavier browser-driver setup than needed for local HTML DOM smoke tests | `chromote` |
+| `shinytest2` | Built for Shiny apps; gg2d3 htmlwidgets do not need a Shiny app driver for static widget DOM checks | Direct `chromote` sessions |
+| `webshot2` | Screenshot capture is useful for visual regression, but v1.9 asks for DOM-level smoke tests and interactivity assertions | Direct DOM/JS evaluation with `chromote` |
+| `vdiffr` | Tests grid/R graphics snapshots, not D3/browser DOM | testthat + chromote |
+| Leaflet/mapview/mapdeck | Would turn gg2d3 into a map engine and conflict with the established SVG/htmlwidgets ggplot parity goal | Existing D3 SVG path renderer |
+| `proj4js` or browser CRS libraries | CRS normalization is already an R-side contract; JS reprojection is out of scope and would duplicate sf/PROJ behavior poorly | `sf::st_transform()` in R |
+| `topojson-client`, `turf.js`, spatial indexing libraries | v1.9 does not require topology simplification, polygon spatial predicates, or large-map performance guarantees | Existing GeoJSON strings and centroid brush |
+| JSON Schema validator | Adds another schema language without clear benefit over package-specific R validation | Extend `validate_ir()` |
+
+## Installation Changes
+
+Recommended DESCRIPTION delta for v1.9:
+
+```text
 Suggests:
-  sf (>= 1.0-0),
-  geojsonsf (>= 2.0.3),
-  testthat (>= 3.0.0),
-  crosstalk
+    testthat (>= 3.0.0),
+    crosstalk,
+    sf (>= 1.0.0),
+    geojsonsf (>= 2.0.0),
+    rnaturalearth,
+    chromote (>= 0.5.1)
 ```
 
-Guard all sf usage at runtime:
+No production `Imports` additions are recommended.
+
+For contributors running browser smoke tests locally:
 
 ```r
-if (!requireNamespace("sf", quietly = TRUE)) {
-  stop("The 'sf' package is required for geom_sf support. Install with: install.packages('sf')",
-       call. = FALSE)
-}
+install.packages(c("chromote", "sf", "geojsonsf"))
 ```
 
-This keeps GDAL/GEOS/PROJ out of gg2d3's hard install requirements — users without spatial data don't need them.
+Chrome or Chromium must be installed unless the test helper deliberately provisions Chrome-for-Testing outside CRAN.
 
----
+## Risks
 
-## Alternatives Considered
+| Risk | Severity | Mitigation |
+|------|----------|------------|
+| Chrome availability makes tests flaky on CRAN or developer machines | High | `skip_on_cran()`, skip when Chrome cannot launch, run browser smoke tests in controlled CI. |
+| Browser tests become slow and discourage local test runs | Medium | Keep DOM smoke tests small: one polygon fixture, one point/line fixture, one interactivity fixture. Avoid screenshot diffs. |
+| Point-family sf rendered as paths may surprise contributors expecting circles | Medium | Document that all sf geometries render as `path.geom-sf`; set `pointRadius()` and test DOM path count/centroids. |
+| Line-family sf accidentally inherits polygon fill behavior | Medium | Renderer should branch defaults by geometry family; tests should assert line paths default to `fill="none"` or equivalent. |
+| Mixed geometry layers create ambiguous styling | Medium | Support mixed point/line/polygon rows only if per-row family handling is added; otherwise accept homogeneous families first and document mixed support limits. |
+| Private ggplot2 API changes break theme extraction | High | Centralize `ggplot2:::` calls and add fallback tests. Do not expand private API usage during sf work. |
+| Optional sf stack increases install friction if moved to `Imports` | High | Keep `sf`, `geojsonsf`, `rnaturalearth`, and `chromote` in `Suggests` with explicit runtime/test skips. |
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| geojsonsf::sfc_geojson() | sf::st_as_text() (WKT) + parse in JS | Never for gg2d3. WKT requires a JS WKT parser library; GeoJSON is directly consumable by d3.geoPath. |
-| geojsonsf::sfc_geojson() | jsonlite::toJSON(sf_object, dataframe="geojson") | Only if you want a single FeatureCollection blob. gg2d3 needs per-row geometry strings to match the existing row-oriented IR data format. |
-| geoIdentity() + fitExtent | geoMercator / geoAlbers in JS | Use named projections only for future "raw lon/lat without coord_sf" support. Not needed when R has already handled projection. |
-| geoIdentity() + fitExtent | Passing pixel-projected coordinates from R | Possible but fragile — requires replicating ggplot2's panel size math in R to get the same pixel coords that coord_sf would use. Too brittle; let D3 fitExtent handle scaling. |
-| sf in Suggests | sf in Imports | Use sf in Imports only if the entire package depends on spatial capability. gg2d3's non-map users should not need GDAL. |
-| Inline GeoJSON strings per row | TopoJSON | TopoJSON requires a separate topology-generation step and a separate JS parser (topojson-client). For choropleth rendering in a ggplot2 IR pipeline, the added complexity is not justified — GeoJSON is the direct output of sf and the direct input to d3.geoPath. |
+## Source Notes
 
-## What NOT to Use
+| Source | Confidence | Notes |
+|--------|------------|-------|
+| Local `DESCRIPTION` | HIGH | Current dependency placement: `sf`, `geojsonsf`, and `rnaturalearth` are optional Suggests; testthat edition 3. |
+| Local `R/sf_utils.R` | HIGH | Current sf path already normalizes CRS, filters invalid/empty/missing rows, serializes with `geojsonsf::sfc_geojson()`, and returns diagnostics. |
+| Local `inst/htmlwidgets/modules/geoms/sf.js` | HIGH | Current renderer already uses `d3.geoIdentity()`, `fitExtent()`, `d3.geoPath()`, `path.geom-sf`, centroid attributes, and row ids. |
+| Local `tests/testthat/test-sf-visual.R` | HIGH | Current browser validation is fixture-generation/manual HTML, not automated DOM inspection. |
+| chromote docs: https://rstudio.github.io/chromote/ | HIGH | Documents chromote as an R implementation of Chrome DevTools Protocol with synchronous API and browser commands. |
+| chromote CRAN-test guidance: https://rstudio.github.io/chromote/articles/example-cran-tests.html | HIGH | Recommends not running chromote tests on CRAN; use `skip_on_cran()` and CI instead. |
+| chromote options: https://rstudio.github.io/chromote/reference/chromote-options.html | HIGH | Documents Chrome path/headless/timeout options for controlled test environments. |
+| D3 geoPath docs: https://d3js.org/d3-geo/path | HIGH | Documents `geoPath()` rendering of GeoJSON Point, MultiPoint, LineString, MultiLineString, Polygon, and MultiPolygon, including `pointRadius()`. |
+| sf validity docs: https://r-spatial.github.io/sf/reference/valid.html | HIGH | Documents `st_is_valid()` behavior used by current filtering. |
+| sf geometry query docs: https://r-spatial.github.io/sf/reference/geos_query.html | HIGH | Documents geometry emptiness queries used by current filtering. |
+| geojsonsf docs: https://www.rdocumentation.org/packages/geojsonsf/versions/2.0.5/topics/sf_geojson | MEDIUM | Confirms GeoJSON conversion support including point and line examples; package docs are mirrored rather than primary CRAN PDF. |
+| testthat skip docs: https://testthat.r-lib.org/reference/skip.html | HIGH | Documents `skip_on_cran()` and `skip_if_not_installed()`. |
+| htmlwidgets saveWidget docs: https://www.rdocumentation.org/packages/htmlwidgets/versions/1.6.4/topics/saveWidget | MEDIUM | Confirms `saveWidget()` file/selfcontained/libdir behavior; mirrored docs, but matches installed API and current code. |
 
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| **leaflet / mapbox / maplibre tile servers** | gg2d3 renders static SVG shapes only; tile maps are raster-based with a completely different rendering model | d3.geoPath producing SVG `<path>` elements |
-| **topojson-client JS library** | Extra vendored JS with no benefit over GeoJSON for single-layer choropleth rendering | GeoJSON inline strings + d3.geoPath |
-| **geojsonio R package** | Heavier dependency (many Suggests), built around HTTP/file I/O API; not designed for in-memory pipeline use | geojsonsf (C++ backed, in-memory, no I/O) |
-| **sp / rgdal (legacy R spatial)** | Deprecated. sp→sf migration complete across the R ecosystem; rgdal was archived from CRAN in Oct 2023 | sf package exclusively |
-| **Projection logic in JavaScript** | ggplot2's coord_sf has already resolved projection choices; reproducing this in JS means double-projecting | Always normalize to WGS84 in R, use geoIdentity in JS |
-| **sf in Imports** | Forces GDAL/GEOS/PROJ system library installation on every gg2d3 user regardless of whether they use maps | sf in Suggests with runtime requireNamespace() guard |
-
----
-
-## Stack Patterns by Variant
-
-**If user calls `gg2d3(p)` where `p` has only non-sf geoms:**
-- No sf/geojsonsf code path is triggered.
-- Zero runtime overhead from map support.
-
-**If user calls `gg2d3(p)` where `p` has `geom_sf()` with polygon/multipolygon geometries:**
-- R: detect sfc column, normalize CRS to WGS84, call `sfc_geojson()`, embed strings in IR.
-- JS: `sf.js` geom renderer parses JSON, calls geoIdentity + fitExtent, renders `<path>` elements.
-- Interactivity: existing hover/tooltip/brush modules can target `path.geom-sf` selectors — same pattern as other geoms.
-
-**If user calls `gg2d3(p)` where `p` has `geom_sf()` with mixed geometry types (point + line + polygon):**
-- geom_sf splits rows by geometry type internally (GeomPoint defaults for points, GeomPolygon defaults for polygons).
-- The IR should emit separate layer entries per geometry type, or the JS renderer must branch per row based on `feature.geometry.type`.
-- Recommended: emit separate sub-layers keyed by geometry type in R; simpler renderer logic in JS.
-
-**If user's sf data is in a non-WGS84 CRS (e.g., EPSG:3857 Web Mercator, EPSG:32617 UTM):**
-- R: `st_transform(sfc_col, 4326)` converts to lon/lat before GeoJSON serialization.
-- JS: geoIdentity + fitExtent handles lon/lat correctly.
-- This is the right approach even if the original data is in a projected CRS — GeoJSON RFC 7946 mandates WGS84.
-
----
-
-## Version Compatibility
-
-| Package | Compatible With | Notes |
-|---------|-----------------|-------|
-| sf 1.1-0 | ggplot2 3.5.x, 4.0.x | ggplot2 geom_sf / coord_sf API stable; sf 1.0+ uses WKT2 for CRS (not proj4 strings) |
-| geojsonsf 2.0.3 | sf 1.0+ | geojsonsf requires sf; sfc_geojson() works on sfc objects from sf 1.0+ |
-| d3 v7.9.0 | d3-geo bundled | d3.geoPath, geoIdentity, geoMercator, geoEquirectangular, geoNaturalEarth1 all included |
-| jsonlite 2.0.0 | sf sfc columns | jsonlite 2.0 (Jul 2025) has asJSON.sf methods, but NOT used in our pipeline (geojsonsf preferred per-row) |
-
----
-
-## Sources
-
-- https://cran.r-project.org/web/packages/sf/sf.pdf — sf 1.1-0 CRAN release date (Feb 24, 2026), system deps (GDAL, GEOS, PROJ) **[HIGH]**
-- https://r-spatial.github.io/sf/reference/st_transform.html — st_transform() CRS conversion API **[HIGH]**
-- https://r-spatial.github.io/sf/reference/st_crs.html — st_crs() introspection, WGS84/EPSG:4326 usage **[HIGH]**
-- https://github.com/SymbolixAU/geojsonsf — geojsonsf v2.0.3, sfc_geojson() function **[MEDIUM — GitHub, Nov 2025 CRAN date confirmed]**
-- https://cran.r-project.org/web/packages/geojsonsf/geojsonsf.pdf — CRAN documentation, Nov 2025 build **[HIGH]**
-- https://d3js.org/d3-geo — d3-geo API, geoPath, projection types, fitExtent/fitSize **[HIGH]**
-- https://github.com/d3/d3-geo — d3-geo v3.1.1 (bundled in D3 v7.9.0) **[HIGH]**
-- https://github.com/tidyverse/ggplot2/blob/main/R/geom-sf.R — geom_sf draw_panel, required_aes="geometry", type classification **[HIGH]**
-- https://github.com/tidyverse/ggplot2/issues/3453 — tibble+sfc ggplot_build compatibility (resolved) **[HIGH]**
-- https://cran.r-project.org/web/packages/jsonlite/jsonlite.pdf — jsonlite 2.0.0 (Jul 2025), sf serialization modes **[HIGH]**
-- https://ggplot2.tidyverse.org/reference/ggsf.html — coord_sf, geom_sf public API **[HIGH]**
-
----
-
-*Stack research for: gg2d3 v1.7 milestone (choropleth map / geom_sf support)*
-*Researched: 2026-04-04*

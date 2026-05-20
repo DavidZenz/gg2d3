@@ -1,208 +1,208 @@
 # Project Research Summary
 
-**Project:** gg2d3 v1.7 — geom_sf / choropleth map rendering
-**Domain:** Geographic visualization extension to an existing ggplot2-to-D3 SVG pipeline
-**Researched:** 2026-04-04
-**Confidence:** HIGH (R layer and D3-geo API), MEDIUM (ggplot_build sf geometry column survival — needs empirical verification)
+**Project:** gg2d3 v1.9 sf Robustness and Expansion
+**Domain:** R/htmlwidgets ggplot2-to-D3 SVG renderer with sf support
+**Researched:** 2026-05-20
+**Confidence:** HIGH
 
 ## Executive Summary
 
-gg2d3 v1.7 adds choropleth map rendering by extending the existing three-layer pipeline (R -> IR -> D3) to handle `geom_sf` layers. The recommended approach is a clean separation of concerns: R normalizes CRS to WGS84 and serializes geometries to GeoJSON strings via `geojsonsf::sfc_geojson()`; the IR carries geometries as a parallel array alongside existing aesthetic row data; JavaScript renders `<path>` elements using `d3.geoIdentity().reflectY(true).fitExtent()` — deliberately not re-projecting, since `coord_sf` has already handled projection on the R side. No new JavaScript libraries are needed; `d3-geo` is already bundled in the vendored D3 v7.9.0. The `sf` and `geojsonsf` packages go into `Suggests`, not `Imports`, to avoid forcing GDAL/GEOS/PROJ system dependencies on users who don't need maps.
+gg2d3 is an R package that converts ggplot2 objects into a JSON-like IR and renders them as interactive D3 SVG htmlwidgets. v1.8 established the production `geom_sf()` polygon foundation: R-side CRS normalization and diagnostics, GeoJSON serialization, panel-scoped bbox/projection metadata, `path.geom-sf` rendering, tooltip/hover/handler support, centroid brushing, and zoom suppression. v1.9 should strengthen that foundation rather than introduce a separate map engine.
 
-The implementation splits cleanly into four phases that match the existing codebase's module boundaries: (1) R-side IR extraction, (2) basic D3 rendering, (3) interactivity wiring, and (4) edge cases and polish. Phase 1 is the feasibility gate — if `ggplot_build()` does not preserve the `sfc` geometry list-column through its data transformation, the entire feature set is blocked. Research strongly indicates it is preserved (per ggplot2 source and related GitHub issues), but this must be verified empirically before implementation begins.
+The recommended approach is to add automated browser DOM smoke validation first, then expand sf support from polygon-family geometries to point and line families, then harden internals touched by the work. Keep the production stack stable: R, ggplot2, htmlwidgets, vendored D3 v7, sf, and geojsonsf. Add only `chromote` as an optional test dependency for live-browser DOM assertions. Do not add Playwright, Puppeteer, Selenium, Leaflet, browser CRS libraries, spatial JS libraries, or screenshot-diff infrastructure.
 
-The primary technical risks are all known and preventable: the `sfc` geometry column breaking existing `to_rows()` serialization (avoid by extracting geometry before calling `to_rows()`), the Cartesian scale system being meaningless for `coord_sf` plots (bypass entirely, use `bbox` instead), winding order mismatches causing holes to render as filled regions (fix with `fill-rule="evenodd"`), and D3 zoom being architecturally incompatible with geoPath rendering (suppress or implement as a separate panel-level transform). None of these require redesigning existing architecture — they are additive special cases with well-documented solutions.
+The biggest risks are false confidence from weak browser tests, treating points/lines as polygons by accident, breaking row identity under skipped rows/facets/multi-geometries, and broad refactoring of `as_d3_ir()` before characterization coverage exists. Mitigate these by asserting rendered DOM behavior in a real browser, preserving R-side geometry truth and panel-scoped projection metadata, keeping `path.geom-sf` as the shared sf compatibility selector, documenting centroid/representative-point brush semantics, and limiting hardening to small helper extractions after sf regression gates are in place.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The v1.6 stack is unchanged. Two new R packages are added to `Suggests` only. No new JS libraries are required.
+Keep all production rendering dependencies unchanged. `sf`, `geojsonsf`, and `rnaturalearth` should remain optional `Suggests`; moving them to `Imports` would impose GDAL/GEOS/PROJ costs on users who never render maps. D3 v7 remains vendored and sufficient for GeoJSON `Point`, `MultiPoint`, `LineString`, `MultiLineString`, `Polygon`, and `MultiPolygon` rendering through `d3.geoPath()`.
 
-**Core technologies (net-new for v1.7):**
-- `sf` (>= 1.0-0, CRAN Feb 2026): CRS detection, WGS84 normalization via `st_transform()`, geometry type inspection — the only authoritative R spatial package; sp/rgdal are deprecated and CRAN-archived
-- `geojsonsf` (2.0.3, CRAN Nov 2025): `sfc_geojson()` converts an `sfc` list-column to a character vector of GeoJSON strings — C++ backed, in-memory, no I/O overhead; preferred over `jsonlite::toJSON(sf_object)` which wraps in a FeatureCollection and breaks the per-row IR format
-- `d3-geo` (bundled in d3 v7.9.0, already vendored): `d3.geoPath()`, `d3.geoIdentity()`, `fitExtent()` — no additional vendoring needed
+The only stack addition for v1.9 should be `chromote (>= 0.5.1)` in `Suggests`, used from `testthat` for local/CI browser smoke tests. Tests should use `htmlwidgets::saveWidget(selfcontained = FALSE)` to generate HTML fixtures, open them through headless Chrome, and assert DOM attributes and event effects. Browser tests must be skipped on CRAN and skipped cleanly when Chrome or optional spatial packages are unavailable.
 
-**Critical version note:** `geojsonsf` requires `sf >= 1.0`; `sf 1.0+` uses WKT2 for CRS strings (not proj4), which is what `st_crs()` returns. All version dependencies are already satisfied by the existing environment.
+**Core technologies:**
+- R package + `testthat` - existing package and test harness; add guarded browser smoke tests here.
+- `ggplot2` - source of build data and theme/facet metadata; isolate private API access behind wrappers.
+- `htmlwidgets` - R-to-browser delivery contract; keep fixture generation through `saveWidget()`.
+- D3 v7 - SVG rendering, `geoIdentity()`, `fitExtent()`, `geoPath()`, and `pointRadius()`.
+- `sf` - R-side geometry inspection, CRS normalization, validity/empty checks, bbox calculation, and fixtures.
+- `geojsonsf` - reliable `sfc` to GeoJSON serialization.
+- `chromote` - optional dev/CI browser DOM smoke runner.
+
+**Stack non-additions:**
+- Do not add Playwright/Puppeteer/Node test tooling for v1.9 unless Phase 36 proves `chromote` cannot cover required brush/event checks.
+- Do not add Selenium, shinytest2, webshot2, vdiffr, or screenshot diffs as the required validation gate.
+- Do not add Leaflet, mapdeck, mapview, tile basemaps, `proj4js`, topojson-client, turf.js, spatial indexes, or a JSON Schema validator.
 
 ### Expected Features
 
-**Must have (table stakes — P1, v1.7 MVP):**
-- Polygon region rendering: `geom_sf(aes(fill = var))` produces filled `<path>` elements via `d3.geoPath()`
-- Fill aesthetic mapped to data variable — ggplot_build resolves hex per row; IR passthrough is trivial once geometry extraction works
-- Boundary stroke (colour + linewidth aesthetics) — standard SVG path rendering
-- Aspect ratio preservation — `geoIdentity().fitExtent()` handles this automatically
-- Hover tooltip on region — extend existing `d3_tooltip()` to include `path.geom-sf` selectors
-- Hover highlight (opacity dim on non-hovered regions) — extend existing `d3_hover()` INTERACTIVE_SELECTORS
-- `theme_void()` compatibility — axes/grids suppressed when `CoordSf` detected; panel background behavior must be verified
+v1.9 should make `geom_sf()` a deliberately bounded sf renderer for polygon, point, and line geometry families. It should not promise "all sf" behavior.
 
-**Should have (differentiators — P2, v1.7.x):**
-- POINT and LINESTRING geom_sf dispatch — route to existing point/line renderers via geometry type detection
-- Multiple geom_sf layer stacking (e.g., polygon fill layer + border overlay layer)
-- Stepped/binned fill scales (`scale_fill_steps`) — explicit validation; likely works already since ggplot_build resolves to hex values per row
+**Must have (table stakes):**
+- Automated browser DOM smoke validation for sf fixtures: live rendered nodes, non-empty path data, finite anchors, row ids, console/page errors, brush behavior, and sanitized callback payloads.
+- Polygon regression coverage: existing `POLYGON`/`MULTIPOLYGON` choropleths keep `path.geom-sf`, `fill-rule="evenodd"`, row identity, tooltip/hover/handler support, centroid brush, facets, stacked alignment, and zoom suppression.
+- Browser fixture automation: deterministic fixture generation with useful artifacts for failures.
+- `POINT` and `MULTIPOINT` support in `geom_sf()` with visible marks, finite projected anchors, row identity, mapped aesthetics where feasible, and source-row-oriented callbacks.
+- `LINESTRING` and `MULTILINESTRING` support with ordered SVG paths, stroke-oriented defaults, no accidental polygon fill, and existing interactivity verbs.
+- Family-aware diagnostics: accepted geometry types/families, unsupported types, skipped rows/reasons, missing CRS, and empty/invalid/missing geometry behavior.
+- Shared panel projection across sf families and stacked sf layers, with `sf_bbox` computed from all accepted geometries in the panel.
+- Existing sf interactivity parity for tooltip, hover, brush, handlers, and private-field sanitization.
+- Continued `d3_zoom()` suppression for every sf widget until projection-aware map zoom is designed.
+- Documentation updates that replace polygon-only language with a precise polygon/point/line contract.
 
-**Defer (v2+):**
-- Map-specific zoom/pan — conflicts with existing Cartesian zoom; requires separate geoPath projection rescaling
-- Click-to-select region for linked views — rectangular brush does not generalize to polygon hit-testing
-- Raster/tile basemap — outside SVG-only mandate; Leaflet is the right tool for tile maps
-- Additional named D3 projections (Mercator, Albers) — `geoIdentity + fitExtent` is correct for the R-projected case
-- `geom_sf_text` / `geom_sf_label` — requires interior point extraction and coordinate projection; scope-increasing for MVP
+**Should have (differentiators):**
+- DOM assertions over source-string checks, so tests catch blank/malformed rendered SVG.
+- Failure artifact bundle: generated HTML, console log, and optional diagnostic screenshot.
+- Family-specific CSS classes beside the compatibility selector: `geom-sf-polygon`, `geom-sf-point`, `geom-sf-line`.
+- Small mixed-overlay examples: choropleth plus points, boundaries plus routes.
+- Deduplicated callback rows for multi-geometries where one source row produces multiple visible parts.
+- Structured hardening checklist for private API wrappers, stale docs, and known renderer edge cases.
+
+**Defer / out of scope:**
+- `GEOMETRYCOLLECTION`, curved geometries, recursive/nested geometry support.
+- `geom_sf_text()` and `geom_sf_label()`.
+- Tile basemaps, raster backgrounds, slippy-map zoom/pan, and projection-aware map controls.
+- JavaScript-side CRS reprojection.
+- True polygon/line intersection brushing; v1.9 should document centroid or representative-point semantics.
+- Large-map performance guarantees, simplification helpers, canvas/WebGL, and spatial indexing.
+- Pixel-diff visual regression as the primary gate.
+- Full rewrite of `as_d3_ir()`.
 
 ### Architecture Approach
 
-The integration is additive and follows existing module patterns without redesigning the pipeline. A new `R/sf_utils.R` centralizes sf-specific R functions behind optional `requireNamespace()` guards. A new `inst/htmlwidgets/modules/geoms/sf.js` self-registers in the existing geom registry. The main `gg2d3.js` render path gets a single routing branch: if `ir.coord.type === "sf"`, call `renderSfPanel()` (which skips Cartesian scale creation); otherwise proceed unchanged. The IR gains three additive fields on sf layers (`geometries[]`, `crs`, `geom_type`) and two fields on the coord object (`coord.type = "sf"`, `coord.bbox`).
+Keep the existing three-layer pipeline and expand only the sf geometry helper and sf renderer. R remains responsible for geometry truth: detecting `sfc`, filtering missing/empty/invalid/unsupported rows, normalizing CRS to WGS84, serializing accepted geometries, preserving source `row_id`, computing panel `sf_bbox`, and emitting diagnostics. JavaScript receives accepted GeoJSON strings and draws them inside the existing panel, facet, interaction, and geom registry infrastructure.
 
 **Major components:**
-1. `R/sf_utils.R` (new) — `extract_sf_geometries()`, `normalize_to_wgs84()`, `detect_dominant_geom_type()`, `get_layer_crs()`; isolates all sf dependency behind `requireNamespace()` guards
-2. `R/as_d3_ir.R` (modified) — add `GeomSf` to geom dispatch switch; add `CoordSf` branch to coord detection; call sf_utils functions in sf layer path; exclude `geometry` column from `keep_aes`
-3. `inst/htmlwidgets/modules/geoms/sf.js` (new) — parses GeoJSON strings, builds `geoIdentity().reflectY(true).fitExtent()` projection, renders `<path class="geom-sf">` per row, computes centroids as `data-cx`/`data-cy` for brush compatibility
-4. `inst/htmlwidgets/gg2d3.js` (modified) — `renderSfPanel()` function; coord routing branch at panel dispatch
-5. `modules/events.js`, `modules/brush.js` (modified) — add `'path.geom-sf'` to INTERACTIVE_SELECTORS (only after centroid attributes are implemented in sf.js)
+1. `R/as_d3_ir.R` - orchestrates ggplot build extraction, panel/facet metadata, and layer IR assembly; v1.9 should call narrower helpers rather than gain more geometry logic.
+2. `R/sf_utils.R` - owns sf detection, supported-family classification, CRS normalization, row filtering, GeoJSON serialization, diagnostics, and degenerate bbox protection.
+3. `R/validate_ir.R` - validates IR shape, especially data/geometries alignment and required sf diagnostics.
+4. `inst/htmlwidgets/gg2d3.js` - preserves panel filtering of paired data/geometries and passes panel-scoped `sf_bbox` to the renderer.
+5. `inst/htmlwidgets/modules/geoms/sf.js` - parses GeoJSON, fits one panel projection, renders all accepted sf families as `path.geom-sf` with family classes, and sets row/anchor attributes.
+6. `inst/htmlwidgets/modules/events.js` and `brush.js` - keep existing interactivity contracts; brush remains pixel-space with sf representative anchors.
+7. Browser smoke harness - test-only helper and tests under `tests/testthat`, with no runtime package dependency.
+
+**Key architecture decisions:**
+- Preserve `path.geom-sf` as the compatibility anchor for polygon, point, and line sf families. Use `d3.geoPath().pointRadius()` for points rather than switching to `circle.geom-sf`.
+- Add family-specific classes, not separate public geoms.
+- Compute `sf_bbox` from all accepted sf geometries in the current panel across stacked layers and families.
+- Guard point-only and line-only degenerate bboxes before `fitExtent()`, with a JS fallback.
+- Keep data/geometries paired through facet filtering; never filter or sort them independently.
+- Centralize `ggplot2:::` access behind internal helpers during hardening.
 
 ### Critical Pitfalls
 
-1. **sfc geometry column breaks `to_rows()` serialization** — `sfc` list-columns are not JSON-serializable by `jsonlite`; the `keep_aes` whitelist silently drops them. Fix: extract geometry via `geojsonsf::sfc_geojson()` before calling `to_rows()`, exclude `"geometry"` from `keep_aes` for sf layers, store as a parallel `layer.geometries[]` array. Address in Phase 1 — this is the foundational blocker.
-
-2. **`coord_sf` bypasses the entire Cartesian scale system** — `ir.scales.x/y` will be meaningless for sf plots; passing them to the renderer causes crashes or empty output. Fix: detect `CoordSf` early, short-circuit Cartesian scale extraction entirely, emit `ir.coord.bbox` instead, build geoPath from panel dimensions in the sf renderer. Address in Phases 1 and 2.
-
-3. **GeoJSON winding order mismatch causes holes to render filled** — `geojsonsf` outputs RFC 7946 winding (exterior CCW, holes CW); d3-geo expects the opposite. Fix: set `fill-rule="evenodd"` on all `path.geom-sf` elements. One-line fix, but invisible without testing against a MULTIPOLYGON with interior rings. Address in Phase 2.
-
-4. **Non-WGS84 CRS input collapses rendering** — projected coordinates (e.g., EPSG:3857 in meters) are numerically incompatible with the `geoIdentity + fitExtent` approach. Fix: always call `sf::st_transform(geom_col, 4326)` unconditionally before serialization. Never make this optional. Address in Phase 1.
-
-5. **Geometry column name is not always `"geometry"`** — PostGIS-sourced data frequently uses `the_geom`; hardcoding the column name causes silent empty renders. Fix: always use `attr(data, "sf_column")` with fallback to `names(data)[sapply(data, inherits, "sfc")][1]`. Address in Phase 1.
-
-**Additional pitfalls to track:** D3 zoom incompatibility with geoPath (Phase 3 — suppress zoom for sf panels or implement separate panel-level transform); brush INTERACTIVE_SELECTORS update order (add centroid attributes to paths in Phase 2 before adding selector in Phase 3); large geometry payload bloat (add size warning in Phase 1; document `rmapshaper::ms_simplify()` preprocessing).
+1. **Browser tests assert incidental markup instead of behavior** - open generated widgets in a live browser, poll for render completion, assert counts, non-empty `d`, finite anchors, row ids, panel-local counts, brush effects, and sanitized callbacks.
+2. **Non-polygon support only widens `supported_types`** - add family classification, renderer branches, point radius handling, line no-fill defaults, family diagnostics, and fixtures for each supported type.
+3. **CRS/projection alignment regresses** - preserve R-side normalization, compute panel bbox from all accepted families, test mixed EPSG:4326/EPSG:3857 overlays, missing CRS warnings, point-only and line-only panels, and facets.
+4. **Row identity breaks under skipped rows, facets, or multi-geometries** - treat `row_id` as a public interaction contract; keep data/geometries paired; add child-part metadata only if needed; callbacks should remain source-row-oriented.
+5. **Brush semantics are overpromised** - document and test centroid/representative-point brushing for sf; do not imply polygon/line overlap selection.
+6. **Faceted sf expansion reintroduces global projection fitting** - assert per-panel `sf_bbox`, `NULL` empty-panel bbox, and DOM counts/coordinate ranges per panel.
+7. **`as_d3_ir()` refactor appears mechanical but changes behavior** - refactor only after browser/sf regression gates, in small helper extractions with characterization tests.
+8. **Private ggplot2 APIs stay scattered** - wrap `calc_element()`, `plot_theme()`, and other private structure reads behind tested compatibility helpers.
 
 ## Implications for Roadmap
 
-Research maps cleanly to four sequential phases with clear dependency ordering. The architecture team's suggested build order matches the dependency graph: R extraction must precede D3 rendering, which must precede interactivity wiring, which must precede edge case handling.
+Based on the research, v1.9 should start at Phase 36 and use four phases.
 
-### Phase 1: R IR Extraction — geom_sf Layer Support
+### Phase 36: Browser Sf Smoke Harness
 
-**Rationale:** Every downstream phase depends on the IR correctly representing sf layers. If geometry extraction fails, there is nothing to render. This phase has no JavaScript dependency and can be verified with pure R tests. It also contains the highest concentration of critical pitfalls (5 of 8 pitfalls are Phase 1 concerns).
+**Rationale:** The project should not change sf rendering until v1.8 polygon behavior is protected by live DOM assertions. This phase converts manual fixture confidence into repeatable validation.
 
-**Delivers:** `gg2d3(p)` where `p` has `geom_sf` correctly serializes to IR — `layer.geometries[]` contains valid GeoJSON strings, `layer.data[]` contains resolved aesthetics, `ir.coord.type === "sf"` and `ir.coord.bbox` are present. All 8 critical pitfalls have prevention code in place.
+**Delivers:** `chromote` in `Suggests`; helper(s) for generating non-self-contained widget fixtures; smoke tests for polygon paths, row ids, finite centroid attrs, skipped rows, stacked layers, facets, brush behavior, callback sanitization, console/page errors, and zoom suppression.
 
-**Implements:**
-- `R/sf_utils.R`: `extract_sf_geometries()`, `normalize_to_wgs84()`, `detect_dominant_geom_type()`, `get_layer_crs()`
-- `as_d3_ir.R`: `GeomSf` dispatch, `CoordSf` branch, `geometry` exclusion from `keep_aes`, parallel `geometries[]` array
-- `DESCRIPTION`: add `sf` and `geojsonsf` to `Suggests`
-- Add payload size warning for large geometry sets
+**Addresses:** Automated DOM smoke validation, polygon regression checks, fixture automation.
 
-**Avoids:** Pitfalls 1 (sfc serialization), 4 (CRS normalization), 8 (geometry column name), 7 (payload size warning)
+**Avoids:** False confidence from file-existence/source-string tests, async htmlwidgets render races, fixture flakiness from heavy optional packages.
 
-**Research flag:** VERIFY FIRST — empirically confirm `ggplot_build()` preserves the `sfc` geometry list-column with current ggplot2 (3.5.x / 4.0.x). Run `b <- ggplot_build(ggplot(nc) + geom_sf()); "geometry" %in% names(b$data[[1]])` before writing any extraction code. This is the feasibility gate for the entire milestone.
+**Research flag:** Moderate. Planning should verify `chromote` can reliably simulate the required brush/event checks in this package. If not, document the gap before considering a Node browser runner.
 
-### Phase 2: D3 Renderer — Basic Polygon Rendering
+### Phase 37: Non-Polygon Sf IR And Renderer
 
-**Rationale:** Core visual output. No interactivity needed to prove the rendering pipeline works. Should be verified with visual tests before wiring interactivity, which is harder to debug. The `fill-rule="evenodd"` fix for winding order must be applied here, not retroactively.
+**Rationale:** Once polygon contracts are guarded, widen the sf contract to point and line families in the R IR and D3 renderer together. Accepting new types without renderer semantics is the central implementation trap.
 
-**Delivers:** A `gg2d3(ggplot(nc) + geom_sf(aes(fill = BIR74)))` call renders a correctly filled, correctly oriented choropleth with visible region boundaries and fill colors matching ggplot2's output.
+**Delivers:** `sf_geometry_family()` helper; accepted types expanded to `POINT`, `MULTIPOINT`, `LINESTRING`, `MULTILINESTRING`, `POLYGON`, `MULTIPOLYGON`; family-aware diagnostics; panel bbox from all accepted families; degenerate bbox protection; renderer family classes; point radius handling through `geoPath().pointRadius()`; line `fill="none"` defaults; tests for point, multipoint, line, multiline, mixed accepted/unsupported rows, and CRS normalization.
 
-**Implements:**
-- `inst/htmlwidgets/modules/geoms/sf.js`: `renderSf()`, `geoIdentity().reflectY(true).fitExtent()`, per-row `<path class="geom-sf">`, `fill-rule="evenodd"`, centroid computation as `data-cx`/`data-cy` data attributes
-- `gg2d3.js`: `renderSfPanel()`, coord routing branch
-- `gg2d3.yaml`: include `modules/geoms/sf.js` in module load order
+**Addresses:** POINT/MULTIPOINT and LINESTRING/MULTILINESTRING support, geometry-family diagnostics, shared projection across families, stack stability without new runtime dependencies.
 
-**Avoids:** Pitfalls 2 (Cartesian scale bypass), 3 (winding order), 5 (D3 zoom incompatibility — suppress zoom for sf panels in this phase)
+**Avoids:** Polygon-style fill on lines, invisible/default-radius points, broken source row identity, invalid point/line bboxes, and CRS drift.
 
-**Research flag:** STANDARD — `d3.geoIdentity`, `d3.geoPath`, `fitExtent` are well-documented D3 APIs; no additional research needed. Visual verification required with NC shapefile test fixture.
+**Research flag:** Low to moderate. D3 and sf patterns are documented; implementation planning should decide exact point radius mapping against existing gg2d3 size conventions.
 
-### Phase 3: Interactivity Wiring
+### Phase 38: Sf Interaction, Facet, And Documentation Hardening
 
-**Rationale:** Hover tooltip and highlight are P1 MVP features and the primary interactive differentiator over static ggplot2 maps. Must come after Phase 2 because the interactivity selectors depend on `path.geom-sf` elements existing in the DOM with centroid data attributes computed in Phase 2.
+**Rationale:** Rendering nodes is not enough. v1.9 must prove point and line sf marks participate correctly in the existing interactivity stack and that docs state the precise contract.
 
-**Delivers:** Hovering over a map region shows tooltip with fill value (and label aesthetic if present); non-hovered regions dim. Brush rectangle draws and highlights/dims polygon regions by centroid position.
+**Delivers:** Browser smoke coverage for point/line tooltip, hover, handlers, brush, callback sanitization, stacked overlays, facet-wrap/grid including empty panels, and zoom suppression. Documentation updates for README/vignettes/roxygen/diagnostics to describe polygon, point, and line support; centroid/representative-point brushing; unsupported geometries; map anti-features; and optional browser validation.
 
-**Implements:**
-- `modules/events.js`: add `'path.geom-sf'` to INTERACTIVE_SELECTORS
-- `modules/brush.js`: add `'path.geom-sf'` to INTERACTIVE_SELECTORS; verify `data-cx`/`data-cy` attributes drive brush selection logic
-- Tooltip data attributes on path elements: `data-tooltip`, `data-fill-value`, region identifier
+**Addresses:** Existing sf interactivity parity, faceted/stacked alignment, documentation truthfulness, explicit out-of-scope behavior.
 
-**Avoids:** Pitfall 6 (brush incompatibility — centroid-based selection, not polygon overlap)
+**Avoids:** Selector drift, callback payload leaks, global facet bboxes, users inferring overlap brushing or full-map-engine support.
 
-**Research flag:** STANDARD — follows existing `d3_hover()` and `d3_tooltip()` extension patterns from v1.6 interactivity wiring. Pattern is documented in project MEMORY.md.
+**Research flag:** Low. This is mostly validation and documentation against decisions already made.
 
-### Phase 4: Edge Cases and Polish
+### Phase 39: Package Internals Hardening
 
-**Rationale:** Handles real-world data patterns (mixed geometry types, multiple layers, faceted maps) that don't appear in the canonical NC shapefile test case but will surface immediately in user adoption. Also the right phase to decide whether to implement proper geographic zoom or document the limitation.
+**Rationale:** After the browser and sf behavior gates exist, reduce future maintenance risk in the core package without destabilizing unrelated geoms.
 
-**Delivers:** Multiple geom_sf layers stack correctly; POINT and LINESTRING geometries dispatch to existing renderers; faceted sf maps filter by PANEL column; IR schema validator updated to accept new sf fields; explicit zoom behavior (suppressed with documentation, or SVG group transform approach).
+**Delivers:** Focused extraction around touched IR seams, especially `extract_sf_layer_ir()` and panel sf bbox assembly; centralized ggplot2 private API wrappers for theme extraction if touched; targeted regression tests for representative non-sf plots, facets, date scales, legends, coord_flip, polygon sf, point sf, and line sf; cleanup of stale renderer/documentation contradictions and known high-risk edge cases only where in scope.
 
-**Implements:**
-- Geometry type dispatch: POLYGON/MULTIPOLYGON -> sf.js, POINT -> existing point renderer, LINESTRING -> existing path renderer
-- Multiple layer stacking: second `geom_sf` layer renders above first; `<g>` layer order correct
-- Facet support: filter `b$data[[i]]` by `PANEL` column for sf layers (same as Cartesian geoms)
-- `validate_ir.R`: add optional `coord.type`, `coord.bbox`, `layer.geometries`, `layer.crs`, `layer.geom_type` fields if validator exists
-- Zoom: SVG group transform approach or explicit zoom suppression with `warning("Zoom not supported for geom_sf panels in gg2d3 v1.7")`
+**Addresses:** Monolithic `as_d3_ir()` risk, private ggplot2 API fragility, stale unsupported-geom behavior, core package hardening.
 
-**Research flag:** NEEDS RESEARCH — Zoom approach decision. Project MEMORY.md documents that gg2d3 deliberately avoided SVG group transforms for Cartesian zoom (stroke width scaling). Same concern applies here. Evaluate whether the tradeoff is acceptable for geographic zoom or whether zoom should remain suppressed through v1.7.
+**Avoids:** Broad IR rewrites, unrelated renderer churn, hidden regressions in the 25 existing geoms.
+
+**Research flag:** Moderate. Planning should inspect current `as_d3_ir.R` dependencies and choose the smallest helper extractions with characterization tests.
 
 ### Phase Ordering Rationale
 
-- **Phase 1 before Phase 2:** No rendering without IR data. The `ggplot_build()` geometry column survival check is the single most important feasibility gate.
-- **Phase 2 before Phase 3:** Selectors and event handlers require target DOM elements to exist. Computing centroids in Phase 2 enables centroid-based brush selection in Phase 3 without reopening Phase 2 files.
-- **Phase 3 before Phase 4:** Interactivity wiring must work on the canonical single-layer polygon case before testing complex multi-layer and faceted scenarios that add more moving parts.
-- **Geometry, then aesthetics, then interaction:** Follows the existing gg2d3 phasing pattern established across all 26 prior phases.
+- Browser validation comes first because it creates the regression tripwire for v1.8 polygon behavior before point/line changes.
+- IR and renderer expansion belong together because accepted sf types, diagnostics, bbox metadata, and visual semantics are coupled.
+- Interactions/facets/docs follow rendering because they verify the public behavior users experience and prevent overclaiming.
+- Internals hardening comes last because broad refactoring is safest after the browser and sf contracts are locked.
 
 ### Research Flags
 
-**Phases needing deeper research during planning:**
-- **Phase 1 (before any code):** Empirical verification of `ggplot_build()` geometry column survival — run `b <- ggplot_build(ggplot(nc) + geom_sf()); "geometry" %in% names(b$data[[1]])` before writing any extraction code. If FALSE, the entire approach changes.
-- **Phase 4:** Geographic zoom architecture decision — SVG group transform vs. geoPath re-render vs. suppression. Needs a short spike to evaluate stroke-width scaling behavior before committing.
+Phases likely needing deeper research during planning:
+- **Phase 36:** Confirm the `chromote` helper can wait for htmlwidgets render completion, capture console/page errors, and simulate brush interactions robustly.
+- **Phase 37:** Confirm point radius mapping and any limitations around `MULTIPOINT`/`MULTILINESTRING` row identity before implementation.
+- **Phase 39:** Inspect current private ggplot2 API usage and `as_d3_ir()` side effects before extracting helpers.
 
-**Phases with standard patterns (skip research):**
-- **Phase 2:** `d3.geoPath`, `geoIdentity`, `fitExtent`, `reflectY` are all in official D3 documentation with working examples. Standard choropleth render pattern.
-- **Phase 3:** Follows established v1.6 interactivity extension pattern. MEMORY.md has the exact D3 selector and brush architecture documented.
+Phases with standard patterns where additional research should usually be skipped:
+- **Phase 38:** Interaction/facet/documentation validation should be driven by the already documented contracts and browser harness.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | sf, geojsonsf, d3-geo all verified via official CRAN and D3 documentation. Version compatibility confirmed. No alternatives needed. |
-| Features | HIGH | Feature taxonomy is definitive. The one LOW-confidence item (ggplot_build geometry column survival) is a binary empirical check, not a research gap. |
-| Architecture | HIGH | Pipeline mechanics verified against ggplot2 source code and existing gg2d3 codebase. Three anti-patterns and their fixes are concrete and sourced. |
-| Pitfalls | HIGH | 8 pitfalls with concrete prevention strategies. Winding order, CRS normalization, brush centroid approach all documented in official sources or verified community patterns. |
+| Stack | HIGH | Local dependency state, chromote docs, testthat skip patterns, D3 geoPath docs, and current sf/htmlwidgets pipeline all support a small optional test-only addition. |
+| Features | HIGH | Table stakes align with PROJECT.md, v1.8 shipped behavior, ggplot2 `geom_sf()` semantics, and current user-facing gaps. Browser-runner mechanics remain the main implementation detail. |
+| Architecture | HIGH | Current component boundaries are clear in local code and research: R-side sf truth, panel-scoped bbox, D3 SVG drawing, and existing interactivity modules. |
+| Pitfalls | HIGH | Risks are repo-specific and grounded in known v1.8 debt: manual browser fixtures, parallel data/geometries, private ggplot2 APIs, facet bbox behavior, and monolithic IR code. |
 
-**Overall confidence:** HIGH — the implementation path is clear. The only meaningful uncertainty is the `ggplot_build()` geometry column empirical check, which should be the first act of Phase 1.
+**Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **ggplot_build geometry column survival (LOW, empirical):** Must verify `b$data[[i]]$geometry` exists and retains `sfc` class after `ggplot_build()` with current ggplot2. FEATURES.md flags historical issues (ggplot2 GitHub issue #3453). Run test before writing `extract_sf_geometries()`. If geometry is stripped, the fallback is to extract directly from `p$layers[[i]]$data` before `ggplot_build()`, but aesthetics won't be resolved — this would require substantial rework.
-- **validate_ir.R schema coverage:** Not confirmed whether gg2d3 v1.6 has a schema validator. If it exists, it must be updated in Phase 4. Check `R/validate_ir.R` at Phase 4 start.
-- **Faceted sf map data structure:** How `coord_sf` interacts with `b$layout` for faceted plots was not verified. Standard facet handling (`filter(PANEL == panel_num)`) likely applies but should be confirmed during Phase 4 planning.
+- `chromote` brush simulation and render-wait ergonomics: validate in Phase 36 before making the harness a milestone gate.
+- Point radius mapping: align `geom_sf()` point size behavior with existing gg2d3 size conventions and document any deferred aesthetics.
+- Multi-geometry callback semantics: decide whether one source row that creates multiple visible parts returns once or per part; default recommendation is source-row deduplication.
+- Mixed geometry-family layers: support only if source row identity, diagnostics, family classes, and interactivity remain simple; otherwise document homogeneous-family expectations for v1.9.
+- CI wiring: choose controlled Chrome availability for project CI while keeping CRAN checks browser-free.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-
-- https://cran.r-project.org/web/packages/sf/sf.pdf — sf 1.1-0 CRAN release date, system deps, API
-- https://r-spatial.github.io/sf/reference/st_transform.html — st_transform CRS conversion
-- https://r-spatial.github.io/sf/reference/st_crs.html — st_crs introspection and WGS84/EPSG:4326 usage
-- https://cran.r-project.org/web/packages/geojsonsf/geojsonsf.pdf — sfc_geojson API, CRAN Nov 2025 build
-- https://d3js.org/d3-geo/path — d3.geoPath API, SVG path output, geoPath.bounds for bounding box
-- https://d3js.org/d3-geo/projection — geoIdentity.reflectY(true), fitExtent/fitSize API
-- https://github.com/tidyverse/ggplot2/blob/main/R/geom-sf.R — geometry column preserved through ggplot_build, aesthetic defaults per geometry type
-- https://ggplot2.tidyverse.org/reference/ggsf.html — coord_sf, geom_sf public API
+- `.planning/PROJECT.md` - current milestone goal, v1.8 shipped state, constraints, known tech debt, and out-of-scope boundaries.
+- `.planning/research/STACK.md` - dependency recommendations, chromote addition, non-additions, sf/D3 stack rationale.
+- `.planning/research/FEATURES.md` - table stakes, differentiators, anti-features, deferred items, user/developer contracts.
+- `.planning/research/ARCHITECTURE.md` - component boundaries, data flow, build order, anti-patterns, and research gaps.
+- `.planning/research/PITFALLS.md` - phase ownership, critical/moderate/minor pitfalls, and mitigations.
+- Local code references cited by research: `R/as_d3_ir.R`, `R/sf_utils.R`, `R/validate_ir.R`, `inst/htmlwidgets/gg2d3.js`, `inst/htmlwidgets/modules/geoms/sf.js`, `inst/htmlwidgets/modules/events.js`, `inst/htmlwidgets/modules/brush.js`, and current sf tests.
+- Official docs cited by research: D3 `geoPath()`/`geoIdentity()`, ggplot2 `geom_sf()`/`coord_sf()`, sf geometry/transform/validity docs, testthat skip docs, chromote docs.
 
 ### Secondary (MEDIUM confidence)
-
-- https://github.com/SymbolixAU/geojsonsf — geojsonsf v2.0.3, CRAN date confirmed Nov 2025
-- https://macwright.com/2015/03/23/geojson-second-bite — GeoJSON winding order vs D3 convention analysis
-- https://r-graph-gallery.com/327-chloropleth-map-from-geojson-with-ggplot2.html — standard choropleth workflow patterns
-- https://d3-graph-gallery.com/graph/choropleth_hover_effect.html — D3 choropleth hover interaction pattern
-- https://github.com/tidyverse/ggplot2/issues/3453 — ggplot_build geometry column survival with tibble versions (historical, resolved)
-
-### Tertiary (LOW confidence — needs empirical validation)
-
-- ggplot_build output structure for sf layers — inferred from ggplot2 source and documentation; must be verified in a running R session before Phase 1 implementation
-
-### Internal
-
-- gg2d3 MEMORY.md — D3 brush architecture, pixel-position vs. data-domain design decision, zoom filter pattern
-- gg2d3 brush.js, events.js, geom-registry.js, as_d3_ir.R — existing patterns that sf integration must follow
+- Mirrored package docs for `geojsonsf` and `htmlwidgets::saveWidget()` confirm current APIs but should be treated as supporting evidence behind installed/local behavior.
 
 ---
-*Research completed: 2026-04-04*
+*Research completed: 2026-05-20*
 *Ready for roadmap: yes*

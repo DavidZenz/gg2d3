@@ -1,294 +1,263 @@
-# Pitfalls Research
+# Domain Pitfalls
 
-**Domain:** Adding geom_sf / choropleth map rendering to an existing ggplot2-to-D3 pipeline (gg2d3 v1.7)
-**Researched:** 2026-04-04
-**Confidence:** HIGH (architecture known deeply; sf/D3-geo behavior verified against official docs and source)
+**Domain:** v1.9 sf robustness and expansion for R/htmlwidgets + D3 `gg2d3`
+**Researched:** 2026-05-20
+**Overall confidence:** HIGH for repo-specific risks; MEDIUM for future non-polygon rendering details until implementation fixtures exist.
 
----
+## Recommended Phase Ownership
+
+| Phase | Suggested Name | Primary Risk Area |
+|-------|----------------|-------------------|
+| Phase 36 | Browser Sf Smoke Harness | DOM/browser validation hardening for rendered sf nodes and brush behavior |
+| Phase 37 | Non-Polygon Sf IR And Renderer | POINT/MULTIPOINT/LINESTRING/MULTILINESTRING extraction, rendering, aesthetics, diagnostics |
+| Phase 38 | Sf Interaction And Facet Hardening | Brush semantics, row identity, stacked/faceted bbox alignment across mixed sf geometry families |
+| Phase 39 | Package Internals Hardening | `as_d3_ir()` modularization, ggplot2 private API isolation, regression gates |
 
 ## Critical Pitfalls
 
-### Pitfall 1: sfc Geometry Column Breaks to_rows() Serialization
+Mistakes that can cause rewrites, false confidence, or user-visible regressions.
 
-**What goes wrong:**
-`as_d3_ir.R`'s `to_rows()` function iterates `ggplot_build()` layer data and converts each row to a plain R list. The geometry column in a geom_sf layer is of class `sfc` — an R list-column of `sfg` objects. `to_rows()` calls `v[[1]]` on each column per row, which extracts a single `sfg` object (e.g. a `MULTIPOLYGON`). When `jsonlite::toJSON()` serializes the resulting list, an `sfg` object is a nested list of numeric matrices. jsonlite serializes it as an arbitrary nested JSON array with no `type` property, no `coordinates` key — nothing that D3 can recognize as a GeoJSON geometry.
+### Pitfall 1: DOM Smoke Tests Assert Incidental Markup Instead Of Behavior
 
-Separately, the `keep_aes` filter in `to_rows()` contains a fixed list of aesthetic names and does not include `geometry`. The geometry column may therefore be silently dropped before serialization even begins, leaving JavaScript with no polygon data and no error.
+**What goes wrong:** Browser tests pass because an SVG exists, while `path.geom-sf` nodes have empty `d` attributes, missing centroid attributes, wrong `data-row-id`, broken facet filtering, or brush callbacks returning renderer-private fields.
 
-**Why it happens:**
-`to_rows()` was designed for scalar aesthetics (x, y, color). It has no special handling for list-type geometry columns. The `keep_aes` whitelist was written before sf support was planned.
+**Why it happens:** v1.8 coverage is mostly R-side/source-contract tests plus generated/manual HTML fixtures. htmlwidgets interactivity is attached through `onRender(... setTimeout(..., 0))`, so tests that query immediately or inspect raw files can miss runtime failures. Playwright also distinguishes retrying locator assertions from one-shot value assertions; one-shot checks are a common source of flaky or falsely passing tests.
 
-**How to avoid:**
-Implement a dedicated `extract_sf_layer()` path in `as_d3_ir.R`. Detect geom_sf layers via `inherits(layer$geom, "GeomSf")`. Before calling `to_rows()`, extract the geometry column dynamically (see Pitfall 8 for column name lookup). Convert geometries to GeoJSON using `geojsonsf::sf_geojson()` or by calling `sf::st_transform()` then serializing with a GeoJSON writer. Store the per-row GeoJSON geometry objects in a parallel `geometries` array in the IR layer — do not mix them into the row data object. Then call `to_rows()` only on the non-geometry attribute columns.
+**Consequences:** The project can ship automated "browser coverage" that does not catch the exact v1.8 audit debt: rendered `path.geom-sf` nodes, finite `data-cx`/`data-cy`, brush selection, and fixture automation.
 
-**Warning signs:**
-- geom_sf layer data arrives in JavaScript with no `geometry` property on each row object
-- `d3.geoPath()(feature)` returns `null` or an empty string
-- `jsonlite::toJSON()` produces `[[[[...]]]]` — deeply nested arrays with no `type` key
+**Prevention:**
+- Use a real browser smoke layer, not only static HTML inspection or jsdom. Prefer Playwright for the first hardening phase because D3 SVG layout APIs and pointer events matter.
+- Save fixtures with `htmlwidgets::saveWidget(..., selfcontained = FALSE)` to avoid Pandoc and keep dependencies inspectable.
+- Assert stable contracts: `svg .panel path.geom-sf` count, non-empty `d`, finite `data-cx`/`data-cy`, stable `data-row-id`, per-panel counts under facets, and no `_geom`/`_centroid` fields in public callback payloads.
+- Use retrying locator or polling assertions for render completion. Avoid fixed sleeps except as a last-resort diagnostic.
+- Put test-only hooks behind stable DOM attributes or callbacks; do not rely on D3-generated child ordering beyond known `panel > clipped group > geom` structure.
 
-**Phase to address:**
-Phase 1 (IR extraction design) — must be solved before any rendering work begins.
+**Detection:** Tests pass locally but fail in CI; path count is correct but attributes are blank; brush tests pass without proving opacity/callback changes; tests read HTML source instead of evaluating the live DOM.
 
----
+**Phase:** Phase 36.
 
-### Pitfall 2: coord_sf Replaces the Cartesian Scale System Entirely
+### Pitfall 2: Non-Polygon Sf Support Is Implemented By Only Expanding `supported_types`
 
-**What goes wrong:**
-When a ggplot has `geom_sf()`, ggplot2 automatically injects `coord_sf()`. `coord_sf()` is not a variant of `CoordCartesian` — it is a fundamentally different coordinate system. The existing `as_d3_ir.R` scale extraction reads `b$layout$panel_scales_x[[1]]` and expects `continuous` or `discrete` scale types with data-space `domain` and `breaks`. With `coord_sf`, these scale objects are geographic descriptors whose domain values are in the CRS's native units (degrees, meters, or projected units depending on the input data). The existing D3 `xScale`/`yScale` pipeline has no meaningful use for rendering polygon paths.
+**What goes wrong:** `prepare_sf_geometry_ir()` accepts `POINT` or `LINESTRING`, but the existing renderer still treats every sf row like a polygon path with fill, `fill-rule`, polygon centroid brushing, and polygon-oriented defaults.
 
-**Why it happens:**
-The gg2d3 pipeline was designed around Cartesian and flipped-Cartesian coordinate systems. `coord_sf` is detectable via `inherits(b$plot$coordinates, "CoordSf")` but there is no branch for it — the code will fall through to the Cartesian path and produce meaningless scale domains that happen to serialize without error.
+**Why it happens:** D3 `geoPath()` can render all GeoJSON geometry types, so it is tempting to let the current `path.geom-sf` renderer handle everything. That hides semantic differences: points need radius/size handling, lines should not be filled, multipoints may create multiple visible marks for one data row, and line centroids/bounds are not equivalent to polygon selection.
 
-**How to avoid:**
-Detect `CoordSf` early in `as_d3_ir.R` alongside the existing `CoordFlip` / `CoordTrans` checks. For sf layers, bypass the Cartesian scale extraction. Instead, read the bounding box from `sf::st_bbox()` on the geometry data after normalization to the target CRS. Emit the IR with a `coord: "sf"` marker and a `bbox: [xmin, ymin, xmax, ymax]` field. In the D3 renderer, use `d3.geoPath()` with a projection fitted to the panel dimensions via `.fitExtent()` rather than `xScale`/`yScale`.
+**Consequences:** Point maps may show tiny default-radius circles unrelated to ggplot2 `size`; lines may inherit fill incorrectly; brush behavior becomes surprising; legends and tooltips may appear to work while visual fidelity is wrong.
 
-**Warning signs:**
-- Axis tick values are in degrees or meters rather than recognizable geographic ranges
-- Polygon paths render as dots or fill the entire panel unexpectedly
-- `b$layout$panel_scales_x[[1]]$limits` returns `c(-180, 180)` for a dataset covering a single US state
+**Prevention:**
+- Add an explicit sf geometry-family field in the IR, not just a wider accepted type list. Treat polygon, line, and point families as renderer branches with separate defaults.
+- Keep a single public geom name (`geom = "sf"`) if that preserves API compatibility, but use internal `geom_type` or `geometry_family` for rendering and tests.
+- For points, choose and document one renderer contract: either SVG circles positioned through the sf projection, or paths with `path.pointRadius()` whose radius is derived from ggplot2 size. Do not rely on D3's default point radius as a visual-fidelity decision.
+- For lines, set fill to `none` by default and map `colour`, `linewidth`, `alpha`, `linetype`, and `lineend` deliberately.
+- Add fixture coverage for POINT, MULTIPOINT, LINESTRING, MULTILINESTRING, and mixed-family layers before treating the feature as complete.
 
-**Phase to address:**
-Phase 1 (IR design) and Phase 2 (D3 renderer) — must be addressed in both layers before anything else works.
+**Detection:** A point layer renders as paths but ignores `size`; a line layer has filled artifacts; multipoints produce one row but many visible symbols with ambiguous tooltip/brush behavior; source tests only check accepted rows and never inspect rendered attributes.
 
----
+**Phase:** Phase 37, with browser assertions in Phase 36/38.
 
-### Pitfall 3: Winding Order Mismatch Causes Holes to Fill Incorrectly in D3
+### Pitfall 3: CRS Alignment Regresses When Mixed Sf Families Are Added
 
-**What goes wrong:**
-D3's `d3.geoPath()` follows spherical polygon winding order conventions: exterior rings **clockwise**, interior rings (holes) **counter-clockwise** when viewed from outside the sphere. GeoJSON RFC 7946 specifies the opposite: exterior rings counter-clockwise, holes clockwise. The sf package and tools like `geojsonsf::sf_geojson()` output RFC 7946 compliant GeoJSON. When a MULTIPOLYGON with holes is serialized from sf and passed to `d3.geoPath()`, holes render as filled regions and filled regions render as holes — producing an inverted-donut appearance. No error is thrown.
+**What goes wrong:** Points, lines, and polygons from different CRSs appear misaligned even though each layer renders. Stacked layers may each fit independently or panels may use bbox metadata computed from only one family.
 
-**Why it happens:**
-D3-geo predates RFC 7946 and follows TopoJSON/ESRI shapefile winding conventions, which are opposite. sf tools follow RFC 7946. This is a well-documented but silent mismatch in the ecosystem.
+**Why it happens:** Current v1.8 behavior relies on R-side WGS84 normalization in `sf_utils.R`, panel-scoped `sf_bbox` metadata in `as_d3_ir.R`, and D3 `geoIdentity().reflectY(true).fitExtent()` in `sf.js`. `coord_sf()` in ggplot2 ensures layers share a common CRS, while gg2d3 currently normalizes sf geometries before serialization and fits SVG space from panel bbox. Expanding geometry families increases the chance that bbox aggregation, empty geometries, missing CRS, or accepted/skipped filtering diverges by family.
 
-**How to avoid:**
-Two options. Option A (preferred): set `fill-rule="evenodd"` on all `path.geom-sf` SVG elements. The SVG even-odd fill rule makes winding order irrelevant for determining inside/outside. Option B: use `d3.geoIdentity().reflectY(true)` as the projection, which corrects winding. Option A requires no coordinate transformation and is simpler. Either way, add a comment in the geom_sf renderer documenting which winding convention the incoming GeoJSON uses.
+**Consequences:** Overlay points drift from polygons; faceted maps use global extents; missing-CRS coordinates are silently fit with WGS84-normalized layers; line-only panels may get null or invalid bbox metadata.
 
-**Warning signs:**
-- Countries with island lakes (e.g., Finland, Canada) appear as solid fills where lakes should be transparent
-- Donut-shaped administrative regions fill the hole instead of the ring
-- Simple convex polygons look correct but anything with interior rings looks inverted
+**Prevention:**
+- Preserve the R-side projection boundary: no JavaScript-side CRS reprojection in v1.9.
+- Compute `sf_bbox` from all accepted sf geometries in the panel, across all sf families and stacked sf layers.
+- Keep missing CRS warning behavior, but test mixed known-CRS/missing-CRS layers explicitly because "serialized as-is" is not alignment-safe.
+- Add tests where the same features are provided in EPSG:4326 and EPSG:3857 and must overlay after normalization.
+- Add line-only and point-only panels to bbox tests, including faceted empty panels.
 
-**Phase to address:**
-Phase 2 (D3 renderer implementation) — test with a MULTIPOLYGON that has at least one interior ring (hole) before considering the renderer complete.
+**Detection:** `ir$panels[[i]]$sf_bbox` differs by layer order; stacked overlays align in single-panel tests but drift under facets; browser smoke screenshots show apparently valid SVG paths in the wrong panel location.
 
----
+**Phase:** Phase 37 for IR acceptance and bbox; Phase 38 for stacked/faceted alignment validation.
 
-### Pitfall 4: CRS Projection Coordinates Collapse Rendering for Non-WGS84 Input
+### Pitfall 4: Row Identity Breaks Under Filtering, Faceting, Or Multi-Geometries
 
-**What goes wrong:**
-sf objects can carry any CRS — EPSG:4326 (WGS84 lon/lat), EPSG:3857 (Web Mercator in meters), national grids (EPSG:27700 British National Grid has coordinates like `(532674, 181384)`), or custom projections. If the coordinates are passed to D3 in the native CRS without normalization, three failures occur: (1) coordinates in meters can be in the millions, completely outside D3's scale domain for a 600px panel; (2) `d3.geoPath()` with a geographic projection (Mercator, Natural Earth) expects WGS84 lon/lat degrees — passing projected coordinates produces garbled geometry; (3) for null projection, projected coordinates with origin offsets (e.g., BNG origin is SW of the UK) will render off-screen.
+**What goes wrong:** Tooltip, hover, handlers, and brush callbacks report the wrong row after unsupported rows are skipped, facets are filtered, or multipoint/multiline geometries are rendered.
 
-**Why it happens:**
-Developers test with WGS84 data downloaded from the web and assume lon/lat is universal. Government, census, and national mapping agency data is almost always in a national projected CRS. The bug is invisible during development and catastrophic in production.
+**Why it happens:** Current sf rendering uses parallel `layer.data` and `layer.geometries` arrays, with `row_id` preserving source row identity. `gg2d3.js` facet filtering preserves data/geometry pairs by array index. This is correct but fragile: any future refactor that filters data and geometries separately, sorts rows, expands multipoints into multiple DOM nodes, or rebuilds rows in JS can break identity.
 
-**How to avoid:**
-Always normalize to WGS84 in R unconditionally inside `extract_sf_layer()`:
-```r
-geom_data <- sf::st_transform(geom_data, crs = 4326)
-```
-Apply this before any bounding box extraction or GeoJSON serialization. Do not make this optional or configurable in the MVP — WGS84 normalization should always happen. Document it as a known constraint.
+**Consequences:** User callbacks mutate/select the wrong data; brush selections are impossible to trust; faceted sf plots pass visual checks but fail linked-view semantics.
 
-**Warning signs:**
-- All polygons appear at a single point near (0, 0)
-- Polygon centroid coordinates in the IR are in the thousands or millions
-- `sf::st_crs(layer_data)$epsg` returns something other than 4326
+**Prevention:**
+- Treat `row_id` as a public sf interaction contract. It must remain source-row identity, not post-filter index.
+- Keep data and geometry paired as a single internal structure during filtering, then split only at the renderer boundary if needed.
+- If multipoints are expanded into multiple DOM nodes, add both `data-row-id` and a child geometry index such as `data-geometry-part`, while callbacks still return the source row once unless explicitly documented otherwise.
+- Test skipped rows plus facets together, not separately.
+- Test that callback payloads are sanitized and row ids match expected source rows after brushing.
 
-**Phase to address:**
-Phase 1 (IR extraction) — enforce WGS84 normalization unconditionally at extraction time.
+**Detection:** `data-row-id` values reset to `1..n` after filtering; brushed rows include skipped source rows; callbacks include `_geom` or `_centroid`; facet panels render correct counts but wrong `data-row-id` attributes.
 
----
+**Phase:** Phase 37 for IR and renderer contracts; Phase 38 for interaction/facet regression tests.
 
-### Pitfall 5: D3 Zoom Architecture Is Incompatible with geoPath Re-rendering
+### Pitfall 5: Brush Behavior Is Defined Too Broadly For Sf Geometry Families
 
-**What goes wrong:**
-The existing `zoom.js` module works by recalculating positions of individual SVG elements using updated D3 Cartesian scales and calling `updateGeoms()` in `geom-registry.js`. Geographic paths rendered by `d3.geoPath()` cannot be repositioned this way — their `d` attribute is a function of the projection, not of independent x/y scale lookups. On zoom, `updateGeoms()` will find no selector for `path.geom-sf` elements, silently skip them, and they will stay frozen at their original positions while axes update, producing a broken visual state.
+**What goes wrong:** A rectangle brush over a line or polygon selects based on a centroid users did not touch, or a point brush selects visually nearby marks inconsistently with ordinary `geom_point`.
 
-**Why it happens:**
-Geographic zoom works differently from Cartesian zoom. Two valid patterns exist: (1) transform the containing `<g>` with an SVG transform (fast, but stroke widths scale — already avoided in gg2d3 for good reason); (2) update the projection's scale/translate and re-render all path `d` attributes. gg2d3's zoom uses element repositioning (option 2 equivalent for Cartesian geoms). For geographic paths, option 2 requires storing the projection as a closure and calling `d3.geoPath()` again on each path element.
+**Why it happens:** v1.8 intentionally uses projected centroid attributes for `path.geom-sf` brush selection. That is a clear polygon MVP contract, but it is not automatically correct for lines and points. D3 brush selection is pixel-space, and current `brush.js` has a special `geom-sf` branch that reads `data-cx`/`data-cy` before the generic path bbox fallback.
 
-**How to avoid:**
-For the sf geom renderer, store the geoPath generator and projection on the panel node: `panelNode.__gg2d3_geoPath = geoPath; panelNode.__gg2d3_projection = projection`. Register a dedicated update handler in `updateGeoms()` that selects `path.geom-sf` elements and recomputes their `d` attribute using the stored projection with updated scale/translate. The zoom module must call this handler after updating Cartesian scales.
+**Consequences:** The same brush rectangle can select a county by centroid but miss a long line crossing the rectangle; users infer polygon-overlap or line-intersection semantics that gg2d3 does not provide.
 
-If full geographic zoom is out of scope for the initial implementation, the simpler recovery is to detect geom_sf in `d3_zoom.R` and suppress zoom attachment, documenting it as a known limitation.
+**Prevention:**
+- Keep v1.9 brush semantics explicit: polygon-family remains centroid brush unless a later phase implements overlap; point-family should use point center; line-family should use a documented representative point or bbox/endpoint policy.
+- Name this in docs and tests. Do not let tests imply overlap brushing unless implemented.
+- Consider adding geometry-family-specific attributes: `data-cx`/`data-cy` for representative point, plus optional `data-bbox-*` for future line/polygon overlap work.
+- Preserve the current callback sanitization path.
 
-**Warning signs:**
-- After zooming in, polygon paths remain at original position while axes rescale
-- `updateGeoms()` emits no warning about skipped `path.geom-sf` elements
-- Zooming out causes axes to show a wider range while map stays at original size
+**Detection:** Brush tests only check that opacity changes somewhere; long lines crossing a selection are not selected; docs say "features inside brush" without defining centroid/representative-point behavior.
 
-**Phase to address:**
-Phase 3 (interactivity integration) — after the basic renderer works, address zoom explicitly. If deferred, document the limitation clearly.
+**Phase:** Phase 38.
 
----
+### Pitfall 6: Faceted Sf Expansion Reintroduces Global Projection Fitting
 
-### Pitfall 6: Brush Selection Logic Is Incompatible with Polygon Geometry
+**What goes wrong:** Facet panels render, but all panels share a global bbox, or empty panels inherit a neighboring panel's bbox.
 
-**What goes wrong:**
-The existing `brush.js` highlights elements by comparing their SVG pixel positions (cx/cy for circles, bounding box for rects) against the brush rectangle bounds. For polygon `<path>` elements, there is no `cx`/`cy`. The `INTERACTIVE_SELECTORS` list does not include `path.geom-sf`. Brush applied to a map plot will show a selection rectangle but dim/highlight nothing — no error, silent failure.
+**Why it happens:** v1.8 fixed this by storing sf geometries by `PANEL` and assigning per-panel `sf_bbox` in `as_d3_ir.R`. Non-polygon expansion may add new helper paths or refactors that compute bbox from `sf_coord_geometries` globally or from the current layer only.
 
-**Why it happens:**
-Brush highlighting was designed for scalar-position geoms (points, bars). Polygons are spatially extended — "is this polygon selected?" is a polygon-polygon intersection problem, not a point-in-rectangle test. The existing pixel-position approach does not generalize to paths.
+**Consequences:** Faceted maps lose comparability with ggplot2 behavior; empty facet panels can render stray marks; stacked overlays align in one facet but not another.
 
-**How to avoid:**
-During geom_sf rendering, compute each polygon's centroid and store it as data attributes on the `<path>` element: `path.attr("data-cx", centroidX).attr("data-cy", centroidY)`. Centroids can be computed in D3 using `d3.geoPath().centroid(feature)`. Then add `path.geom-sf` to `INTERACTIVE_SELECTORS` and extend the brush highlight logic to check `data-cx`/`data-cy` the same way it checks `cx`/`cy` for circles. Document that brush selects by region centroid, not by spatial overlap — this is a deliberate tradeoff for implementation simplicity.
+**Prevention:**
+- Keep panel-scoped bbox calculation as the only renderer fit source for faceted `coord_sf` plots.
+- Test `facet_wrap()` and `facet_grid(drop = FALSE)` for polygon-only, point-only, line-only, and mixed-family data.
+- Include empty panels in tests and assert their `sf_bbox` is `NULL`, not borrowed.
+- In browser smoke tests, assert each panel's sf element count and projected coordinate range independently.
 
-**Warning signs:**
-- Brush rectangle appears and clears correctly but no polygon regions change opacity
-- Console shows brush events firing but no elements match the selection
-- `INTERACTIVE_SELECTORS` in `brush.js` does not contain `path.geom-sf`
+**Detection:** `ir$panels` has identical `sf_bbox` values for panels with far-apart data; rendered features cluster in the same relative area in every facet; empty panels contain sf nodes.
 
-**Phase to address:**
-Phase 3 (interactivity integration) — add centroid attributes during Phase 2 renderer implementation to enable this; wire brush in Phase 3.
+**Phase:** Phase 38.
 
----
+### Pitfall 7: Refactoring `as_d3_ir()` Changes Behavior While Appearing Mechanical
 
-### Pitfall 7: Large Geometry Payloads Bloat the htmlwidgets HTML File
+**What goes wrong:** Package hardening breaks non-sf geoms, legends, facets, date scales, theme extraction, or sf projection metadata because a monolithic function was split without enough characterization tests.
 
-**What goes wrong:**
-A US county shapefile (~3,000 counties at full resolution) produces a GeoJSON payload of 20-50MB. htmlwidgets embeds all data as inline JSON in the HTML output file. The consequences are: large Rmd knit files (>10MB) that may fail in some rendering environments; initial widget parse time of several seconds; browser tab memory spikes. Unlike tile-based mapping tools (Leaflet), gg2d3 embeds the complete geometry set in the page.
+**Why it happens:** `as_d3_ir.R` contains geom dispatch, data rowization, theme extraction, scale metadata, guide extraction, facet extraction, coord metadata, and sf bbox collection in one function. Several pieces depend on side effects (`<<-` into sf geometry accumulators), duplicated helpers, and ggplot2 object internals.
 
-**Why it happens:**
-ggplot2 users are accustomed to plotting sf data at full resolution because R's renderer handles it in-process without size constraints. The htmlwidgets inline-JSON pattern has no analogous pressure. Full-resolution administrative boundaries are visually indistinguishable from simplified versions at typical display resolutions (600-1200px wide).
+**Consequences:** A refactor intended to reduce risk becomes the biggest regression source in v1.9.
 
-**How to avoid:**
-Two mitigations: (1) In the R extraction layer, reduce GeoJSON coordinate precision to 4 decimal places (~10m resolution) — sufficient for display at any realistic SVG size. Apply `sf::st_precision()` before serialization. (2) Add an IR payload size warning in `as_d3_ir.R` when the serialized geometry exceeds 1MB: `if (nchar(geojson_string) > 1e6) warning(...)`. Do not automatically simplify geometry — automatic simplification can alter recognized political boundaries in ways that surprise users. Instead, document `rmapshaper::ms_simplify()` as a recommended preprocessing step.
+**Prevention:**
+- Refactor only after Phase 36-38 have locked browser and sf regression gates.
+- Extract pure helpers in small commits: geom-name detection, rowization, sf layer preparation, panel metadata, theme extraction. Avoid changing IR schema in the same phase.
+- Add snapshot-like structural tests for representative plots before moving code: non-faceted point plot, date scale, color legend, facet_wrap, facet_grid, coord_flip, polygon sf, point sf, line sf.
+- Keep old and new helper output compared in tests during the transition where feasible.
 
-**Warning signs:**
-- `object.size(ir)` reported by `as_d3_ir.R` exceeds several MB
-- The knitted HTML file is >5MB
-- Widget takes >2 seconds to appear in the browser after page load
+**Detection:** Broad diff in `as_d3_ir.R` plus only sf tests run; changed warnings; changed key order or missing optional fields in IR; unrelated visual fixtures differ.
 
-**Phase to address:**
-Phase 1 (IR extraction design) — add the size warning early and document simplification guidance before any rendering work ships.
+**Phase:** Phase 39.
 
----
+### Pitfall 8: Private ggplot2 APIs Stay Scattered And Unversioned
 
-### Pitfall 8: Geometry Column Name Is Not Always "geometry"
+**What goes wrong:** A future ggplot2 release changes `ggplot2:::calc_element()`, `ggplot2:::plot_theme()`, facet params, or panel param structure, and gg2d3 starts warning, mis-rendering, or failing.
 
-**What goes wrong:**
-Any code in `extract_sf_layer()` that hardcodes `data[["geometry"]]` to locate the geometry column will silently return NULL when the sf object's geometry column has a non-standard name. sf allows any column name for the geometry list-column. Government data loaded from PostGIS databases frequently uses `the_geom`. ESRI shapefiles loaded via `sf::st_read()` default to `geometry` but this is not guaranteed for all drivers.
+**Why it happens:** The current package uses private ggplot2 APIs for theme and layout extraction, and also reads ggplot build internals such as `b$layout$panel_params`, `b$layout$facet$params`, and ggproto class names. This is common for ggplot2 converters, but it is fragile unless isolated.
 
-**Why it happens:**
-Developers test with standard sf examples (which use `geometry`) and assume this name is universal. The sf class stores the active geometry column name as an attribute (`attr(obj, "sf_column")`), but this attribute may not survive `ggplot_build()` processing which can strip the sf class from the data frame.
+**Consequences:** Users see regressions unrelated to v1.9 sf work; CRAN checks can break when dependency versions move; sf failures are misdiagnosed as geometry issues.
 
-**How to avoid:**
-Always look up the geometry column name dynamically. First try: `geom_col <- attr(layer_data, "sf_column")`. If the sf class has been stripped, fall back to: `geom_col <- names(layer_data)[sapply(layer_data, inherits, "sfc")][1]`. Never hardcode `"geometry"`. Add a stop with an informative message if neither approach finds an sfc column.
+**Prevention:**
+- Centralize private ggplot2 access behind wrapper functions with fallbacks and tests.
+- Prefer exported APIs where available, such as `ggplot2::get_guide_data()` already used for guides.
+- Add compatibility tests that fail with clear messages when key ggplot2 structures move.
+- Record the supported ggplot2 version range in package docs or release notes if hard limits are discovered.
 
-**Warning signs:**
-- No error is thrown but no polygons render; the layer appears empty
-- Testing with a PostGIS-sourced dataset fails while the same shapes from a shapefile succeed
-- `attr(b$data[[1]], "sf_column")` returns `"the_geom"` on real-world data
+**Detection:** `:::` appears in new code outside the wrapper module; tests fail only under a newer ggplot2; warnings fall back to default panel ranges or default theme values silently.
 
-**Phase to address:**
-Phase 1 (IR extraction) — write the lookup correctly from the start; test with a column named `the_geom`.
+**Phase:** Phase 39.
 
----
+## Moderate Pitfalls
 
-## Technical Debt Patterns
+### Pitfall 1: Test Fixtures Depend On Optional Heavy Packages Or Network
 
-| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|----------------|-----------------|
-| Hardcode `d3.geoMercator()` as the only projection | Ships faster, single rendering path | Breaks polar/conic/Equal-Earth projections users expect for thematic maps | MVP only — document the limitation explicitly |
-| Pass geometry in native CRS without normalization to WGS84 | Saves one `st_transform()` call | Silent breakage for any non-WGS84 input — includes most government data | Never |
-| Hardcode `"geometry"` as the geometry column name | Simpler code | Silent failure with PostGIS-loaded data and many real-world sources | Never |
-| Use SVG `<g>` transform for geographic zoom instead of re-projecting | Trivially compatible with existing zoom module | Stroke widths scale with zoom — already rejected for Cartesian geoms | Never — suppress zoom or re-project properly |
-| Embed full-resolution geometry without size warning | Simpler extraction code | Unusable widget for any real-world administrative boundary dataset | Never — add size warning at minimum |
-| Add `path.geom-sf` to `INTERACTIVE_SELECTORS` without centroid attributes | Brush "works" (no crash) | Brush has zero visual effect on polygon regions; silent failure misleads users | Never — add centroid attributes first |
-| Use WKT strings instead of GeoJSON for geometry transfer | Avoids winding order issue | Requires a WKT parser in JavaScript; no standard D3 utility exists for this | Never — use GeoJSON with `fill-rule="evenodd"` instead |
+**What goes wrong:** Browser fixture tests fail on CI or contributors' machines because they require optional packages, downloaded map data, Pandoc, or self-contained widget bundling.
 
----
+**Prevention:** Use small synthetic `sf::st_sf()` geometries for core tests. Keep `rnaturalearth`/large map fixtures as optional/manual or skipped tests. Continue `selfcontained = FALSE`.
 
-## Integration Gotchas
+**Phase:** Phase 36.
 
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| `to_rows()` / `keep_aes` filter | Assuming the geometry column survives the aesthetic filter | Bypass `to_rows()` for sf layers entirely; extract geometry before calling `to_rows()` on attribute columns |
-| `jsonlite::toJSON()` | Calling it on a data frame that still has an `sfc` list-column | Strip or extract the geometry column before calling `toJSON()`; serialize geometry via `geojsonsf` separately |
-| `geomRegistry.updateGeoms()` | Adding `path.geom-sf` to existing selector list without an update handler | Register a dedicated closure that re-runs `d3.geoPath()` with an updated projection for each sf path element |
-| `brush.js` `INTERACTIVE_SELECTORS` | Adding the sf path class before centroid data attributes exist on path elements | Add `data-cx`/`data-cy` centroid attributes in the sf renderer first; only then update selectors |
-| `validate_ir.R` | Forgetting to update the IR schema validator to accept the new `coord: "sf"`, `bbox`, and `geometries` fields | Add these as optional fields in the layer/IR schema; run validation on a geom_sf test plot |
-| `coord_sf` detection | Detecting by `inherits(coord, "CoordSf")` but then still running Cartesian scale extraction | Short-circuit the entire Cartesian scale path; replace with bbox extraction |
+### Pitfall 2: Geometry Validity Filtering Becomes Too Aggressive For Lines And Points
 
----
+**What goes wrong:** Valid non-polygon geometries are skipped because filtering logic was written around polygon validity/emptiness.
 
-## Performance Traps
+**Prevention:** Validate `st_is_empty()`, `st_is_valid()`, missing geometry, and supported-type checks separately for each geometry family. Keep skipped diagnostics family-aware.
 
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Full-resolution polygon paths in SVG | Browser paint time >2s; hover lag; scroll jank | Reduce coordinate precision to 4 decimal places; document `ms_simplify()` preprocessing | ~200 complex polygons (detailed coastlines, county-level US data) |
-| Re-running `d3.geoPath()` on all paths during every zoom event tick | Choppy zoom; sustained CPU spike | Cache the path generator; recompute `d` attributes only on zoom end, not during zoom | Any polygon count — felt at 30+ polygons |
-| Storing per-polygon GeoJSON as parsed JS objects instead of a single FeatureCollection | Excessive memory allocation during render | Serialize as one GeoJSON FeatureCollection string; parse once in JS; index by row | >100 polygons: memory doubles when geometry stored twice (IR + parsed objects) |
-| Using `d3.brush()` area overlap check instead of centroid for polygon selection | CPU spike during brush move events (point-in-polygon per-frame per-polygon) | Store centroids as data attributes; reuse existing point-in-rectangle logic | Any count — the polygon intersection approach is O(n * vertices) per frame |
+**Phase:** Phase 37.
 
----
+### Pitfall 3: Aesthetic Defaults Ignore Geometry Family
 
-## "Looks Done But Isn't" Checklist
+**What goes wrong:** Lines inherit polygon fill defaults; points ignore `shape`, `stroke`, or `size`; alpha is applied inconsistently.
 
-- [ ] **Geometry column lookup:** Verify the column is found via `attr(data, "sf_column")` + sfc class fallback, not hardcoded as `"geometry"` — test with a `the_geom` named column
-- [ ] **Winding order:** Test with a MULTIPOLYGON that has at least one interior ring (hole) — verify holes are transparent not filled
-- [ ] **CRS normalization:** Test with data in EPSG:3857 (Web Mercator) — verify polygons render at correct position and size after normalization
-- [ ] **Brush highlighting:** Verify brush rectangle dims/highlights polygon regions — not just draws a rectangle with no effect
-- [ ] **Zoom behavior:** Verify polygon paths reposition after zoom (or confirm zoom is explicitly suppressed with documentation)
-- [ ] **Payload size warning:** Confirm warning fires when a US state polygon dataset is used without simplification
-- [ ] **INTERACTIVE_SELECTORS:** Confirm `path.geom-sf` is absent from the selector list until centroid attributes are implemented in the renderer
-- [ ] **Mixed layers:** Test a plot with geom_sf (polygons) AND geom_point on the same panel — confirm Cartesian point rendering is unaffected
-- [ ] **IR validation:** Run `validate_ir.R` on a geom_sf plot — confirm it does not reject the new `coord`, `bbox`, and `geometries` fields
+**Prevention:** Define an sf aesthetic matrix for polygon, line, and point families before coding. Match ggplot2 where feasible, and explicitly document deferred aesthetics.
 
----
+**Phase:** Phase 37.
 
-## Recovery Strategies
+### Pitfall 4: Zoom Suppression Is Accidentally Removed
 
-| Pitfall | Recovery Cost | Recovery Steps |
-|---------|---------------|----------------|
-| sfc column serialization breaks (pitfall 1) | LOW | Add a guard to strip or extract any `sfc` column before `to_rows()` and `toJSON()`; add dedicated `extract_sf_layer()` |
-| Winding order bug found post-ship (pitfall 3) | LOW | Add `attr("fill-rule", "evenodd")` to all `path.geom-sf` elements; no R changes required |
-| CRS normalization missing (pitfall 4) | MEDIUM | Add `sf::st_transform(data, 4326)` in the extraction path; no JS changes; all test inputs need to be re-run |
-| Zoom incompatibility discovered (pitfall 5) | MEDIUM | Detect geom_sf in `d3_zoom.R` and suppress zoom with a warning; implement proper projection-based zoom in a follow-up phase |
-| Brush incompatibility discovered (pitfall 6) | LOW | Add `d3.geoPath().centroid(feature)` centroid computation in the renderer, store as data attributes; update selectors |
-| Oversized payload causing browser issues (pitfall 7) | LOW | Retroactively add the size warning; document `ms_simplify()` preprocessing; no rendering changes needed |
-| Geometry column not found silently (pitfall 8) | LOW | Replace any hardcoded `"geometry"` string with the dynamic attribute lookup; add a stop with a clear message |
+**What goes wrong:** Adding browser smoke tests or non-polygon sf support enables Cartesian `d3_zoom()` on sf widgets again, producing misleading transforms.
 
----
+**Prevention:** Keep `d3_zoom()` suppression for all `geom_sf` layers in v1.9 unless a dedicated sf zoom design exists. Add a regression test with point and line sf widgets.
 
-## Pitfall-to-Phase Mapping
+**Phase:** Phase 38.
 
-| Pitfall | Prevention Phase | Verification |
-|---------|------------------|--------------|
-| sfc column breaks to_rows() serialization | Phase 1: IR extraction design | geom_sf plot serializes without error; `geometries` array arrives in JS as valid GeoJSON |
-| coord_sf replaces Cartesian scale system | Phase 1: IR extraction design | IR contains `coord: "sf"` marker and `bbox` field; no Cartesian scale domains for sf layers |
-| Winding order — holes render filled | Phase 2: D3 geom_sf renderer | MULTIPOLYGON with interior ring renders with transparent holes |
-| CRS not normalized to WGS84 | Phase 1: IR extraction design | Test with EPSG:3857 input; polygons render correctly at expected location |
-| D3 zoom incompatible with geoPath | Phase 3: Interactivity integration | After zoom, polygon paths reposition; OR zoom is suppressed with clear documentation |
-| Brush incompatible with polygon geometry | Phase 3: Interactivity integration | Brush highlights/dims polygons by centroid; selector list updated only after centroid attributes exist |
-| Large geometry payload | Phase 1: IR extraction design | Size warning fires for US county dataset; simplification guidance documented |
-| Geometry column name not found | Phase 1: IR extraction design | Renderer finds geometry with `the_geom` column name without modification |
+### Pitfall 5: Source-Contract Tests Become A Substitute For Browser Tests
 
----
+**What goes wrong:** Tests search JS files for strings like `data-cx` or `path.geom-sf` and claim behavior coverage.
+
+**Prevention:** Keep source-contract tests for cheap guardrails, but require one live browser assertion for every public sf interaction contract.
+
+**Phase:** Phase 36.
+
+## Minor Pitfalls
+
+### Pitfall 1: Documentation Says "All Sf" Too Early
+
+**What goes wrong:** Users expect `GEOMETRYCOLLECTION`, `CURVEPOLYGON`, Z/M dimensions, projection controls, basemaps, or overlap brushing.
+
+**Prevention:** Phrase v1.9 as "polygon, point, and line sf geometry families" with explicit unsupported geometry diagnostics.
+
+**Phase:** Phase 37 and Phase 38 docs.
+
+### Pitfall 2: CSS Selectors Drift Across Interactivity Modules
+
+**What goes wrong:** Renderer introduces `circle.geom-sf-point` or `path.geom-sf-line`, but tooltip, hover, brush, handler, or crosstalk selectors are not updated.
+
+**Prevention:** Either keep `path.geom-sf` as a shared selector for all sf families or introduce a centralized selector registry. Test every new sf DOM class with all existing interactivity APIs.
+
+**Phase:** Phase 38.
+
+### Pitfall 3: Snapshot Counts Hide Visual Regressions
+
+**What goes wrong:** Tests assert node counts but not whether features are visible, finite, or inside panel bounds.
+
+**Prevention:** Add bounds checks for `d`, `cx/cy`, line path length/bounds, and per-panel rendered extents. Screenshot tests are optional; DOM geometry checks are required.
+
+**Phase:** Phase 36 and Phase 38.
+
+## Phase-Specific Warnings
+
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|----------------|------------|
+| Browser smoke harness | Flaky tests caused by async htmlwidgets render and one-shot assertions | Use Playwright locators/retrying assertions, poll for `path.geom-sf` count and finite attributes |
+| Browser smoke harness | Fixture generation depends on Pandoc or optional map packages | Use non-self-contained widgets and synthetic sf data for required tests |
+| Non-polygon IR | Adding `POINT`/`LINESTRING` to `supported_types` without schema clarity | Add `geometry_family`, family-aware diagnostics, and tests per family |
+| Non-polygon renderer | Points/lines inherit polygon fill/centroid assumptions | Separate renderer branches and aesthetic defaults by family |
+| CRS/projection | Mixed CRS layers drift after normalization or missing CRS serialization | Test EPSG:4326 + EPSG:3857 overlays and missing-CRS warnings explicitly |
+| Row identity | Data/geometries filtered separately under facets | Preserve paired filtering and assert `data-row-id` source rows after skips |
+| Brush behavior | Users infer overlap/intersection selection from rectangle brush | Document representative-point semantics and test the exact chosen policy |
+| Facets | Empty panels or far-apart panels inherit global bbox | Assert per-panel `sf_bbox`, null empty-panel bbox, and DOM counts |
+| Refactoring | Mechanical split of `as_d3_ir()` changes unrelated IR fields | Refactor after sf/browser gates; use characterization tests before edits |
+| Private ggplot2 APIs | Dependency update breaks private theme/facet extraction | Centralize `:::` usage behind wrappers with fallbacks and version-sensitive tests |
 
 ## Sources
 
-- [ggplot2 ggsf reference — geom_sf / coord_sf / stat_sf](https://ggplot2.tidyverse.org/reference/ggsf.html)
-- [ggplot2 layer_sf — sf geometry column auto-mapping](https://ggplot2.tidyverse.org/reference/layer_sf.html)
-- [ggplot2 source R/geom-sf.R — geometry handling and draw_panel](https://rdrr.io/cran/ggplot2/src/R/geom-sf.R)
-- [ggplot2 coord_sf scale interaction — issue #2846](https://github.com/tidyverse/ggplot2/issues/2846)
-- [ggplot2 geometry column name detection — issue #2060](https://github.com/tidyverse/ggplot2/issues/2060)
-- [ggplot2 geom_sf ggplot_build tibble column type conflict — issue #3453](https://github.com/tidyverse/ggplot2/issues/3453)
-- [sf package — sfc simple feature geometry list column](https://r-spatial.github.io/sf/reference/sfc.html)
-- [sf package — Plotting Simple Features vignette](https://r-spatial.github.io/sf/articles/sf5.html)
-- [sf package — st_transform coordinate conversion](https://r-spatial.github.io/sf/reference/st_transform.html)
-- [geojsonsf package — sf to GeoJSON conversion](https://cran.r-project.org/web/packages/geojsonsf/vignettes/geojson-sf-conversions.html)
-- [D3-geo paths official documentation](https://d3js.org/d3-geo/path)
-- [D3-geo projections official documentation](https://d3js.org/d3-geo/projection)
-- [D3-geo GitHub README v3.1.0 — winding order conventions](https://github.com/d3/d3-geo/tree/v3.1.0)
-- [GeoJSON winding order vs D3 convention analysis — macwright.com](https://macwright.com/2015/03/23/geojson-second-bite)
-- [Tips for optimising large GeoJSON files](https://open-innovations.org/blog/2023-07-25-tips-for-optimising-geojson-files)
-- [D3 choropleth hover interaction patterns](https://d3-graph-gallery.com/graph/choropleth_hover_effect.html)
-- [d3-geo-zoom — geographic projection zoom library](https://github.com/vasturiano/d3-geo-zoom)
-- [gg2d3 MEMORY.md — pixel-position brush design decision and D3 brush format notes](internal project memory)
-- [gg2d3 brush.js — INTERACTIVE_SELECTORS and brush highlight architecture](internal codebase)
-- [gg2d3 geom-registry.js — updateGeoms() architecture](internal codebase)
-- [gg2d3 as_d3_ir.R — to_rows(), keep_aes, coord detection patterns](internal codebase)
-
----
-*Pitfalls research for: geom_sf / choropleth map rendering added to gg2d3 v1.7*
-*Researched: 2026-04-04*
+- Local project context: `.planning/PROJECT.md`, `.planning/RETROSPECTIVE.md`, `.planning/milestones/v1.8-MILESTONE-AUDIT.md`.
+- Local implementation: `R/as_d3_ir.R`, `R/sf_utils.R`, `inst/htmlwidgets/modules/geoms/sf.js`, `inst/htmlwidgets/gg2d3.js`, `inst/htmlwidgets/modules/brush.js`, `tests/testthat/test-sf-visual.R`.
+- sf official docs: `st_geometry_type()` returns per-geometry or set-level geometry types, supporting family-aware filtering. https://r-spatial.github.io/sf/reference/st_geometry_type.html
+- sf official docs: `st_transform()` transforms coordinates and can return empty geometries when transformation fails; axis-order ambiguity around EPSG:4326 is documented. https://r-spatial.github.io/sf/reference/st_transform.html
+- ggplot2 official docs: `geom_sf()` uses the unique `geometry` aesthetic, `coord_sf()` aligns layers to a common CRS, and non-sf layers require explicit CRS interpretation. https://ggplot2.tidyverse.org/reference/ggsf.html
+- D3 official docs: `geoPath()` supports Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon, and GeometryCollection; separate path elements are useful for styling and interaction. https://d3js.org/d3-geo/path
+- D3 official docs: `geoPath().centroid()` returns projected planar centroids; `pointRadius()` controls rendered Point/MultiPoint radius and defaults to 4.5. https://d3js.org/d3-geo/path
+- D3 official docs: `geoIdentity()` supports `fitExtent()` and `reflectY()`, matching the current gg2d3 sf renderer strategy. https://d3js.org/d3-geo/projection
+- D3 official docs: `d3.brush()` selection shapes differ for xy, x, and y brushes; brush state should be read through official APIs rather than internals. https://d3js.org/d3-brush
+- Playwright official docs: locators provide auto-waiting/retry behavior, and non-retrying assertions can create flaky tests for asynchronous pages. https://playwright.dev/docs/locators and https://playwright.dev/docs/test-assertions
+- htmlwidgets docs: `saveWidget(..., selfcontained = FALSE)` writes external resources beside the HTML instead of embedding them, avoiding the heavier self-contained path. https://rdrr.io/cran/htmlwidgets/man/saveWidget.html
