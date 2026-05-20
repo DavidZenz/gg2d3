@@ -8,6 +8,9 @@
 #
 # Output goes to test_output/ in the project root (per CLAUDE.md convention).
 
+# Load package if not already loaded (supports both devtools::test() and testthat::test_file())
+if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
+
 .test_output_dir <- function() {
   # Write to project root test_output/ (CLAUDE.md: "Always save visual test HTML
   # files to test_output/ in the project root, not /tmp/")

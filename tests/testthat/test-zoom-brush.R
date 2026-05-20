@@ -1,3 +1,5 @@
+if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
+
 test_that("d3_zoom() requires gg2d3 widget", {
   expect_error(d3_zoom("not a widget"), "gg2d3 widget")
   expect_error(d3_zoom(list(x = 1)), "gg2d3 widget")
