@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.7
-milestone_name: Choropleth Map Research
-status: completed
-stopped_at: v1.7 milestone archived
-last_updated: "2026-05-20T11:15:00Z"
-last_activity: 2026-05-20 - v1.7 milestone archived
+milestone: v1.8
+milestone_name: Production geom_sf Polygon MVP
+status: planning
+stopped_at: defining requirements
+last_updated: "2026-05-20T11:30:00Z"
+last_activity: 2026-05-20 - Milestone v1.8 started
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 6
-  completed_plans: 6
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-20)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** Planning next milestone
+**Current focus:** Defining v1.8 requirements
 
 ## Current Position
 
-Phase: 30 (edge-cases-and-blueprint) - COMPLETE
-Plan: 1 of 1
-Status: v1.7 milestone archived
-Last activity: 2026-05-20 - v1.7 milestone archived
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-20 — Milestone v1.8 started
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -84,13 +84,13 @@ None yet.
 
 ### Blockers/Concerns
 
-None for v1.7. Future production geom_sf work should start from `.planning/phases/30-edge-cases-and-blueprint/30-EDGE-CASE-BLUEPRINT.md` or its archived milestone context.
+None for v1.8. This milestone starts from the archived v1.7 blueprint context and keeps tile basemaps, slippy map controls, browser reprojection, polygon-overlap brushing, and large-map performance guarantees out of scope.
 
 ## Session Continuity
 
 Last session: 2026-05-20T09:28:13.617Z
-Stopped at: v1.7 milestone archived
-Resume file: .planning/milestones/v1.7-ROADMAP.md
+Stopped at: defining v1.8 requirements
+Resume file: .planning/REQUIREMENTS.md
 
 ---
 *State initialized: 2026-02-07*

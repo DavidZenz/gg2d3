@@ -10,15 +10,15 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.7 shipped 2026-05-20. The choropleth research milestone is complete: gg2d3 now has verified `geom_sf` R extraction research, a D3 polygon renderer prototype, interactivity design guidance, and a future implementation blueprint for production sf work.
+v1.8 is active. This milestone turns the v1.7 `geom_sf` research handoff into production polygon choropleth support while keeping gg2d3's SVG/htmlwidgets boundary intact.
 
-## Next Milestone Goals
+## Current Milestone: v1.8 Production geom_sf Polygon MVP
 
-Start the next milestone with `$gsd-new-milestone`. The likely direction is a v1.8 production `geom_sf` build that starts from `.planning/phases/30-edge-cases-and-blueprint/30-EDGE-CASE-BLUEPRINT.md`.
+**Goal:** Ship production-safe `geom_sf` polygon rendering for gg2d3, starting with polygon-family choropleths and the interactivity behaviors proven in v1.7.
 
-Candidate focus areas:
-- Production-safe single-panel polygon choropleths with tooltip, hover, centroid brush, and zoom suppression.
-- Shared per-panel projection/bbox for stacked sf layers.
+**Target features:**
+- Production-safe single-panel `geom_sf` polygon choropleths with tooltip, hover, centroid brush, and zoom suppression.
+- Shared per-panel projection/bbox for stacked sf layers so overlays align.
 - Faceted sf maps using per-panel projection from each panel's `PANEL` rows.
 - Explicit unsupported geometry behavior and documentation hardening.
 
@@ -65,10 +65,10 @@ Candidate focus areas:
 
 ### Active
 
-- [ ] Production `geom_sf` polygon MVP — future v1.8+ milestone candidate
-- [ ] Shared projection alignment for stacked sf layers — future v1.8+ milestone candidate
-- [ ] Faceted sf maps with per-panel bbox/projection behavior — future v1.8+ milestone candidate
-- [ ] Unsupported sf geometry and documentation hardening — future v1.8+ milestone candidate
+- [ ] Production `geom_sf` polygon MVP — v1.8
+- [ ] Shared projection alignment for stacked sf layers — v1.8
+- [ ] Faceted sf maps with per-panel bbox/projection behavior — v1.8
+- [ ] Unsupported sf geometry and documentation hardening — v1.8
 
 ### Out of Scope
 
@@ -119,5 +119,22 @@ gg2d3 shipped v1.7 with a mature three-layer pipeline (R → IR → D3) plus a c
 | geom_sf interactivity contract | Tooltip/hover should extend existing `path.geom-sf` selectors, brush should use centroid `data-cx`/`data-cy`, and zoom should be suppressed for first sf build | ✓ Good — validated in Phase 29 design contract |
 | polygon-first `geom_sf` build blueprint | First production build should support `POLYGON`/`MULTIPOLYGON`, shared per-panel projection, explicit anti-features, and validation gates | ✓ Good — locked in Phase 30 blueprint |
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `$gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `$gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-05-20 after v1.7 milestone*
+*Last updated: 2026-05-20 after starting v1.8 milestone*
