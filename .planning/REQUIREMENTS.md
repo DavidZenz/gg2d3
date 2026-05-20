@@ -16,8 +16,8 @@ Requirements for the production `geom_sf` polygon MVP milestone. Each maps to ex
 ### SF Rendering
 
 - [x] **SFREND-01**: Single-panel `geom_sf` polygon choropleths render as SVG `path.geom-sf` elements with fill, stroke, and multipolygon hole behavior matching the v1.7 prototype.
-- [ ] **SFREND-02**: Multiple sf layers in the same panel share a per-panel bbox/projection so polygon overlays align instead of being fitted independently.
-- [ ] **SFREND-03**: Faceted sf maps render with facet-aware `PANEL` filtering and per-panel bbox/projection behavior for both `facet_wrap()` and `facet_grid()`.
+- [x] **SFREND-02**: Multiple sf layers in the same panel share a per-panel bbox/projection so polygon overlays align instead of being fitted independently.
+- [x] **SFREND-03**: Faceted sf maps render with facet-aware `PANEL` filtering and per-panel bbox/projection behavior for both `facet_wrap()` and `facet_grid()`.
 
 ### SF Interactivity
 
@@ -69,8 +69,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SFIR-02 | Phase 32 | Complete |
 | SFIR-03 | Phase 32 | Complete |
 | SFREND-01 | Phase 33 | Complete |
-| SFREND-02 | Phase 34 | Pending |
-| SFREND-03 | Phase 34 | Pending |
+| SFREND-02 | Phase 34 | Complete |
+| SFREND-03 | Phase 34 | Complete |
 | SFINTR-01 | Phase 33 | Complete |
 | SFINTR-02 | Phase 33 | Complete |
 | SFINTR-03 | Phase 33 | Complete |
@@ -84,4 +84,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-20*
-*Last updated: 2026-05-20 after roadmap creation*
+*Last updated: 2026-05-20 after completing Phase 34*

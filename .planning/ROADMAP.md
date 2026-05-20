@@ -27,7 +27,7 @@
 
 **Requirements:** SFIR-01, SFIR-02, SFIR-03
 **Depends on:** v1.7 Phase 27 findings and Phase 30 blueprint
-**Status:** Pending
+**Status:** Complete
 
 **Success criteria:**
 1. `gg2d3()` extracts `POLYGON` and `MULTIPOLYGON` geometries from `geom_sf` layers into JSON-serializable IR.
@@ -47,7 +47,7 @@
 
 **Requirements:** SFREND-01, SFINTR-01, SFINTR-02, SFINTR-03
 **Depends on:** Phase 32
-**Status:** Pending
+**Status:** Complete
 
 **Success criteria:**
 1. `geom_sf` polygons render as `path.geom-sf` with fill, stroke, and multipolygon hole behavior matching the v1.7 prototype.
@@ -70,7 +70,7 @@
 
 **Requirements:** SFREND-02, SFREND-03
 **Depends on:** Phase 33
-**Status:** Pending
+**Status:** Complete
 
 **Success criteria:**
 1. Multiple sf layers in the same panel share one panel-level bbox/projection instead of fitting each layer independently.
@@ -187,8 +187,8 @@ See `.planning/milestones/v1.7-ROADMAP.md` and phase history for distribution de
 |-------|-----------|--------------|--------|-----------|
 | 32. geom_sf IR Foundation | v1.8 | 2/2 | Complete    | 2026-05-20 |
 | 33. Single-Panel Renderer and Interactivity | v1.8 | 3/3 | Complete    | 2026-05-20 |
-| 34. Stacked and Faceted Projection Alignment | v1.8 | SFREND-02, SFREND-03 | Pending | — |
+| 34. Stacked and Faceted Projection Alignment | v1.8 | 2/2 | Complete | 2026-05-20 |
 | 35. geom_sf Docs and Validation Hardening | v1.8 | SFDOC-01, SFDOC-02 | Pending | — |
 
 ---
-*Roadmap updated: 2026-05-20 after v1.8 milestone initialization*
+*Roadmap updated: 2026-05-20 after completing Phase 34*

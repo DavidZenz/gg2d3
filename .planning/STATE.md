@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Production geom_sf Polygon MVP
 status: executing
-stopped_at: Phase 34 context gathered
-last_updated: "2026-05-20T14:21:37.819Z"
-last_activity: 2026-05-20 -- Phase 34 execution started
+stopped_at: Phase 34 complete; ready for Phase 35 discussion
+last_updated: "2026-05-20T14:30:57Z"
+last_activity: 2026-05-20 -- Phase 34 completed
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 8
-  completed_plans: 5
-  percent: 63
+  completed_plans: 8
+  percent: 75
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-20)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** Phase 34 — Stacked and Faceted Projection Alignment
+**Current focus:** Phase 35 — geom_sf Docs and Validation Hardening
 
 ## Current Position
 
-Phase: 34 (Stacked and Faceted Projection Alignment) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 34
-Last activity: 2026-05-20 -- Phase 34 execution started
+Phase: 35 (geom_sf Docs and Validation Hardening) — READY
+Plan: not planned yet
+Status: Ready for Phase 35 discussion
+Last activity: 2026-05-20 -- Phase 34 completed
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███████░░░] 75%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 5 (v1.8 milestone)
+- Total plans completed: 8 (v1.8 milestone)
 - Average duration: unknown
 - Total execution time: 0 hours
 
@@ -46,6 +46,7 @@ Progress: [░░░░░░░░░░] 0%
 |-------|-------|-------|----------|
 | 32 | 2 | - | - |
 | 33 | 3 | - | - |
+| 34 | 3 | - | - |
 
 *Updated after each plan completion*
 | Phase 32 P01 | 20min | 2 tasks | 2 files |
@@ -53,6 +54,9 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 33 P01 | 3min | 3 tasks | 4 files |
 | Phase 33 P02 | 3min | 3 tasks | 2 files |
 | Phase 33 P03 | 4min | 3 tasks | 3 files |
+| Phase 34 P01 | - | 3 tasks | 3 files |
+| Phase 34 P02 | - | 3 tasks | 3 files |
+| Phase 34 P03 | - | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -76,6 +80,7 @@ Recent decisions affecting current work:
 - [Phase 30-edge-cases-and-blueprint]: Future geom_sf build starts with polygon-family choropleths (`POLYGON` and `MULTIPOLYGON`) and explicit unsupported geometry handling
 - [Phase 30-edge-cases-and-blueprint]: Stacked sf layers use shared per-panel projection/bbox, while faceted sf maps use per-panel projection from each panel's `PANEL` rows
 - [Phase 30-edge-cases-and-blueprint]: Tile basemaps, slippy zoom/pan, JavaScript-side reprojection, polygon-overlap brushing, and large-map performance guarantees are first-build anti-features
+- [Phase 34-stacked-and-faceted-projection-alignment]: Panel-level `sf_bbox` metadata is computed from accepted sf geometries per `PANEL`, and the D3 renderer filters sf data/geometry pairs together before fitting from that bbox
 
 ### Pending Todos
 
@@ -88,7 +93,7 @@ None for v1.8. This milestone starts from the archived v1.7 blueprint context an
 ## Session Continuity
 
 Last session: --stopped-at
-Stopped at: Phase 34 context gathered
+Stopped at: Phase 34 complete; ready for Phase 35 discussion
 Resume file: --resume-file
 
 ---
