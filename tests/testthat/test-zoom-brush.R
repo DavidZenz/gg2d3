@@ -89,14 +89,41 @@ test_that("d3_zoom() warns and suppresses zoom for geom_sf widgets", {
 
   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   p <- ggplot(nc) + geom_sf()
+  sf_zoom_warning <- "geom_sf.*zoom|zoom.*geom_sf"
 
   expect_warning(
     w <- gg2d3(p) |> d3_zoom(),
-    "geom_sf.*zoom|zoom.*geom_sf"
+    sf_zoom_warning
   )
 
   expect_s3_class(w, "gg2d3")
   expect_s3_class(w, "htmlwidget")
+  expect_null(w$x$interactivity$zoom)
+})
+
+test_that("d3_zoom() suppresses sf zoom without dropping brush tooltip or hover", {
+  skip_if_not_installed("sf")
+  library(ggplot2)
+
+  nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+  p <- ggplot(nc) + geom_sf()
+  sf_zoom_warning <- "geom_sf.*zoom|zoom.*geom_sf"
+
+  w <- gg2d3(p) |>
+    d3_brush() |>
+    d3_tooltip() |>
+    d3_hover()
+
+  expect_warning(
+    w <- w |> d3_zoom(),
+    sf_zoom_warning
+  )
+
+  expect_s3_class(w, "gg2d3")
+  expect_s3_class(w, "htmlwidget")
+  expect_true(w$x$interactivity$brush$enabled)
+  expect_true(w$x$interactivity$tooltip$enabled)
+  expect_true(w$x$interactivity$hover$enabled)
   expect_null(w$x$interactivity$zoom)
 })
 

@@ -34,6 +34,7 @@ test_that("events module sanitizes sf custom handler data", {
   expect_match(events_js, "sanitizeEventDatum")
   expect_match(events_js, "startsWith\\('_'\\)")
   expect_match(events_js, "publicDatum")
+  expect_match(events_js, "key\\.startsWith\\('_'\\)")
   expect_match(events_js, "setInputValue\\(shinyId, publicDatum\\)")
   expect_match(events_js, "clickHandler\\.call\\(this, event, publicDatum\\)")
   expect_match(events_js, "mouseoverHandler\\.call\\(this, event, sanitizeEventDatum\\(d\\)\\)")
@@ -45,8 +46,10 @@ test_that("tooltip module sanitizes sf renderer internals", {
 
   expect_match(tooltip_js, "sanitizeTooltipDatum")
   expect_match(tooltip_js, "startsWith\\('_'\\)")
+  expect_match(tooltip_js, "key\\.startsWith\\('_'\\)")
   expect_match(tooltip_js, "d = sanitizeTooltipDatum\\(d\\)")
   expect_match(tooltip_js, "customFn\\(enriched\\)")
+  expect_match(tooltip_js, "config\\.fields\\.filter\\(k => !String\\(k\\)\\.startsWith\\('_'\\)\\)")
   private_fields <- c("_geom", "_centroid")
   expect_true(all(startsWith(private_fields, "_")))
 })
@@ -75,13 +78,25 @@ test_that("brush module uses sf centroid attrs before generic path bbox", {
   expect_true(bbox_branch[[1]] > sf_branch[[1]])
 })
 
+test_that("brush module selects geom_sf paths by centroid attributes", {
+  brush_js <- read_module("inst/htmlwidgets/modules/brush.js")
+
+  expect_match(brush_js, "path\\.geom-sf")
+  expect_match(brush_js, "classList\\.contains\\('geom-sf'\\)")
+  expect_match(brush_js, "getAttribute\\('data-cx'\\)")
+  expect_match(brush_js, "getAttribute\\('data-cy'\\)")
+  expect_match(brush_js, "isPointInPixelRect\\(sfCx, sfCy, rect\\)")
+})
+
 test_that("brush module sanitizes sf callback data", {
   brush_js <- read_module("inst/htmlwidgets/modules/brush.js")
 
   expect_match(brush_js, "sanitizeSelectedDatum")
   expect_match(brush_js, "startsWith\\('_'\\)")
+  expect_match(brush_js, "key\\.startsWith\\('_'\\)")
   expect_match(brush_js, "collectSelectedData")
   expect_match(brush_js, "sanitizeSelectedDatum\\(d\\)")
+  expect_match(brush_js, "selectedData\\.push\\(sanitizeSelectedDatum\\(d\\)\\)")
   private_fields <- c("_geom", "_centroid")
   expect_true(all(startsWith(private_fields, "_")))
 })
