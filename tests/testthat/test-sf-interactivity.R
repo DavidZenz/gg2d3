@@ -27,3 +27,14 @@ test_that("events module targets sf paths without dropping existing geoms", {
   expect_match(events_js, "path\\.geom-line")
   expect_match(events_js, "rect\\.geom-bar")
 })
+
+test_that("tooltip module sanitizes sf renderer internals", {
+  tooltip_js <- read_module("inst/htmlwidgets/modules/tooltip.js")
+
+  expect_match(tooltip_js, "sanitizeTooltipDatum")
+  expect_match(tooltip_js, "startsWith\\('_'\\)")
+  expect_match(tooltip_js, "d = sanitizeTooltipDatum\\(d\\)")
+  expect_match(tooltip_js, "customFn\\(enriched\\)")
+  private_fields <- c("_geom", "_centroid")
+  expect_true(all(startsWith(private_fields, "_")))
+})

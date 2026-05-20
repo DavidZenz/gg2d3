@@ -109,6 +109,23 @@
   }
 
   /**
+   * Remove renderer-private fields from user-facing tooltip data.
+   *
+   * @param {Object} d - Data row bound to SVG element
+   * @returns {Object} Cloned row without underscore-prefixed fields
+   */
+  function sanitizeTooltipDatum(d) {
+    if (!d || typeof d !== 'object' || Array.isArray(d)) return d || {};
+
+    const sanitized = {};
+    Object.keys(d).forEach(function(key) {
+      if (key.startsWith('_')) return;
+      sanitized[key] = d[key];
+    });
+    return sanitized;
+  }
+
+  /**
    * Format tooltip content from data row.
    * Generates HTML string with field names and formatted values.
    *
@@ -136,6 +153,7 @@
     if (d && typeof d === 'object' && d.d && typeof d.d === 'object' && !Array.isArray(d.d)) {
       d = d.d;
     }
+    d = sanitizeTooltipDatum(d);
 
     // Determine which fields to show. Default prefers the ORIGINAL variable
     // names from the ggplot aes mapping (e.g. "wt", "mpg", "cyl") over the
@@ -144,7 +162,7 @@
     // formatter API (function(field, value)) is expected to receive.
     let fields;
     if (config.fields) {
-      fields = config.fields;
+      fields = config.fields.filter(k => !String(k).startsWith('_'));
     } else {
       const internalKeys = ['PANEL', 'group', 'SCALE_X', 'SCALE_Y'];
       const aesByVarLocal = (ir && ir.aes_by_var) || {};
