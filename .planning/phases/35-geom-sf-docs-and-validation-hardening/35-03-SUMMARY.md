@@ -66,6 +66,7 @@ completed: 2026-05-20T16:18:00Z
 - Regenerated fixtures for manual inspection, then improved stacked/skipped fixture readability after user feedback.
 - Ran the final docs generation and targeted sf/facet/zoom validation sweep successfully.
 - Completed the human visual checkpoint: choropleth and interactivity looked good; facet wrap/grid behavior matched expected output; stacked and skipped-row fixtures were adjusted and then accepted as matching the expected contract.
+- Resolved code-review findings by removing Pandoc dependence from visual fixture saves, hardening `d3_zoom()` scale extent validation, and making scoped sf test files directly runnable.
 
 ## Task Commits
 
@@ -73,10 +74,14 @@ completed: 2026-05-20T16:18:00Z
 2. **Task 35-03-01 follow-up: Improve fixture readability after visual feedback** - `c62649e` (`test`)
 3. **Task 35-03-02: Run final docs and sf validation sweep** - no source changes after the committed fixture updates
 4. **Task 35-03-03: Human inspect Phase 35 HTML fixtures** - approved in conversation after fixture inspection
+5. **Code review fix: Remove Pandoc and non-finite zoom edge cases** - `d6c2621` (`fix`)
+6. **Code review fix: Support direct sf test file runs** - `1c07c8e` (`test`)
 
 ## Files Created/Modified
 
 - `tests/testthat/test-sf-visual.R` - Phase 35 fixture generator and structural assertions.
+- `tests/testthat/test-zoom-brush.R` - Non-finite `d3_zoom()` scale extent regression coverage and direct-run package loading.
+- `R/d3_zoom.R` - Finite scale extent validation for `d3_zoom()`.
 - `test_output/phase35-sf-choropleth.html` - Generated single-panel NC choropleth fixture.
 - `test_output/phase35-sf-stacked-overlay.html` - Generated stacked sf overlay fixture with aligned inner and outer polygons.
 - `test_output/phase35-sf-facet-wrap.html` - Generated facet_wrap fixture with per-panel sf extents.
@@ -87,6 +92,7 @@ completed: 2026-05-20T16:18:00Z
 ## Verification
 
 - `rtk Rscript --vanilla -e 'pkgload::load_all(quiet = TRUE); testthat::test_file("tests/testthat/test-sf-visual.R")'`
+- `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-zoom-brush.R"); testthat::test_file("tests/testthat/test-sf-visual.R")'`
 - `rtk Rscript --vanilla -e 'devtools::document(); devtools::build_readme()'`
 - `rtk Rscript --vanilla -e 'pkgload::load_all(quiet = TRUE); testthat::test_file("tests/testthat/test-sf-utils.R"); testthat::test_file("tests/testthat/test-sf-ir.R"); testthat::test_file("tests/testthat/test-sf-renderer.R"); testthat::test_file("tests/testthat/test-sf-interactivity.R"); testthat::test_file("tests/testthat/test-sf-visual.R"); testthat::test_file("tests/testthat/test-facets.R"); testthat::test_file("tests/testthat/test-facet-grid.R"); testthat::test_file("tests/testthat/test-zoom-brush.R")'`
 
@@ -116,7 +122,8 @@ completed: 2026-05-20T16:18:00Z
 ## Issues Encountered
 
 - `devtools::document(); devtools::build_readme()` completed successfully but continued to report outdated development dependencies: `bslib` 0.10.0 vs 0.11.0 and `cpp11` 0.5.4 vs 0.5.5.
-- The generated `test_output/phase35-*.html` files are ignored by `.gitignore`; the tracked artifact is the reproducible fixture generator in `tests/testthat/test-sf-visual.R`.
+- The generated `test_output/phase35-*.html` files and sibling asset directories are ignored by `.gitignore`; the tracked artifact is the reproducible fixture generator in `tests/testthat/test-sf-visual.R`.
+- Code review initially found visual fixture portability and zoom validation issues; both were fixed and the final review report is clean.
 
 ## User Setup Required
 
@@ -131,6 +138,8 @@ SFDOC-01 and SFDOC-02 are ready for phase-level verification. Docs, automated va
 - Summary file exists: `.planning/phases/35-geom-sf-docs-and-validation-hardening/35-03-SUMMARY.md`
 - Task commit exists: `251a4dd`
 - Fixture readability commit exists: `c62649e`
+- Code review fix commit exists: `d6c2621`
+- Direct test-run fix commit exists: `1c07c8e`
 - Required docs command exited 0.
 - Required targeted sf/facet/zoom sweep exited 0.
 - Human visual checkpoint approved in conversation.
