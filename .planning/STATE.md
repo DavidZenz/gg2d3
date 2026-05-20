@@ -4,14 +4,14 @@ milestone: v1.8
 milestone_name: Production geom_sf Polygon MVP
 status: Ready for Phase 35 discussion
 stopped_at: Phase 35 context gathered
-last_updated: "2026-05-20T14:43:32.771Z"
+last_updated: "2026-05-20T15:17:45.418Z"
 last_activity: 2026-05-20 -- Phase 34 completed
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 8
+  total_plans: 11
   completed_plans: 8
-  percent: 100
+  percent: 73
 ---
 
 # Project State
@@ -103,4 +103,4 @@ Resume file: .planning/phases/35-geom-sf-docs-and-validation-hardening/35-CONTEX
 *v1.7 milestone started: 2026-04-04*
 *v1.8 milestone started: 2026-05-20*
 
-**Planned Phase:** 34 (Stacked and Faceted Projection Alignment) — 3 plans — 2026-05-20T14:16:41.022Z
+**Planned Phase:** 35 (geom_sf Docs and Validation Hardening) — 3 plans — 2026-05-20T15:17:45.409Z
