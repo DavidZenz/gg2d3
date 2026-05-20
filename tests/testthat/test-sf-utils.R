@@ -287,21 +287,30 @@ test_that("prepare_sf_geometry_ir records skipped mixed sf rows", {
     list(square_ring(30, 0, 31, 1))
   ))
 
-  df <- data.frame(label = c("polygon", "point", "empty", "invalid", "multipolygon"))
-  df$geometry <- sf::st_sfc(polygon, point, empty_polygon, bowtie, multipolygon, crs = 4326)
+  df <- data.frame(label = c("polygon", "point", "empty", "invalid", "missing", "multipolygon"))
+  df$geometry <- sf::st_sfc(
+    polygon,
+    point,
+    empty_polygon,
+    bowtie,
+    polygon,
+    multipolygon,
+    crs = 4326
+  )
+  df$geometry[[5]] <- NA
 
   expect_warning(
     result <- prepare_sf_geometry_ir(df),
-    regexp = "skipped 3"
+    regexp = "skipped 4"
   )
 
   expect_equal(nrow(result$data), length(result$geometries))
-  expect_equal(result$data$row_id, c(1L, 5L))
-  expect_equal(result$sf_diagnostics$accepted_rows, c(1L, 5L))
-  expect_equal(result$sf_diagnostics$skipped_rows, c(2L, 3L, 4L))
+  expect_equal(result$data$row_id, c(1L, 6L))
+  expect_equal(result$sf_diagnostics$accepted_rows, c(1L, 6L))
+  expect_equal(result$sf_diagnostics$skipped_rows, c(2L, 3L, 4L, 5L))
 
   reasons <- vapply(result$sf_diagnostics$skipped, function(item) item$reason, character(1))
-  expect_equal(reasons, c("unsupported", "empty", "invalid"))
+  expect_equal(reasons, c("unsupported", "empty", "invalid", "missing"))
 })
 
 test_that("prepare_sf_geometry_ir skips empty polygon geometry", {

@@ -99,13 +99,20 @@ prepare_sf_geometry_ir <- function(df,
   geom_col <- df[[geom_col_name]]
   source_rows <- seq_len(nrow(df))
   geometry_types <- as.character(sf::st_geometry_type(geom_col, by_geometry = TRUE))
-  empty <- sf::st_is_empty(geom_col)
   missing_geometry <- is.na(geom_col)
-  valid <- tryCatch(
-    sf::st_is_valid(geom_col),
-    error = function(e) rep(FALSE, length(geom_col))
-  )
-  valid[is.na(valid)] <- FALSE
+  present_geometry <- !missing_geometry
+  empty <- rep(FALSE, length(geom_col))
+  valid <- rep(FALSE, length(geom_col))
+
+  if (any(present_geometry)) {
+    empty[present_geometry] <- sf::st_is_empty(geom_col[present_geometry])
+    valid_present <- tryCatch(
+      sf::st_is_valid(geom_col[present_geometry]),
+      error = function(e) rep(FALSE, sum(present_geometry))
+    )
+    valid_present[is.na(valid_present)] <- FALSE
+    valid[present_geometry] <- valid_present
+  }
 
   supported <- geometry_types %in% supported_types
   accepted <- supported & !empty & !missing_geometry & valid
