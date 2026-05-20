@@ -342,29 +342,17 @@ as_d3_ir <- function(p, width = 640, height = 400,
     }
 
     if (gname == "sf") {
-      # Normalize geometry column to WGS84 first so CRS and geometries are consistent
-      gcol_name <- attr(df, "sf_column")
-      if (is.null(gcol_name)) {
-        candidates <- names(df)[vapply(df, inherits, logical(1L), "sfc")]
-        gcol_name <- if (length(candidates) > 0L) candidates[[1L]] else NA_character_
-      }
-      if (!is.na(gcol_name)) {
-        df[[gcol_name]] <- normalize_to_wgs84(df[[gcol_name]])
-      }
-      sf_geom_strings <- extract_sf_geometries(df)
-      sf_layer_crs    <- get_layer_crs(df)
-      sf_layer_gtype  <- detect_dominant_geom_type(df)
-      # D-06: add row_id for safe geometry-aesthetic join
-      df[["row_id"]] <- seq_along(sf_geom_strings)
+      sf_prepared <- prepare_sf_geometry_ir(df)
       list(
-        geom       = "sf",
-        geom_type  = sf_layer_gtype,
-        geometries = sf_geom_strings,
-        data       = to_rows(df),
-        aes        = aes,
-        params     = g_params,
-        crs        = sf_layer_crs,
-        var_names  = var_names
+        geom           = "sf",
+        geom_type      = sf_prepared$geom_type,
+        geometries     = sf_prepared$geometries,
+        data           = to_rows(sf_prepared$data),
+        aes            = aes,
+        params         = g_params,
+        crs            = sf_prepared$crs,
+        sf_diagnostics = sf_prepared$sf_diagnostics,
+        var_names      = var_names
       )
     } else {
       list(
