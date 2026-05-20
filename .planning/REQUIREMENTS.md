@@ -65,11 +65,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| BRSF-01 | Phase 36 | Pending |
+| BRSF-02 | Phase 36 | Pending |
+| BRSF-03 | Phase 36 | Pending |
+| SFGEOM-01 | Phase 37 | Pending |
+| SFGEOM-02 | Phase 37 | Pending |
+| SFGEOM-03 | Phase 37 | Pending |
+| SFGEOM-04 | Phase 37 | Pending |
+| SFXDOC-01 | Phase 38 | Pending |
+| SFXDOC-02 | Phase 38 | Pending |
+| SFXDOC-03 | Phase 38 | Pending |
+| HARD-01 | Phase 39 | Pending |
+| HARD-02 | Phase 39 | Pending |
+| HARD-03 | Phase 39 | Pending |
 
 **Coverage:**
 - v1.9 requirements: 13 total
-- Mapped to phases: 0
-- Unmapped: 13
+- Mapped to phases: 13
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-20*
