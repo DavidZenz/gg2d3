@@ -31,9 +31,9 @@ Requirements for choropleth map research milestone. Each maps to roadmap phases.
 
 ### Blueprint
 
-- [ ] **BLPR-01**: Document edge cases: mixed geometry types, multi-layer stacking, faceted sf maps
-- [ ] **BLPR-02**: Define explicit anti-features with rationale (tile basemaps, JS-side projection, slippy zoom)
-- [ ] **BLPR-03**: Produce phase-by-phase implementation plan with concrete file changes for a future build milestone
+- [x] **BLPR-01**: Document edge cases: mixed geometry types, multi-layer stacking, faceted sf maps
+- [x] **BLPR-02**: Define explicit anti-features with rationale (tile basemaps, JS-side projection, slippy zoom)
+- [x] **BLPR-03**: Produce phase-by-phase implementation plan with concrete file changes for a future build milestone
 
 ## Distribution
 
@@ -78,9 +78,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTR-01 | Phase 29 | Complete |
 | INTR-02 | Phase 29 | Complete |
 | INTR-03 | Phase 29 | Complete |
-| BLPR-01 | Phase 30 | Pending |
-| BLPR-02 | Phase 30 | Pending |
-| BLPR-03 | Phase 30 | Pending |
+| BLPR-01 | Phase 30 | Complete |
+| BLPR-02 | Phase 30 | Complete |
+| BLPR-03 | Phase 30 | Complete |
 | DOCS-02 | Phase 31 | Complete |
 
 **Coverage:**

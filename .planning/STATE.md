@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Choropleth Map Research
-status: planning
-stopped_at: Phase 30 context gathered
-last_updated: "2026-05-20T10:35:14.523Z"
-last_activity: 2026-05-20 - Phase 30 context gathered
+status: milestone_complete
+stopped_at: Phase 30 complete
+last_updated: "2026-05-20T10:58:40Z"
+last_activity: 2026-05-20 - Phase 30 completed and v1.7 milestone complete
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 6
-  completed_plans: 5
-  percent: 83
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** Phase 30 - edge cases and blueprint
+**Current focus:** v1.7 choropleth research milestone complete
 
 ## Current Position
 
-Phase: 30
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-05-20 - Phase 30 context gathered
+Phase: 30 (edge-cases-and-blueprint) - COMPLETE
+Plan: 1 of 1
+Status: Milestone complete
+Last activity: 2026-05-20 - Phase 30 completed and v1.7 milestone complete
 
 Progress: [██████████] 100%
 
@@ -36,7 +36,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 1 (v1.7 milestone)
+- Total plans completed: 6 (v1.7 milestone)
 - Average duration: unknown
 - Total execution time: 0 hours
 
@@ -45,6 +45,7 @@ Progress: [██████████] 100%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 29 | 1 | - | - |
+| 30 | 1 | - | - |
 
 *Updated after each plan completion*
 | Phase 27-r-ir-extraction-feasibility P01 | 10 | 3 tasks | 3 files |
@@ -52,6 +53,7 @@ Progress: [██████████] 100%
 | Phase 28-d3-renderer-prototyping P01 | 8 | 2 tasks | 4 files |
 | Phase 28-d3-renderer-prototyping P02 | 10 | 2 tasks | 1 files |
 | Phase 29-interactivity-design P01 | 3 min | 3 tasks | 1 files |
+| Phase 30-edge-cases-and-blueprint P01 | 9 min | 4 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -72,6 +74,9 @@ Recent decisions affecting current work:
 - [Phase 29-interactivity-design]: Future geom_sf tooltip and hover support extends existing selectors with path.geom-sf and keeps bound rows as the tooltip data source
 - [Phase 29-interactivity-design]: Future geom_sf brush support selects regions by data-cx/data-cy centroid containment, not polygon overlap
 - [Phase 29-interactivity-design]: First geom_sf build suppresses d3_zoom() from R with a warning; map zoom is deferred to projection/path re-rendering
+- [Phase 30-edge-cases-and-blueprint]: Future geom_sf build starts with polygon-family choropleths (`POLYGON` and `MULTIPOLYGON`) and explicit unsupported geometry handling
+- [Phase 30-edge-cases-and-blueprint]: Stacked sf layers use shared per-panel projection/bbox, while faceted sf maps use per-panel projection from each panel's `PANEL` rows
+- [Phase 30-edge-cases-and-blueprint]: Tile basemaps, slippy zoom/pan, JavaScript-side reprojection, polygon-overlap brushing, and large-map performance guarantees are first-build anti-features
 
 ### Pending Todos
 
@@ -79,14 +84,13 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 27 feasibility gate: Must empirically verify `ggplot_build()` preserves the `sfc` geometry list-column before writing any extraction code. Run `b <- ggplot_build(ggplot(nc) + geom_sf()); "geometry" %in% names(b$data[[1]])`. If FALSE, fallback to pre-build layer extraction requires design rework.
-- Phase 30 should use `.planning/phases/29-interactivity-design/29-INTERACTIVITY-DESIGN.md` as the locked interactivity input for blueprint work.
+None for v1.7. Future production geom_sf work should start from `.planning/phases/30-edge-cases-and-blueprint/30-EDGE-CASE-BLUEPRINT.md`.
 
 ## Session Continuity
 
 Last session: 2026-05-20T09:28:13.617Z
-Stopped at: Phase 30 context gathered
-Resume file: .planning/phases/30-edge-cases-and-blueprint/30-CONTEXT.md
+Stopped at: Phase 30 complete
+Resume file: .planning/phases/30-edge-cases-and-blueprint/30-EDGE-CASE-BLUEPRINT.md
 
 ---
 *State initialized: 2026-02-07*
