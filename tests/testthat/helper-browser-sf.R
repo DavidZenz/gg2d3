@@ -203,6 +203,36 @@ write_browser_failure_artifacts <- function(name, html_path, logs, session = NUL
   out_dir <- browser_sf_artifact_dir()
   prefix <- file.path(out_dir, name)
   entries <- .browser_sf_logs(logs)
+  console_entries <- entries[vapply(entries, function(entry) {
+    identical(entry$source, "Runtime.consoleAPICalled")
+  }, logical(1))]
+  page_error_entries <- entries[vapply(entries, function(entry) {
+    identical(entry$source, "Runtime.exceptionThrown") ||
+      identical(entry$type, "exception")
+  }, logical(1))]
+
+  format_entry <- function(entry) {
+    paste(
+      entry$source %||% "browser",
+      entry$type %||% "log",
+      entry$message %||% "",
+      sep = ": "
+    )
+  }
+
+  writeLines(
+    vapply(console_entries, format_entry, character(1)),
+    con = paste0(prefix, "-console.log")
+  )
+  writeLines(
+    vapply(page_error_entries, format_entry, character(1)),
+    con = paste0(prefix, "-page-errors.log")
+  )
+
+  html_copy <- paste0(prefix, ".html")
+  if (!identical(normalizePath(html_path, mustWork = FALSE), normalizePath(html_copy, mustWork = FALSE))) {
+    file.copy(html_path, html_copy, overwrite = TRUE)
+  }
 
   jsonlite::write_json(
     list(
@@ -214,13 +244,6 @@ write_browser_failure_artifacts <- function(name, html_path, logs, session = NUL
     pretty = TRUE,
     null = "null"
   )
-
-  if (!is.null(session)) {
-    try(
-      session$screenshot(filename = paste0(prefix, "-screenshot.png")),
-      silent = TRUE
-    )
-  }
 
   invisible(prefix)
 }

@@ -103,6 +103,7 @@ test_that("BRSF-01 DOM: Phase 35 sf fixtures render live geom-sf paths", {
             expect_equal(row_ids, c("1", "5"))
             expect_false(any(c("2", "3", "4") %in% row_ids))
           }
+          assert_no_browser_errors(logs)
         },
         error = function(e) {
           write_browser_failure_artifacts(
@@ -115,8 +116,6 @@ test_that("BRSF-01 DOM: Phase 35 sf fixtures render live geom-sf paths", {
         }
       )
     }
-
-    assert_no_browser_errors(logs)
   })
 })
 
@@ -150,6 +149,7 @@ test_that("BRSF-02 DOM: faceted sf fixtures keep panel-local path counts", {
           panel_counts <- as.integer(unlist(panel_counts, use.names = FALSE))
 
           expect_equal(sort(panel_counts), expected_panel_counts[[fixture_name]])
+          assert_no_browser_errors(logs)
         },
         error = function(e) {
           write_browser_failure_artifacts(
@@ -162,8 +162,6 @@ test_that("BRSF-02 DOM: faceted sf fixtures keep panel-local path counts", {
         }
       )
     }
-
-    assert_no_browser_errors(logs)
   })
 })
 
