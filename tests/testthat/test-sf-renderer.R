@@ -84,7 +84,7 @@ test_that("skipped sf rows cannot become selectable paths", {
   expect_match(gg2d3_js, "geometries: filteredPairs\\.map\\(function\\(pair\\) \\{ return pair\\.geometry; \\}\\)")
 
   expect_match(sf_js, "path\\.geom-sf")
-  expect_match(sf_js, "\\.data\\(rows\\)")
+  expect_match(sf_js, "\\.data\\(polygonRows\\)")
   expect_match(sf_js, "data-row-id")
   expect_match(sf_js, "data-cx")
   expect_match(sf_js, "data-cy")
