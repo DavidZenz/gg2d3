@@ -1,0 +1,114 @@
+# Browser smoke tests for live geom_sf DOM rendering.
+
+# Load package if not already loaded (supports both devtools::test() and testthat::test_file())
+if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
+
+if (!exists("skip_browser_sf_smoke", mode = "function")) {
+  helper_candidates <- c(
+    "tests/testthat/helper-browser-sf.R",
+    "helper-browser-sf.R"
+  )
+  helper_path <- helper_candidates[file.exists(helper_candidates)][1]
+  if (!is.na(helper_path)) {
+    source(helper_path)
+  }
+}
+
+.browser_sf_fixture_names <- function() {
+  c(
+    "phase35-sf-choropleth.html",
+    "phase35-sf-stacked-overlay.html",
+    "phase35-sf-facet-wrap.html",
+    "phase35-sf-facet-grid.html",
+    "phase35-sf-skipped-rows.html",
+    "phase35-sf-interactivity-smoke.html"
+  )
+}
+
+.browser_sf_expected_counts <- function() {
+  c(
+    "phase35-sf-choropleth.html" = 100L,
+    "phase35-sf-stacked-overlay.html" = 4L,
+    "phase35-sf-facet-wrap.html" = 2L,
+    "phase35-sf-facet-grid.html" = 2L,
+    "phase35-sf-skipped-rows.html" = 2L,
+    "phase35-sf-interactivity-smoke.html" = 100L
+  )
+}
+
+.browser_sf_file_url <- function(path) {
+  paste0("file://", normalizePath(path, winslash = "/", mustWork = TRUE))
+}
+
+.browser_sf_path_script <- function() {
+  paste(
+    "(() => Array.from(document.querySelectorAll(\"path.geom-sf\")).map(path => ({",
+    'd: path.getAttribute("d"),',
+    'dataRowId: path.getAttribute("data-row-id"),',
+    'dataCx: path.getAttribute("data-cx"),',
+    'dataCy: path.getAttribute("data-cy"),',
+    'cx: Number(path.getAttribute("data-cx")),',
+    'cy: Number(path.getAttribute("data-cy"))',
+    "})))()"
+  )
+}
+
+test_that("BRSF-01 DOM: Phase 35 sf fixtures render live geom-sf paths", {
+  skip_browser_sf_smoke()
+
+  fixtures <- .phase35_sf_fixture_set()
+  expected_names <- .browser_sf_fixture_names()
+  expected_counts <- .browser_sf_expected_counts()
+
+  expect_equal(names(fixtures), expected_names)
+  expect_equal(names(expected_counts), expected_names)
+
+  with_chromote_session({
+    logs <- browser_console_collector(session)
+
+    for (fixture_name in expected_names) {
+      html_path <- fixtures[[fixture_name]]
+      expect_true(file.exists(html_path))
+
+      tryCatch(
+        {
+          session$go_to(.browser_sf_file_url(html_path), delay = 1)
+          wait_for_sf_paths(
+            session,
+            expected = unname(expected_counts[[fixture_name]]),
+            timeout = 10
+          )
+          paths <- eval_js_value(session, .browser_sf_path_script())
+
+          expect_length(paths, expected_counts[[fixture_name]])
+
+          d_values <- vapply(paths, function(path) path$d, character(1))
+          row_ids <- vapply(paths, function(path) path$dataRowId, character(1))
+          cx_values <- vapply(paths, function(path) path$cx, numeric(1))
+          cy_values <- vapply(paths, function(path) path$cy, numeric(1))
+
+          expect_true(all(nzchar(d_values)))
+          expect_true(all(nzchar(row_ids)))
+          expect_true(all(is.finite(cx_values)))
+          expect_true(all(is.finite(cy_values)))
+
+          if (identical(fixture_name, "phase35-sf-skipped-rows.html")) {
+            expect_equal(row_ids, c("1", "5"))
+            expect_false(any(c("2", "3", "4") %in% row_ids))
+          }
+        },
+        error = function(e) {
+          write_browser_failure_artifacts(
+            tools::file_path_sans_ext(fixture_name),
+            html_path,
+            logs,
+            session
+          )
+          stop(e)
+        }
+      )
+    }
+
+    assert_no_browser_errors(logs)
+  })
+})
