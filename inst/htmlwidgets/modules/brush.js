@@ -36,7 +36,7 @@
     'path.geom-smooth',
     'path.geom-ribbon',
     'path.geom-violin',
-    'path.geom-sf',
+    '.geom-sf',                    // geom_sf: path.geom-sf.geom-sf-polygon, path.geom-sf.geom-sf-line, circle.geom-sf.geom-sf-point
     'text.geom-text',
     'line.geom-segment',
     'rect.geom-boxplot-box',
@@ -266,6 +266,12 @@
   function isElementInPixelRect(node, rect) {
     var tagName = node.tagName.toLowerCase();
 
+    if (node.classList && node.classList.contains('geom-sf')) {
+      var sfCx = parseFloat(node.getAttribute('data-cx'));
+      var sfCy = parseFloat(node.getAttribute('data-cy'));
+      return isPointInPixelRect(sfCx, sfCy, rect);
+    }
+
     if (tagName === 'circle') {
       // Point-in-rect check for circles (use center)
       var cx = parseFloat(node.getAttribute('cx'));
@@ -308,12 +314,6 @@
     }
 
     if (tagName === 'path') {
-      if (node.classList && node.classList.contains('geom-sf')) {
-        var sfCx = parseFloat(node.getAttribute('data-cx'));
-        var sfCy = parseFloat(node.getAttribute('data-cy'));
-        return isPointInPixelRect(sfCx, sfCy, rect);
-      }
-
       // Use bounding box center for path elements
       try {
         var bbox = node.getBBox();
@@ -408,6 +408,17 @@
     return sanitized;
   }
 
+  function dedupeSelectedDataByRowId(selectedData) {
+    var seenRowIds = {};
+    return selectedData.filter(function(d) {
+      if (!d || d.row_id == null) return true;
+      var key = String(d.row_id);
+      if (seenRowIds[key]) return false;
+      seenRowIds[key] = true;
+      return true;
+    });
+  }
+
   /**
    * Collect data from selected elements (for on_brush callback).
    */
@@ -426,7 +437,7 @@
       });
     });
 
-    return selectedData;
+    return dedupeSelectedDataByRowId(selectedData);
   }
 
   /**

@@ -30,7 +30,7 @@
     'path.geom-smooth',          // geom_smooth
     'path.geom-ribbon',          // geom_ribbon
     'path.geom-violin',          // geom_violin
-    'path.geom-sf',              // geom_sf
+    '.geom-sf',                  // geom_sf: path.geom-sf.geom-sf-polygon, path.geom-sf.geom-sf-line, circle.geom-sf.geom-sf-point
     'text.geom-text',            // geom_text
     'line.geom-segment',         // geom_segment
     'rect.geom-boxplot-box',     // geom_boxplot (IQR box)
