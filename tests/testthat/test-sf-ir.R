@@ -329,6 +329,89 @@ test_that("stacked sf layers share one panel sf_bbox", {
   expect_no_warning(validate_ir(ir))
 })
 
+test_that("SFGEOM-04 polygon+point stacked sf layers share one panel sf_bbox", {
+  base_sf <- sf::st_sf(
+    id = 1L,
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(sf_ir_square_ring(0, 0, 1, 1))),
+      crs = 4326
+    )
+  )
+  point_sf <- sf::st_sf(
+    id = 1L,
+    geometry = sf::st_sfc(sf::st_point(c(10, 20)), crs = 4326)
+  )
+
+  ir <- as_d3_ir(
+    ggplot2::ggplot() +
+      ggplot2::geom_sf(data = base_sf) +
+      ggplot2::geom_sf(data = point_sf)
+  )
+
+  expect_equal(ir$layers[[1]]$sf_family, "polygon")
+  expect_equal(ir$layers[[2]]$sf_family, "point")
+  expect_equal(ir$panels[[1]]$sf_bbox, c(0, 0, 10, 20))
+  expect_equal(ir$coord$bbox, c(0, 0, 10, 20))
+  expect_no_warning(validate_ir(ir))
+})
+
+test_that("SFGEOM-04 polygon+line stacked sf layers share one panel sf_bbox", {
+  base_sf <- sf::st_sf(
+    id = 1L,
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(sf_ir_square_ring(0, 0, 1, 1))),
+      crs = 4326
+    )
+  )
+  line_sf <- sf::st_sf(
+    id = 1L,
+    geometry = sf::st_sfc(
+      sf::st_linestring(matrix(c(20, -5, 21, 6), ncol = 2, byrow = TRUE)),
+      crs = 4326
+    )
+  )
+
+  ir <- as_d3_ir(
+    ggplot2::ggplot() +
+      ggplot2::geom_sf(data = base_sf) +
+      ggplot2::geom_sf(data = line_sf)
+  )
+
+  expect_equal(ir$layers[[1]]$sf_family, "polygon")
+  expect_equal(ir$layers[[2]]$sf_family, "line")
+  expect_equal(ir$panels[[1]]$sf_bbox, c(0, -5, 21, 6))
+  expect_equal(ir$coord$bbox, c(0, -5, 21, 6))
+  expect_no_warning(validate_ir(ir))
+})
+
+test_that("SFGEOM-04 facet_wrap empty panel keeps NULL sf_bbox for point and line families", {
+  facet_sf <- sf::st_sf(
+    facet = factor(c("point", "line"), levels = c("point", "line", "empty panel")),
+    geometry = sf::st_sfc(
+      sf::st_point(c(0, 0)),
+      sf::st_linestring(matrix(c(10, 10, 11, 11), ncol = 2, byrow = TRUE)),
+      crs = 4326
+    )
+  )
+
+  ir <- as_d3_ir(
+    ggplot2::ggplot(facet_sf) +
+      ggplot2::geom_sf() +
+      ggplot2::facet_wrap(~facet, drop = FALSE)
+  )
+
+  panel_bboxes <- lapply(ir$panels, `[[`, "sf_bbox")
+  non_empty <- vapply(panel_bboxes, Negate(is.null), logical(1))
+
+  expect_equal(ir$facets$type, "wrap")
+  expect_equal(length(ir$panels), 3L)
+  expect_equal(non_empty, c(TRUE, TRUE, FALSE))
+  expect_finite_sf_bbox(panel_bboxes[[1]])
+  expect_finite_sf_bbox(panel_bboxes[[2]])
+  expect_null(panel_bboxes[[3]])
+  expect_no_warning(validate_ir(ir))
+})
+
 test_that("validate_ir warns on malformed sf_bbox metadata", {
   ir <- as_d3_ir(ggplot2::ggplot(nc) + ggplot2::geom_sf())
 
