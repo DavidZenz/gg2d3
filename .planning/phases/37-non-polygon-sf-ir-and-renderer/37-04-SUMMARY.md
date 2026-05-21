@@ -18,7 +18,7 @@ Declared direct test helper dependencies `pkgload` and `rprojroot` in `Suggests`
 ## Verification
 
 - `rtk Rscript --vanilla -e 'source("tests/testthat/helper-sf-fixtures.R"); fixtures <- .phase37_sf_fixture_set(); stopifnot(length(fixtures) == 6L, all(file.exists(unlist(fixtures))))'` passed.
-- `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-browser.R")'` completed with zero failures and clean browser skips in this environment.
+- `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-browser.R")'` completed cleanly with browser skips in this environment.
 - Full Phase 37 suite passed: IR, renderer, interactivity, and browser tests.
 
 ## Self-Check
