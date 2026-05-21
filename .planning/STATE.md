@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: sf Robustness and Expansion
 status: executing
-stopped_at: Completed 36-01-PLAN.md
-last_updated: "2026-05-21T07:10:37.962Z"
+stopped_at: Completed 36-02-PLAN.md
+last_updated: "2026-05-21T07:19:42.325Z"
 last_activity: 2026-05-21
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 33
+  completed_plans: 2
+  percent: 67
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-20)
 ## Current Position
 
 Phase: 36 (browser-sf-smoke-harness) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-05-21
 
-Progress: [███░░░░░░░] 33%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [███░░░░░░░] 33%
 
 *Updated after each plan completion*
 | Phase 36 P01 | 6m13s | 2 tasks | 4 files |
+| Phase 36 P02 | 3m50s | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,9 @@ Recent decisions affecting current work:
 - 36-01: Kept browser automation optional by adding chromote only to Suggests.
 - 36-01: Centralized Phase 35 polygon sf fixtures for browser smoke reuse.
 - 36-01: Browser sf artifacts use non-self-contained test_output/browser-sf files.
+- 36-02: Kept Phase 36 browser smoke validation inside R/testthat and chromote helpers.
+- 36-02: Asserted live DOM attributes directly in the browser test rather than relying on saved HTML source.
+- 36-02: Used a single-file testthat run as the local verification command because this testthat build does not support test_file(filter = ...).
 
 ### Pending Todos
 
@@ -85,8 +89,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-21T07:10:37.954Z
-Stopped at: Completed 36-01-PLAN.md
+Last session: 2026-05-21T07:19:42.317Z
+Stopped at: Completed 36-02-PLAN.md
 Resume file: None
 
 **Planned Phase:** 36 (browser-sf-smoke-harness) — 3 plans — 2026-05-20T20:27:09.489Z
