@@ -19,6 +19,7 @@ Imports:
     rlang
 Suggests:
     testthat (>= 3.0.0),
+    chromote (>= 0.5.1),
     crosstalk,
     sf (>= 1.0.0),
     geojsonsf (>= 2.0.0),
