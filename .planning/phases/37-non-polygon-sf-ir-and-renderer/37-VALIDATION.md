@@ -38,11 +38,16 @@ created: 2026-05-21
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 37-01-01 | 01 | 0 | SFGEOM-01, SFGEOM-02 | T-37-01 | Renderer-private geometry metadata remains internal to IR/helpers | unit | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-ir.R")'` | yes | pending |
-| 37-01-02 | 01 | 0 | SFGEOM-04 | T-37-02 | Skipped-row diagnostics do not expose malformed geometry internals beyond existing public diagnostics | unit | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-ir.R")'` | yes | pending |
-| 37-02-01 | 02 | 1 | SFGEOM-03 | T-37-03 | SVG renderer keeps callback data sanitized and avoids remote/runtime dependency expansion | unit/source | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-renderer.R")'` | yes | pending |
-| 37-02-02 | 02 | 1 | SFGEOM-03 | T-37-03 | Point and line styling does not inject unsafe script/content | unit/source | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-renderer.R")'` | yes | pending |
-| 37-03-01 | 03 | 2 | SFGEOM-03, SFGEOM-04 | T-37-04 | Browser smoke payloads remain public-row-oriented and private fields stay stripped | browser/source | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-interactivity.R"); testthat::test_file("tests/testthat/test-sf-browser.R")'` | yes | pending |
+| 37-01-01 | 01 | 1 | SFGEOM-01, SFGEOM-02, SFGEOM-04 | T-37-01 | Renderer-private geometry metadata remains internal to IR/helpers | unit | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-ir.R")'` | yes | pending |
+| 37-01-02 | 01 | 1 | SFGEOM-01, SFGEOM-02 | T-37-01 | Skipped-row diagnostics do not expose malformed geometry internals beyond existing public diagnostics | unit | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-ir.R")'` | yes | pending |
+| 37-01-03 | 01 | 1 | SFGEOM-04 | T-37-02 | Mixed accepted families contribute to panel bbox without leaking private geometry fields | unit | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-ir.R")'` | yes | pending |
+| 37-02-01 | 02 | 2 | SFGEOM-03 | T-37-03 | SVG renderer keeps callback data sanitized and avoids remote/runtime dependency expansion | source | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-renderer.R")'` | yes | pending |
+| 37-02-02 | 02 | 2 | SFGEOM-03, SFGEOM-04 | T-37-03 | Point and line styling does not inject unsafe script/content | source | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-renderer.R")'` | yes | pending |
+| 37-02-03 | 02 | 2 | SFGEOM-03, SFGEOM-04 | T-37-03 | Renderer receives valid sf IR for point, line, polygon, and mixed overlays | unit/source | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-renderer.R")'` | yes | pending |
+| 37-03-01 | 03 | 3 | SFGEOM-03 | T-37-04 | Interactivity payloads remain public-row-oriented and private fields stay stripped | source | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-interactivity.R")'` | yes | pending |
+| 37-03-02 | 03 | 3 | SFGEOM-03 | T-37-04 | Multipoint child selections deduplicate public rows by source row_id | source | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-interactivity.R")'` | yes | pending |
+| 37-04-01 | 04 | 4 | SFGEOM-01, SFGEOM-02, SFGEOM-03, SFGEOM-04 | T-37-05 | Browser fixtures remain local, deterministic, and optional-dependency safe | browser/source | `rtk Rscript --vanilla -e 'source("tests/testthat/helper-sf-fixtures.R"); stopifnot(is.function(.phase37_sf_fixture_set))'` | yes | pending |
+| 37-04-02 | 04 | 4 | SFGEOM-03, SFGEOM-04 | T-37-05 | Browser smoke payloads remain local, deterministic, and sanitized | browser/source | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-browser.R")'` | yes | pending |
 
 *Status: pending until execution updates summaries and verification evidence.*
 

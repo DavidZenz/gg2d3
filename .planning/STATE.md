@@ -4,14 +4,14 @@ milestone: v1.9
 milestone_name: sf Robustness and Expansion
 status: planning
 stopped_at: Phase 37 context gathered
-last_updated: "2026-05-21T09:42:29.803Z"
+last_updated: "2026-05-21T10:23:52.264Z"
 last_activity: 2026-05-21
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 3
+  total_plans: 7
   completed_plans: 3
-  percent: 100
+  percent: 43
 ---
 
 # Project State
@@ -96,4 +96,4 @@ Last session: --stopped-at
 Stopped at: Phase 37 context gathered
 Resume file: --resume-file
 
-**Planned Phase:** 36 (browser-sf-smoke-harness) — 3 plans — 2026-05-20T20:27:09.489Z
+**Planned Phase:** 37 (non-polygon-sf-ir-and-renderer) — 4 plans — 2026-05-21T10:23:52.255Z

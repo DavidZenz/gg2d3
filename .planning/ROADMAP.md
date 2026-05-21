@@ -57,7 +57,12 @@ Plans:
   2. User can pass `LINESTRING` and `MULTILINESTRING` `geom_sf()` layers to `gg2d3()` and see ordered sf line paths with source row identity, diagnostics, finite anchors, and line-oriented no-fill behavior.
   3. Polygon, point, and line sf families render as `path.geom-sf` with family-specific classes, stable row ids, and representative anchors that remain compatible with existing selectors.
   4. Mixed accepted sf families in stacked and faceted panels share panel-scoped projection/bbox behavior while skipped-row alignment and existing polygon rendering remain stable.
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 37-01-PLAN.md — Expand R-side sf IR acceptance, family metadata, diagnostics, and validation for point and line geometries.
+- [ ] 37-02-PLAN.md — Render sf polygon, point, and line families with shared projection, classes, anchors, and visible styling.
+- [ ] 37-03-PLAN.md — Wire sf point and line marks into tooltip, hover, handler, and brush interactivity with source-row deduplication.
+- [ ] 37-04-PLAN.md — Extend browser smoke fixtures and DOM assertions for point, line, mixed overlay, skipped-row, and faceted sf behavior.
 **UI hint**: yes
 
 ### Phase 38: sf Interaction, Facet, And Documentation Hardening
@@ -90,7 +95,7 @@ Phases execute in numeric order: 36 → 37 → 38 → 39
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 36. Browser sf Smoke Harness | 3/3 | Complete    | 2026-05-21 |
-| 37. Non-Polygon sf IR And Renderer | 0/TBD | Not started | - |
+| 37. Non-Polygon sf IR And Renderer | 0/4 | Not started | - |
 | 38. sf Interaction, Facet, And Documentation Hardening | 0/TBD | Not started | - |
 | 39. Package Internals Hardening | 0/TBD | Not started | - |
 
