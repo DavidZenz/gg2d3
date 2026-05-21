@@ -68,11 +68,11 @@ if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
 
 .phase35_make_mixed_sf <- function() {
   sf::st_sf(
-    label = c("polygon", "point", "empty", "invalid", "multipolygon"),
+    label = c("polygon", "collection", "empty", "invalid", "multipolygon"),
     value = c(1, 2, 3, 4, 5),
     geometry = sf::st_sfc(
       sf::st_polygon(list(.phase35_square_ring())),
-      sf::st_point(c(10, 10)),
+      sf::st_geometrycollection(list(sf::st_point(c(10, 10)))),
       sf::st_polygon(),
       sf::st_polygon(list(matrix(
         c(
@@ -200,6 +200,157 @@ if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
   testthat::expect_true(interactivity$x$interactivity$hover$enabled)
   testthat::expect_false(is.null(interactivity$x$interactivity$handlers$click))
   testthat::expect_null(interactivity$x$interactivity$zoom)
+
+  fixtures
+}
+
+.phase37_make_point_sf <- function() {
+  sf::st_sf(
+    label = c("point", "multipoint"),
+    value = c(1, 2),
+    geometry = sf::st_sfc(
+      sf::st_point(c(2, 2)),
+      sf::st_multipoint(matrix(c(6, 4, 7, 5), ncol = 2, byrow = TRUE)),
+      crs = 4326
+    )
+  )
+}
+
+.phase37_make_line_sf <- function() {
+  sf::st_sf(
+    label = c("line", "multiline"),
+    value = c(1, 2),
+    geometry = sf::st_sfc(
+      sf::st_linestring(matrix(c(1, 1, 3, 4, 5, 2), ncol = 2, byrow = TRUE)),
+      sf::st_multilinestring(list(
+        matrix(c(6, 1, 8, 3), ncol = 2, byrow = TRUE),
+        matrix(c(8, 3, 9, 2), ncol = 2, byrow = TRUE)
+      )),
+      crs = 4326
+    )
+  )
+}
+
+.phase37_make_polygon_point_overlay <- function() {
+  list(
+    polygon = sf::st_sf(
+      label = "polygon",
+      value = 1,
+      geometry = sf::st_sfc(sf::st_polygon(list(.phase35_square_ring(0, 0, 10, 10))), crs = 4326)
+    ),
+    point = sf::st_sf(
+      label = c("point", "multipoint"),
+      value = c(2, 3),
+      geometry = sf::st_sfc(
+        sf::st_point(c(2, 3)),
+        sf::st_multipoint(matrix(c(6, 7, 8, 5), ncol = 2, byrow = TRUE)),
+        crs = 4326
+      )
+    )
+  )
+}
+
+.phase37_make_polygon_line_overlay <- function() {
+  list(
+    polygon = sf::st_sf(
+      label = "polygon",
+      value = 1,
+      geometry = sf::st_sfc(sf::st_polygon(list(.phase35_square_ring(0, 0, 10, 10))), crs = 4326)
+    ),
+    line = sf::st_sf(
+      label = c("line", "multiline"),
+      value = c(2, 3),
+      geometry = sf::st_sfc(
+        sf::st_linestring(matrix(c(1, 1, 4, 8, 9, 2), ncol = 2, byrow = TRUE)),
+        sf::st_multilinestring(list(
+          matrix(c(2, 8, 5, 6), ncol = 2, byrow = TRUE),
+          matrix(c(5, 6, 8, 8), ncol = 2, byrow = TRUE)
+        )),
+        crs = 4326
+      )
+    )
+  )
+}
+
+.phase37_make_mixed_sf <- function() {
+  sf::st_sf(
+    label = c("polygon", "point", "line", "collection"),
+    value = c(1, 2, 3, 4),
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(.phase35_square_ring(0, 0, 4, 4))),
+      sf::st_point(c(2, 2)),
+      sf::st_linestring(matrix(c(0, 5, 2, 7, 4, 5), ncol = 2, byrow = TRUE)),
+      sf::st_geometrycollection(list(sf::st_point(c(20, 20)))),
+      crs = 4326
+    )
+  )
+}
+
+.phase37_make_faceted_sf <- function() {
+  sf::st_sf(
+    facet = factor(c("point", "line"), levels = c("point", "line", "empty")),
+    value = c(1, 2),
+    geometry = sf::st_sfc(
+      sf::st_point(c(1, 1)),
+      sf::st_linestring(matrix(c(5, 5, 8, 8), ncol = 2, byrow = TRUE)),
+      crs = 4326
+    )
+  )
+}
+
+.phase37_sf_fixture_set <- function() {
+  fixtures <- list()
+
+  point_plot <- ggplot2::ggplot(.phase37_make_point_sf(), ggplot2::aes(colour = label, size = value)) +
+    ggplot2::geom_sf()
+  fixtures[["phase37-sf-point-only.html"]] <- .phase35_save_widget(
+    gg2d3(point_plot),
+    "phase37-sf-point-only.html"
+  )
+
+  line_plot <- ggplot2::ggplot(.phase37_make_line_sf(), ggplot2::aes(colour = label, linewidth = value)) +
+    ggplot2::geom_sf()
+  fixtures[["phase37-sf-line-only.html"]] <- .phase35_save_widget(
+    gg2d3(line_plot),
+    "phase37-sf-line-only.html"
+  )
+
+  polygon_point <- .phase37_make_polygon_point_overlay()
+  polygon_point_plot <- ggplot2::ggplot() +
+    ggplot2::geom_sf(data = polygon_point$polygon, fill = "#DDE7F0", colour = "#234E70") +
+    ggplot2::geom_sf(data = polygon_point$point, ggplot2::aes(colour = label, size = value))
+  fixtures[["phase37-sf-polygon-point-overlay.html"]] <- .phase35_save_widget(
+    gg2d3(polygon_point_plot),
+    "phase37-sf-polygon-point-overlay.html"
+  )
+
+  polygon_line <- .phase37_make_polygon_line_overlay()
+  polygon_line_plot <- ggplot2::ggplot() +
+    ggplot2::geom_sf(data = polygon_line$polygon, fill = "#E6E0D4", colour = "#51483D") +
+    ggplot2::geom_sf(data = polygon_line$line, ggplot2::aes(colour = label, linewidth = value))
+  fixtures[["phase37-sf-polygon-line-overlay.html"]] <- .phase35_save_widget(
+    gg2d3(polygon_line_plot),
+    "phase37-sf-polygon-line-overlay.html"
+  )
+
+  mixed_plot <- ggplot2::ggplot(.phase37_make_mixed_sf(), ggplot2::aes(colour = label, fill = label)) +
+    ggplot2::geom_sf()
+  testthat::expect_warning(
+    mixed_widget <- gg2d3(mixed_plot),
+    regexp = "skipped 1"
+  )
+  fixtures[["phase37-sf-mixed-skipped.html"]] <- .phase35_save_widget(
+    mixed_widget,
+    "phase37-sf-mixed-skipped.html"
+  )
+
+  faceted_plot <- ggplot2::ggplot(.phase37_make_faceted_sf(), ggplot2::aes(colour = facet)) +
+    ggplot2::geom_sf() +
+    ggplot2::facet_wrap(~facet, drop = FALSE)
+  fixtures[["phase37-sf-faceted-empty.html"]] <- .phase35_save_widget(
+    gg2d3(faceted_plot),
+    "phase37-sf-faceted-empty.html"
+  )
 
   fixtures
 }
