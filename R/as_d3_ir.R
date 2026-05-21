@@ -240,7 +240,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
       # Dotplot specific
       "stackpos","binwidth","countidx",
       # sf-specific: row index for geometry-aesthetic join (D-06)
-      "row_id"
+      "row_id",".sf_family"
     )
 
     # coerce + rowize (same as your latest version)
@@ -366,6 +366,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
       list(
         geom           = "sf",
         geom_type      = sf_prepared$geom_type,
+        sf_family      = sf_prepared$sf_family,
         geometries     = sf_prepared$geometries,
         data           = to_rows(sf_prepared$data),
         aes            = aes,

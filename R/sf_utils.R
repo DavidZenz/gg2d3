@@ -5,8 +5,8 @@
 #' and serializes each geometry as a GeoJSON geometry string via
 #' `geojsonsf::sfc_geojson()` (per D-10).
 #'
-#' gg2d3's public `geom_sf()` renderer is limited to polygon-family
-#' `POLYGON` and `MULTIPOLYGON` layers. Missing CRS emits
+#' gg2d3's public `geom_sf()` renderer accepts polygon, point, and line
+#' geometry families. Missing CRS emits
 #' "geom_sf layer has missing CRS; coordinates will be serialized as-is".
 #' Unsupported, empty, invalid, or missing geometries emit
 #' "geom_sf layer skipped %d unsupported, empty, invalid, or missing geometries"
@@ -58,7 +58,7 @@ extract_sf_geometries <- function(df) {
 #' non-renderable rows before GeoJSON serialization, while preserving source row
 #' identity for downstream data/geometry joins.
 #'
-#' Only `POLYGON` and `MULTIPOLYGON` geometries are accepted by default. Missing
+#' Polygon, point, and line geometries are accepted by default. Missing
 #' CRS warns with "geom_sf layer has missing CRS; coordinates will be serialized
 #' as-is". Skipped rows warn with "geom_sf layer skipped %d unsupported, empty,
 #' invalid, or missing geometries".
@@ -69,8 +69,20 @@ extract_sf_geometries <- function(df) {
 #' @return A list with filtered data, GeoJSON geometries, normalized geometry,
 #'   CRS metadata, dominant accepted geometry type, and sf diagnostics
 #' @noRd
+sf_supported_geometry_types <- function() {
+  c("POLYGON", "MULTIPOLYGON", "POINT", "MULTIPOINT", "LINESTRING", "MULTILINESTRING")
+}
+
+sf_geometry_family <- function(types) {
+  family <- rep("unsupported", length(types))
+  family[types %in% c("POLYGON", "MULTIPOLYGON")] <- "polygon"
+  family[types %in% c("POINT", "MULTIPOINT")] <- "point"
+  family[types %in% c("LINESTRING", "MULTILINESTRING")] <- "line"
+  family
+}
+
 prepare_sf_geometry_ir <- function(df,
-                                   supported_types = c("POLYGON", "MULTIPOLYGON"),
+                                   supported_types = sf_supported_geometry_types(),
                                    warn = TRUE) {
   if (!requireNamespace("sf", quietly = TRUE)) {
     stop(
@@ -99,6 +111,7 @@ prepare_sf_geometry_ir <- function(df,
   geom_col <- df[[geom_col_name]]
   source_rows <- seq_len(nrow(df))
   geometry_types <- as.character(sf::st_geometry_type(geom_col, by_geometry = TRUE))
+  geometry_families <- sf_geometry_family(geometry_types)
   missing_geometry <- is.na(geom_col)
   present_geometry <- !missing_geometry
   empty <- rep(FALSE, length(geom_col))
@@ -141,6 +154,7 @@ prepare_sf_geometry_ir <- function(df,
   accepted_data <- df[accepted, , drop = FALSE]
   accepted_data[[geom_col_name]] <- accepted_geom
   accepted_data[["row_id"]] <- source_rows[accepted]
+  accepted_data[[".sf_family"]] <- geometry_families[accepted]
   attr(accepted_data, "sf_column") <- geom_col_name
 
   geometries <- if (length(accepted_geom) > 0L) {
@@ -150,6 +164,7 @@ prepare_sf_geometry_ir <- function(df,
   }
 
   accepted_geometry_types <- unique(geometry_types[accepted])
+  accepted_geometry_families <- sort(unique(geometry_families[accepted]))
   unsupported_geometry_types <- sort(unique(geometry_types[!supported]))
 
   skip_reason <- function(i) {
@@ -175,6 +190,13 @@ prepare_sf_geometry_ir <- function(df,
   } else {
     "GEOMETRY"
   }
+  sf_family <- if (length(accepted_geometry_families) == 0L) {
+    NA_character_
+  } else if (length(accepted_geometry_families) == 1L) {
+    accepted_geometry_families[[1L]]
+  } else {
+    "mixed"
+  }
 
   list(
     data = accepted_data,
@@ -185,12 +207,14 @@ prepare_sf_geometry_ir <- function(df,
       wkt = if (!is.na(crs)) crs$wkt else NA_character_
     ),
     geom_type = geom_type,
+    sf_family = sf_family,
     sf_diagnostics = list(
       accepted_rows = source_rows[accepted],
       skipped_rows = source_rows[skipped],
       skipped = skipped_details,
       missing_crs = missing_crs,
       accepted_geometry_types = sort(accepted_geometry_types),
+      accepted_geometry_families = accepted_geometry_families,
       unsupported_geometry_types = unsupported_geometry_types
     )
   )
@@ -245,7 +269,7 @@ normalize_to_wgs84 <- function(geom_col) {
 #' Returns the summary geometry type for the sfc column in the data.frame.
 #' When the column contains mixed types, `sf::st_geometry_type()` with
 #' `by_geometry = FALSE` returns the shared type or "GEOMETRY". gg2d3 renders
-#' polygon-family `geom_sf()` layers only: `POLYGON` and `MULTIPOLYGON`.
+#' polygon, point, and line `geom_sf()` families.
 #'
 #' @param df A data.frame from `ggplot_build()$data[[i]]` containing an sfc column
 #' @return Character string such as "MULTIPOLYGON", "POLYGON", "POINT", "LINESTRING", etc.

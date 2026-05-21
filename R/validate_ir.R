@@ -95,6 +95,14 @@ validate_ir <- function(ir) {
           call. = FALSE
         )
       }
+
+      if (!is.null(layer$sf_family)) {
+        valid_sf_families <- c("polygon", "point", "line", "mixed", NA_character_)
+        if (!is.character(layer$sf_family) || length(layer$sf_family) != 1L ||
+            !(is.na(layer$sf_family) || layer$sf_family %in% valid_sf_families)) {
+          warning(sprintf("Layer %d sf layer has invalid sf_family", i), call. = FALSE)
+        }
+      }
     }
   }
 

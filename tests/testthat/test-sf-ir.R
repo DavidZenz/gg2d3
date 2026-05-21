@@ -223,7 +223,7 @@ test_that("SFGEOM-04 mixed sf families keep row identity and skip unsupported ro
   expect_no_warning(validate_ir(ir))
 })
 
-test_that("as_d3_ir filters unsupported sf rows and preserves source row_id", {
+test_that("as_d3_ir accepts mixed polygon, point, and multipolygon rows", {
   polygon <- sf::st_polygon(list(sf_ir_square_ring()))
   point <- sf::st_point(c(10, 10))
   multipolygon <- sf::st_multipolygon(list(
@@ -237,22 +237,21 @@ test_that("as_d3_ir filters unsupported sf rows and preserves source row_id", {
     geometry = sf::st_sfc(polygon, point, multipolygon, crs = 4326)
   )
 
-  expect_warning(
-    ir <- as_d3_ir(ggplot2::ggplot(mixed) + ggplot2::geom_sf()),
-    regexp = "skipped 1"
-  )
+  ir <- as_d3_ir(ggplot2::ggplot(mixed) + ggplot2::geom_sf())
 
   layer <- ir$layers[[1]]
   row_ids <- vapply(layer$data, function(row) row$row_id, numeric(1))
 
   expect_equal(layer$geom, "sf")
+  expect_equal(layer$sf_family, "mixed")
   expect_equal(length(layer$data), length(layer$geometries))
-  expect_equal(row_ids, c(1, 3))
-  expect_equal(layer$sf_diagnostics$accepted_rows, c(1L, 3L))
-  expect_equal(layer$sf_diagnostics$skipped_rows, 2L)
-  expect_true("POINT" %in% layer$sf_diagnostics$unsupported_geometry_types)
-  expect_lt(ir$coord$bbox[[3]], 6)
-  expect_lt(ir$coord$bbox[[4]], 2)
+  expect_equal(row_ids, c(1, 2, 3))
+  expect_equal(layer$sf_diagnostics$accepted_rows, c(1L, 2L, 3L))
+  expect_equal(layer$sf_diagnostics$skipped_rows, integer())
+  expect_equal(layer$sf_diagnostics$accepted_geometry_families, c("point", "polygon"))
+  expect_equal(layer$sf_diagnostics$unsupported_geometry_types, character())
+  expect_gte(ir$coord$bbox[[3]], 10)
+  expect_gte(ir$coord$bbox[[4]], 10)
   expect_equal(ir$panels[[1]]$sf_bbox, ir$coord$bbox)
   expect_no_warning(validate_ir(ir))
 })
@@ -284,7 +283,7 @@ test_that("as_d3_ir keeps skipped sf rows out of accepted row ids", {
 
   expect_warning(
     ir <- as_d3_ir(ggplot2::ggplot(mixed) + ggplot2::geom_sf()),
-    regexp = "skipped 3"
+    regexp = "skipped 2"
   )
 
   layer <- ir$layers[[1]]
@@ -293,12 +292,13 @@ test_that("as_d3_ir keeps skipped sf rows out of accepted row ids", {
 
   expect_equal(length(layer$data), length(layer$geometries))
   expect_equal(row_ids, layer$sf_diagnostics$accepted_rows)
-  expect_equal(row_ids, c(1, 5))
-  expect_equal(skipped_rows, c(2L, 3L, 4L))
+  expect_equal(row_ids, c(1, 2, 5))
+  expect_equal(skipped_rows, c(3L, 4L))
   expect_false(any(skipped_rows %in% row_ids))
   expect_equal(length(layer$geometries), length(layer$sf_diagnostics$accepted_rows))
-  expect_equal(layer$sf_diagnostics$accepted_geometry_types, c("MULTIPOLYGON", "POLYGON"))
-  expect_true("POINT" %in% layer$sf_diagnostics$unsupported_geometry_types)
+  expect_equal(layer$sf_diagnostics$accepted_geometry_types, c("MULTIPOLYGON", "POINT", "POLYGON"))
+  expect_equal(layer$sf_diagnostics$accepted_geometry_families, c("point", "polygon"))
+  expect_equal(layer$sf_diagnostics$unsupported_geometry_types, character())
   expect_no_warning(validate_ir(ir))
 })
 
