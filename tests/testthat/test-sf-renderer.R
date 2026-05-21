@@ -112,3 +112,45 @@ test_that("sf renderer consumes shared panel bbox when available", {
   expect_match(sf_js, "data-cx")
   expect_match(sf_js, "data-cy")
 })
+
+test_that("SFGEOM-03 sf renderer source dispatches polygon point and line families", {
+  sf_js <- read_repo_file("inst/htmlwidgets/modules/geoms/sf.js")
+
+  expect_match(sf_js, "Point")
+  expect_match(sf_js, "MultiPoint")
+  expect_match(sf_js, "LineString")
+  expect_match(sf_js, "MultiLineString")
+  expect_match(sf_js, "Polygon")
+  expect_match(sf_js, "MultiPolygon")
+  expect_match(sf_js, "geom-sf-point")
+  expect_match(sf_js, "geom-sf-line")
+  expect_match(sf_js, "geom-sf-polygon")
+})
+
+test_that("SFGEOM-03 sf renderer source declares point and line DOM attributes", {
+  sf_js <- read_repo_file("inst/htmlwidgets/modules/geoms/sf.js")
+
+  expect_match(sf_js, 'append\\("circle"\\)')
+  expect_match(sf_js, 'attr\\("cx"')
+  expect_match(sf_js, 'attr\\("cy"')
+  expect_match(sf_js, 'attr\\("r"')
+  expect_match(sf_js, 'fill", "none"')
+  expect_match(sf_js, "data-row-id")
+  expect_match(sf_js, "data-cx")
+  expect_match(sf_js, "data-cy")
+  expect_match(sf_js, "mmToPxRadius")
+  expect_match(sf_js, "mmToPxLinewidth")
+  expect_match(sf_js, "getDashArray")
+})
+
+test_that("SFGEOM-04 sf renderer continues polygon path projection contract", {
+  sf_js <- read_repo_file("inst/htmlwidgets/modules/geoms/sf.js")
+
+  expect_match(sf_js, "path\\.geom-sf")
+  expect_match(sf_js, "d3\\.geoIdentity\\(\\)")
+  expect_match(sf_js, "reflectY\\(true\\)")
+  expect_match(sf_js, "fitExtent")
+  expect_match(sf_js, "options\\.sfBBox")
+  expect_match(sf_js, "fill-rule")
+  expect_match(sf_js, "evenodd")
+})
