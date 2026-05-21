@@ -180,3 +180,29 @@ test_that("BRSF-03 artifact: browser sf fixtures use deterministic local output"
   expect_true(grepl("test_output/browser-sf", artifact_path, fixed = TRUE))
   expect_true(file.exists(artifact_dir))
 })
+
+test_that("BRSF-03 artifact: browser errors write deterministic log files", {
+  artifact_dir <- browser_sf_artifact_dir()
+  html_path <- tempfile("browser-sf-artifact-", fileext = ".html")
+  writeLines("<!doctype html><title>browser sf artifact</title>", html_path)
+  fixture_name <- "artifact-contract"
+
+  logs <- list(
+    list(
+      source = "Runtime.consoleAPICalled",
+      type = "error",
+      message = "console failure"
+    ),
+    list(
+      source = "Runtime.exceptionThrown",
+      type = "exception",
+      message = "page failure"
+    )
+  )
+
+  write_browser_failure_artifacts(fixture_name, html_path, logs, session = NULL)
+
+  expect_true(file.exists(file.path(artifact_dir, paste0(fixture_name, "-console.log"))))
+  expect_true(file.exists(file.path(artifact_dir, paste0(fixture_name, "-page-errors.log"))))
+  expect_error(assert_no_browser_errors(logs), "Browser errors were captured")
+})
