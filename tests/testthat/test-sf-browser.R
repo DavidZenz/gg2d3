@@ -204,3 +204,13 @@ test_that("BRSF-03 artifact: browser errors write deterministic log files", {
   expect_true(file.exists(file.path(artifact_dir, paste0(fixture_name, "-page-errors.log"))))
   expect_error(assert_no_browser_errors(logs), "Browser errors were captured")
 })
+
+test_that("BRSF-02 interaction: browser interaction helper is wired", {
+  expect_true(is.function(.browser_sf_assert_interaction_payloads))
+})
+
+test_that("BRSF-02 interaction: sf browser payloads are sanitized and brush uses centroids", {
+  skip_browser_sf_smoke()
+
+  .browser_sf_assert_interaction_payloads()
+})
