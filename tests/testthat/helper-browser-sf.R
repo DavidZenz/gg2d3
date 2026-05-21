@@ -82,6 +82,42 @@ eval_js_value <- function(session, script) {
   result$result$value
 }
 
+wait_for_sf_marks <- function(session, expected, timeout = 10) {
+  deadline <- Sys.time() + timeout
+  mark_script <- paste(
+    "(() => Array.from(document.querySelectorAll(\".geom-sf\")).map(mark => ({",
+    "tag: mark.tagName.toLowerCase(),",
+    "className: mark.getAttribute(\"class\") || \"\",",
+    "rowId: mark.getAttribute(\"data-row-id\"),",
+    "dataCx: Number(mark.getAttribute(\"data-cx\")),",
+    "dataCy: Number(mark.getAttribute(\"data-cy\")),",
+    "cx: Number(mark.getAttribute(\"cx\")),",
+    "cy: Number(mark.getAttribute(\"cy\")),",
+    "d: mark.getAttribute(\"d\") || \"\",",
+    "r: Number(mark.getAttribute(\"r\")),",
+    "fill: mark.getAttribute(\"fill\") || window.getComputedStyle(mark).fill || \"\"",
+    "})))()"
+  )
+
+  repeat {
+    count <- eval_js_value(
+      session,
+      "document.querySelectorAll(\".geom-sf\").length"
+    )
+    if (!is.null(count) && count >= expected) {
+      return(eval_js_value(session, mark_script))
+    }
+    if (Sys.time() >= deadline) break
+    Sys.sleep(0.1)
+  }
+
+  testthat::fail(sprintf(
+    "Timed out waiting for %s .geom-sf nodes after %s seconds",
+    expected,
+    timeout
+  ))
+}
+
 wait_for_sf_paths <- function(session, expected, timeout = 10) {
   deadline <- Sys.time() + timeout
   path_script <- paste(

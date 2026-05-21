@@ -60,8 +60,15 @@ if (!exists("skip_browser_sf_smoke", mode = "function")) {
   )
 }
 
+.browser_sf_mark_panel_count_script <- function() {
+  paste(
+    "(() => Array.from(document.querySelectorAll(\".panel\"))",
+    ".map(panel => panel.querySelectorAll(\".geom-sf\").length))()"
+  )
+}
+
 .browser_sf_private_fields <- function() {
-  c("_geom", "_centroid")
+  c("_geom", "_centroid", "_sfFamily", "_pointIndex", "_pointCoord")
 }
 
 .browser_sf_expect_public_payload <- function(payload) {
@@ -230,7 +237,7 @@ test_that("BRSF-02 DOM: faceted sf fixtures keep panel-local path counts", {
   expected_counts <- .browser_sf_expected_counts()
   expected_panel_counts <- list(
     "phase35-sf-facet-wrap.html" = c(1L, 1L),
-    "phase35-sf-facet-grid.html" = c(0L, 0L, 1L, 1L)
+    "phase35-sf-facet-grid.html" = c(1L, 0L, 0L, 1L)
   )
 
   with_chromote_session({
@@ -252,7 +259,7 @@ test_that("BRSF-02 DOM: faceted sf fixtures keep panel-local path counts", {
           panel_counts <- eval_js_value(session, .browser_sf_panel_count_script())
           panel_counts <- as.integer(unlist(panel_counts, use.names = FALSE))
 
-          expect_equal(sort(panel_counts), expected_panel_counts[[fixture_name]])
+          expect_equal(panel_counts, expected_panel_counts[[fixture_name]])
           assert_no_browser_errors(logs)
         },
         error = function(e) {
@@ -266,6 +273,117 @@ test_that("BRSF-02 DOM: faceted sf fixtures keep panel-local path counts", {
         }
       )
     }
+  })
+})
+
+test_that("SFGEOM-03 DOM: point and line sf fixtures render live geom-sf marks", {
+  skip_browser_sf_smoke()
+
+  fixtures <- .phase37_sf_fixture_set()
+
+  with_chromote_session({
+    logs <- browser_console_collector(session)
+
+    tryCatch(
+      {
+        session$go_to(.browser_sf_file_url(fixtures[["phase37-sf-point-only.html"]]), delay = 1)
+        point_marks <- wait_for_sf_marks(session, expected = 3L, timeout = 10)
+        point_circles <- point_marks[vapply(point_marks, function(mark) {
+          identical(mark$tag, "circle") && grepl("geom-sf-point", mark$className, fixed = TRUE)
+        }, logical(1))]
+
+        expect_gt(length(point_circles), 0)
+        for (mark in point_circles) {
+          expect_true(is.finite(mark$cx))
+          expect_true(is.finite(mark$cy))
+          expect_true(is.finite(mark$r))
+          expect_gt(mark$r, 0)
+          expect_true(nzchar(mark$rowId))
+          expect_true(is.finite(mark$dataCx))
+          expect_true(is.finite(mark$dataCy))
+        }
+        assert_no_browser_errors(logs)
+
+        session$go_to(.browser_sf_file_url(fixtures[["phase37-sf-line-only.html"]]), delay = 1)
+        line_marks <- wait_for_sf_marks(session, expected = 2L, timeout = 10)
+        line_paths <- line_marks[vapply(line_marks, function(mark) {
+          identical(mark$tag, "path") && grepl("geom-sf-line", mark$className, fixed = TRUE)
+        }, logical(1))]
+
+        expect_gt(length(line_paths), 0)
+        for (mark in line_paths) {
+          expect_true(nzchar(mark$d))
+          expect_true(mark$fill %in% c("none", "rgba(0, 0, 0, 0)", "transparent"))
+          expect_true(nzchar(mark$rowId))
+          expect_true(is.finite(mark$dataCx))
+          expect_true(is.finite(mark$dataCy))
+        }
+        assert_no_browser_errors(logs)
+      },
+      error = function(e) {
+        write_browser_failure_artifacts(
+          "phase37-sf-point-line",
+          fixtures[["phase37-sf-point-only.html"]],
+          logs,
+          session
+        )
+        stop(e)
+      }
+    )
+  })
+})
+
+test_that("SFGEOM-04 DOM: mixed sf overlays and facets keep panel-local marks", {
+  skip_browser_sf_smoke()
+
+  fixtures <- .phase37_sf_fixture_set()
+
+  with_chromote_session({
+    logs <- browser_console_collector(session)
+
+    tryCatch(
+      {
+        session$go_to(.browser_sf_file_url(fixtures[["phase37-sf-polygon-point-overlay.html"]]), delay = 1)
+        polygon_point_marks <- wait_for_sf_marks(session, expected = 4L, timeout = 10)
+        polygon_point_classes <- vapply(polygon_point_marks, function(mark) mark$className, character(1))
+        expect_true(any(grepl("geom-sf-polygon", polygon_point_classes, fixed = TRUE)))
+        expect_true(any(grepl("geom-sf-point", polygon_point_classes, fixed = TRUE)))
+        assert_no_browser_errors(logs)
+
+        session$go_to(.browser_sf_file_url(fixtures[["phase37-sf-polygon-line-overlay.html"]]), delay = 1)
+        polygon_line_marks <- wait_for_sf_marks(session, expected = 3L, timeout = 10)
+        polygon_line_classes <- vapply(polygon_line_marks, function(mark) mark$className, character(1))
+        expect_true(any(grepl("geom-sf-polygon", polygon_line_classes, fixed = TRUE)))
+        expect_true(any(grepl("geom-sf-line", polygon_line_classes, fixed = TRUE)))
+        assert_no_browser_errors(logs)
+
+        session$go_to(.browser_sf_file_url(fixtures[["phase37-sf-mixed-skipped.html"]]), delay = 1)
+        mixed_marks <- wait_for_sf_marks(session, expected = 3L, timeout = 10)
+        mixed_classes <- vapply(mixed_marks, function(mark) mark$className, character(1))
+        mixed_row_ids <- vapply(mixed_marks, function(mark) mark$rowId, character(1))
+        expect_true(any(grepl("geom-sf-polygon", mixed_classes, fixed = TRUE)))
+        expect_true(any(grepl("geom-sf-point", mixed_classes, fixed = TRUE)))
+        expect_true(any(grepl("geom-sf-line", mixed_classes, fixed = TRUE)))
+        expect_false("4" %in% mixed_row_ids)
+        assert_no_browser_errors(logs)
+
+        session$go_to(.browser_sf_file_url(fixtures[["phase37-sf-faceted-empty.html"]]), delay = 1)
+        wait_for_sf_marks(session, expected = 2L, timeout = 10)
+        panel_counts <- eval_js_value(session, .browser_sf_mark_panel_count_script())
+        panel_counts <- as.integer(unlist(panel_counts, use.names = FALSE))
+        expect_equal(panel_counts, c(1L, 1L, 0L))
+        assert_no_browser_errors(logs)
+      },
+      error = function(e) {
+        write_browser_failure_artifacts(
+          "phase37-sf-mixed-facets",
+          fixtures[["phase37-sf-mixed-skipped.html"]],
+          logs,
+          session
+        )
+        stop(e)
+      }
+    )
   })
 })
 
