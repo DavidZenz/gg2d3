@@ -118,6 +118,111 @@ sf_ir_square_ring <- function(xmin = 0, ymin = 0, xmax = 1, ymax = 1) {
   )
 }
 
+expect_finite_sf_bbox <- function(bbox) {
+  expect_false(is.null(bbox))
+  expect_length(bbox, 4)
+  expect_true(all(is.finite(bbox)))
+}
+
+expect_sf_layer_contract <- function(layer, family, accepted_rows, accepted_types, accepted_families) {
+  expect_equal(layer$geom, "sf")
+  expect_equal(layer$sf_family, family)
+  expect_equal(length(layer$data), length(layer$geometries))
+
+  row_ids <- vapply(layer$data, function(row) row$row_id, numeric(1))
+  row_families <- vapply(layer$data, function(row) row$.sf_family, character(1))
+
+  expect_equal(row_ids, accepted_rows)
+  expect_equal(layer$sf_diagnostics$accepted_rows, accepted_rows)
+  expect_equal(sort(unique(row_families)), accepted_families)
+  expect_equal(layer$sf_diagnostics$accepted_geometry_types, accepted_types)
+  expect_equal(layer$sf_diagnostics$accepted_geometry_families, accepted_families)
+}
+
+test_that("SFGEOM-01 point-family sf rows enter IR with diagnostics and bbox", {
+  point_sf <- sf::st_sf(
+    id = 1:2,
+    geometry = sf::st_sfc(
+      sf::st_point(c(0, 1)),
+      sf::st_multipoint(matrix(c(2, 2, 3, 3), ncol = 2, byrow = TRUE)),
+      crs = 4326
+    )
+  )
+
+  ir <- as_d3_ir(ggplot2::ggplot(point_sf) + ggplot2::geom_sf())
+  layer <- ir$layers[[1]]
+
+  expect_sf_layer_contract(
+    layer,
+    family = "point",
+    accepted_rows = c(1, 2),
+    accepted_types = c("MULTIPOINT", "POINT"),
+    accepted_families = "point"
+  )
+  expect_false(layer$sf_diagnostics$missing_crs)
+  expect_finite_sf_bbox(ir$panels[[1]]$sf_bbox)
+  expect_finite_sf_bbox(ir$coord$bbox)
+  expect_no_warning(validate_ir(ir))
+})
+
+test_that("SFGEOM-02 line-family sf rows enter IR with diagnostics and bbox", {
+  line_sf <- sf::st_sf(
+    id = 1:2,
+    geometry = sf::st_sfc(
+      sf::st_linestring(matrix(c(0, 0, 1, 1, 2, 0), ncol = 2, byrow = TRUE)),
+      sf::st_multilinestring(list(
+        matrix(c(3, 0, 4, 1), ncol = 2, byrow = TRUE),
+        matrix(c(4, 1, 5, 0), ncol = 2, byrow = TRUE)
+      )),
+      crs = 4326
+    )
+  )
+
+  ir <- as_d3_ir(ggplot2::ggplot(line_sf) + ggplot2::geom_sf())
+  layer <- ir$layers[[1]]
+
+  expect_sf_layer_contract(
+    layer,
+    family = "line",
+    accepted_rows = c(1, 2),
+    accepted_types = c("LINESTRING", "MULTILINESTRING"),
+    accepted_families = "line"
+  )
+  expect_finite_sf_bbox(ir$panels[[1]]$sf_bbox)
+  expect_no_warning(validate_ir(ir))
+})
+
+test_that("SFGEOM-04 mixed sf families keep row identity and skip unsupported rows", {
+  mixed_sf <- sf::st_sf(
+    label = c("polygon", "point", "line", "collection"),
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(sf_ir_square_ring())),
+      sf::st_point(c(2, 2)),
+      sf::st_linestring(matrix(c(3, 0, 4, 1), ncol = 2, byrow = TRUE)),
+      sf::st_geometrycollection(list(sf::st_point(c(10, 10)))),
+      crs = 4326
+    )
+  )
+
+  expect_warning(
+    ir <- as_d3_ir(ggplot2::ggplot(mixed_sf) + ggplot2::geom_sf()),
+    regexp = "skipped 1"
+  )
+  layer <- ir$layers[[1]]
+
+  expect_sf_layer_contract(
+    layer,
+    family = "mixed",
+    accepted_rows = c(1, 2, 3),
+    accepted_types = c("LINESTRING", "POINT", "POLYGON"),
+    accepted_families = c("line", "point", "polygon")
+  )
+  expect_equal(layer$sf_diagnostics$skipped_rows, 4L)
+  expect_true("GEOMETRYCOLLECTION" %in% layer$sf_diagnostics$unsupported_geometry_types)
+  expect_finite_sf_bbox(ir$panels[[1]]$sf_bbox)
+  expect_no_warning(validate_ir(ir))
+})
+
 test_that("as_d3_ir filters unsupported sf rows and preserves source row_id", {
   polygon <- sf::st_polygon(list(sf_ir_square_ring()))
   point <- sf::st_point(c(10, 10))
