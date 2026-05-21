@@ -9,9 +9,9 @@ Requirements for the sf Robustness and Expansion milestone. Each maps to exactly
 
 ### Browser Validation
 
-- [ ] **BRSF-01**: Automated browser smoke tests render saved sf widgets and assert live DOM `path.geom-sf` nodes, non-empty path data, row ids, finite anchor attributes, and no page or console errors.
-- [ ] **BRSF-02**: Browser smoke tests cover polygon regressions for choropleths, stacked overlays, faceted panels, skipped-row filtering, tooltip/handler payload sanitization, centroid brushing, and sf zoom suppression.
-- [ ] **BRSF-03**: Browser fixture generation uses non-self-contained htmlwidgets output, skips cleanly when optional browser/spatial dependencies are unavailable, and leaves useful failure artifacts for local debugging.
+- [x] **BRSF-01**: Automated browser smoke tests render saved sf widgets and assert live DOM `path.geom-sf` nodes, non-empty path data, row ids, finite anchor attributes, and no page or console errors.
+- [x] **BRSF-02**: Browser smoke tests cover polygon regressions for choropleths, stacked overlays, faceted panels, skipped-row filtering, tooltip/handler payload sanitization, centroid brushing, and sf zoom suppression.
+- [x] **BRSF-03**: Browser fixture generation uses non-self-contained htmlwidgets output, skips cleanly when optional browser/spatial dependencies are unavailable, and leaves useful failure artifacts for local debugging.
 
 ### Non-Polygon SF Geometry
 
@@ -65,9 +65,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BRSF-01 | Phase 36 | Pending |
-| BRSF-02 | Phase 36 | Pending |
-| BRSF-03 | Phase 36 | Pending |
+| BRSF-01 | Phase 36 | Complete |
+| BRSF-02 | Phase 36 | Complete |
+| BRSF-03 | Phase 36 | Complete |
 | SFGEOM-01 | Phase 37 | Pending |
 | SFGEOM-02 | Phase 37 | Pending |
 | SFGEOM-03 | Phase 37 | Pending |

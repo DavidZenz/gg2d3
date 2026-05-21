@@ -43,7 +43,7 @@
   3. Browser fixture generation produces non-self-contained htmlwidgets output, skips cleanly when optional browser or spatial dependencies are unavailable, and leaves useful local failure artifacts.
 **Plans**: 3 plans
 Plans:
-- [ ] 36-01-PLAN.md — Add optional chromote dependency, extract shared sf fixtures, and create browser smoke helpers.
+- [x] 36-01-PLAN.md — Add optional chromote dependency, extract shared sf fixtures, and create browser smoke helpers.
 - [ ] 36-02-PLAN.md — Add live browser DOM assertions for the Phase 35 polygon sf fixture matrix.
 - [ ] 36-03-PLAN.md — Add browser runtime error, sanitized payload, brush, and zoom-suppression assertions.
 **UI hint**: yes
@@ -89,7 +89,7 @@ Phases execute in numeric order: 36 → 37 → 38 → 39
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 36. Browser sf Smoke Harness | 0/TBD | Not started | - |
+| 36. Browser sf Smoke Harness | 1/3 | In progress | - |
 | 37. Non-Polygon sf IR And Renderer | 0/TBD | Not started | - |
 | 38. sf Interaction, Facet, And Documentation Hardening | 0/TBD | Not started | - |
 | 39. Package Internals Hardening | 0/TBD | Not started | - |
@@ -133,4 +133,4 @@ See `.planning/milestones/` and archived roadmap files for full details on the M
 </details>
 
 ---
-*Roadmap updated: 2026-05-20 for v1.9 sf Robustness and Expansion*
+*Roadmap updated: 2026-05-21 after Phase 36 Plan 01*
