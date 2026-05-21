@@ -15,6 +15,30 @@ read_repo_file <- function(path) {
   paste(readLines(existing[[1]], warn = FALSE), collapse = "\n")
 }
 
+renderer_sf_square_ring <- function(xmin = 0, ymin = 0, xmax = 1, ymax = 1) {
+  matrix(
+    c(
+      xmin, ymin,
+      xmax, ymin,
+      xmax, ymax,
+      xmin, ymax,
+      xmin, ymin
+    ),
+    ncol = 2,
+    byrow = TRUE
+  )
+}
+
+expect_renderer_sf_layer <- function(layer, family, accepted_types) {
+  expect_equal(layer$geom, "sf")
+  expect_equal(layer$sf_family, family)
+  expect_true(length(layer$geometries) > 0)
+  expect_equal(length(layer$data), length(layer$geometries))
+  expect_equal(layer$sf_diagnostics$accepted_geometry_types, accepted_types)
+  expect_true(all(vapply(layer$data, function(row) ".sf_family" %in% names(row), logical(1))))
+  expect_true(all(vapply(layer$data, function(row) "row_id" %in% names(row), logical(1))))
+}
+
 test_that("sf IR data rows include row_id field", {
   ir <- as_d3_ir(ggplot2::ggplot(nc) + ggplot2::geom_sf())
   layer <- ir$layers[[1]]
@@ -153,4 +177,60 @@ test_that("SFGEOM-04 sf renderer continues polygon path projection contract", {
   expect_match(sf_js, "options\\.sfBBox")
   expect_match(sf_js, "fill-rule")
   expect_match(sf_js, "evenodd")
+})
+
+test_that("SFGEOM-03 renderer IR smoke accepts point and multipoint sf_family data", {
+  point_sf <- sf::st_sf(
+    id = 1:2,
+    geometry = sf::st_sfc(
+      sf::st_point(c(0, 0)),
+      sf::st_multipoint(matrix(c(1, 1, 2, 2), ncol = 2, byrow = TRUE)),
+      crs = 4326
+    )
+  )
+
+  ir <- as_d3_ir(ggplot2::ggplot(point_sf) + ggplot2::geom_sf())
+
+  expect_renderer_sf_layer(ir$layers[[1]], "point", c("MULTIPOINT", "POINT"))
+  expect_false(is.null(ir$panels[[1]]$sf_bbox))
+})
+
+test_that("SFGEOM-03 renderer IR smoke accepts line and multiline sf_family data", {
+  line_sf <- sf::st_sf(
+    id = 1:2,
+    geometry = sf::st_sfc(
+      sf::st_linestring(matrix(c(0, 0, 1, 1), ncol = 2, byrow = TRUE)),
+      sf::st_multilinestring(list(
+        matrix(c(2, 0, 3, 1), ncol = 2, byrow = TRUE),
+        matrix(c(3, 1, 4, 0), ncol = 2, byrow = TRUE)
+      )),
+      crs = 4326
+    )
+  )
+
+  ir <- as_d3_ir(ggplot2::ggplot(line_sf) + ggplot2::geom_sf())
+
+  expect_renderer_sf_layer(ir$layers[[1]], "line", c("LINESTRING", "MULTILINESTRING"))
+  expect_false(is.null(ir$panels[[1]]$sf_bbox))
+})
+
+test_that("SFGEOM-04 renderer IR smoke spans polygon+point stacked bbox", {
+  polygon_sf <- sf::st_sf(
+    id = 1L,
+    geometry = sf::st_sfc(sf::st_polygon(list(renderer_sf_square_ring())), crs = 4326)
+  )
+  point_sf <- sf::st_sf(
+    id = 1L,
+    geometry = sf::st_sfc(sf::st_point(c(5, 6)), crs = 4326)
+  )
+
+  ir <- as_d3_ir(
+    ggplot2::ggplot() +
+      ggplot2::geom_sf(data = polygon_sf) +
+      ggplot2::geom_sf(data = point_sf)
+  )
+
+  expect_renderer_sf_layer(ir$layers[[1]], "polygon", "POLYGON")
+  expect_renderer_sf_layer(ir$layers[[2]], "point", "POINT")
+  expect_equal(ir$panels[[1]]$sf_bbox, c(0, 0, 5, 6))
 })
