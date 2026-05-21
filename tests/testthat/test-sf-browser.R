@@ -53,6 +53,13 @@ if (!exists("skip_browser_sf_smoke", mode = "function")) {
   )
 }
 
+.browser_sf_panel_count_script <- function() {
+  paste(
+    "(() => Array.from(document.querySelectorAll(\".panel\"))",
+    ".map(panel => panel.querySelectorAll(\"path.geom-sf\").length))()"
+  )
+}
+
 test_that("BRSF-01 DOM: Phase 35 sf fixtures render live geom-sf paths", {
   skip_browser_sf_smoke()
 
@@ -111,4 +118,65 @@ test_that("BRSF-01 DOM: Phase 35 sf fixtures render live geom-sf paths", {
 
     assert_no_browser_errors(logs)
   })
+})
+
+test_that("BRSF-02 DOM: faceted sf fixtures keep panel-local path counts", {
+  skip_browser_sf_smoke()
+
+  fixtures <- .phase35_sf_fixture_set()
+  expected_counts <- .browser_sf_expected_counts()
+  expected_panel_counts <- list(
+    "phase35-sf-facet-wrap.html" = c(1L, 1L),
+    "phase35-sf-facet-grid.html" = c(0L, 0L, 1L, 1L)
+  )
+
+  with_chromote_session({
+    logs <- browser_console_collector(session)
+
+    for (fixture_name in names(expected_panel_counts)) {
+      html_path <- fixtures[[fixture_name]]
+      expect_true(file.exists(html_path))
+
+      tryCatch(
+        {
+          session$go_to(.browser_sf_file_url(html_path), delay = 1)
+          wait_for_sf_paths(
+            session,
+            expected = unname(expected_counts[[fixture_name]]),
+            timeout = 10
+          )
+
+          panel_counts <- eval_js_value(session, .browser_sf_panel_count_script())
+          panel_counts <- as.integer(unlist(panel_counts, use.names = FALSE))
+
+          expect_equal(sort(panel_counts), expected_panel_counts[[fixture_name]])
+        },
+        error = function(e) {
+          write_browser_failure_artifacts(
+            tools::file_path_sans_ext(fixture_name),
+            html_path,
+            logs,
+            session
+          )
+          stop(e)
+        }
+      )
+    }
+
+    assert_no_browser_errors(logs)
+  })
+})
+
+test_that("BRSF-03 artifact: browser sf fixtures use deterministic local output", {
+  skip_browser_sf_smoke()
+
+  fixtures <- .phase35_sf_fixture_set()
+  artifact_dir <- browser_sf_artifact_dir()
+  fixture_paths <- normalizePath(unlist(fixtures), winslash = "/", mustWork = TRUE)
+  artifact_path <- normalizePath(artifact_dir, winslash = "/", mustWork = FALSE)
+
+  expect_true(all(file.exists(unlist(fixtures))))
+  expect_true(all(grepl("test_output", fixture_paths, fixed = TRUE)))
+  expect_true(grepl("test_output/browser-sf", artifact_path, fixed = TRUE))
+  expect_true(file.exists(artifact_dir))
 })
