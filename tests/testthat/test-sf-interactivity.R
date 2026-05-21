@@ -19,10 +19,14 @@ test_that("sf renderer exposes path row and centroid attributes", {
   expect_match(sf_js, "Number\\.isFinite")
 })
 
-test_that("events module targets sf paths without dropping existing geoms", {
+test_that("events module targets all sf families without dropping existing geoms", {
   events_js <- read_module("inst/htmlwidgets/modules/events.js")
 
-  expect_match(events_js, "path\\.geom-sf")
+  expect_match(events_js, "\\.geom-sf")
+  expect_match(events_js, "circle\\.geom-sf")
+  expect_match(events_js, "geom-sf-point")
+  expect_match(events_js, "geom-sf-line")
+  expect_match(events_js, "geom-sf-polygon")
   expect_match(events_js, "circle\\.geom-point")
   expect_match(events_js, "path\\.geom-line")
   expect_match(events_js, "rect\\.geom-bar")
@@ -50,14 +54,18 @@ test_that("tooltip module sanitizes sf renderer internals", {
   expect_match(tooltip_js, "d = sanitizeTooltipDatum\\(d\\)")
   expect_match(tooltip_js, "customFn\\(enriched\\)")
   expect_match(tooltip_js, "config\\.fields\\.filter\\(k => !String\\(k\\)\\.startsWith\\('_'\\)\\)")
-  private_fields <- c("_geom", "_centroid")
+  private_fields <- c("_geom", "_centroid", "_sfFamily", "_pointIndex", "_pointCoord")
   expect_true(all(startsWith(private_fields, "_")))
 })
 
-test_that("brush module targets sf paths without dropping existing geoms", {
+test_that("brush module targets all sf families without dropping existing geoms", {
   brush_js <- read_module("inst/htmlwidgets/modules/brush.js")
 
-  expect_match(brush_js, "path\\.geom-sf")
+  expect_match(brush_js, "\\.geom-sf")
+  expect_match(brush_js, "circle\\.geom-sf")
+  expect_match(brush_js, "geom-sf-point")
+  expect_match(brush_js, "geom-sf-line")
+  expect_match(brush_js, "geom-sf-polygon")
   expect_match(brush_js, "circle\\.geom-point")
   expect_match(brush_js, "path\\.geom-line")
   expect_match(brush_js, "rect\\.geom-bar")
@@ -81,7 +89,8 @@ test_that("brush module uses sf centroid attrs before generic path bbox", {
 test_that("brush module selects geom_sf paths by centroid attributes", {
   brush_js <- read_module("inst/htmlwidgets/modules/brush.js")
 
-  expect_match(brush_js, "path\\.geom-sf")
+  expect_match(brush_js, "\\.geom-sf")
+  expect_match(brush_js, "circle\\.geom-sf")
   expect_match(brush_js, "classList\\.contains\\('geom-sf'\\)")
   expect_match(brush_js, "getAttribute\\('data-cx'\\)")
   expect_match(brush_js, "getAttribute\\('data-cy'\\)")
@@ -97,8 +106,18 @@ test_that("brush module sanitizes sf callback data", {
   expect_match(brush_js, "collectSelectedData")
   expect_match(brush_js, "sanitizeSelectedDatum\\(d\\)")
   expect_match(brush_js, "selectedData\\.push\\(sanitizeSelectedDatum\\(d\\)\\)")
-  private_fields <- c("_geom", "_centroid")
+  private_fields <- c("_geom", "_centroid", "_sfFamily", "_pointIndex", "_pointCoord")
   expect_true(all(startsWith(private_fields, "_")))
+})
+
+test_that("brush module deduplicates multipoint sf child selections by row_id", {
+  brush_js <- read_module("inst/htmlwidgets/modules/brush.js")
+
+  expect_match(brush_js, "dedupeSelectedDataByRowId")
+  expect_match(brush_js, "row_id")
+  expect_match(brush_js, "String\\(d\\.row_id\\)")
+  expect_match(brush_js, "seenRowIds")
+  expect_match(brush_js, "return dedupeSelectedDataByRowId\\(selectedData\\)")
 })
 
 test_that("sf interactivity remains composable when zoom is suppressed", {
