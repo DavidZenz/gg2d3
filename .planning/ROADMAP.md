@@ -27,7 +27,7 @@
 - Decimal phases (36.1, 36.2): Urgent insertions, if needed
 
 - [x] **Phase 36: Browser sf Smoke Harness** - Developers can validate rendered sf widgets in a real browser before changing sf geometry behavior.
-- [ ] **Phase 37: Non-Polygon sf IR And Renderer** - Users can render polygon, point, and line sf families with shared projection and row identity contracts.
+- [x] **Phase 37: Non-Polygon sf IR And Renderer** - Users can render polygon, point, and line sf families with shared projection and row identity contracts.
 - [ ] **Phase 38: sf Interaction, Facet, And Documentation Hardening** - Users can rely on sf point/line interactivity, facet behavior, and documentation matching the v1.9 contract.
 - [ ] **Phase 39: Package Internals Hardening** - Maintainers can evolve sf and core rendering internals behind regression coverage and focused helper boundaries.
 
