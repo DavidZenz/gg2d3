@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: sf Robustness and Expansion
 status: ready_to_plan
-stopped_at: Phase 36 plans executed; phase verification pending
-last_updated: "2026-05-21T08:10:13.754Z"
+stopped_at: Phase 36 complete; ready to plan Phase 37
+last_updated: "2026-05-21T08:47:05Z"
 last_activity: 2026-05-21
 progress:
   total_phases: 4
@@ -18,10 +18,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-20)
+See: .planning/PROJECT.md (updated 2026-05-21)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** Phase 36 — browser-sf-smoke-harness
+**Current focus:** Phase 37 — non-polygon-sf-ir-and-renderer
 
 ## Current Position
 
@@ -71,6 +71,8 @@ Recent decisions affecting current work:
 - 36-02: Kept Phase 36 browser smoke validation inside R/testthat and chromote helpers.
 - 36-02: Asserted live DOM attributes directly in the browser test rather than relying on saved HTML source.
 - 36-02: Used a single-file testthat run as the local verification command because this testthat build does not support test_file(filter = ...).
+- 36-03: Browser smoke tests now capture runtime console/page errors and assert sanitized sf click, tooltip, and brush payloads.
+- 36 complete: The live browser path is optional and skips cleanly in CRAN-like environments; local full execution requires chromote, Chrome, sf, and geojsonsf.
 
 ### Pending Todos
 
@@ -78,7 +80,7 @@ None yet.
 
 ### Blockers/Concerns
 
-None. Phase 36 planning should verify that `chromote` can reliably wait for htmlwidgets rendering, collect console/page errors, and simulate brush interactions.
+Phase 36 code review left two advisory follow-ups: add direct `pkgload` and `rprojroot` Suggests entries, and tighten facet smoke assertions so panel identity is preserved instead of only sorted count distributions.
 
 ## Deferred Items
 
@@ -86,12 +88,12 @@ Items acknowledged and carried forward from previous milestone close:
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| Validation | DOM-level browser smoke testing for rendered sf paths and brush behavior | Planned in Phase 36 | v1.8 audit |
+| Validation | DOM-level browser smoke testing for rendered sf paths and brush behavior | Completed in Phase 36 | v1.8 audit |
 
 ## Session Continuity
 
-Last session: 2026-05-21T08:10:13.750Z
-Stopped at: Phase 36 plans executed; phase verification pending
-Resume file: .planning/phases/36-browser-sf-smoke-harness/36-03-SUMMARY.md
+Last session: 2026-05-21T08:47:05Z
+Stopped at: Phase 36 complete; ready to plan Phase 37
+Resume file: .planning/phases/36-browser-sf-smoke-harness/36-VERIFICATION.md
 
 **Planned Phase:** 36 (browser-sf-smoke-harness) — 3 plans — 2026-05-20T20:27:09.489Z
