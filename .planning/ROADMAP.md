@@ -76,7 +76,7 @@ Plans:
   4. README, vignettes, diagnostics docs, roxygen source, and generated help describe the polygon/point/line support contract, unsupported geometries, representative-anchor brushing, browser validation, zoom suppression, and map anti-features.
 **Plans**: 3 plans
 Plans:
-- [ ] 38-01-PLAN.md — Harden live browser sf interaction gates for tooltip, hover, handlers, Shiny-style payloads, brush callbacks, sanitization, and zoom suppression.
+- [x] 38-01-PLAN.md — Harden live browser sf interaction gates for tooltip, hover, handlers, Shiny-style payloads, brush callbacks, sanitization, and zoom suppression.
 - [ ] 38-02-PLAN.md — Expand sf facet validation for wrap/grid point, line, polygon, mixed-family, and empty-panel cases with panel-local bbox/projection checks.
 - [ ] 38-03-PLAN.md — Refresh README, vignettes, diagnostics, roxygen, and generated help for the v1.9 polygon/point/line sf support contract.
 **UI hint**: yes

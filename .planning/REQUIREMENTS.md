@@ -22,7 +22,7 @@ Requirements for the sf Robustness and Expansion milestone. Each maps to exactly
 
 ### SF Interactivity And Documentation
 
-- [ ] **SFXDOC-01**: Tooltip, hover, custom handler, Shiny handler, and brush behavior work for sf point and line paths using sanitized source-row payloads and documented representative-anchor brushing semantics.
+- [x] **SFXDOC-01**: Tooltip, hover, custom handler, Shiny handler, and brush behavior work for sf point and line paths using sanitized source-row payloads and documented representative-anchor brushing semantics.
 - [ ] **SFXDOC-02**: `facet_wrap()` and `facet_grid()` browser/automated validation covers point, line, polygon, mixed-family, and empty-panel sf cases with panel-local counts and bbox/projection isolation.
 - [ ] **SFXDOC-03**: README, vignettes, diagnostics docs, roxygen source, and generated help describe the v1.9 sf support contract for polygon, point, and line families, unsupported geometries, zoom suppression, browser validation, and map anti-features.
 
