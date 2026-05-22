@@ -29,6 +29,11 @@ Returns the widget to enable pipe chaining.
 Enables interactive tooltips on hover for a gg2d3 widget. Tooltips display
 data values associated with each visual element (points, bars, etc.).
 }
+\details{
+For \code{geom_sf()} layers, tooltips attach to \code{.geom-sf} polygon-family,
+point-family, and line-family marks. Tooltip data uses sanitized source-row
+payloads with renderer-only fields removed.
+}
 \examples{
 \dontrun{
 library(ggplot2)

@@ -28,6 +28,11 @@ Enables hover highlighting for a gg2d3 widget. When hovering over an element,
 other elements are dimmed (reduced opacity) and the hovered element can
 optionally receive a highlight stroke.
 }
+\details{
+For \code{geom_sf()} layers, hover attaches to \code{.geom-sf} polygon-family,
+point-family, and line-family marks and exposes sanitized source-row payloads
+to shared event handling.
+}
 \examples{
 \dontrun{
 library(ggplot2)

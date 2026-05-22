@@ -49,9 +49,15 @@ gg2d3(p)
 | Annotation | `geom_hline`, `geom_vline`, `geom_abline`, `geom_rug` |
 | Statistical | `geom_boxplot`, `geom_violin`, `geom_density`, `geom_smooth` (loess, gam, lm), `geom_dotplot` |
 
-gg2d3 also supports `geom_sf()` for polygon-family choropleths and
-polygon overlays, limited to `POLYGON` and `MULTIPOLYGON` geometries.
-See the main vignette for CRS, skipped-row, and map-feature caveats.
+gg2d3 also supports `geom_sf()` for polygon-family (`POLYGON`,
+`MULTIPOLYGON`), point-family (`POINT`, `MULTIPOINT`), and line-family
+(`LINESTRING`, `MULTILINESTRING`) geometries. Rows that are unsupported,
+empty, invalid, or missing are skipped with warnings while accepted rows
+render; known CRS inputs are normalized in R before serialization, and
+missing CRS coordinates are serialized as-is with a warning. Browser
+validation covers sf family interactivity, stacked overlays, faceted and
+empty panels, and zoom suppression. See the main vignette for
+map-feature caveats.
 
 ### Scales & Coordinates
 

@@ -33,6 +33,7 @@ to the original view.
 \code{d3_zoom()} does not currently support widgets containing \code{geom_sf()} layers.
 Those widgets are returned unchanged with the warning "d3_zoom() does not
 support geom_sf layers yet; zoom has been suppressed."
+This keeps sf map anti-features explicit until projection-aware zoom exists.
 }
 \examples{
 \dontrun{

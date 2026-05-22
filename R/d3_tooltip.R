@@ -3,6 +3,10 @@
 #' Enables interactive tooltips on hover for a gg2d3 widget. Tooltips display
 #' data values associated with each visual element (points, bars, etc.).
 #'
+#' For `geom_sf()` layers, tooltips attach to `.geom-sf` polygon-family,
+#' point-family, and line-family marks. Tooltip data uses sanitized source-row
+#' payloads with renderer-only fields removed.
+#'
 #' @param widget A gg2d3 widget object created by \code{gg2d3()}
 #' @param fields Character vector of field names to display in tooltip.
 #'   Accepts either original data variable names (e.g. \code{"wt"},

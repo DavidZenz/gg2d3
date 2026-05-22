@@ -1,9 +1,10 @@
 #' Render a ggplot as a D3 widget
 #'
-#' gg2d3 supports polygon-family `geom_sf()` layers for `POLYGON` and
-#' `MULTIPOLYGON` choropleths and polygon overlays. Broader map features such
-#' as tile basemaps, slippy map controls, JavaScript-side CRS reprojection, and
-#' non-polygon sf rendering are outside the current support boundary.
+#' gg2d3 supports `geom_sf()` polygon-family (`POLYGON`, `MULTIPOLYGON`),
+#' point-family (`POINT`, `MULTIPOINT`), and line-family (`LINESTRING`,
+#' `MULTILINESTRING`) layers. The map anti-features are explicit: no tile
+#' basemaps, slippy map controls, JavaScript-side CRS reprojection, true
+#' geometry-overlap brushing, or large-map performance guarantees.
 #'
 #' @param x ggplot object or IR list from as_d3_ir()
 #' @export

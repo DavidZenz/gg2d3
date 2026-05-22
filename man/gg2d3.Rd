@@ -10,8 +10,9 @@ gg2d3(x, width = NULL, height = NULL, elementId = NULL)
 \item{x}{ggplot object or IR list from as_d3_ir()}
 }
 \description{
-gg2d3 supports polygon-family \code{geom_sf()} layers for \code{POLYGON} and
-\code{MULTIPOLYGON} choropleths and polygon overlays. Broader map features such
-as tile basemaps, slippy map controls, JavaScript-side CRS reprojection, and
-non-polygon sf rendering are outside the current support boundary.
+gg2d3 supports \code{geom_sf()} polygon-family (\code{POLYGON}, \code{MULTIPOLYGON}),
+point-family (\code{POINT}, \code{MULTIPOINT}), and line-family (\code{LINESTRING},
+\code{MULTILINESTRING}) layers. The map anti-features are explicit: no tile
+basemaps, slippy map controls, JavaScript-side CRS reprojection, true
+geometry-overlap brushing, or large-map performance guarantees.
 }

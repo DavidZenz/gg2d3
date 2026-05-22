@@ -28,5 +28,8 @@ automatically update a Shiny input with this ID.}
 The modified widget.
 }
 \description{
-Add custom JavaScript event handlers to the plot
+Handlers receive public data rows for rendered marks. For \code{geom_sf()} layers,
+handlers attach to \code{.geom-sf} polygon-family, point-family, and line-family
+marks and pass sanitized source-row payloads to custom JavaScript callbacks
+and Shiny-style \code{shiny_id} click updates.
 }

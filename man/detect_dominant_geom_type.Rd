@@ -16,5 +16,5 @@ Character string such as "MULTIPOLYGON", "POLYGON", "POINT", "LINESTRING", etc.
 Returns the summary geometry type for the sfc column in the data.frame.
 When the column contains mixed types, \code{sf::st_geometry_type()} with
 \code{by_geometry = FALSE} returns the shared type or "GEOMETRY". gg2d3 renders
-polygon-family \code{geom_sf()} layers only: \code{POLYGON} and \code{MULTIPOLYGON}.
+polygon, point, and line \code{geom_sf()} families.
 }
