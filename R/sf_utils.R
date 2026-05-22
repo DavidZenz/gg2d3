@@ -221,6 +221,93 @@ prepare_sf_geometry_ir <- function(df,
 }
 
 
+sf_layer_data_rows <- function(df) {
+  if (is.null(df) || !nrow(df)) return(list())
+
+  keep_aes <- c(
+    "PANEL", "x", "y", "xend", "yend", "xmin", "xmax", "ymin", "ymax",
+    "colour", "fill", "size", "alpha", "group", "label",
+    "stroke", "shape", "linewidth", "linetype", "lineend",
+    "slope", "intercept", "xintercept", "yintercept",
+    "lower", "middle", "upper", "outliers", "notchupper", "notchlower",
+    "width", "violinwidth", "density", "scaled", "count", "ncount", "ndensity",
+    "weight", "stackpos", "binwidth", "countidx", "row_id", ".sf_family"
+  )
+
+  df <- df[, intersect(keep_aes, names(df)), drop = FALSE]
+  col_names <- names(df)
+  df[] <- lapply(col_names, function(colname) {
+    col <- df[[colname]]
+    if (colname == "PANEL") as.integer(col)
+    else if (is.factor(col)) as.character(col)
+    else if (inherits(col, c("POSIXct", "POSIXt"))) as.numeric(col) * 1000
+    else if (inherits(col, "Date")) as.numeric(col) * 86400000
+    else if (is.list(col)) I(col)
+    else col
+  })
+  names(df) <- col_names
+
+  rows <- vector("list", nrow(df))
+  for (i in seq_len(nrow(df))) {
+    row <- lapply(df[i, , drop = FALSE], function(v) v[[1]])
+    names(row) <- names(df)
+    rows[[i]] <- row
+  }
+  rows
+}
+
+
+sf_layer_ir_payload <- function(df, aes, params, var_names) {
+  sf_prepared <- prepare_sf_geometry_ir(df)
+  panel_geometries <- list()
+
+  if (length(sf_prepared$geometry) > 0L) {
+    panel_values <- if ("PANEL" %in% names(sf_prepared$data)) {
+      as.integer(sf_prepared$data$PANEL)
+    } else {
+      rep(1L, length(sf_prepared$geometry))
+    }
+
+    for (geom_idx in seq_along(sf_prepared$geometry)) {
+      panel_key <- as.character(panel_values[[geom_idx]])
+      existing <- panel_geometries[[panel_key]]
+      panel_geometries[[panel_key]] <- if (is.null(existing)) {
+        sf_prepared$geometry[geom_idx]
+      } else {
+        c(existing, sf_prepared$geometry[geom_idx])
+      }
+    }
+  }
+
+  list(
+    layer = list(
+      geom           = "sf",
+      geom_type      = sf_prepared$geom_type,
+      sf_family      = sf_prepared$sf_family,
+      geometries     = sf_prepared$geometries,
+      data           = sf_layer_data_rows(sf_prepared$data),
+      aes            = aes,
+      params         = params,
+      crs            = sf_prepared$crs,
+      sf_diagnostics = sf_prepared$sf_diagnostics,
+      var_names      = var_names
+    ),
+    coord_geometry = sf_prepared$geometry,
+    panel_geometries = panel_geometries
+  )
+}
+
+
+attach_sf_panel_bboxes <- function(panels, sf_panel_geometries) {
+  lapply(panels, function(panel) {
+    panel_id <- if (!is.null(panel$PANEL)) panel$PANEL else 1L
+    panel_key <- as.character(panel_id)
+    panel$sf_bbox <- sf_bbox_values(sf_panel_geometries[[panel_key]])
+    panel
+  })
+}
+
+
 sf_bbox_values <- function(geom) {
   if (is.null(geom) || length(geom) == 0L) {
     return(NULL)

@@ -345,36 +345,19 @@ as_d3_ir <- function(p, width = 640, height = 400,
     }
 
     if (gname == "sf") {
-      sf_prepared <- prepare_sf_geometry_ir(df)
-      if (length(sf_prepared$geometry) > 0L) {
-        sf_coord_geometries[[length(sf_coord_geometries) + 1L]] <<- sf_prepared$geometry
-        panel_values <- if ("PANEL" %in% names(sf_prepared$data)) {
-          as.integer(sf_prepared$data$PANEL)
-        } else {
-          rep(1L, length(sf_prepared$geometry))
-        }
-        for (geom_idx in seq_along(sf_prepared$geometry)) {
-          panel_key <- as.character(panel_values[[geom_idx]])
+      payload <- sf_layer_ir_payload(df, aes, g_params, var_names)
+      if (length(payload$coord_geometry) > 0L) {
+        sf_coord_geometries[[length(sf_coord_geometries) + 1L]] <<- payload$coord_geometry
+        for (panel_key in names(payload$panel_geometries)) {
           existing <- sf_panel_geometries[[panel_key]]
           sf_panel_geometries[[panel_key]] <<- if (is.null(existing)) {
-            sf_prepared$geometry[geom_idx]
+            payload$panel_geometries[[panel_key]]
           } else {
-            c(existing, sf_prepared$geometry[geom_idx])
+            c(existing, payload$panel_geometries[[panel_key]])
           }
         }
       }
-      list(
-        geom           = "sf",
-        geom_type      = sf_prepared$geom_type,
-        sf_family      = sf_prepared$sf_family,
-        geometries     = sf_prepared$geometries,
-        data           = to_rows(sf_prepared$data),
-        aes            = aes,
-        params         = g_params,
-        crs            = sf_prepared$crs,
-        sf_diagnostics = sf_prepared$sf_diagnostics,
-        var_names      = var_names
-      )
+      payload$layer
     } else {
       list(
         geom   = gname,          # <-- now always a non-NULL string like "point"
@@ -931,11 +914,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
   })
 
   if (is_sf_coord && !is.null(panels_ir)) {
-    panels_ir <- lapply(panels_ir, function(panel) {
-      panel_key <- as.character(panel$PANEL %||% 1L)
-      panel$sf_bbox <- sf_bbox_values(sf_panel_geometries[[panel_key]])
-      panel
-    })
+    panels_ir <- attach_sf_panel_bboxes(panels_ir, sf_panel_geometries)
   }
 
   # Build reverse map: variable name -> aesthetic key (first layer wins on collision).
