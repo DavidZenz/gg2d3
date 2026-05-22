@@ -151,11 +151,14 @@ by D3. No JavaScript statistics are needed.
   gg2d3()
 ```
 
-### Polygon-family maps with `geom_sf`
+### sf family maps with `geom_sf`
 
-`geom_sf()` is supported for polygon-family choropleths and polygon overlays.
-This example uses the `nc` shapefile bundled with `sf` and renders county
-boundaries as D3 `path` marks.
+`geom_sf()` supports polygon-family (`POLYGON`, `MULTIPOLYGON`), point-family
+(`POINT`, `MULTIPOINT`), and line-family (`LINESTRING`, `MULTILINESTRING`)
+geometries. Polygon-family choropleths and overlays render as D3 `path` marks;
+point-family rows render as `.geom-sf-point` marks; and line-family rows render
+as `.geom-sf-line` paths. This example uses the `nc` shapefile bundled with
+`sf` and renders county boundaries as D3 `path` marks.
 
 ```{r, eval = requireNamespace("sf", quietly = TRUE) && requireNamespace("geojsonsf", quietly = TRUE)}
 nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
@@ -167,17 +170,21 @@ nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   gg2d3()
 ```
 
-The v1.8 `geom_sf()` support contract is intentionally narrow:
+The v1.9 `geom_sf()` support contract is intentionally explicit:
 
-- Only `POLYGON` and `MULTIPOLYGON` geometries render.
-- Known CRS inputs are normalized to WGS84 in R before serialization.
+- Accepted families are polygon-family (`POLYGON`, `MULTIPOLYGON`),
+  point-family (`POINT`, `MULTIPOINT`), and line-family (`LINESTRING`,
+  `MULTILINESTRING`).
+- known CRS inputs are normalized to WGS84 in R before serialization.
 - Missing CRS emits `geom_sf layer has missing CRS; coordinates will be serialized as-is`.
-- Unsupported, empty, invalid, or missing geometry rows emit
+- Rows that are unsupported, empty, invalid, or missing emit
   `geom_sf layer skipped %d unsupported, empty, invalid, or missing geometries`
-  and are skipped while valid polygon rows remain renderable.
+  and are skipped while accepted rows remain renderable.
+- Browser validation covers sf family interactivity, stacked overlays, faceted
+  and empty panels, and zoom suppression.
 - gg2d3 does not provide tile basemaps, slippy map controls, JavaScript-side
-  CRS reprojection, polygon-overlap brushing, non-polygon sf rendering, or
-  large-map performance guarantees.
+  CRS reprojection, true geometry-overlap brushing, or large-map performance
+  guarantees.
 
 ## Scales
 
