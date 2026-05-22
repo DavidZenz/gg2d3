@@ -120,6 +120,34 @@ test_that("brush module deduplicates multipoint sf child selections by row_id", 
   expect_match(brush_js, "return dedupeSelectedDataByRowId\\(selectedData\\)")
 })
 
+test_that("SFXDOC-01 source guards protect sf interaction selectors and payload sanitizers", {
+  events_js <- read_module("inst/htmlwidgets/modules/events.js")
+  tooltip_js <- read_module("inst/htmlwidgets/modules/tooltip.js")
+  brush_js <- read_module("inst/htmlwidgets/modules/brush.js")
+
+  expect_match(events_js, "\\.geom-sf")
+  expect_match(events_js, "geom-sf-point")
+  expect_match(events_js, "geom-sf-line")
+  expect_match(events_js, "geom-sf-polygon")
+  expect_match(events_js, "sanitizeEventDatum")
+  expect_match(events_js, "setInputValue\\(shinyId, publicDatum\\)")
+  expect_match(events_js, "mouseoverHandler\\.call\\(this, event, sanitizeEventDatum\\(d\\)\\)")
+  expect_match(events_js, "mouseoutHandler\\.call\\(this, event, sanitizeEventDatum\\(d\\)\\)")
+
+  expect_match(tooltip_js, "sanitizeTooltipDatum")
+  expect_match(tooltip_js, "key\\.startsWith\\('_'\\)")
+  expect_match(tooltip_js, "config\\.fields\\.filter\\(k => !String\\(k\\)\\.startsWith\\('_'\\)\\)")
+  expect_match(tooltip_js, "customFn\\(enriched\\)")
+
+  expect_match(brush_js, "classList\\.contains\\('geom-sf'\\)")
+  expect_match(brush_js, "data-cx")
+  expect_match(brush_js, "data-cy")
+  expect_match(brush_js, "sanitizeSelectedDatum")
+  expect_match(brush_js, "sanitizeSelectedDatum\\(d\\)")
+  expect_match(brush_js, "dedupeSelectedDataByRowId")
+  expect_match(brush_js, "return dedupeSelectedDataByRowId\\(selectedData\\)")
+})
+
 test_that("sf interactivity remains composable when zoom is suppressed", {
   skip_if_not_installed("sf")
 
