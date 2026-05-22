@@ -30,7 +30,8 @@ Requirements for the sf Robustness and Expansion milestone. Each maps to exactly
 
 - [x] **HARD-01
 **: Sf IR assembly is extracted behind focused helper boundaries so `as_d3_ir()` delegates sf layer preparation and panel bbox assembly without changing existing non-sf behavior.
-- [ ] **HARD-02**: Private ggplot2 API access used by theme/layout extraction is centralized behind tested compatibility helpers or otherwise characterized with regression tests before additional refactoring.
+- [x] **HARD-02
+**: Private ggplot2 API access used by theme/layout extraction is centralized behind tested compatibility helpers or otherwise characterized with regression tests before additional refactoring.
 - [ ] **HARD-03**: Regression coverage protects representative non-sf plots, polygon sf, point sf, line sf, facets, legends, date scales, coord_flip, and known renderer edge cases after hardening changes.
 
 ## Future Requirements
