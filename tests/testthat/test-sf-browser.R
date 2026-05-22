@@ -67,6 +67,69 @@ if (!exists("skip_browser_sf_smoke", mode = "function")) {
   )
 }
 
+.browser_sf_panel_marks_script <- function() {
+  paste(
+    "(() => Array.from(document.querySelectorAll(\".panel\")).map(panel => {",
+    "const background = panel.querySelector(\"rect\");",
+    "const panelWidth = background ? Number(background.getAttribute(\"width\")) : NaN;",
+    "const panelHeight = background ? Number(background.getAttribute(\"height\")) : NaN;",
+    "const marks = Array.from(panel.querySelectorAll(\".geom-sf\")).map(mark => ({",
+    "tag: mark.tagName.toLowerCase(),",
+    "className: mark.getAttribute(\"class\") || \"\",",
+    "rowId: mark.getAttribute(\"data-row-id\"),",
+    "dataCx: Number(mark.getAttribute(\"data-cx\")),",
+    "dataCy: Number(mark.getAttribute(\"data-cy\")),",
+    "panelWidth: panelWidth,",
+    "panelHeight: panelHeight",
+    "}));",
+    "return {",
+    "count: marks.length,",
+    "panelWidth: panelWidth,",
+    "panelHeight: panelHeight,",
+    "marks: marks",
+    "};",
+    "}))()"
+  )
+}
+
+.browser_sf_expect_panel_marks <- function(panels, expected_counts, expected_classes) {
+  expect_equal(length(panels), length(expected_counts))
+
+  panel_counts <- vapply(panels, function(panel) as.integer(panel$count), integer(1))
+  expect_equal(panel_counts, expected_counts)
+
+  for (panel_index in seq_along(panels)) {
+    panel <- panels[[panel_index]]
+    marks <- panel$marks
+    expected <- expected_classes[[panel_index]]
+
+    expect_true(is.finite(panel$panelWidth))
+    expect_true(is.finite(panel$panelHeight))
+    expect_gt(panel$panelWidth, 0)
+    expect_gt(panel$panelHeight, 0)
+
+    if (length(expected) == 0) {
+      expect_equal(length(marks), 0)
+      next
+    }
+
+    class_names <- vapply(marks, function(mark) mark$className, character(1))
+    for (class_name in expected) {
+      expect_true(any(grepl(class_name, class_names, fixed = TRUE)))
+    }
+
+    for (mark in marks) {
+      expect_true(nzchar(mark$rowId))
+      expect_true(is.finite(mark$dataCx))
+      expect_true(is.finite(mark$dataCy))
+      expect_gte(mark$dataCx, 0)
+      expect_lte(mark$dataCx, mark$panelWidth)
+      expect_gte(mark$dataCy, 0)
+      expect_lte(mark$dataCy, mark$panelHeight)
+    }
+  }
+}
+
 .browser_sf_private_fields <- function() {
   c("_geom", "_centroid", "_sfFamily", "_pointIndex", "_pointCoord")
 }
@@ -529,6 +592,85 @@ test_that("SFXDOC-01 DOM: sf point and line interactions expose sanitized source
           .browser_sf_expect_public_payload(result$shiny$value)
           expect_false(grepl("_geom|_centroid|_sfFamily|_pointIndex|_pointCoord", result$tooltipText))
           .browser_sf_expect_unique_public_rows(result$brush)
+          assert_no_browser_errors(logs)
+        },
+        error = function(e) {
+          write_browser_failure_artifacts(
+            tools::file_path_sans_ext(fixture_name),
+            html_path,
+            logs,
+            session
+          )
+          stop(e)
+        }
+      )
+    }
+  })
+})
+
+test_that("SFXDOC-02 DOM: faceted sf fixtures keep panel-local family counts and anchors", {
+  skip_browser_sf_smoke()
+
+  fixtures <- .phase38_sf_facet_fixture_set()
+  expected <- list(
+    "phase38-sf-facet-wrap-families.html" = list(
+      total = 6L,
+      counts = c(1L, 1L, 1L, 3L, 0L),
+      classes = list(
+        "geom-sf-polygon",
+        "geom-sf-point",
+        "geom-sf-line",
+        c("geom-sf-polygon", "geom-sf-point", "geom-sf-line"),
+        character()
+      )
+    ),
+    "phase38-sf-facet-grid-families.html" = list(
+      total = 6L,
+      counts = c(1L, 1L, 1L, 3L, 0L, 0L),
+      classes = list(
+        "geom-sf-polygon",
+        "geom-sf-point",
+        "geom-sf-line",
+        c("geom-sf-polygon", "geom-sf-point", "geom-sf-line"),
+        character(),
+        character()
+      )
+    ),
+    "phase38-sf-facet-empty-panels.html" = list(
+      total = 3L,
+      counts = c(1L, 1L, 1L, 0L, 0L),
+      classes = list(
+        "geom-sf-polygon",
+        "geom-sf-point",
+        "geom-sf-line",
+        character(),
+        character()
+      )
+    )
+  )
+
+  with_chromote_session({
+    logs <- browser_console_collector(session)
+
+    for (fixture_name in names(expected)) {
+      html_path <- fixtures[[fixture_name]]
+      expect_true(file.exists(html_path))
+
+      tryCatch(
+        {
+          session$go_to(.browser_sf_file_url(html_path), delay = 1)
+          wait_for_sf_marks(
+            session,
+            expected = expected[[fixture_name]]$total,
+            timeout = 10
+          )
+
+          panels <- eval_js_value(session, .browser_sf_panel_marks_script())
+          .browser_sf_expect_panel_marks(
+            panels,
+            expected[[fixture_name]]$counts,
+            expected[[fixture_name]]$classes
+          )
           assert_no_browser_errors(logs)
         },
         error = function(e) {
