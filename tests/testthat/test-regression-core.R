@@ -130,3 +130,26 @@ test_that("HARD-03 regression matrix covers facets legends dates and coord_flip"
   expect_equal(flip_ir$axes$x$label, "mpg")
   expect_equal(flip_ir$axes$y$label, "factor(cyl)")
 })
+
+test_that("HARD-03 regression matrix guards sf renderer and interaction source contracts", {
+  sf_js <- regression_read_module("inst/htmlwidgets/modules/geoms/sf.js")
+  brush_js <- regression_read_module("inst/htmlwidgets/modules/brush.js")
+  events_js <- regression_read_module("inst/htmlwidgets/modules/events.js")
+
+  expect_match(sf_js, "geom-sf-polygon")
+  expect_match(sf_js, "geom-sf-point")
+  expect_match(sf_js, "geom-sf-line")
+  expect_match(sf_js, "data-cx")
+  expect_match(sf_js, "data-cy")
+  expect_match(sf_js, "bboxToFeatureCollection")
+
+  expect_match(brush_js, "\\.geom-sf")
+  expect_match(brush_js, "data-cx")
+  expect_match(brush_js, "data-cy")
+  expect_match(brush_js, "sanitizeSelectedDatum")
+  expect_match(brush_js, "dedupeSelectedDataByRowId")
+
+  expect_match(events_js, "\\.geom-sf")
+  expect_match(events_js, "sanitizeEventDatum")
+  expect_match(events_js, "setInputValue")
+})
