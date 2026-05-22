@@ -78,9 +78,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SFXDOC-01 | Phase 38 | Complete |
 | SFXDOC-02 | Phase 38 | Complete |
 | SFXDOC-03 | Phase 38 | Complete |
-| HARD-01 | Phase 39 | Pending |
-| HARD-02 | Phase 39 | Pending |
-| HARD-03 | Phase 39 | Pending |
+| HARD-01 | Phase 39 | Complete |
+| HARD-02 | Phase 39 | Complete |
+| HARD-03 | Phase 39 | Complete |
 
 **Coverage:**
 - v1.9 requirements: 13 total

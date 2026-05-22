@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.9 is underway. Phase 36 shipped automated browser smoke harnessing for polygon-family `geom_sf` widgets: saved sf fixtures can be exercised through chromote-backed DOM assertions, runtime browser errors are captured, callback and brush payloads remain sanitized, fixture artifacts are deterministic, and optional browser/spatial dependencies skip cleanly when unavailable. The remaining milestone work expands sf support beyond polygons and hardens high-risk package internals.
+v1.9 implementation phases are complete and ready for milestone closeout. The package now has automated browser smoke harnessing for sf widgets, point-family and line-family `geom_sf()` support, hardened sf interaction/facet/documentation coverage, and package-internals hardening around sf IR assembly, ggplot2 compatibility access, and cross-surface regression gates.
 
 ## Current Milestone: v1.9 sf Robustness and Expansion
 
@@ -76,10 +76,13 @@ v1.9 is underway. Phase 36 shipped automated browser smoke harnessing for polygo
 - ✓ Shared projection alignment for stacked sf layers and facet-aware per-panel bbox/projection behavior for `facet_wrap()` and `facet_grid()` — v1.8 Phase 34
 - ✓ Documentation and validation hardening for supported and unsupported sf behavior — v1.8 Phase 35
 - ✓ Browser smoke harness for polygon-family sf fixtures, DOM contracts, runtime error capture, sanitized interaction payloads, centroid brushing, zoom suppression, and deterministic debug artifacts — v1.9 Phase 36
+- ✓ Non-polygon `geom_sf()` IR and renderer support for point and line families — v1.9 Phase 37
+- ✓ sf interaction, facet, and documentation hardening for point/line/mixed families — v1.9 Phase 38
+- ✓ Package internals hardening for sf helper boundaries, ggplot2 compatibility wrappers, and bounded regression coverage — v1.9 Phase 39
 
 ### Active
 
-- v1.9 requirements remain active for non-polygon sf support and package hardening.
+- None. v1.9 phase work is complete pending milestone closeout/audit.
 
 ### Out of Scope
 
@@ -96,8 +99,8 @@ v1.9 is underway. Phase 36 shipped automated browser smoke harnessing for polygo
 gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus production polygon-family `geom_sf()` support. R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, D3 renders SVG through a registry-based geom dispatch system, and htmlwidgets bridges the browser output. The package supports 25 non-sf geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, non-Cartesian coordinates, a composable pipe-based interactivity API, and polygon-first sf rendering with tooltip, hover, handler, centroid brush, stacked-layer alignment, and faceted panel projection behavior.
 
 **Known tech debt:**
-- Monolithic `as_d3_ir()` function (~1000 lines) needs modularization
-- Private API dependency on `ggplot2:::calc_element()` creates fragility
+- Monolithic `as_d3_ir()` function (~1000 lines) still needs broader modularization beyond the extracted sf helper boundaries
+- Private ggplot2 theme access remains necessary but is quarantined in `R/ggplot2_compat.R` behind compatibility helpers
 - Orphaned GeomPolygon reference (no renderer)
 - rect geom edge cases with out-of-bounds rendering
 - Browser-side sf behavior now has DOM-level smoke harness coverage; live Chrome execution still depends on optional local browser dependencies
@@ -135,6 +138,9 @@ gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus pro
 | panel-scoped sf projection metadata | Stacked and faceted sf layers should use `sf_bbox` from accepted geometries in the current panel, with the renderer filtering data/geometry pairs together by original row index | ✓ Good — implemented and verified in Phase 34 |
 | documented polygon-first sf contract | The first production `geom_sf` support should be explicit about polygon-family support, skipped unsupported/empty/invalid/missing geometries, zoom suppression, and map anti-features | ✓ Good — implemented and verified in Phase 35 |
 | chromote-backed sf browser smoke harness | Browser-level sf regression coverage should use optional R tooling and non-self-contained htmlwidgets fixtures, not a Node browser stack | ✓ Good — implemented and verified in Phase 36 |
+| point/line sf support extends existing renderer contract | Non-polygon sf support should reuse the existing `.geom-sf` interactivity selectors and add family-specific DOM classes rather than introduce a separate map engine | ✓ Good — implemented and verified in Phase 37 |
+| sf internals helper boundaries | Remaining sf layer assembly and panel bbox attachment should live behind focused helpers outside the monolithic `as_d3_ir()` body | ✓ Good — implemented and verified in Phase 39 |
+| ggplot2 compatibility quarantine | Unavoidable private ggplot2 calls should be isolated behind internal wrappers with characterization tests and explicit comments | ✓ Good — implemented and verified in Phase 39 |
 
 ## Evolution
 
@@ -154,4 +160,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-21 after completing Phase 36 browser sf smoke harness*
+*Last updated: 2026-05-22 after completing Phase 39 package internals hardening*
