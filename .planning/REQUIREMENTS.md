@@ -24,7 +24,7 @@ Requirements for the sf Robustness and Expansion milestone. Each maps to exactly
 
 - [x] **SFXDOC-01**: Tooltip, hover, custom handler, Shiny handler, and brush behavior work for sf point and line paths using sanitized source-row payloads and documented representative-anchor brushing semantics.
 - [x] **SFXDOC-02**: `facet_wrap()` and `facet_grid()` browser/automated validation covers point, line, polygon, mixed-family, and empty-panel sf cases with panel-local counts and bbox/projection isolation.
-- [ ] **SFXDOC-03**: README, vignettes, diagnostics docs, roxygen source, and generated help describe the v1.9 sf support contract for polygon, point, and line families, unsupported geometries, zoom suppression, browser validation, and map anti-features.
+- [x] **SFXDOC-03**: README, vignettes, diagnostics docs, roxygen source, and generated help describe the v1.9 sf support contract for polygon, point, and line families, unsupported geometries, zoom suppression, browser validation, and map anti-features.
 
 ### Package Hardening
 
@@ -74,7 +74,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SFGEOM-04 | Phase 37 | Pending |
 | SFXDOC-01 | Phase 38 | Complete |
 | SFXDOC-02 | Phase 38 | Complete |
-| SFXDOC-03 | Phase 38 | Pending |
+| SFXDOC-03 | Phase 38 | Complete |
 | HARD-01 | Phase 39 | Pending |
 | HARD-02 | Phase 39 | Pending |
 | HARD-03 | Phase 39 | Pending |
