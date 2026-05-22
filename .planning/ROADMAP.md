@@ -28,7 +28,7 @@
 
 - [x] **Phase 36: Browser sf Smoke Harness** - Developers can validate rendered sf widgets in a real browser before changing sf geometry behavior.
 - [x] **Phase 37: Non-Polygon sf IR And Renderer** - Users can render polygon, point, and line sf families with shared projection and row identity contracts.
-- [ ] **Phase 38: sf Interaction, Facet, And Documentation Hardening** - Users can rely on sf point/line interactivity, facet behavior, and documentation matching the v1.9 contract.
+- [x] **Phase 38: sf Interaction, Facet, And Documentation Hardening** - Users can rely on sf point/line interactivity, facet behavior, and documentation matching the v1.9 contract.
 - [ ] **Phase 39: Package Internals Hardening** - Maintainers can evolve sf and core rendering internals behind regression coverage and focused helper boundaries.
 
 ## Phase Details
@@ -100,7 +100,7 @@ Phases execute in numeric order: 36 → 37 → 38 → 39
 |-------|----------------|--------|-----------|
 | 36. Browser sf Smoke Harness | 3/3 | Complete    | 2026-05-21 |
 | 37. Non-Polygon sf IR And Renderer | 4/4 | Complete   | 2026-05-21 |
-| 38. sf Interaction, Facet, And Documentation Hardening | 3/3 | In verification | - |
+| 38. sf Interaction, Facet, And Documentation Hardening | 3/3 | Complete    | 2026-05-22 |
 | 39. Package Internals Hardening | 0/TBD | Not started | - |
 
 ## Archived Milestones
