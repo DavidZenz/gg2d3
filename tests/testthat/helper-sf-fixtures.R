@@ -430,3 +430,113 @@ if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
 
   fixtures
 }
+
+.phase38_make_facet_wrap_sf <- function() {
+  sf::st_sf(
+    facet = factor(
+      c("polygon", "point", "line", "mixed", "mixed", "mixed", "mixed"),
+      levels = c("polygon", "point", "line", "mixed", "empty")
+    ),
+    label = c("polygon", "point", "line", "mixed-polygon", "mixed-point", "mixed-line", "collection"),
+    value = c(1, 2, 3, 4, 5, 6, 7),
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(.phase35_square_ring(0, 0, 1, 1))),
+      sf::st_point(c(100, 10)),
+      sf::st_linestring(matrix(c(200, 20, 201, 21), ncol = 2, byrow = TRUE)),
+      sf::st_polygon(list(.phase35_square_ring(300, 30, 301, 31))),
+      sf::st_point(c(302, 32)),
+      sf::st_linestring(matrix(c(303, 33, 304, 34), ncol = 2, byrow = TRUE)),
+      sf::st_geometrycollection(list(sf::st_point(c(999, 999)))),
+      crs = 4326
+    )
+  )
+}
+
+.phase38_make_facet_grid_sf <- function() {
+  sf::st_sf(
+    row = factor(
+      c("north", "north", "south", "south", "south", "south", "south"),
+      levels = c("north", "south", "empty-row")
+    ),
+    col = factor(
+      c("west", "east", "west", "east", "east", "east", "east"),
+      levels = c("west", "east")
+    ),
+    label = c("polygon", "point", "line", "mixed-polygon", "mixed-point", "mixed-line", "collection"),
+    value = c(1, 2, 3, 4, 5, 6, 7),
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(.phase35_square_ring(0, 0, 1, 1))),
+      sf::st_point(c(100, 10)),
+      sf::st_linestring(matrix(c(200, 20, 201, 21), ncol = 2, byrow = TRUE)),
+      sf::st_polygon(list(.phase35_square_ring(300, 30, 301, 31))),
+      sf::st_point(c(302, 32)),
+      sf::st_linestring(matrix(c(303, 33, 304, 34), ncol = 2, byrow = TRUE)),
+      sf::st_geometrycollection(list(sf::st_point(c(999, 999)))),
+      crs = 4326
+    )
+  )
+}
+
+.phase38_make_facet_empty_sf <- function() {
+  sf::st_sf(
+    facet = factor(
+      c("polygon", "point", "line"),
+      levels = c("polygon", "point", "line", "empty-a", "empty-b")
+    ),
+    label = c("polygon", "point", "line"),
+    value = c(1, 2, 3),
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(.phase35_square_ring(0, 0, 1, 1))),
+      sf::st_point(c(100, 10)),
+      sf::st_linestring(matrix(c(200, 20, 201, 21), ncol = 2, byrow = TRUE)),
+      crs = 4326
+    )
+  )
+}
+
+.phase38_sf_facet_fixture_set <- function() {
+  fixtures <- list()
+
+  wrap_plot <- ggplot2::ggplot(
+    .phase38_make_facet_wrap_sf(),
+    ggplot2::aes(colour = label, fill = label)
+  ) +
+    ggplot2::geom_sf() +
+    ggplot2::facet_wrap(~facet, drop = FALSE)
+  testthat::expect_warning(
+    wrap_widget <- gg2d3(wrap_plot),
+    regexp = "skipped 1"
+  )
+  fixtures[["phase38-sf-facet-wrap-families.html"]] <- .phase38_save_browser_widget(
+    wrap_widget,
+    "phase38-sf-facet-wrap-families.html"
+  )
+
+  grid_plot <- ggplot2::ggplot(
+    .phase38_make_facet_grid_sf(),
+    ggplot2::aes(colour = label, fill = label)
+  ) +
+    ggplot2::geom_sf() +
+    ggplot2::facet_grid(row ~ col, drop = FALSE)
+  testthat::expect_warning(
+    grid_widget <- gg2d3(grid_plot),
+    regexp = "skipped 1"
+  )
+  fixtures[["phase38-sf-facet-grid-families.html"]] <- .phase38_save_browser_widget(
+    grid_widget,
+    "phase38-sf-facet-grid-families.html"
+  )
+
+  empty_plot <- ggplot2::ggplot(
+    .phase38_make_facet_empty_sf(),
+    ggplot2::aes(colour = label, fill = label)
+  ) +
+    ggplot2::geom_sf() +
+    ggplot2::facet_wrap(~facet, drop = FALSE)
+  fixtures[["phase38-sf-facet-empty-panels.html"]] <- .phase38_save_browser_widget(
+    gg2d3(empty_plot),
+    "phase38-sf-facet-empty-panels.html"
+  )
+
+  fixtures
+}
