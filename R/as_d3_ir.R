@@ -6,8 +6,9 @@ as_d3_ir <- function(p, width = 640, height = 400,
   b <- ggplot2::ggplot_build(p)
   is_flip <- inherits(b$plot$coordinates, "CoordFlip")
 
-  # Detect coord_trans (not yet supported - Phase 3)
-  if (inherits(b$plot$coordinates, "CoordTrans")) {
+  # Detect transformed coordinates (not yet supported - Phase 3)
+  if (inherits(b$plot$coordinates, "CoordTrans") ||
+      inherits(b$plot$coordinates, "CoordTransform")) {
     warning(
       "coord_trans() is not yet supported by gg2d3. ",
       "Scale transformations (e.g., scale_x_log10()) provide equivalent visual output ",
@@ -678,7 +679,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
     )
   }
 
-  is_fixed    <- inherits(b$plot$coordinates, "CoordFixed")
+  is_fixed    <- inherits(b$plot$coordinates, "CoordFixed") ||
+    (!is.null(b$plot$coordinates$ratio))
   is_polar    <- inherits(b$plot$coordinates, "CoordPolar")
   is_sf_coord <- inherits(b$plot$coordinates, "CoordSf")
 
