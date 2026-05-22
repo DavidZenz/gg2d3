@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.9
-milestone_name: sf Robustness and Expansion
-status: no_active_milestone
-stopped_at: Archived v1.9 milestone
+milestone: v1.10
+milestone_name: Release Hardening
+status: defining_requirements
+stopped_at: Started v1.10 milestone
 last_updated: "2026-05-22T11:37:49.761Z"
 last_activity: 2026-05-22
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 13
-  completed_plans: 13
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-22)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** No active milestone. Next step is `$gsd-new-milestone`.
+**Current focus:** v1.10 Release Hardening
 
 ## Current Position
 
-Phase: None
-Plan: None
-Status: v1.9 archived; ready for next milestone
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
 Last activity: 2026-05-22
 
-Progress: [██████████] 100%
+Progress: [----------] 0%
 
 ## Performance Metrics
 
@@ -99,8 +99,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: Archived v1.9 sf Robustness and Expansion
-Stopped at: Archived v1.9 milestone
+Last session: Started v1.10 Release Hardening
+Stopped at: Defining requirements
 Resume file: None
 
 **Planned Phase:** 39 (Package Internals Hardening) — 3 plans — 2026-05-22T11:05:00Z
@@ -108,3 +108,4 @@ Resume file: None
 **Completed Plan:** 39-02 (ggplot2 compatibility wrappers) — 2026-05-22T11:33:56Z
 **Completed Plan:** 39-03 (bounded regression gate) — 2026-05-22T11:37:16Z
 **Completed Milestone:** v1.9 sf Robustness and Expansion — 2026-05-22
+**Started Milestone:** v1.10 Release Hardening — 2026-05-22

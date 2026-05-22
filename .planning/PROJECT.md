@@ -10,11 +10,17 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.9 shipped on 2026-05-22. The package now has automated browser smoke harnessing for sf widgets, point-family and line-family `geom_sf()` support, hardened sf interaction/facet/documentation coverage, and package-internals hardening around sf IR assembly, ggplot2 compatibility access, and cross-surface regression gates.
+v1.10 is focused on release hardening after the v1.9 sf expansion. The package now has broad feature coverage plus automated sf browser smoke harnessing, so the next useful milestone is to tighten package hygiene, release checks, documentation consistency, and small release-blocking debt before broader feature work resumes.
 
-## Current Milestone
+## Current Milestone: v1.10 Release Hardening
 
-No active milestone. Start the next cycle with `$gsd-new-milestone`.
+**Goal:** Prepare gg2d3 for a cleaner release-quality checkpoint by closing package hygiene gaps, validating the release surface, and documenting known residual risks.
+
+**Target features:**
+- Package metadata and dependency hygiene for tests, docs, optional browser tooling, and spatial helpers.
+- Release-blocking debt triage for stale references, known renderer edge cases, and advisory follow-ups from recent reviews.
+- Reproducible release validation gates covering package tests, representative browser skips/runs, documentation generation, and package check behavior.
+- Release notes and docs polish that describe the current v1.9/v1.10 support contract without stale milestone language.
 
 ## Last Shipped Milestone: v1.9 sf Robustness and Expansion
 
@@ -87,7 +93,9 @@ No active milestone. Start the next cycle with `$gsd-new-milestone`.
 
 ### Active
 
-- None. Fresh requirements should be defined with the next milestone.
+- Package metadata, dependency, and optional-tooling hygiene for release readiness.
+- Release-blocking debt triage across known renderer/doc/test issues.
+- Reproducible release validation gates and documentation/release-note polish.
 
 ### Out of Scope
 
@@ -165,4 +173,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-22 after archiving v1.9 sf Robustness and Expansion*
+*Last updated: 2026-05-22 after starting v1.10 Release Hardening*
