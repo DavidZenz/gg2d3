@@ -441,12 +441,12 @@ if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
     value = c(1, 2, 3, 4, 5, 6, 7),
     geometry = sf::st_sfc(
       sf::st_polygon(list(.phase35_square_ring(0, 0, 1, 1))),
-      sf::st_point(c(100, 10)),
-      sf::st_linestring(matrix(c(200, 20, 201, 21), ncol = 2, byrow = TRUE)),
-      sf::st_polygon(list(.phase35_square_ring(300, 30, 301, 31))),
-      sf::st_point(c(302, 32)),
-      sf::st_linestring(matrix(c(303, 33, 304, 34), ncol = 2, byrow = TRUE)),
-      sf::st_geometrycollection(list(sf::st_point(c(999, 999)))),
+      sf::st_point(c(-60, 10)),
+      sf::st_linestring(matrix(c(0, 20, 1, 21), ncol = 2, byrow = TRUE)),
+      sf::st_polygon(list(.phase35_square_ring(60, 30, 61, 31))),
+      sf::st_point(c(62, 32)),
+      sf::st_linestring(matrix(c(63, 33, 64, 34), ncol = 2, byrow = TRUE)),
+      sf::st_geometrycollection(list(sf::st_point(c(120, 45)))),
       crs = 4326
     )
   )
@@ -466,12 +466,12 @@ if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
     value = c(1, 2, 3, 4, 5, 6, 7),
     geometry = sf::st_sfc(
       sf::st_polygon(list(.phase35_square_ring(0, 0, 1, 1))),
-      sf::st_point(c(100, 10)),
-      sf::st_linestring(matrix(c(200, 20, 201, 21), ncol = 2, byrow = TRUE)),
-      sf::st_polygon(list(.phase35_square_ring(300, 30, 301, 31))),
-      sf::st_point(c(302, 32)),
-      sf::st_linestring(matrix(c(303, 33, 304, 34), ncol = 2, byrow = TRUE)),
-      sf::st_geometrycollection(list(sf::st_point(c(999, 999)))),
+      sf::st_point(c(-60, 10)),
+      sf::st_linestring(matrix(c(0, 20, 1, 21), ncol = 2, byrow = TRUE)),
+      sf::st_polygon(list(.phase35_square_ring(60, 30, 61, 31))),
+      sf::st_point(c(62, 32)),
+      sf::st_linestring(matrix(c(63, 33, 64, 34), ncol = 2, byrow = TRUE)),
+      sf::st_geometrycollection(list(sf::st_point(c(120, 45)))),
       crs = 4326
     )
   )
@@ -487,8 +487,8 @@ if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
     value = c(1, 2, 3),
     geometry = sf::st_sfc(
       sf::st_polygon(list(.phase35_square_ring(0, 0, 1, 1))),
-      sf::st_point(c(100, 10)),
-      sf::st_linestring(matrix(c(200, 20, 201, 21), ncol = 2, byrow = TRUE)),
+      sf::st_point(c(-60, 10)),
+      sf::st_linestring(matrix(c(0, 20, 1, 21), ncol = 2, byrow = TRUE)),
       crs = 4326
     )
   )

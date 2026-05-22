@@ -4,6 +4,17 @@ skip_if_not_installed("geojsonsf")
 # Load package if not already loaded (supports both devtools::test() and testthat::test_file())
 if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
 
+if (!exists(".phase38_make_facet_wrap_sf", mode = "function")) {
+  helper_candidates <- c(
+    "tests/testthat/helper-sf-fixtures.R",
+    "helper-sf-fixtures.R"
+  )
+  helper_path <- helper_candidates[file.exists(helper_candidates)][1]
+  if (!is.na(helper_path)) {
+    source(helper_path)
+  }
+}
+
 nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
 
 test_that("basic sf IR generation succeeds without error", {
@@ -410,6 +421,100 @@ test_that("SFGEOM-04 facet_wrap empty panel keeps NULL sf_bbox for point and lin
   expect_finite_sf_bbox(panel_bboxes[[2]])
   expect_null(panel_bboxes[[3]])
   expect_no_warning(validate_ir(ir))
+})
+
+test_that("SFXDOC-02 IR: faceted sf panels keep family-specific bbox isolation", {
+  expect_warning(
+    wrap_ir <- as_d3_ir(
+      ggplot2::ggplot(
+        .phase38_make_facet_wrap_sf(),
+        ggplot2::aes(colour = label, fill = label)
+      ) +
+        ggplot2::geom_sf() +
+        ggplot2::facet_wrap(~facet, drop = FALSE)
+    ),
+    regexp = "skipped 1"
+  )
+
+  wrap_panel_bboxes <- lapply(wrap_ir$panels, `[[`, "sf_bbox")
+  wrap_non_empty <- vapply(wrap_panel_bboxes, Negate(is.null), logical(1))
+  wrap_row_ids <- unlist(lapply(wrap_ir$layers, function(layer) {
+    if (!identical(layer$geom, "sf")) return(NULL)
+    vapply(layer$data, function(row) row$row_id, numeric(1))
+  }), use.names = FALSE)
+
+  expect_equal(wrap_ir$facets$type, "wrap")
+  expect_equal(length(wrap_ir$panels), 5L)
+  expect_equal(wrap_non_empty, c(TRUE, TRUE, TRUE, TRUE, FALSE))
+  expect_true(all(is.finite(wrap_panel_bboxes[[1]])))
+  expect_true(all(is.finite(wrap_panel_bboxes[[2]])))
+  expect_true(all(is.finite(wrap_panel_bboxes[[3]])))
+  expect_true(all(is.finite(wrap_panel_bboxes[[4]])))
+  expect_true(is.null(wrap_ir$panels[[5]]$sf_bbox))
+  expect_null(wrap_panel_bboxes[[5]])
+  # Distant panels should keep non-identical local sf_bbox values.
+  expect_false(identical(wrap_panel_bboxes[[1]], wrap_panel_bboxes[[2]]))
+  expect_false(identical(wrap_panel_bboxes[[2]], wrap_panel_bboxes[[3]]))
+  expect_false(7 %in% wrap_row_ids)
+
+  expect_warning(
+    grid_ir <- as_d3_ir(
+      ggplot2::ggplot(
+        .phase38_make_facet_grid_sf(),
+        ggplot2::aes(colour = label, fill = label)
+      ) +
+        ggplot2::geom_sf() +
+        ggplot2::facet_grid(row ~ col, drop = FALSE)
+    ),
+    regexp = "skipped 1"
+  )
+
+  grid_panel_bboxes <- lapply(grid_ir$panels, `[[`, "sf_bbox")
+  grid_non_empty <- vapply(grid_panel_bboxes, Negate(is.null), logical(1))
+  grid_row_ids <- unlist(lapply(grid_ir$layers, function(layer) {
+    if (!identical(layer$geom, "sf")) return(NULL)
+    vapply(layer$data, function(row) row$row_id, numeric(1))
+  }), use.names = FALSE)
+
+  expect_equal(grid_ir$facets$type, "grid")
+  expect_equal(length(grid_ir$panels), 6L)
+  expect_equal(grid_non_empty, c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE))
+  expect_true(all(is.finite(grid_panel_bboxes[[1]])))
+  expect_true(all(is.finite(grid_panel_bboxes[[2]])))
+  expect_true(all(is.finite(grid_panel_bboxes[[3]])))
+  expect_true(all(is.finite(grid_panel_bboxes[[4]])))
+  expect_true(is.null(grid_ir$panels[[5]]$sf_bbox))
+  expect_true(is.null(grid_ir$panels[[6]]$sf_bbox))
+  expect_null(grid_panel_bboxes[[5]])
+  expect_null(grid_panel_bboxes[[6]])
+  # Distant grid panels should keep non-identical local sf_bbox values.
+  expect_false(identical(grid_panel_bboxes[[1]], grid_panel_bboxes[[2]]))
+  expect_false(identical(grid_panel_bboxes[[3]], grid_panel_bboxes[[4]]))
+  expect_false(7 %in% grid_row_ids)
+
+  empty_ir <- as_d3_ir(
+    ggplot2::ggplot(
+      .phase38_make_facet_empty_sf(),
+      ggplot2::aes(colour = label, fill = label)
+    ) +
+      ggplot2::geom_sf() +
+      ggplot2::facet_wrap(~facet, drop = FALSE)
+  )
+
+  empty_panel_bboxes <- lapply(empty_ir$panels, `[[`, "sf_bbox")
+  empty_non_empty <- vapply(empty_panel_bboxes, Negate(is.null), logical(1))
+
+  expect_equal(empty_ir$facets$type, "wrap")
+  expect_equal(length(empty_ir$panels), 5L)
+  expect_equal(empty_non_empty, c(TRUE, TRUE, TRUE, FALSE, FALSE))
+  expect_true(all(is.finite(empty_panel_bboxes[[1]])))
+  expect_true(all(is.finite(empty_panel_bboxes[[2]])))
+  expect_true(all(is.finite(empty_panel_bboxes[[3]])))
+  expect_true(is.null(empty_ir$panels[[4]]$sf_bbox))
+  expect_true(is.null(empty_ir$panels[[5]]$sf_bbox))
+  expect_null(empty_panel_bboxes[[4]])
+  expect_null(empty_panel_bboxes[[5]])
+  expect_no_warning(validate_ir(empty_ir))
 })
 
 test_that("validate_ir warns on malformed sf_bbox metadata", {
