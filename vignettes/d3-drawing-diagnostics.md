@@ -8,25 +8,34 @@ from what ggplot2 produces.
 
 gg2d3 supports core Cartesian geoms (point, line, path, bar, col, rect, tile,
 text, area, ribbon, segment, hline/vline/abline, boxplot, violin, density,
-smooth) plus polygon-family `geom_sf`.
+smooth) plus polygon-family, point-family, and line-family `geom_sf`.
 
 Geoms outside this set (for example `geom_contour`) log a warning and do not
 render.
 
-## Polygon-family `geom_sf` support
+## `geom_sf` support
 
-`geom_sf()` support exists for polygon-family layers: `POLYGON` and
-`MULTIPOLYGON` geometries render as SVG paths for choropleths and polygon
-overlays. Known CRS inputs are normalized to WGS84 in R before serialization.
-If a layer has no CRS, gg2d3 warns that coordinates will be serialized as-is.
+`geom_sf()` support exists for polygon-family (`POLYGON`, `MULTIPOLYGON`),
+point-family (`POINT`, `MULTIPOINT`), and line-family (`LINESTRING`,
+`MULTILINESTRING`) layers. Polygon and line families render as SVG paths; point
+families render as SVG circle marks. Known CRS inputs are normalized to WGS84 in
+R before serialization. If a layer has no CRS, gg2d3 warns that coordinates
+will be serialized as-is.
 
 Unsupported, empty, invalid, or missing sf geometries are skipped with a
-warning while valid polygon rows remain renderable. Non-polygon sf rendering is
-not supported in v1.8.
+warning while accepted rows remain renderable. `GEOMETRYCOLLECTION`,
+`geom_sf_text()`, and `geom_sf_label()` are not supported.
+
+Interactivity targets `.geom-sf` polygon, point, and line marks. Tooltip,
+hover, custom handler, and Shiny-style callback payloads are sanitized
+source-row objects. Brush selection uses representative-anchor brushing from
+rendered `data-cx` and `data-cy` anchors rather than geometric intersection.
+Browser validation covers sf family interactivity, stacked overlays, faceted and
+empty panels, skipped rows, and zoom suppression.
 
 Map anti-features are explicit: no tile basemaps, no slippy map controls, no
-JavaScript-side CRS reprojection, no polygon-overlap brushing, no non-polygon
-sf rendering, and no large-map performance guarantees.
+JavaScript-side CRS reprojection, no true geometry-overlap brushing, no
+`GEOMETRYCOLLECTION` expansion, and no large-map performance guarantees.
 
 ## Text options
 
