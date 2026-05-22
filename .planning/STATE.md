@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Release Hardening
-status: defining_requirements
-stopped_at: Started v1.10 milestone
+status: roadmap_ready
+stopped_at: Ready for Phase 40
 last_updated: "2026-05-22T11:37:49.761Z"
 last_activity: 2026-05-22
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 10
   completed_plans: 0
   percent: 0
 ---
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-05-22)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
+Phase: 40 (Package Hygiene)
+Plan: Not started
+Status: Roadmap ready
 Last activity: 2026-05-22
 
 Progress: [----------] 0%
@@ -44,10 +44,10 @@ Progress: [----------] 0%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 36 | 3 | - | - |
-| 37 | 4 | - | - |
-| 38 | 3 | - | - |
-| 39 | 3 | - | - |
+| 40 | 3 | - | - |
+| 41 | 2 | - | - |
+| 42 | 3 | - | - |
+| 43 | 2 | - | - |
 
 *Updated after each plan completion*
 | Phase 36 P01 | 6m13s | 2 tasks | 4 files |
@@ -99,8 +99,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: Started v1.10 Release Hardening
-Stopped at: Defining requirements
+Last session: Created v1.10 Release Hardening roadmap
+Stopped at: Ready for Phase 40
 Resume file: None
 
 **Planned Phase:** 39 (Package Internals Hardening) — 3 plans — 2026-05-22T11:05:00Z
@@ -109,3 +109,4 @@ Resume file: None
 **Completed Plan:** 39-03 (bounded regression gate) — 2026-05-22T11:37:16Z
 **Completed Milestone:** v1.9 sf Robustness and Expansion — 2026-05-22
 **Started Milestone:** v1.10 Release Hardening — 2026-05-22
+**Planned Phase:** 40 (Package Hygiene) — 3 plans — 2026-05-22

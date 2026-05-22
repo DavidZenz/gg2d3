@@ -58,21 +58,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HYG-01 | TBD | Pending |
-| HYG-02 | TBD | Pending |
-| HYG-03 | TBD | Pending |
-| DEBT-01 | TBD | Pending |
-| DEBT-02 | TBD | Pending |
-| VAL-01 | TBD | Pending |
-| VAL-02 | TBD | Pending |
-| VAL-03 | TBD | Pending |
-| DOC-01 | TBD | Pending |
-| DOC-02 | TBD | Pending |
+| HYG-01 | Phase 40 | Pending |
+| HYG-02 | Phase 40 | Pending |
+| HYG-03 | Phase 40 | Pending |
+| DEBT-01 | Phase 41 | Pending |
+| DEBT-02 | Phase 41 | Pending |
+| VAL-01 | Phase 42 | Pending |
+| VAL-02 | Phase 42 | Pending |
+| VAL-03 | Phase 42 | Pending |
+| DOC-01 | Phase 43 | Pending |
+| DOC-02 | Phase 43 | Pending |
 
 **Coverage:**
 - v1.10 requirements: 10 total
-- Mapped to phases: 0
-- Unmapped: 10
+- Mapped to phases: 10
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-22*
+*Last updated: 2026-05-22 after creating v1.10 roadmap*
