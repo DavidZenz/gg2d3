@@ -354,3 +354,79 @@ if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
 
   fixtures
 }
+
+.phase38_save_browser_widget <- function(widget, filename) {
+  out_dir <- file.path(.test_output_dir(), "browser-sf")
+  dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+
+  outpath <- file.path(out_dir, filename)
+  htmlwidgets::saveWidget(
+    widget,
+    file = normalizePath(outpath, mustWork = FALSE),
+    selfcontained = FALSE
+  )
+  testthat::expect_true(file.exists(outpath))
+  outpath
+}
+
+.phase38_interactive_widget <- function(plot) {
+  widget <- gg2d3(plot) |>
+    d3_brush(on_brush = "window.__gg2d3_sf_brush = selectedData;") |>
+    d3_tooltip() |>
+    d3_hover() |>
+    d3_handlers(
+      click = "function(event, d) { window.__gg2d3_sf_click = d; }",
+      mouseover = "function(event, d) { window.__gg2d3_sf_mouseover = d; }",
+      shiny_id = "phase38_sf"
+    )
+
+  testthat::expect_warning(
+    widget <- d3_zoom(widget),
+    regexp = "geom_sf.*zoom|zoom.*geom_sf"
+  )
+  testthat::expect_true(widget$x$interactivity$brush$enabled)
+  testthat::expect_true(widget$x$interactivity$tooltip$enabled)
+  testthat::expect_true(widget$x$interactivity$hover$enabled)
+  testthat::expect_false(is.null(widget$x$interactivity$handlers$click))
+  testthat::expect_false(is.null(widget$x$interactivity$handlers$mouseover))
+  testthat::expect_equal(widget$x$interactivity$handlers$shiny_id, "phase38_sf")
+  testthat::expect_null(widget$x$interactivity$zoom)
+
+  widget
+}
+
+.phase38_sf_interaction_fixture_set <- function() {
+  fixtures <- list()
+
+  polygon_plot <- ggplot2::ggplot(
+    .phase35_make_adjacent_sf(),
+    ggplot2::aes(fill = value)
+  ) +
+    ggplot2::geom_sf()
+  fixtures[["phase38-sf-polygon-interaction.html"]] <- .phase38_save_browser_widget(
+    .phase38_interactive_widget(polygon_plot),
+    "phase38-sf-polygon-interaction.html"
+  )
+
+  point_plot <- ggplot2::ggplot(
+    .phase37_make_point_sf(),
+    ggplot2::aes(colour = label, size = value)
+  ) +
+    ggplot2::geom_sf()
+  fixtures[["phase38-sf-point-interaction.html"]] <- .phase38_save_browser_widget(
+    .phase38_interactive_widget(point_plot),
+    "phase38-sf-point-interaction.html"
+  )
+
+  line_plot <- ggplot2::ggplot(
+    .phase37_make_line_sf(),
+    ggplot2::aes(colour = label, linewidth = value)
+  ) +
+    ggplot2::geom_sf()
+  fixtures[["phase38-sf-line-interaction.html"]] <- .phase38_save_browser_widget(
+    .phase38_interactive_widget(line_plot),
+    "phase38-sf-line-interaction.html"
+  )
+
+  fixtures
+}
