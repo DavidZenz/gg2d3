@@ -93,7 +93,7 @@ Plans:
 Plans:
 - [x] 39-01-PLAN.md — Extract sf layer assembly and panel bbox attachment from `as_d3_ir()` into focused helper boundaries with no IR drift.
 - [x] 39-02-PLAN.md — Centralize ggplot2 private/theme/layout access behind compatibility helpers and characterization tests.
-- [ ] 39-03-PLAN.md — Add bounded cross-surface regression coverage for representative non-sf, sf, facet, legend, date-scale, coord_flip, and renderer-edge behavior.
+- [x] 39-03-PLAN.md — Add bounded cross-surface regression coverage for representative non-sf, sf, facet, legend, date-scale, coord_flip, and renderer-edge behavior.
 
 ## Progress
 
@@ -105,7 +105,7 @@ Phases execute in numeric order: 36 → 37 → 38 → 39
 | 36. Browser sf Smoke Harness | 3/3 | Complete    | 2026-05-21 |
 | 37. Non-Polygon sf IR And Renderer | 4/4 | Complete   | 2026-05-21 |
 | 38. sf Interaction, Facet, And Documentation Hardening | 3/3 | Complete    | 2026-05-22 |
-| 39. Package Internals Hardening | 2/3 | In Progress | - |
+| 39. Package Internals Hardening | 3/3 | Ready for verification | - |
 
 ## Archived Milestones
 
