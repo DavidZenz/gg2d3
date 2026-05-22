@@ -77,7 +77,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 38-01-PLAN.md — Harden live browser sf interaction gates for tooltip, hover, handlers, Shiny-style payloads, brush callbacks, sanitization, and zoom suppression.
-- [ ] 38-02-PLAN.md — Expand sf facet validation for wrap/grid point, line, polygon, mixed-family, and empty-panel cases with panel-local bbox/projection checks.
+- [x] 38-02-PLAN.md — Expand sf facet validation for wrap/grid point, line, polygon, mixed-family, and empty-panel cases with panel-local bbox/projection checks.
 - [ ] 38-03-PLAN.md — Refresh README, vignettes, diagnostics, roxygen, and generated help for the v1.9 polygon/point/line sf support contract.
 **UI hint**: yes
 
@@ -100,7 +100,7 @@ Phases execute in numeric order: 36 → 37 → 38 → 39
 |-------|----------------|--------|-----------|
 | 36. Browser sf Smoke Harness | 3/3 | Complete    | 2026-05-21 |
 | 37. Non-Polygon sf IR And Renderer | 4/4 | Complete   | 2026-05-21 |
-| 38. sf Interaction, Facet, And Documentation Hardening | 0/TBD | Not started | - |
+| 38. sf Interaction, Facet, And Documentation Hardening | 2/3 | In progress | - |
 | 39. Package Internals Hardening | 0/TBD | Not started | - |
 
 ## Archived Milestones
