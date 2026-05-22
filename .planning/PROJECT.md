@@ -10,18 +10,23 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.9 implementation phases are complete and ready for milestone closeout. The package now has automated browser smoke harnessing for sf widgets, point-family and line-family `geom_sf()` support, hardened sf interaction/facet/documentation coverage, and package-internals hardening around sf IR assembly, ggplot2 compatibility access, and cross-surface regression gates.
+v1.9 shipped on 2026-05-22. The package now has automated browser smoke harnessing for sf widgets, point-family and line-family `geom_sf()` support, hardened sf interaction/facet/documentation coverage, and package-internals hardening around sf IR assembly, ggplot2 compatibility access, and cross-surface regression gates.
 
-## Current Milestone: v1.9 sf Robustness and Expansion
+## Current Milestone
+
+No active milestone. Start the next cycle with `$gsd-new-milestone`.
+
+## Last Shipped Milestone: v1.9 sf Robustness and Expansion
 
 **Goal:** Strengthen the `geom_sf` foundation with automated browser validation, non-polygon sf geometry support, and core package hardening.
 
-**Target features:**
-- DOM-level smoke coverage for rendered `path.geom-sf` nodes, centroid attributes, brushing behavior, and fixture automation.
+**Shipped features:**
+- DOM-level smoke coverage for rendered sf marks, centroid/anchor attributes, brushing behavior, runtime browser errors, sanitized payloads, and fixture automation.
 - Non-polygon sf support for point and line geometry families without weakening the polygon-first contracts.
-- Package hardening around high-risk internals such as the monolithic IR converter, private ggplot2 API usage, and known renderer edge cases.
+- sf point/line/mixed-family interactivity, facet validation, documentation, and generated help aligned to the v1.9 public support contract.
+- Package hardening around high-risk internals such as sf IR helper boundaries, private ggplot2 API compatibility wrappers, and known renderer edge cases.
 
-## Last Shipped Milestone: v1.8 Production geom_sf Polygon MVP
+## Previous Shipped Milestone: v1.8 Production geom_sf Polygon MVP
 
 **Goal:** Ship production-safe `geom_sf` polygon rendering for gg2d3, starting with polygon-family choropleths and the interactivity behaviors proven in v1.7.
 
@@ -82,7 +87,7 @@ v1.9 implementation phases are complete and ready for milestone closeout. The pa
 
 ### Active
 
-- None. v1.9 phase work is complete pending milestone closeout/audit.
+- None. Fresh requirements should be defined with the next milestone.
 
 ### Out of Scope
 
@@ -160,4 +165,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-22 after completing Phase 39 package internals hardening*
+*Last updated: 2026-05-22 after archiving v1.9 sf Robustness and Expansion*

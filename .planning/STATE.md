@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: sf Robustness and Expansion
-status: milestone_complete
-stopped_at: Completed Phase 39
+status: no_active_milestone
+stopped_at: Archived v1.9 milestone
 last_updated: "2026-05-22T11:37:49.761Z"
 last_activity: 2026-05-22
 progress:
@@ -18,16 +18,16 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-21)
+See: .planning/PROJECT.md (updated 2026-05-22)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** Phase 39 — Package Internals Hardening
+**Current focus:** No active milestone. Next step is `$gsd-new-milestone`.
 
 ## Current Position
 
-Phase: 39 (Package Internals Hardening)
-Plan: Complete
-Status: Milestone complete
+Phase: None
+Plan: None
+Status: v1.9 archived; ready for next milestone
 Last activity: 2026-05-22
 
 Progress: [██████████] 100%
@@ -99,11 +99,12 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: Completed Phase 39 Plan 03
-Stopped at: Completed Phase 39
+Last session: Archived v1.9 sf Robustness and Expansion
+Stopped at: Archived v1.9 milestone
 Resume file: None
 
 **Planned Phase:** 39 (Package Internals Hardening) — 3 plans — 2026-05-22T11:05:00Z
 **Completed Plan:** 39-01 (sf helper extraction) — 2026-05-22T11:29:57Z
 **Completed Plan:** 39-02 (ggplot2 compatibility wrappers) — 2026-05-22T11:33:56Z
 **Completed Plan:** 39-03 (bounded regression gate) — 2026-05-22T11:37:16Z
+**Completed Milestone:** v1.9 sf Robustness and Expansion — 2026-05-22

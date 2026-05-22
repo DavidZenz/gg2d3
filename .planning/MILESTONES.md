@@ -1,5 +1,22 @@
 # Milestones
 
+## v1.9 sf Robustness and Expansion (Shipped: 2026-05-22)
+
+**Phases completed:** 4 phases, 13 plans, 32 tasks
+
+**Key accomplishments:**
+
+- Browser sf smoke harness now generates non-self-contained htmlwidget fixtures, opens them through optional chromote tooling, and asserts live sf DOM contracts, runtime errors, sanitized payloads, centroid/anchor brushing, and zoom suppression.
+- `geom_sf()` support expanded from polygon-family geometries to point-family and line-family geometries with shared row identity, CRS normalization, diagnostics, panel bbox metadata, and family-aware renderer classes.
+- sf tooltip, hover, custom handler, Shiny-style handler, and brush behavior now work across polygon, point, line, multipoint, multiline, mixed-family, stacked, skipped-row, and faceted cases.
+- README, vignettes, diagnostics docs, roxygen source, and generated help now document the v1.9 polygon/point/line support contract and explicit map anti-features.
+- sf IR assembly and panel bbox attachment were extracted behind focused internal helpers while preserving existing IR behavior.
+- Private ggplot2 theme/layout access is quarantined in `R/ggplot2_compat.R`, and representative non-sf, sf, facet, legend, date-scale, coord_flip, and renderer-edge behavior is covered by bounded regression tests.
+
+**Known deferred items at close:** 0 open GSD artifacts. No formal `v1.9-MILESTONE-AUDIT.md` was present; closeout relied on the clear open-artifact audit plus phase verification and code review artifacts.
+
+---
+
 ## v1.8 Production geom_sf Polygon MVP (Shipped: 2026-05-20)
 
 **Phases completed:** 4 phases, 11 plans, 21 tasks
