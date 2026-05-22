@@ -74,7 +74,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
   # Extract a single theme element as a plain list for JSON serialization
   extract_theme_element <- function(element_name, theme) {
-    calc <- tryCatch(ggplot2:::calc_element(element_name, theme), error = function(e) NULL)
+    calc <- gg2d3_calc_element(element_name, theme)
 
     if (is.null(calc)) {
       return(NULL)
@@ -443,17 +443,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
       # The panel_params contain ggplot2's pre-computed expanded range
 
       # Try to get the continuous_range (already expanded by ggplot2)
-      expanded_range <- NULL
-
-      if (!is.null(panel_params_axis)) {
-        # First try: direct .range field (some ggplot2 versions)
-        if (!is.null(panel_params_axis$continuous_range)) {
-          expanded_range <- panel_params_axis$continuous_range
-        } else if (!is.null(panel_params_axis$range)) {
-          # Try range field if continuous_range doesn't exist
-          expanded_range <- panel_params_axis$range
-        }
-      }
+      expanded_range <- gg2d3_continuous_range(panel_params_axis)
 
       # Fallback: if we couldn't get range from panel_params, use scale limits
       if (is.null(expanded_range) || length(expanded_range) != 2) {
@@ -549,10 +539,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
         }
 
         # Include pre-formatted labels as fallback
-        formatted_labels <- tryCatch({
-          pp_labels <- panel_params_axis$get_labels()
-          if (length(pp_labels) > 0) as.character(pp_labels) else NULL
-        }, error = function(e) NULL)
+        formatted_labels <- gg2d3_panel_labels(panel_params_axis)
+        if (length(formatted_labels) == 0L) formatted_labels <- NULL
         result$labels <- formatted_labels
       }
 
@@ -569,12 +557,13 @@ as_d3_ir <- function(p, width = 640, height = 400,
   }
 
   # Extract grid breaks from panel params
+  first_panel_params <- b$layout$panel_params[[1]]
   if (is_flip) {
-    pp_x <- b$layout$panel_params[[1]]$y
-    pp_y <- b$layout$panel_params[[1]]$x
+    pp_x <- gg2d3_panel_axis(first_panel_params, "y")
+    pp_y <- gg2d3_panel_axis(first_panel_params, "x")
   } else {
-    pp_x <- b$layout$panel_params[[1]]$x
-    pp_y <- b$layout$panel_params[[1]]$y
+    pp_x <- gg2d3_panel_axis(first_panel_params, "x")
+    pp_y <- gg2d3_panel_axis(first_panel_params, "y")
   }
 
   x_breaks <- pp_x$breaks
@@ -624,7 +613,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
   # Extract theme information
   theme_ir <- NULL
-  th <- ggplot2:::plot_theme(b$plot)
+  th <- gg2d3_plot_theme(b$plot)
   if (!is.null(th)) {
     theme_ir <- list(
       panel = list(
@@ -665,7 +654,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
         margin = extract_theme_element("legend.margin", th),
         spacing = extract_theme_element("legend.spacing", th),
         key.size = tryCatch({
-          size <- ggplot2:::calc_element("legend.key.size", th)
+          size <- gg2d3_calc_element("legend.key.size", th)
           inches <- grid::convertUnit(size, "inches", valueOnly = TRUE)
           inches * 96
         }, error = function(e) 23)
@@ -722,20 +711,12 @@ as_d3_ir <- function(p, width = 640, height = 400,
   # Tick labels mirror the displayed (post-flip) axes — matches the swap
   # applied to x_label/y_label below. Use the unswapped panel_params because
   # ggplot_build already orients panel_params$x/$y to the rendered axes.
-  pp_x_display <- b$layout$panel_params[[1]]$x
-  pp_y_display <- b$layout$panel_params[[1]]$y
+  pp_x_display <- gg2d3_panel_axis(first_panel_params, "x")
+  pp_y_display <- gg2d3_panel_axis(first_panel_params, "y")
 
-  x_tick_labels <- tryCatch({
-    labs <- pp_x_display$get_labels()
-    labs <- labs[!is.na(labs)]
-    as.character(labs)
-  }, error = function(e) character(0))
+  x_tick_labels <- gg2d3_panel_labels(pp_x_display)
 
-  y_tick_labels <- tryCatch({
-    labs <- pp_y_display$get_labels()
-    labs <- labs[!is.na(labs)]
-    as.character(labs)
-  }, error = function(e) character(0))
+  y_tick_labels <- gg2d3_panel_labels(pp_y_display)
 
   has_sec_x <- tryCatch({
     sec <- b$layout$panel_scales_x[[1]]$secondary.axis
@@ -747,10 +728,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
     !is.null(sec) && !inherits(sec, "waiver")
   }, error = function(e) FALSE)
 
-  legend_position <- tryCatch({
-    pos <- ggplot2:::calc_element("legend.position", th)
-    if (is.character(pos)) pos else "right"
-  }, error = function(e) "right")
+  legend_position <- gg2d3_calc_element("legend.position", th, default = "right")
+  if (!is.character(legend_position)) legend_position <- "right"
 
   subtitle_text <- b$plot$labels$subtitle %||% ""
   caption_text <- b$plot$labels$caption %||% ""
@@ -863,9 +842,9 @@ as_d3_ir <- function(p, width = 640, height = 400,
       })
       panels_ir <- lapply(seq_along(b$layout$panel_params), function(p) {
         pp <- b$layout$panel_params[[p]]
-        if (is_flip) { ppx <- pp$y; ppy <- pp$x } else { ppx <- pp$x; ppy <- pp$y }
-        panel_x_range <- if (xscale_obj$is_discrete()) unname(xscale_obj$get_limits()) else unname(ppx$continuous_range %||% ppx$range)
-        panel_y_range <- if (yscale_obj$is_discrete()) unname(yscale_obj$get_limits()) else unname(ppy$continuous_range %||% ppy$range)
+        if (is_flip) { ppx <- gg2d3_panel_axis(pp, "y"); ppy <- gg2d3_panel_axis(pp, "x") } else { ppx <- gg2d3_panel_axis(pp, "x"); ppy <- gg2d3_panel_axis(pp, "y") }
+        panel_x_range <- if (xscale_obj$is_discrete()) unname(xscale_obj$get_limits()) else unname(gg2d3_continuous_range(ppx))
+        panel_y_range <- if (yscale_obj$is_discrete()) unname(yscale_obj$get_limits()) else unname(gg2d3_continuous_range(ppy))
         panel_x_breaks <- unname(ppx$breaks[!is.na(ppx$breaks)])
         panel_y_breaks <- unname(ppy$breaks[!is.na(ppy$breaks)])
         panel_x_minor_breaks <- if (!is.null(ppx$minor_breaks)) unname(ppx$minor_breaks[!is.na(ppx$minor_breaks)]) else NULL
@@ -876,7 +855,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
         } else if (!is.null(y_trans_name) && y_trans_name == "time") { panel_y_range <- panel_y_range * 1000; panel_y_breaks <- panel_y_breaks * 1000; if (!is.null(panel_y_minor_breaks)) panel_y_minor_breaks <- panel_y_minor_breaks * 1000 }
         list(PANEL = as.integer(p), x_range = panel_x_range, y_range = panel_y_range, x_breaks = panel_x_breaks, y_breaks = panel_y_breaks, x_minor_breaks = panel_x_minor_breaks, y_minor_breaks = panel_y_minor_breaks)
       })
-      panel_spacing <- tryCatch({ spacing <- ggplot2:::calc_element("panel.spacing", th); if (!is.null(spacing)) grid::convertUnit(spacing, "inches", valueOnly = TRUE) * 96 else 7.3 }, error = function(e) 7.3)
+      panel_spacing <- tryCatch({ spacing <- gg2d3_calc_element("panel.spacing", th); if (!is.null(spacing)) grid::convertUnit(spacing, "inches", valueOnly = TRUE) * 96 else 7.3 }, error = function(e) 7.3)
       facets_ir <- list(type = "wrap", vars = facet_vars, nrow = as.integer(max(layout_df$ROW)), ncol = as.integer(max(layout_df$COL)), scales = scales_mode, spacing = panel_spacing, layout = lapply(seq_len(nrow(layout_df)), function(i) { row <- as.list(layout_df[i, , drop = FALSE]); row$PANEL <- as.integer(row$PANEL); row$ROW <- as.integer(row$ROW); row$COL <- as.integer(row$COL); row$SCALE_X <- as.integer(row$SCALE_X); row$SCALE_Y <- as.integer(row$SCALE_Y); row }), strips = strips)
     } else if (is_facet_grid) {
       layout_df <- b$layout$layout; row_vars <- names(b$layout$facet$params$rows); col_vars <- names(b$layout$facet$params$cols)
@@ -886,9 +865,9 @@ as_d3_ir <- function(p, width = 640, height = 400,
       col_strips <- NULL; if (length(col_vars) > 0) { col_combos <- unique(layout_df[, c("COL", col_vars), drop = FALSE]); col_strips <- lapply(seq_along(col_vars), function(l) { var <- col_vars[l]; level_labels <- lapply(seq_len(nrow(col_combos)), function(i) list(COL = as.integer(col_combos$COL[i]), label = as.character(col_combos[[var]][i]))); list(level = l, variable = var, labels = level_labels) }) }
       panels_ir <- lapply(seq_along(b$layout$panel_params), function(p) {
         pp <- b$layout$panel_params[[p]]
-        if (is_flip) { ppx <- pp$y; ppy <- pp$x } else { ppx <- pp$x; ppy <- pp$y }
-        panel_x_range <- if (xscale_obj$is_discrete()) unname(xscale_obj$get_limits()) else unname(ppx$continuous_range %||% ppx$range)
-        panel_y_range <- if (yscale_obj$is_discrete()) unname(yscale_obj$get_limits()) else unname(ppy$continuous_range %||% ppy$range)
+        if (is_flip) { ppx <- gg2d3_panel_axis(pp, "y"); ppy <- gg2d3_panel_axis(pp, "x") } else { ppx <- gg2d3_panel_axis(pp, "x"); ppy <- gg2d3_panel_axis(pp, "y") }
+        panel_x_range <- if (xscale_obj$is_discrete()) unname(xscale_obj$get_limits()) else unname(gg2d3_continuous_range(ppx))
+        panel_y_range <- if (yscale_obj$is_discrete()) unname(yscale_obj$get_limits()) else unname(gg2d3_continuous_range(ppy))
         panel_x_breaks <- unname(ppx$breaks[!is.na(ppx$breaks)])
         panel_y_breaks <- unname(ppy$breaks[!is.na(ppy$breaks)])
         panel_x_minor_breaks <- if (!is.null(ppx$minor_breaks)) unname(ppx$minor_breaks[!is.na(ppx$minor_breaks)]) else NULL
@@ -899,7 +878,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
         } else if (!is.null(y_trans_name) && y_trans_name == "time") { panel_y_range <- panel_y_range * 1000; panel_y_breaks <- panel_y_breaks * 1000; if (!is.null(panel_y_minor_breaks)) panel_y_minor_breaks <- panel_y_minor_breaks * 1000 }
         list(PANEL = as.integer(p), x_range = panel_x_range, y_range = panel_y_range, x_breaks = panel_x_breaks, y_breaks = panel_y_breaks, x_minor_breaks = panel_x_minor_breaks, y_minor_breaks = panel_y_minor_breaks)
       })
-      panel_spacing <- tryCatch({ spacing <- ggplot2:::calc_element("panel.spacing", th); if (!is.null(spacing)) grid::convertUnit(spacing, "inches", valueOnly = TRUE) * 96 else 7.3 }, error = function(e) 7.3)
+      panel_spacing <- tryCatch({ spacing <- gg2d3_calc_element("panel.spacing", th); if (!is.null(spacing)) grid::convertUnit(spacing, "inches", valueOnly = TRUE) * 96 else 7.3 }, error = function(e) 7.3)
       facets_ir <- list(type = "grid", rows = row_vars, cols = col_vars, scales = scales_mode, nrow = as.integer(max(layout_df$ROW)), ncol = as.integer(max(layout_df$COL)), spacing = panel_spacing, layout = lapply(seq_len(nrow(layout_df)), function(i) { row <- as.list(layout_df[i, , drop = FALSE]); row$PANEL <- as.integer(row$PANEL); row$ROW <- as.integer(row$ROW); row$COL <- as.integer(row$COL); row$SCALE_X <- as.integer(row$SCALE_X); row$SCALE_Y <- as.integer(row$SCALE_Y); row }), row_strips = row_strips, col_strips = col_strips)
     } else {
       facets_ir <- list(type = "null", vars = list(), nrow = 1L, ncol = 1L, layout = list(list(PANEL = 1L, ROW = 1L, COL = 1L, SCALE_X = 1L, SCALE_Y = 1L)), strips = list())
