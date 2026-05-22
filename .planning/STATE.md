@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: sf Robustness and Expansion
-status: ready_to_execute
-stopped_at: Planned Phase 39
-last_updated: "2026-05-22T11:05:00Z"
+status: executing
+stopped_at: Completed 39-01-PLAN.md
+last_updated: "2026-05-22T11:30:32.781Z"
 last_activity: 2026-05-22
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 13
-  completed_plans: 10
-  percent: 77
+  completed_plans: 11
+  percent: 85
 ---
 
 # Project State
@@ -25,18 +25,18 @@ See: .planning/PROJECT.md (updated 2026-05-21)
 
 ## Current Position
 
-Phase: 39
-Plan: 1 of 3
+Phase: 39 (Package Internals Hardening) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
 Last activity: 2026-05-22
 
-Progress: [████████░░] 77%
+Progress: [█████████░] 85%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 10 (v1.9 milestone)
+- Total plans completed: 11 (v1.9 milestone)
 - Average duration: 6m13s
 - Total execution time: 6m13s
 
@@ -73,6 +73,9 @@ Recent decisions affecting current work:
 - 36-02: Used a single-file testthat run as the local verification command because this testthat build does not support test_file(filter = ...).
 - 36-03: Browser smoke tests now capture runtime console/page errors and assert sanitized sf click, tooltip, and brush payloads.
 - 36 complete: The live browser path is optional and skips cleanly in CRAN-like environments; local full execution requires chromote, Chrome, sf, and geojsonsf.
+- 39-01: Kept sf helper extraction internal and roxygen-free while preserving sf/core IR behavior.
+- 39-01: Updated stale polygon-only sf utility tests to use explicit `supported_types` now that point and line are supported by default.
+- 39-01: Treated ggplot2 4.x coordinate class drift as a bounded compatibility fix required by the no-IR-drift gate.
 
 ### Pending Todos
 
@@ -92,8 +95,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: Planned Phase 39
-Stopped at: Phase 39 planned and ready to execute
-Resume file: .planning/phases/39-package-internals-hardening/39-01-PLAN.md
+Last session: Completed Phase 39 Plan 01
+Stopped at: Completed 39-01-PLAN.md
+Resume file: .planning/phases/39-package-internals-hardening/39-02-PLAN.md
 
 **Planned Phase:** 39 (Package Internals Hardening) — 3 plans — 2026-05-22T11:05:00Z
+**Completed Plan:** 39-01 (sf helper extraction) — 2026-05-22T11:29:57Z

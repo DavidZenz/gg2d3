@@ -91,7 +91,7 @@ Plans:
   3. Regression coverage protects representative non-sf plots, polygon sf, point sf, line sf, facets, legends, date scales, coord_flip, and known renderer edge cases after hardening changes.
 **Plans**: 3 plans
 Plans:
-- [ ] 39-01-PLAN.md — Extract sf layer assembly and panel bbox attachment from `as_d3_ir()` into focused helper boundaries with no IR drift.
+- [x] 39-01-PLAN.md — Extract sf layer assembly and panel bbox attachment from `as_d3_ir()` into focused helper boundaries with no IR drift.
 - [ ] 39-02-PLAN.md — Centralize ggplot2 private/theme/layout access behind compatibility helpers and characterization tests.
 - [ ] 39-03-PLAN.md — Add bounded cross-surface regression coverage for representative non-sf, sf, facet, legend, date-scale, coord_flip, and renderer-edge behavior.
 
@@ -105,7 +105,7 @@ Phases execute in numeric order: 36 → 37 → 38 → 39
 | 36. Browser sf Smoke Harness | 3/3 | Complete    | 2026-05-21 |
 | 37. Non-Polygon sf IR And Renderer | 4/4 | Complete   | 2026-05-21 |
 | 38. sf Interaction, Facet, And Documentation Hardening | 3/3 | Complete    | 2026-05-22 |
-| 39. Package Internals Hardening | 0/3 | Ready to execute | - |
+| 39. Package Internals Hardening | 1/3 | In Progress | - |
 
 ## Archived Milestones
 
