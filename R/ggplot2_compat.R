@@ -1,6 +1,6 @@
 gg2d3_plot_theme <- function(plot) {
   tryCatch(
-    ggplot2:::plot_theme(plot),
+    ggplot2:::plot_theme(plot), # no exported equivalent; quarantined in compat helper
     error = function(e) NULL
   )
 }
@@ -12,7 +12,7 @@ gg2d3_calc_element <- function(element_name, theme, default = NULL) {
   }
 
   element <- tryCatch(
-    ggplot2:::calc_element(element_name, theme),
+    ggplot2:::calc_element(element_name, theme), # no exported equivalent; quarantined in compat helper
     error = function(e) NULL
   )
 
