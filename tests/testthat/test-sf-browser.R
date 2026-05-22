@@ -113,6 +113,52 @@ if (!exists("skip_browser_sf_smoke", mode = "function")) {
   )
 }
 
+.browser_sf_phase38_interaction_script <- function() {
+  paste(
+    "(() => new Promise(resolve => {",
+    "window.__gg2d3_sf_click = null;",
+    "window.__gg2d3_sf_mouseover = null;",
+    "window.__gg2d3_sf_brush = [];",
+    "window.__gg2d3_sf_shiny = null;",
+    "window.Shiny = { setInputValue: function(id, value) { window.__gg2d3_sf_shiny = { id: id, value: value }; } };",
+    "const mark = document.querySelector('.geom-sf');",
+    "const panelGroup = mark ? mark.closest('.panel') : null;",
+    "const cx = mark ? Number(mark.getAttribute('data-cx')) : NaN;",
+    "const cy = mark ? Number(mark.getAttribute('data-cy')) : NaN;",
+    "if (mark) {",
+    "  mark.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window, clientX: cx, clientY: cy }));",
+    "  mark.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, cancelable: true, view: window, clientX: cx, clientY: cy }));",
+    "}",
+    "const brush = panelGroup && panelGroup.__gg2d3_brush;",
+    "if (brush && Number.isFinite(cx) && Number.isFinite(cy)) {",
+    "  brush.group.call(brush.behavior.move, [[cx - 3, cy - 3], [cx + 3, cy + 3]]);",
+    "}",
+    "setTimeout(() => {",
+    "  const tooltip = document.querySelector('.gg2d3-tooltip');",
+    "  resolve({",
+    "    tag: mark ? mark.tagName.toLowerCase() : '',",
+    "    className: mark ? (mark.getAttribute('class') || '') : '',",
+    "    rowId: mark ? mark.getAttribute('data-row-id') : null,",
+    "    cx: cx,",
+    "    cy: cy,",
+    "    click: window.__gg2d3_sf_click || null,",
+    "    mouseover: window.__gg2d3_sf_mouseover || null,",
+    "    shiny: window.__gg2d3_sf_shiny || null,",
+    "    tooltipText: tooltip ? (tooltip.textContent || tooltip.innerHTML || '') : '',",
+    "    brush: window.__gg2d3_sf_brush || []",
+    "  });",
+    "}, 100);",
+    "}))()"
+  )
+}
+
+.browser_sf_expect_unique_public_rows <- function(rows) {
+  .browser_sf_expect_public_payload_rows(rows)
+  row_ids <- vapply(rows, function(row) as.character(row$row_id), character(1))
+  expect_true(all(nzchar(row_ids)))
+  expect_equal(row_ids, unique(row_ids))
+}
+
 .browser_sf_assert_interaction_payloads <- function() {
   nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   choropleth <- ggplot2::ggplot(nc, ggplot2::aes(fill = BIR74)) +
@@ -435,4 +481,66 @@ test_that("BRSF-02 interaction: sf browser payloads are sanitized and brush uses
   skip_browser_sf_smoke()
 
   .browser_sf_assert_interaction_payloads()
+})
+
+test_that("SFXDOC-01 DOM: sf point and line interactions expose sanitized source-row payloads", {
+  skip_browser_sf_smoke()
+
+  fixtures <- .phase38_sf_interaction_fixture_set()
+  expected <- list(
+    "phase38-sf-point-interaction.html" = list(
+      count = 3L,
+      tag = "circle",
+      class = "geom-sf-point"
+    ),
+    "phase38-sf-line-interaction.html" = list(
+      count = 2L,
+      tag = "path",
+      class = "geom-sf-line"
+    )
+  )
+
+  with_chromote_session({
+    logs <- browser_console_collector(session)
+
+    for (fixture_name in names(expected)) {
+      html_path <- fixtures[[fixture_name]]
+      expect_true(file.exists(html_path))
+
+      tryCatch(
+        {
+          session$go_to(.browser_sf_file_url(html_path), delay = 1)
+          wait_for_sf_marks(
+            session,
+            expected = expected[[fixture_name]]$count,
+            timeout = 10
+          )
+
+          result <- eval_js_value(session, .browser_sf_phase38_interaction_script())
+
+          expect_identical(result$tag, expected[[fixture_name]]$tag)
+          expect_true(grepl(expected[[fixture_name]]$class, result$className, fixed = TRUE))
+          expect_true(nzchar(result$rowId))
+          expect_true(is.finite(result$cx))
+          expect_true(is.finite(result$cy))
+          .browser_sf_expect_public_payload(result$click)
+          .browser_sf_expect_public_payload(result$mouseover)
+          expect_equal(result$shiny$id, "phase38_sf")
+          .browser_sf_expect_public_payload(result$shiny$value)
+          expect_false(grepl("_geom|_centroid|_sfFamily|_pointIndex|_pointCoord", result$tooltipText))
+          .browser_sf_expect_unique_public_rows(result$brush)
+          assert_no_browser_errors(logs)
+        },
+        error = function(e) {
+          write_browser_failure_artifacts(
+            tools::file_path_sans_ext(fixture_name),
+            html_path,
+            logs,
+            session
+          )
+          stop(e)
+        }
+      )
+    }
+  })
 })
