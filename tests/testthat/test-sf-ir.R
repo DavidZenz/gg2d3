@@ -423,6 +423,52 @@ test_that("SFGEOM-04 facet_wrap empty panel keeps NULL sf_bbox for point and lin
   expect_no_warning(validate_ir(ir))
 })
 
+test_that("HARD-01 sf helper extraction keeps stacked and faceted bbox contracts", {
+  base_sf <- sf::st_sf(
+    id = 1L,
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(sf_ir_square_ring(0, 0, 2, 2))),
+      crs = 4326
+    )
+  )
+  point_sf <- sf::st_sf(
+    id = 1L,
+    geometry = sf::st_sfc(sf::st_point(c(10, 20)), crs = 4326)
+  )
+
+  stacked_ir <- as_d3_ir(
+    ggplot2::ggplot() +
+      ggplot2::geom_sf(data = base_sf) +
+      ggplot2::geom_sf(data = point_sf)
+  )
+
+  expect_equal(stacked_ir$panels[[1]]$sf_bbox, c(0, 0, 10, 20))
+  expect_equal(stacked_ir$coord$bbox, c(0, 0, 10, 20))
+
+  facet_sf <- sf::st_sf(
+    facet = factor(c("polygon", "point"), levels = c("polygon", "point", "empty")),
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(sf_ir_square_ring(0, 0, 1, 1))),
+      sf::st_point(c(5, 6)),
+      crs = 4326
+    )
+  )
+
+  facet_ir <- as_d3_ir(
+    ggplot2::ggplot(facet_sf) +
+      ggplot2::geom_sf() +
+      ggplot2::facet_wrap(~facet, drop = FALSE)
+  )
+
+  expect_equal(facet_ir$facets$type, "wrap")
+  expect_equal(length(facet_ir$panels), 3L)
+  expect_equal(facet_ir$panels[[1]]$sf_bbox, c(0, 0, 1, 1))
+  expect_equal(facet_ir$panels[[2]]$sf_bbox, c(5, 6, 5, 6))
+  expect_null(facet_ir$panels[[3]]$sf_bbox)
+  expect_no_warning(validate_ir(stacked_ir))
+  expect_no_warning(validate_ir(facet_ir))
+})
+
 test_that("SFXDOC-02 IR: faceted sf panels keep family-specific bbox isolation", {
   expect_warning(
     wrap_ir <- as_d3_ir(

@@ -234,7 +234,7 @@ square_ring <- function(xmin = 0, ymin = 0, xmax = 1, ymax = 1) {
   )
 }
 
-test_that("prepare_sf_geometry_ir keeps polygon family and reports unsupported types", {
+test_that("prepare_sf_geometry_ir can restrict supported geometry types", {
   skip_if_not_installed("sf")
   skip_if_not_installed("geojsonsf")
 
@@ -250,7 +250,10 @@ test_that("prepare_sf_geometry_ir keeps polygon family and reports unsupported t
   df$geometry <- sf::st_sfc(polygon, multipolygon, point, line, crs = 4326)
 
   expect_warning(
-    result <- prepare_sf_geometry_ir(df),
+    result <- prepare_sf_geometry_ir(
+      df,
+      supported_types = c("POLYGON", "MULTIPOLYGON")
+    ),
     regexp = "skipped 2"
   )
 
@@ -263,6 +266,31 @@ test_that("prepare_sf_geometry_ir keeps polygon family and reports unsupported t
   expect_true(all(c("POLYGON", "MULTIPOLYGON") %in% result$sf_diagnostics$accepted_geometry_types))
   expect_type(result$geometries, "character")
   expect_true(all(grepl('\\{"type":', result$geometries)))
+})
+
+test_that("HARD-01 prepare_sf_geometry_ir preserves row identity and diagnostics", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("geojsonsf")
+
+  polygon <- sf::st_polygon(list(square_ring()))
+  point <- sf::st_point(c(2, 2))
+  line <- sf::st_linestring(matrix(c(3, 0, 4, 1), ncol = 2, byrow = TRUE))
+  collection <- sf::st_geometrycollection(list(sf::st_point(c(10, 10))))
+
+  df <- data.frame(label = c("polygon", "point", "line", "collection"))
+  df$geometry <- sf::st_sfc(polygon, point, line, collection, crs = 4326)
+
+  expect_warning(
+    result <- prepare_sf_geometry_ir(df),
+    regexp = "skipped 1"
+  )
+
+  expect_equal(result$sf_diagnostics$accepted_rows, c(1L, 2L, 3L))
+  expect_equal(result$sf_diagnostics$skipped_rows, 4L)
+  expect_equal(result$sf_family, "mixed")
+  expect_equal(length(result$geometries), nrow(result$data))
+  expect_true(all(nzchar(as.character(result$data$row_id))))
+  expect_true(all(nzchar(result$data$.sf_family)))
 })
 
 test_that("prepare_sf_geometry_ir records skipped mixed sf rows", {
@@ -300,7 +328,10 @@ test_that("prepare_sf_geometry_ir records skipped mixed sf rows", {
   df$geometry[[5]] <- NA
 
   expect_warning(
-    result <- prepare_sf_geometry_ir(df),
+    result <- prepare_sf_geometry_ir(
+      df,
+      supported_types = c("POLYGON", "MULTIPOLYGON")
+    ),
     regexp = "skipped 4"
   )
 
