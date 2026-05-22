@@ -33,12 +33,12 @@ created: 2026-05-22
 | 39-01-01 | 01 | 1 | HARD-01 | T-39-01 | N/A | unit/characterization | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-utils.R"); testthat::test_file("tests/testthat/test-sf-ir.R")'` | yes | pending |
 | 39-01-02 | 01 | 1 | HARD-01 | T-39-01 | N/A | unit | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-utils.R")'` | yes | pending |
 | 39-01-03 | 01 | 1 | HARD-01 | T-39-01 | N/A | regression | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-sf-ir.R"); testthat::test_file("tests/testthat/test-sf-renderer.R")'` | yes | pending |
-| 39-02-01 | 02 | 1 | HARD-02 | T-39-02 | N/A | unit/characterization | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-ggplot2-compat.R")'` | planned | pending |
-| 39-02-02 | 02 | 1 | HARD-02 | T-39-02 | N/A | regression | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-layout.R"); testthat::test_file("tests/testthat/test-legends.R")'` | yes | pending |
-| 39-02-03 | 02 | 1 | HARD-02 | T-39-02 | N/A | regression | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-date-scales.R"); testthat::test_file("tests/testthat/test-coord-flip.R")'` | yes | pending |
-| 39-03-01 | 03 | 2 | HARD-03 | T-39-03 | N/A | regression | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-regression-core.R")'` | planned | pending |
-| 39-03-02 | 03 | 2 | HARD-03 | T-39-03 | N/A | regression | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-regression-core.R"); testthat::test_file("tests/testthat/test-sf-browser.R")'` | planned | pending |
-| 39-03-03 | 03 | 2 | HARD-03 | T-39-03 | N/A | full regression | Full suite command | planned | pending |
+| 39-02-01 | 02 | 2 | HARD-02 | T-39-02 | N/A | unit/characterization | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-ggplot2-compat.R")'` | planned | pending |
+| 39-02-02 | 02 | 2 | HARD-02 | T-39-02 | N/A | regression | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-layout.R"); testthat::test_file("tests/testthat/test-legends.R")'` | yes | pending |
+| 39-02-03 | 02 | 2 | HARD-02 | T-39-02 | N/A | regression | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-date-scales.R"); testthat::test_file("tests/testthat/test-coord-flip.R")'` | yes | pending |
+| 39-03-01 | 03 | 3 | HARD-03 | T-39-03 | N/A | regression | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-regression-core.R")'` | planned | pending |
+| 39-03-02 | 03 | 3 | HARD-03 | T-39-03 | N/A | regression | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-regression-core.R"); testthat::test_file("tests/testthat/test-sf-browser.R")'` | planned | pending |
+| 39-03-03 | 03 | 3 | HARD-03 | T-39-03 | N/A | full regression | Full suite command | planned | pending |
 
 ## Wave 0 Requirements
 
