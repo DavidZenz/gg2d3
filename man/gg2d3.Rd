@@ -8,6 +8,12 @@ gg2d3(x, width = NULL, height = NULL, elementId = NULL)
 }
 \arguments{
 \item{x}{ggplot object or IR list from as_d3_ir()}
+
+\item{width}{Optional widget width passed to htmlwidgets.}
+
+\item{height}{Optional widget height passed to htmlwidgets.}
+
+\item{elementId}{Optional htmlwidgets element id.}
 }
 \description{
 gg2d3 supports \code{geom_sf()} polygon-family (\code{POLYGON}, \code{MULTIPOLYGON}),

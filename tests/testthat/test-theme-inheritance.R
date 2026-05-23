@@ -1,5 +1,4 @@
 library(ggplot2)
-devtools::load_all()
 
 test_that("element_blank is correctly captured in IR", {
   p <- ggplot(mtcars, aes(wt, mpg)) +
@@ -32,7 +31,6 @@ test_that("legend background and margin are extracted", {
           legend.margin = margin(10, 10, 10, 10))
   ir <- as_d3_ir(p)
 
-  str(ir$theme$legend$margin)
   expect_equal(ir$theme$legend$background$fill, "yellow")
   expect_equal(ir$theme$legend$background$colour, "black")
   # 10pt = 10 * 96/72.27 = 13.28px

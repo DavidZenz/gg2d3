@@ -78,7 +78,7 @@ test_that("d3_transitions() configures IR correctly", {
   expect_false(w3$x$interactivity$transitions$enabled)
 })
 
-test_that("d3_zoom() returns valid widget", {
+test_that("d3_hover() returns valid widget", {
 
   library(ggplot2)
   p <- ggplot(mtcars, aes(x = wt, y = mpg)) + geom_point()
@@ -86,7 +86,7 @@ test_that("d3_zoom() returns valid widget", {
 
   expect_s3_class(w, "gg2d3")
   expect_true(w$x$interactivity$hover$enabled)
-  expect_equal(w$x$interactivity$hover$opacity, 0.7)
+  expect_equal(w$x$interactivity$hover$opacity, 0.3)
 })
 
 test_that("d3_hover() with custom params", {

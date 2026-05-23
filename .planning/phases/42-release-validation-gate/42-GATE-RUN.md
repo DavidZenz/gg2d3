@@ -51,7 +51,25 @@ Evidence:
 
 ## Full Gate
 
-Pending.
+Full gate commands and outcomes:
+
+| Command | Working Directory | Outcome | Expected Skip Or Failure | Artifact Path |
+|---|---|---|---|---|
+| `rtk Rscript --vanilla -e 'devtools::document(); devtools::build_readme(); devtools::test()'` | `/Users/davidzenz/R/gg2d3` | Initial run failed: `test-interactivity.R:89:3` expected hover opacity `0.7` but actual was `0.30`; `test-theme-inheritance.R:39:3` errored with `$ operator is invalid for atomic vectors`. | Release-blocking test failures repaired below. Full-suite skips included expected missing `sf`, empty crosstalk test, and disabled visual-test context. | Local test output only. |
+| `rtk Rscript --vanilla -e 'devtools::load_all(quiet = TRUE); testthat::test_file("tests/testthat/test-interactivity.R")'` | `/Users/davidzenz/R/gg2d3` | passed after repair: 54 passed. | None. | Local test output only. |
+| `rtk Rscript --vanilla -e 'devtools::load_all(quiet = TRUE); testthat::test_file("tests/testthat/test-theme-inheritance.R")'` | `/Users/davidzenz/R/gg2d3` | passed after repair: 9 passed. | None. | Local test output only. |
+| `rtk Rscript --vanilla -e 'devtools::load_all(quiet = TRUE); testthat::test_file("tests/testthat/test-regression-core.R"); testthat::test_file("tests/testthat/test-sf-browser.R")'` | `/Users/davidzenz/R/gg2d3` | passed after repair with expected optional skips. | `{sf} cannot be loaded`; `On CRAN`. | Browser artifact paths remain `test_output/browser-sf/*` if live browser execution reaches artifact creation. |
+| `rtk Rscript --vanilla -e 'devtools::document(); devtools::build_readme(); devtools::test()'` | `/Users/davidzenz/R/gg2d3` | passed after first repair: 817 passed, 40 skipped, 6 warnings. | Expected skips: missing `sf`, empty crosstalk test, disabled visual-test context. | Generated docs reviewed in working tree. |
+| `rtk R CMD build --no-manual /Users/davidzenz/R/gg2d3` | `/private/tmp` | passed; built `gg2d3_0.0.0.9000.tar.gz`. | None. | `/private/tmp/gg2d3_0.0.0.9000.tar.gz` |
+| `rtk R CMD check --as-cran gg2d3_0.0.0.9000.tar.gz` | `/private/tmp` | Initial run failed with `1 ERROR, 1 WARNING, 4 NOTEs`. Rd usage warning and installed-package test error repaired below. | Release-blocking package-check failures repaired below. | `/private/tmp/gg2d3.Rcheck/00check.log` |
+| `rtk Rscript --vanilla -e 'devtools::document()'` | `/Users/davidzenz/R/gg2d3` | passed; regenerated `man/as_d3_ir.Rd` and `man/gg2d3.Rd`. | None. | `man/as_d3_ir.Rd`, `man/gg2d3.Rd` |
+| `rtk R CMD build --no-manual /Users/davidzenz/R/gg2d3` | `/private/tmp` | passed; rebuilt `gg2d3_0.0.0.9000.tar.gz`. | None. | `/private/tmp/gg2d3_0.0.0.9000.tar.gz` |
+| `rtk R CMD check --as-cran gg2d3_0.0.0.9000.tar.gz` | `/private/tmp` | Second run failed with `1 ERROR, 4 NOTEs`: source-contract tests could not find installed JS module files. | Release-blocking package-check failure repaired below. | `/private/tmp/gg2d3.Rcheck/00check.log` |
+| `rtk Rscript --vanilla -e 'devtools::load_all(quiet = TRUE); testthat::test_file("tests/testthat/test-sf-interactivity.R")'` | `/Users/davidzenz/R/gg2d3` | passed after repair: 82 passed, 1 expected `sf` skip. | `{sf} cannot be loaded`. | Local test output only. |
+| `rtk Rscript --vanilla -e 'devtools::load_all(quiet = TRUE); testthat::test_file("tests/testthat/test-regression-core.R")'` | `/Users/davidzenz/R/gg2d3` | passed after repair: 41 passed, 1 expected `sf` skip. | `{sf} cannot be loaded`. | Local test output only. |
+| `rtk Rscript --vanilla -e 'devtools::document(); devtools::build_readme(); devtools::test()'` | `/Users/davidzenz/R/gg2d3` | final run passed: 817 passed, 40 skipped, 6 warnings. | Expected skips: missing `sf`, empty crosstalk test, disabled visual-test context. | Generated docs reviewed in working tree. |
+| `rtk R CMD build --no-manual /Users/davidzenz/R/gg2d3` | `/private/tmp` | final build passed; rebuilt `gg2d3_0.0.0.9000.tar.gz`. | None. | `/private/tmp/gg2d3_0.0.0.9000.tar.gz` |
+| `rtk R CMD check --as-cran gg2d3_0.0.0.9000.tar.gz` | `/private/tmp` | final check passed with 4 NOTEs and no ERROR/WARNING. Tests passed in check: `[14s/14s] OK`. | NOTEs retained as release evidence: CRAN incoming metadata/version/title, unused `jsonlite`/private ggplot2 compatibility calls, long `d3_tooltip.Rd` example line, and old HTML Tidy. | `/private/tmp/gg2d3.Rcheck/00check.log`; exact check directory `/private/tmp/gg2d3.Rcheck`. |
 
 ## Expected Optional Skips
 
@@ -61,10 +79,76 @@ Observed during quick gate:
 |---|---|---|
 | `{sf} cannot be loaded` | `tests/testthat/test-regression-core.R` | Expected optional spatial skip because `sf` is `NOT_INSTALLED` and `42-VALIDATION-GATE.md` permits `skip_if_not_installed("sf")`. |
 | `On CRAN` | `tests/testthat/test-sf-browser.R` | Expected optional browser smoke skip because `42-VALIDATION-GATE.md` lists `skip_on_cran()` as the first browser/spatial skip gate. |
+| `{sf} cannot be loaded` | Full `devtools::test()` run | Expected optional spatial skip across sf IR, renderer, browser, interactivity, visual, facet, and zoom/brush tests because `sf` is `NOT_INSTALLED`. |
+| `interactive() || identical(Sys.getenv("GG2D3_VISUAL_TESTS"), "true") is not TRUE` | `tests/testthat/test-date-scales.R` | Expected local visual-artifact skip for non-interactive/default visual-test context. |
+| `empty test` | `tests/testthat/test-crosstalk.R` | Non-blocking testthat skip; not a browser/spatial failure. |
 
 ## Release-Blocking Repairs
 
-Pending.
+### Repair 1: Hover default and ggplot2 4.x margin extraction
+
+Original failure text:
+
+- `Failure ('test-interactivity.R:89:3'): d3_zoom() returns valid widget Expected w$x$interactivity$hover$opacity to equal 0.7. actual: 0.30 expected: 0.70`
+- `Error ('test-theme-inheritance.R:39:3'): legend background and margin are extracted Error in ir$theme$legend$margin$top: $ operator is invalid for atomic vectors`
+
+Changed files:
+
+- `tests/testthat/test-interactivity.R`
+- `R/as_d3_ir.R`
+- `tests/testthat/test-theme-inheritance.R`
+
+Fix summary: updated the stale `d3_hover()` default expectation/test name to match the documented `0.3` default; made theme margin extraction recognize ggplot2 4.x's `ggplot2::margin` class; removed a debug `str()` call from the theme test.
+
+Rerun result:
+
+- `test-interactivity.R`: passed, 54 assertions.
+- `test-theme-inheritance.R`: passed, 9 assertions.
+- Quick gate: passed with expected optional skips.
+
+### Repair 2: Rd usage docs and installed-package test context
+
+Original failure text:
+
+- `WARNING Undocumented arguments in Rd file 'as_d3_ir.Rd' 'p' 'width' 'height' 'padding'`
+- `WARNING Undocumented arguments in Rd file 'gg2d3.Rd' 'width' 'height' 'elementId'`
+- `ERROR ('test-theme-inheritance.R:2:1') ... devtools::load_all() ... pkgload_no_desc`
+
+Changed files:
+
+- `R/as_d3_ir.R`
+- `R/gg2d3.R`
+- `man/as_d3_ir.Rd`
+- `man/gg2d3.Rd`
+- `tests/testthat/test-theme-inheritance.R`
+
+Fix summary: added missing roxygen `@param` documentation and removed the top-level `devtools::load_all()` call from the installed-package test file.
+
+Rerun result:
+
+- `devtools::document()`: passed and regenerated the two Rd files.
+- `test-theme-inheritance.R`: passed, 9 assertions.
+- Later `R CMD check` runs no longer reported the Rd usage warning or `pkgload_no_desc` error.
+
+### Repair 3: Installed package path for JS source-contract tests
+
+Original failure text:
+
+- `ERROR ('test-sf-interactivity.R:114:3'): brush module deduplicates multipoint sf child selections by row_id Error: Cannot find module: inst/htmlwidgets/modules/brush.js`
+- `ERROR ('test-sf-interactivity.R:124:3'): SFXDOC-01 source guards protect sf interaction selectors and payload sanitizers Error: Cannot find module: inst/htmlwidgets/modules/events.js`
+
+Changed files:
+
+- `tests/testthat/test-sf-interactivity.R`
+- `tests/testthat/test-regression-core.R`
+
+Fix summary: extended JS source readers to fall back to `system.file(sub("^inst/", "", path), package = "gg2d3")`, preserving repository-path behavior while allowing installed-package checks to find bundled htmlwidget modules.
+
+Rerun result:
+
+- `test-sf-interactivity.R`: passed, 82 assertions, 1 expected `sf` skip.
+- `test-regression-core.R`: passed, 41 assertions, 1 expected `sf` skip.
+- Final `R CMD check --as-cran`: passed with 4 NOTEs and no ERROR/WARNING.
 
 ## Failure Artifacts
 

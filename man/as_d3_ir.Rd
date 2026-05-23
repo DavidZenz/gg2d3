@@ -11,6 +11,15 @@ as_d3_ir(
   padding = list(top = 20, right = 20, bottom = 40, left = 50)
 )
 }
+\arguments{
+\item{p}{A ggplot object.}
+
+\item{width}{Widget width in pixels.}
+
+\item{height}{Widget height in pixels.}
+
+\item{padding}{Named list of top, right, bottom, and left plot padding in pixels.}
+}
 \description{
 Build a D3-ready IR (intermediate representation) from a ggplot
 }

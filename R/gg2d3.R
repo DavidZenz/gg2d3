@@ -7,6 +7,10 @@
 #' geometry-overlap brushing, or large-map performance guarantees.
 #'
 #' @param x ggplot object or IR list from as_d3_ir()
+#' @param width Optional widget width passed to htmlwidgets.
+#' @param height Optional widget height passed to htmlwidgets.
+#' @param elementId Optional htmlwidgets element id.
+#'
 #' @export
 gg2d3 <- function(x, width = NULL, height = NULL, elementId = NULL) {
   # Detect crosstalk SharedData

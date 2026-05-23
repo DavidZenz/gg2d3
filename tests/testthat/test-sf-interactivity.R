@@ -1,6 +1,7 @@
 read_module <- function(path) {
-  candidates <- c(path, file.path("..", "..", path))
-  resolved <- candidates[file.exists(candidates)][1]
+  installed_path <- system.file(sub("^inst/", "", path), package = "gg2d3")
+  candidates <- c(path, file.path("..", "..", path), installed_path)
+  resolved <- candidates[nzchar(candidates) & file.exists(candidates)][1]
   if (is.na(resolved)) {
     stop("Cannot find module: ", path, call. = FALSE)
   }

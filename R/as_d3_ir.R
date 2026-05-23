@@ -1,4 +1,10 @@
 #' Build a D3-ready IR (intermediate representation) from a ggplot
+#'
+#' @param p A ggplot object.
+#' @param width Widget width in pixels.
+#' @param height Widget height in pixels.
+#' @param padding Named list of top, right, bottom, and left plot padding in pixels.
+#'
 #' @export
 as_d3_ir <- function(p, width = 640, height = 400,
                      padding = list(top = 20, right = 20, bottom = 40, left = 50)) {
@@ -134,8 +140,9 @@ as_d3_ir <- function(p, width = 640, height = 400,
       ))
     }
 
-    # Handle margin elements (plot.margin, legend.margin)
-    if (inherits(calc, "margin")) {
+    # Handle margin elements (plot.margin, legend.margin). ggplot2 4.x uses
+    # the namespaced class "ggplot2::margin".
+    if (inherits(calc, "margin") || "ggplot2::margin" %in% class(calc)) {
       # Convert margin to pixels using grid::convertUnit
       # First convert to inches, then to pixels (96 DPI web standard)
       inches <- grid::convertUnit(calc, "inches", valueOnly = TRUE)
