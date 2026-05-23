@@ -311,22 +311,19 @@ This confirms documented artifact paths still match source and ignore rules. [VE
 |---|-------|---------|---------------|
 | A1 | The research should be considered current until 2026-06-22. [ASSUMED] | Metadata | Low; re-probing installed package versions before execution mitigates stale local tooling assumptions. [VERIFIED: local package-version probe] |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should the full release gate run `--as-cran` by default?** [VERIFIED: 42-CONTEXT.md]
+1. **RESOLVED: Use `R CMD check --as-cran` for the full local release gate.** [VERIFIED: 42-CONTEXT.md]
    What we know: Phase 42 requires an `R CMD check`-style path, and Phase 40 verified a source build with `--no-build-vignettes --no-manual`. [VERIFIED: .planning/REQUIREMENTS.md, 40-ARTIFACT-AUDIT.md]  
-   What's unclear: The exact strictness flags for the final local gate are not locked. [VERIFIED: 42-CONTEXT.md]  
-   Recommendation: Use `R CMD check --as-cran` for the full gate when local dependencies permit, and record expected optional skips separately from failures. [VERIFIED: .planning/ROADMAP.md, 42-CONTEXT.md]
+   Resolution: Phase 42 plans use `R CMD check --as-cran` for the full gate when local dependencies permit, and record expected optional skips separately from failures. [VERIFIED: .planning/ROADMAP.md, 42-CONTEXT.md]
 
-2. **Where should maintainer-facing gate documentation live long term?** [VERIFIED: 42-CONTEXT.md]
+2. **RESOLVED: Keep maintainer-facing gate documentation phase-local during Phase 42.** [VERIFIED: 42-CONTEXT.md]
    What we know: Phase 42 may choose the filename/location, and Phase 43 owns documentation polish. [VERIFIED: 42-CONTEXT.md, .planning/ROADMAP.md]  
-   What's unclear: Whether the gate doc should stay phase-local or be promoted into README/vignettes in Phase 43. [VERIFIED: 42-CONTEXT.md]  
-   Recommendation: Create phase-local `42-VALIDATION-GATE.md` now, then let Phase 43 decide what becomes release-facing documentation. [VERIFIED: .planning/ROADMAP.md]
+   Resolution: Create phase-local `42-VALIDATION-GATE.md` now, then let Phase 43 decide what becomes release-facing documentation. [VERIFIED: .planning/ROADMAP.md]
 
-3. **Will the current local environment run live sf browser smoke?** [VERIFIED: local package-version probe]
+3. **RESOLVED: Treat missing local `sf` as an expected optional skip unless the maintainer installs it separately.** [VERIFIED: local package-version probe]
    What we know: `chromote`, Chrome, and `geojsonsf` are available locally; `sf` is not installed locally. [VERIFIED: local package-version and Chrome probes]  
-   What's unclear: Whether Phase 42 execution will install `sf` or accept the documented optional skip. [VERIFIED: local package-version probe, 42-CONTEXT.md]  
-   Recommendation: Do not install optional tooling as part of the plan unless the maintainer explicitly wants live browser smoke locally; record the `sf` skip as expected if absent. [VERIFIED: 42-CONTEXT.md]
+   Resolution: Do not install optional tooling as part of the plan unless the maintainer explicitly wants live browser smoke locally; record the `sf` skip as expected if absent. [VERIFIED: 42-CONTEXT.md]
 
 ## Environment Availability
 
