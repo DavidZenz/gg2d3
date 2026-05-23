@@ -1,7 +1,7 @@
 ---
 phase: 42
 slug: release-validation-gate
-status: in-progress
+status: passed-with-expected-skips
 created: 2026-05-23
 ---
 
@@ -152,8 +152,32 @@ Rerun result:
 
 ## Failure Artifacts
 
-Pending.
+Observed or expected artifact paths:
+
+| Artifact Path | Status | Details |
+|---|---|---|
+| `test_output/browser-sf/*.html` | expected path; not created in this run | Live browser smoke skipped before fixture/failure artifact creation because optional browser/spatial gates fired. |
+| `test_output/browser-sf/*-console.log` | expected path; not created in this run | Written by `write_browser_failure_artifacts()` only when live browser execution reaches a failure. |
+| `test_output/browser-sf/*-page-errors.log` | expected path; not created in this run | Written by `write_browser_failure_artifacts()` only when live browser execution reaches a failure. |
+| `test_output/browser-sf/*-browser-log.json` | expected path; not created in this run | Written by `write_browser_failure_artifacts()` only when live browser execution reaches a failure. |
+| `/private/tmp/gg2d3.Rcheck/00check.log` | observed | Final `R CMD check --as-cran` log; final status was 4 NOTEs, no ERROR/WARNING. |
+| `/private/tmp/gg2d3.Rcheck` | observed | Exact final check directory. |
+| `/private/tmp/gg2d3_0.0.0.9000.tar.gz` | observed | Source package tarball built by final `R CMD build --no-manual`. |
+| `README.md` | no generated diff retained | `devtools::build_readme()` did not leave a README diff. |
+| `NAMESPACE` | no generated diff retained | `devtools::document()` did not leave a NAMESPACE diff. |
+| `man/as_d3_ir.Rd` | generated diff retained | Updated by roxygen after adding missing `@param` docs. |
+| `man/gg2d3.Rd` | generated diff retained | Updated by roxygen after adding missing `@param` docs. |
 
 ## Final Outcome
 
-Pending.
+PASSED WITH EXPECTED OPTIONAL SKIPS
+
+Final status: quick gate passed with expected optional browser/spatial skips; full R gate passed; final source package build passed; final `R CMD check --as-cran` passed with 4 NOTEs and no ERROR/WARNING after scoped repairs.
+
+Requirement status:
+
+| Requirement | Status | Evidence |
+|---|---|---|
+| VAL-01 | satisfied with expected skips | Quick and full release-gate commands are recorded with outcomes, working directories, package version, `/private/tmp` build/check artifacts, and final `R CMD check` result. |
+| VAL-02 | satisfied with expected skips | Representative regression, sf/browser, full test suite, and installed-package check tests ran; missing `sf`, `skip_on_cran()`, visual-test, and empty-test skips are explicitly classified. |
+| VAL-03 | satisfied | Browser smoke artifact patterns, generated docs paths, package tarball, exact `.Rcheck` directory, and `00check.log` are listed; release-blocking failures include original messages, changed files, and rerun outcomes. |
