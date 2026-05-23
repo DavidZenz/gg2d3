@@ -61,8 +61,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HYG-01 | Phase 40 | Complete |
 | HYG-02 | Phase 40 | Complete |
 | HYG-03 | Phase 40 | Complete |
-| DEBT-01 | Phase 41 | Pending |
-| DEBT-02 | Phase 41 | Pending |
+| DEBT-01 | Phase 41 | Complete |
+| DEBT-02 | Phase 41 | Complete |
 | VAL-01 | Phase 42 | Pending |
 | VAL-02 | Phase 42 | Pending |
 | VAL-03 | Phase 42 | Pending |

@@ -32,7 +32,7 @@
 - Decimal phases (40.1, 40.2): Urgent insertions, if needed
 
 - [x] **Phase 40: Package Hygiene** - Maintainers can run tests, examples, docs, and optional validation tooling without undeclared dependencies or source-tree artifact noise.
-- [ ] **Phase 41: Release-Blocking Debt Triage** - Maintainers have fixed or explicitly deferred known release-facing debt with rationale.
+- [x] **Phase 41: Release-Blocking Debt Triage** - Maintainers have fixed or explicitly deferred known release-facing debt with rationale.
 - [ ] **Phase 42: Release Validation Gate** - Maintainers can run and interpret a repeatable local release gate covering tests, docs, checks, and browser validation behavior.
 - [ ] **Phase 43: Documentation And Release Notes** - Users and maintainers have current docs, release notes, residual-risk notes, and next-milestone candidates.
 
@@ -62,8 +62,8 @@ Plans:
   3. Deferred debt has explicit rationale and next-step guidance rather than disappearing into vague notes.
 **Plans**: 2 plans
 Plans:
-- [ ] 41-01-PLAN.md — Resolve or classify recent advisory follow-ups from review and verification artifacts.
-- [ ] 41-02-PLAN.md — Triage stale renderer/documentation debt around `GeomPolygon` and rect out-of-bounds behavior.
+- [x] 41-01-PLAN.md — Resolve or classify recent advisory follow-ups from review and verification artifacts.
+- [x] 41-02-PLAN.md — Triage stale renderer/documentation debt around `GeomPolygon` and rect out-of-bounds behavior.
 
 ### Phase 42: Release Validation Gate
 **Goal**: Maintainers can run and interpret a repeatable local release gate covering tests, docs, checks, and browser validation behavior.
@@ -100,7 +100,7 @@ Phases execute in numeric order: 40 → 41 → 42 → 43
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
 | 40. Package Hygiene | HYG-01, HYG-02, HYG-03 | 3/3 | Complete    | 2026-05-23 |
-| 41. Release-Blocking Debt Triage | DEBT-01, DEBT-02 | 0/2 | Pending | - |
+| 41. Release-Blocking Debt Triage | DEBT-01, DEBT-02 | 2/2 | Complete    | 2026-05-23 |
 | 42. Release Validation Gate | VAL-01, VAL-02, VAL-03 | 0/3 | Pending | - |
 | 43. Documentation And Release Notes | DOC-01, DOC-02 | 0/2 | Pending | - |
 
