@@ -48,3 +48,4 @@ package-lock.json
 /ggplot2_*.png
 /*.png
 /*.html
+/*.pdf

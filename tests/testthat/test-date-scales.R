@@ -1,5 +1,35 @@
 library(ggplot2)
 
+.date_scale_test_output_dir <- function() {
+  if (exists(".test_output_dir", mode = "function")) {
+    return(.test_output_dir())
+  }
+
+  pkg_root <- NULL
+  if (requireNamespace("rprojroot", quietly = TRUE)) {
+    pkg_root <- tryCatch(
+      rprojroot::find_package_root_file(),
+      error = function(e) NULL
+    )
+  }
+
+  if (is.null(pkg_root)) {
+    candidates <- normalizePath(
+      c(getwd(), file.path(getwd(), "../.."), file.path(getwd(), "../../..")),
+      mustWork = FALSE
+    )
+    is_pkg_root <- file.exists(file.path(candidates, "DESCRIPTION")) &
+      dir.exists(file.path(candidates, "R"))
+    pkg_root <- candidates[is_pkg_root][1]
+  }
+
+  if (is.null(pkg_root) || is.na(pkg_root)) {
+    pkg_root <- normalizePath(getwd(), mustWork = FALSE)
+  }
+
+  file.path(pkg_root, "test_output")
+}
+
 # --- Date scale basics ---
 test_that("Date x-axis produces temporal scale with ms domain", {
   df <- data.frame(
@@ -229,7 +259,8 @@ test_that("visual test: date/time scales render correctly", {
   skip_on_ci()
   skip_if_not(interactive() || identical(Sys.getenv("GG2D3_VISUAL_TESTS"), "true"))
 
-  dir.create("../../test_output", showWarnings = FALSE, recursive = TRUE)
+  out_dir <- .date_scale_test_output_dir()
+  dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
   # Test 1: Date x-axis with points and line
   set.seed(42)
@@ -275,9 +306,9 @@ test_that("visual test: date/time scales render correctly", {
   w1 <- gg2d3(p1) |> d3_tooltip()
   htmlwidgets::saveWidget(
     w1,
-    file.path(normalizePath("../../test_output"), "visual_test_date_scales.html"),
+    file.path(out_dir, "visual_test_date_scales.html"),
     selfcontained = FALSE
   )
 
-  expect_true(file.exists("../../test_output/visual_test_date_scales.html"))
+  expect_true(file.exists(file.path(out_dir, "visual_test_date_scales.html")))
 })
