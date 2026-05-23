@@ -58,9 +58,10 @@ Most theme elements are translated, but some edge cases are not covered:
 
 ## Rect/tile edge cases
 
-`geom_rect` and `geom_tile` may render incorrectly when coordinates extend
-outside the panel area (negative widths/heights). Clipping is applied at the
-panel boundary.
+`geom_rect` and `geom_tile` are clipped at the panel boundary, but rectangles
+whose bounds extend beyond scale limits or interact with transformed/reversed
+scales remain a known edge case. The current release treats this as deferred
+non-blocking renderer debt unless a focused regression proves otherwise.
 
 ## Private API dependency
 
