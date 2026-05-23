@@ -29,3 +29,13 @@ Each item is tracked with these fields: `Item`, `Requirement`, `Evidence`, `Stat
 | `rtk Rscript --vanilla -e 'd <- read.dcf("DESCRIPTION"); suggests <- d[1, "Suggests"]; stopifnot(grepl("pkgload", suggests, fixed = TRUE), grepl("rprojroot", suggests, fixed = TRUE)); cat("dependency advisory resolved\n")'` | passed; output included `dependency advisory resolved` |
 | `rtk rg -n "phase35-sf-facet-wrap.html\" = c\\(1L, 1L\\)|phase35-sf-facet-grid.html\" = c\\(1L, 0L, 0L, 1L\\)|expect_equal\\(panel_counts, expected_panel_counts\\[\\[fixture_name\\]\\]\\)" tests/testthat/test-sf-browser.R` | passed |
 | `rtk Rscript --vanilla -e 'txt <- readLines("tests/testthat/test-sf-browser.R"); start <- grep("BRSF-02 DOM: faceted sf fixtures keep panel-local path counts", txt, fixed = TRUE); stopifnot(length(start) == 1L); block <- txt[start:min(length(txt), start + 60L)]; stopifnot(!any(grepl("sort\\\\(panel_counts|sort\\\\(expected_panel_counts", block))); cat("facet identity assertion ok\n")'` | passed; output included `facet identity assertion ok` |
+
+### DEBT-02 evidence
+
+| Command | Outcome |
+|---------|---------|
+| `rtk Rscript --vanilla -e 'for (f in c("README.Rmd", "README.md")) { txt <- readLines(f); area <- grep("^\\\\| Area/Ribbon \\\\|", txt, value = TRUE); stopifnot(length(area) == 1L, !grepl("geom_polygon", area, fixed = TRUE)) }; cat("README polygon support table ok\n")'` | passed; output included `README polygon support table ok` |
+| `rtk rg -n "ordinary geom_polygon|geom_polygon\\(\\).*does not currently have a D3 renderer|geom_sf\\(\\).*polygon-family" README.Rmd README.md vignettes/gg2d3.Rmd` | passed |
+| `rtk rg -n "negative widths/heights" vignettes/d3-drawing-diagnostics.md` | passed with no matches |
+| `rtk rg -n "clipped at the panel boundary|bounds extend beyond scale limits|transformed/reversed scales|deferred non-blocking renderer debt" vignettes/d3-drawing-diagnostics.md` | passed |
+| `rtk Rscript --vanilla -e 'txt <- readLines(".planning/phases/41-release-blocking-debt-triage/41-DEBT-AUDIT.md"); start <- grep("## DEBT-02 Renderer and Documentation Debt", txt)[1]; end <- grep("## Verification Evidence", txt)[1]; debt02 <- txt[start:end]; stopifnot(!any(grepl("Pending verification", debt02)), any(grepl("ordinary geom_polygon support signaling", debt02)), any(grepl("rect/tile out-of-bounds behavior", debt02)), any(grepl("Next step:", debt02))); cat("DEBT-02 audit statuses complete\n")'` | passed; output included `DEBT-02 audit statuses complete` |
