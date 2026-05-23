@@ -9,9 +9,9 @@ Requirements for the Release Hardening milestone. Each maps to exactly one roadm
 
 ### Package Hygiene
 
-- [ ] **HYG-01**: Maintainer can run package tests, helper code, examples, and documentation generation without undeclared direct package usage; DESCRIPTION records direct runtime, test, browser, and documentation dependencies in the appropriate fields.
-- [ ] **HYG-02**: Optional browser and spatial validation tooling skips cleanly with clear messages when unavailable and does not force heavyweight local dependencies in CRAN-like environments.
-- [ ] **HYG-03**: Generated browser fixtures, logs, check outputs, and local validation artifacts are written to predictable ignored paths so routine checks and local smoke runs do not pollute package sources.
+- [x] **HYG-01**: Maintainer can run package tests, helper code, examples, and documentation generation without undeclared direct package usage; DESCRIPTION records direct runtime, test, browser, and documentation dependencies in the appropriate fields.
+- [x] **HYG-02**: Optional browser and spatial validation tooling skips cleanly with clear messages when unavailable and does not force heavyweight local dependencies in CRAN-like environments.
+- [x] **HYG-03**: Generated browser fixtures, logs, check outputs, and local validation artifacts are written to predictable ignored paths so routine checks and local smoke runs do not pollute package sources.
 
 ### Release-Blocking Debt
 
@@ -58,9 +58,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HYG-01 | Phase 40 | Pending |
-| HYG-02 | Phase 40 | Pending |
-| HYG-03 | Phase 40 | Pending |
+| HYG-01 | Phase 40 | Complete |
+| HYG-02 | Phase 40 | Complete |
+| HYG-03 | Phase 40 | Complete |
 | DEBT-01 | Phase 41 | Pending |
 | DEBT-02 | Phase 41 | Pending |
 | VAL-01 | Phase 42 | Pending |
@@ -76,4 +76,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-22*
-*Last updated: 2026-05-22 after creating v1.10 roadmap*
+*Last updated: 2026-05-23 after completing Phase 40 Package Hygiene*

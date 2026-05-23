@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.10 is focused on release hardening after the v1.9 sf expansion. The package now has broad feature coverage plus automated sf browser smoke harnessing, so the next useful milestone is to tighten package hygiene, release checks, documentation consistency, and small release-blocking debt before broader feature work resumes.
+v1.10 is focused on release hardening after the v1.9 sf expansion. Package hygiene is now tightened for direct dependencies, optional skips, and generated artifacts; the current focus is release-blocking debt triage before broader release validation and documentation polish.
 
 ## Current Milestone: v1.10 Release Hardening
 
@@ -90,10 +90,10 @@ v1.10 is focused on release hardening after the v1.9 sf expansion. The package n
 - ✓ Non-polygon `geom_sf()` IR and renderer support for point and line families — v1.9 Phase 37
 - ✓ sf interaction, facet, and documentation hardening for point/line/mixed families — v1.9 Phase 38
 - ✓ Package internals hardening for sf helper boundaries, ggplot2 compatibility wrappers, and bounded regression coverage — v1.9 Phase 39
+- ✓ Package metadata, optional dependency skip behavior, and generated artifact hygiene for release readiness — v1.10 Phase 40
 
 ### Active
 
-- Package metadata, dependency, and optional-tooling hygiene for release readiness.
 - Release-blocking debt triage across known renderer/doc/test issues.
 - Reproducible release validation gates and documentation/release-note polish.
 
@@ -154,6 +154,8 @@ gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus pro
 | point/line sf support extends existing renderer contract | Non-polygon sf support should reuse the existing `.geom-sf` interactivity selectors and add family-specific DOM classes rather than introduce a separate map engine | ✓ Good — implemented and verified in Phase 37 |
 | sf internals helper boundaries | Remaining sf layer assembly and panel bbox attachment should live behind focused helpers outside the monolithic `as_d3_ir()` body | ✓ Good — implemented and verified in Phase 39 |
 | ggplot2 compatibility quarantine | Unavoidable private ggplot2 calls should be isolated behind internal wrappers with characterization tests and explicit comments | ✓ Good — implemented and verified in Phase 39 |
+| release-hygiene dependency classification | Direct optional test, browser, vignette, visual-check, and helper dependencies should be declared in `Suggests`, while guarded runtime paths stay optional unless required unconditionally | ✓ Good — implemented and verified in Phase 40 |
+| local generated artifact boundaries | Browser fixtures, logs, visual outputs, and check artifacts should be preserved for debugging under ignored paths and excluded from source package builds | ✓ Good — implemented and verified in Phase 40 |
 
 ## Evolution
 
@@ -173,4 +175,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-22 after starting v1.10 Release Hardening*
+*Last updated: 2026-05-23 after completing Phase 40 Package Hygiene*
