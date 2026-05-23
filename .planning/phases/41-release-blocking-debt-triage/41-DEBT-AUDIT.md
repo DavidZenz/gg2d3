@@ -18,4 +18,11 @@ Pending Phase 41 plan 02.
 
 ## Verification Evidence
 
-Pending verification.
+### DEBT-01 evidence
+
+| Command | Outcome |
+|---------|---------|
+| `rtk Rscript --vanilla -e 'read.dcf("DESCRIPTION"); cat("DESCRIPTION parse ok\n")'` | passed |
+| `rtk Rscript --vanilla -e 'd <- read.dcf("DESCRIPTION"); suggests <- d[1, "Suggests"]; stopifnot(grepl("pkgload", suggests, fixed = TRUE), grepl("rprojroot", suggests, fixed = TRUE)); cat("dependency advisory resolved\n")'` | passed; output included `dependency advisory resolved` |
+| `rtk rg -n "phase35-sf-facet-wrap.html\" = c\\(1L, 1L\\)|phase35-sf-facet-grid.html\" = c\\(1L, 0L, 0L, 1L\\)|expect_equal\\(panel_counts, expected_panel_counts\\[\\[fixture_name\\]\\]\\)" tests/testthat/test-sf-browser.R` | passed |
+| `rtk Rscript --vanilla -e 'txt <- readLines("tests/testthat/test-sf-browser.R"); start <- grep("BRSF-02 DOM: faceted sf fixtures keep panel-local path counts", txt, fixed = TRUE); stopifnot(length(start) == 1L); block <- txt[start:min(length(txt), start + 60L)]; stopifnot(!any(grepl("sort\\\\(panel_counts|sort\\\\(expected_panel_counts", block))); cat("facet identity assertion ok\n")'` | passed; output included `facet identity assertion ok` |
