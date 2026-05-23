@@ -89,7 +89,7 @@ Plans:
   3. A v1.10 release checklist or notes artifact records checks run, residual risks, deferred non-blockers, and recommended next-milestone candidates.
 **Plans**: 2 plans
 Plans:
-- [ ] 43-01-PLAN.md — Sweep README, vignettes, diagnostics docs, roxygen source, and generated help for release-consistent language.
+- [x] 43-01-PLAN.md — Sweep README, vignettes, diagnostics docs, roxygen source, and generated help for release-consistent language.
 - [ ] 43-02-PLAN.md — Create v1.10 release checklist/notes with residual risks and next-milestone candidates.
 
 ## Progress
@@ -102,7 +102,7 @@ Phases execute in numeric order: 40 → 41 → 42 → 43
 | 40. Package Hygiene | HYG-01, HYG-02, HYG-03 | 3/3 | Complete    | 2026-05-23 |
 | 41. Release-Blocking Debt Triage | DEBT-01, DEBT-02 | 2/2 | Complete    | 2026-05-23 |
 | 42. Release Validation Gate | VAL-01, VAL-02, VAL-03 | 3/3 | Complete    | 2026-05-23 |
-| 43. Documentation And Release Notes | DOC-01, DOC-02 | 0/2 | Pending | - |
+| 43. Documentation And Release Notes | DOC-01, DOC-02 | 1/2 | In Progress | - |
 
 ## Archived Milestones
 

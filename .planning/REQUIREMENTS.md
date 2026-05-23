@@ -26,7 +26,7 @@ Requirements for the Release Hardening milestone. Each maps to exactly one roadm
 
 ### Documentation And Release Notes
 
-- [ ] **DOC-01**: README, vignettes, diagnostics docs, roxygen source, and generated help consistently describe the shipped polygon/point/line `geom_sf()` contract, optional browser validation, map anti-features, and release-support status without stale milestone language.
+- [x] **DOC-01**: README, vignettes, diagnostics docs, roxygen source, and generated help consistently describe the shipped polygon/point/line `geom_sf()` contract, optional browser validation, map anti-features, and release-support status without stale milestone language.
 - [ ] **DOC-02**: A v1.10 release checklist or notes artifact records checks run, residual risks, deferred non-blockers, and recommended next-milestone candidates.
 
 ## Future Requirements
@@ -66,7 +66,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VAL-01 | Phase 42 | Complete |
 | VAL-02 | Phase 42 | Complete |
 | VAL-03 | Phase 42 | Complete |
-| DOC-01 | Phase 43 | Pending |
+| DOC-01 | Phase 43 | Complete |
 | DOC-02 | Phase 43 | Pending |
 
 **Coverage:**
