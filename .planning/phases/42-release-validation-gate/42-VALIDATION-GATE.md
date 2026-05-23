@@ -37,15 +37,42 @@ Replace gg2d3_0.0.0.9000.tar.gz with the package version printed from DESCRIPTIO
 
 ## Expected Optional Skips
 
-The quick and full gates preserve optional browser and spatial skip behavior for local machines that do not have every smoke-test dependency installed.
+The quick and full gates preserve this optional browser and spatial skip order from `tests/testthat/helper-browser-sf.R`:
+
+1. `skip_on_cran()`
+2. `skip_if_not_installed("chromote", "0.5.1")`
+3. `skip_if_not_installed("sf")`
+4. `skip_if_not_installed("geojsonsf")`
+5. `Chrome/Chromium not available for chromote sf smoke tests`
+6. `chromote session launch unavailable:`
+
+Missing optional browser/spatial tooling is expected skip evidence, not a release failure, when the skip message is explicit.
 
 ## Coverage Matrix
 
-The release gate maps each required behavior area to concrete commands, test files, source files, and failure artifacts.
+| Behavior Area | Requirement | Command Or Gate | Primary Test Or Source | Expected Optional Skip | Failure Artifact |
+|---|---|---|---|---|---|
+| Representative non-sf plots | VAL-02 | Quick Local Gate and `devtools::test()` in the Full Release Gate | `tests/testthat/test-regression-core.R` | None expected | testthat failure output |
+| polygon/point/line geom_sf families | VAL-02 | Quick Local Gate and `devtools::test()` in the Full Release Gate | `tests/testthat/test-regression-core.R`, `tests/testthat/test-sf-ir.R`, `tests/testthat/test-sf-renderer.R` | `skip_if_not_installed("sf")`, `skip_if_not_installed("geojsonsf")` | testthat failure output |
+| Facets | VAL-02 | Quick Local Gate and `devtools::test()` in the Full Release Gate | `tests/testthat/test-regression-core.R`, `tests/testthat/test-facets.R`, `tests/testthat/test-facet-grid.R` | Browser facet smoke rows may skip on optional browser/spatial tooling | `test_output/browser-sf/*.html` when browser smoke reaches live rendering |
+| Legends | VAL-02 | Quick Local Gate and `devtools::test()` in the Full Release Gate | `tests/testthat/test-regression-core.R`, `tests/testthat/test-legends.R` | None expected | testthat failure output |
+| Dates | VAL-02 | Quick Local Gate and `devtools::test()` in the Full Release Gate | `tests/testthat/test-regression-core.R`, `tests/testthat/test-date-scales.R` | Visual artifact checks may skip in non-interactive or unavailable visual-test contexts | README and testthat failure output |
+| coord_flip | VAL-02 | Quick Local Gate and `devtools::test()` in the Full Release Gate | `tests/testthat/test-regression-core.R`, `tests/testthat/test-coord-flip.R`, `tests/testthat/test-date-scales.R` | None expected | testthat failure output |
+| Browser smoke DOM rendering | VAL-01, VAL-02, VAL-03 | Quick Local Gate and browser smoke portion of `devtools::test()` | `tests/testthat/test-sf-browser.R`, `tests/testthat/helper-browser-sf.R` | `skip_on_cran()`, `skip_if_not_installed("chromote", "0.5.1")`, `skip_if_not_installed("sf")`, `skip_if_not_installed("geojsonsf")`, Chrome/chromote launch messages | `test_output/browser-sf/*.html`, `test_output/browser-sf/*-console.log`, `test_output/browser-sf/*-page-errors.log`, `test_output/browser-sf/*-browser-log.json` |
+| Browser smoke interaction payloads | VAL-01, VAL-02, VAL-03 | Quick Local Gate and browser smoke portion of `devtools::test()` | `tests/testthat/test-sf-browser.R`, `tests/testthat/helper-browser-sf.R` | `skip_on_cran()`, `skip_if_not_installed("chromote", "0.5.1")`, `skip_if_not_installed("sf")`, `skip_if_not_installed("geojsonsf")`, Chrome/chromote launch messages | `test_output/browser-sf/*.html`, `test_output/browser-sf/*-console.log`, `test_output/browser-sf/*-page-errors.log`, `test_output/browser-sf/*-browser-log.json` |
+| Package documentation generation | VAL-01, VAL-03 | First command in the Full Release Gate | `README.Rmd`, `README.md`, `man/`, `NAMESPACE` | None expected | `README.md`, `man/*.Rd`, and `NAMESPACE` diffs after documentation generation |
+| R CMD check output | VAL-01, VAL-03 | Build/check commands in the Full Release Gate | `DESCRIPTION`, `*.Rcheck/` | Optional browser/spatial tests may skip with explicit messages inside check logs | `/private/tmp/gg2d3_*.Rcheck/00check.log` |
 
 ## Failure Artifacts
 
-Validation failures should leave actionable local files or diffs that identify the failing gate and the next inspection point.
+- `test_output/browser-sf/*.html` for saved browser smoke widgets and failure copies.
+- `test_output/browser-sf/*-console.log` for browser console output.
+- `test_output/browser-sf/*-page-errors.log` for JavaScript exception output.
+- `test_output/browser-sf/*-browser-log.json` for structured browser smoke logs.
+- `/private/tmp/gg2d3_*.Rcheck/00check.log` for package check summaries.
+- `README.md`, `man/*.Rd`, and `NAMESPACE` diffs after documentation generation.
+
+Browser smoke artifacts are local debugging evidence under ignored paths. Inspect them locally and redact logs before sharing outside the release-validation context.
 
 ## Phase 42 Evidence Files
 
