@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Release Hardening
-status: ready_to_plan
-stopped_at: Ready for Phase 41
-last_updated: "2026-05-23T13:08:43Z"
-last_activity: 2026-05-23 -- Phase 40 completed; ready for Phase 41 planning
+status: planning
+stopped_at: Phase 41 context gathered
+last_updated: "2026-05-23T16:38:25.436Z"
+last_activity: 2026-05-23 -- Phase 41 context gathered; ready for Phase 41 planning
 progress:
   total_phases: 4
   completed_phases: 1
@@ -99,9 +99,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: Completed Phase 40 Package Hygiene
-Stopped at: Ready for Phase 41
-Resume file: None
+Last session: Phase 41 context gathered
+Stopped at: Phase 41 context gathered
+Resume file: .planning/phases/41-release-blocking-debt-triage/41-CONTEXT.md
 
 **Completed Phase:** 40 (Package Hygiene) — 3/3 plans — 2026-05-23
 **Planned Phase:** 40 (Package Hygiene) — 3 plans — 2026-05-22T17:07:20.671Z
