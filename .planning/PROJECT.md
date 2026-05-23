@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.10 is focused on release hardening after the v1.9 sf expansion. Package hygiene is now tightened for direct dependencies, optional skips, and generated artifacts; the current focus is release-blocking debt triage before broader release validation and documentation polish.
+v1.10 is focused on release hardening after the v1.9 sf expansion. Package hygiene and release-blocking debt triage are now complete; the current focus is repeatable release validation and documentation polish.
 
 ## Current Milestone: v1.10 Release Hardening
 
@@ -91,10 +91,10 @@ v1.10 is focused on release hardening after the v1.9 sf expansion. Package hygie
 - ✓ sf interaction, facet, and documentation hardening for point/line/mixed families — v1.9 Phase 38
 - ✓ Package internals hardening for sf helper boundaries, ggplot2 compatibility wrappers, and bounded regression coverage — v1.9 Phase 39
 - ✓ Package metadata, optional dependency skip behavior, and generated artifact hygiene for release readiness — v1.10 Phase 40
+- ✓ Release-blocking debt triage for dependency/facet advisories, ordinary `geom_polygon()` support signaling, and rect/tile out-of-bounds diagnostics — v1.10 Phase 41
 
 ### Active
 
-- Release-blocking debt triage across known renderer/doc/test issues.
 - Reproducible release validation gates and documentation/release-note polish.
 
 ### Out of Scope
@@ -114,8 +114,8 @@ gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus pro
 **Known tech debt:**
 - Monolithic `as_d3_ir()` function (~1000 lines) still needs broader modularization beyond the extracted sf helper boundaries
 - Private ggplot2 theme access remains necessary but is quarantined in `R/ggplot2_compat.R` behind compatibility helpers
-- Orphaned GeomPolygon reference (no renderer)
-- rect geom edge cases with out-of-bounds rendering
+- Ordinary `geom_polygon()` still has no D3 renderer and is explicitly deferred as a non-blocking parity item
+- rect/tile out-of-bounds behavior remains a deferred non-blocking renderer edge case pending a focused reproduction
 - Browser-side sf behavior now has DOM-level smoke harness coverage; live Chrome execution still depends on optional local browser dependencies
 
 ## Constraints
