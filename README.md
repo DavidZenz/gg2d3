@@ -44,7 +44,7 @@ gg2d3(p)
 | Category | Geoms |
 |----|----|
 | Basic | `geom_point`, `geom_line`, `geom_path`, `geom_bar`, `geom_col`, `geom_rect`, `geom_tile`, `geom_text` |
-| Area/Ribbon | `geom_area`, `geom_ribbon`, `geom_polygon` |
+| Area/Ribbon | `geom_area`, `geom_ribbon` |
 | Intervals | `geom_segment`, `geom_errorbar`, `geom_linerange`, `geom_pointrange` |
 | Annotation | `geom_hline`, `geom_vline`, `geom_abline`, `geom_rug` |
 | Statistical | `geom_boxplot`, `geom_violin`, `geom_density`, `geom_smooth` (loess, gam, lm), `geom_dotplot` |
@@ -58,6 +58,9 @@ missing CRS coordinates are serialized as-is with a warning. Browser
 validation covers sf family interactivity, stacked overlays, faceted and
 empty panels, and zoom suppression. See the main vignette for
 map-feature caveats.
+
+ordinary geom_polygon() does not currently have a D3 renderer. This is
+separate from supported geom_sf() polygon-family rendering.
 
 ### Scales & Coordinates
 

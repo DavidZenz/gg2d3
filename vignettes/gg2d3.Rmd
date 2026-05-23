@@ -537,9 +537,8 @@ normal rendering scope:
 1. **Non-finite values** — `NA`, `NaN`, and `Inf` are filtered from each layer
    with a single R warning per layer. Remaining finite points render normally;
    line/path geoms show a visible gap where the non-finite rows were removed.
-2. **Unsupported geoms** — when a geom type has no D3 renderer, an in-panel
-   message appears (e.g., "unsupported geom: polygon") rather than producing
-   silently empty output.
+2. **Unsupported geoms** — when a geom type has no D3 renderer, gg2d3 emits a
+   browser-console warning instead of rendering marks for that layer.
 3. **R-level errors during build** — if `ggplot_build()` itself errors (e.g.,
    incompatible stat/geom combinations), the error is surfaced as an R
    condition before any D3 rendering is attempted.
@@ -557,13 +556,14 @@ df <- data.frame(x = 1:10, y = c(1:4, NA, 6:9, NaN))
 ```
 
 ```{r, eval = requireNamespace("maps", quietly = TRUE)}
-# Unsupported geom: in-panel message instead of silent blank
+# Unsupported geom: browser-console warning instead of ordinary polygon marks
 # (eval guarded — `map_data("state")` needs the `maps` package which is
 # not a direct dependency of gg2d3)
 (ggplot(map_data("state"), aes(long, lat, group = group)) +
   geom_polygon()) |>
   gg2d3()
-# Renders an in-panel "unsupported geom: polygon" note rather than empty output.
+# ordinary polygon marks are not rendered; the browser console warns that no
+# renderer is registered for "polygon".
 ```
 
 ## Tips

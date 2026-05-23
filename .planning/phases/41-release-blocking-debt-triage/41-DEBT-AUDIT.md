@@ -14,7 +14,10 @@ Each item is tracked with these fields: `Item`, `Requirement`, `Evidence`, `Stat
 
 ## DEBT-02 Renderer and Documentation Debt
 
-Pending Phase 41 plan 02.
+| Item | Requirement | Evidence | Status | Release-blocking judgment | Action | Rationale | Next step |
+|------|-------------|----------|--------|---------------------------|--------|-----------|-----------|
+| ordinary geom_polygon support signaling | DEBT-02 | `R/as_d3_ir.R` maps `GeomPolygon` to `polygon`; `R/validate_ir.R` recognizes `polygon`; no ordinary `polygon` renderer is registered in `inst/htmlwidgets/modules/geoms`; README support tables corrected | Deferred non-blocker | Not blocking after documentation correction | Correct public support signaling; do not implement ordinary polygon renderer in Phase 41 | v1.10 release hardening should not add new geom support; geom_sf() polygon-family rendering remains supported. | Next step: Plan ordinary geom_polygon renderer separately if parity coverage requires it. |
+| rect/tile out-of-bounds behavior | DEBT-02 | `inst/htmlwidgets/modules/geoms/rect.js` uses `Math.abs()` for continuous rectangle width/height and renders inside the clipped panel group; diagnostics wording corrected | Deferred non-blocker | Not blocking after diagnostic correction | Characterize current renderer behavior and update stale documentation; do not rewrite rect/tile renderer in Phase 41 | Current evidence does not prove a release-blocking renderer failure, and a rushed clipping rewrite risks visual regressions before Phase 42 release validation. | Next step: Add a focused rect/tile reproduction and renderer fix in a future parity phase if transformed, reversed, or out-of-bounds scale behavior is proven wrong. |
 
 ## Verification Evidence
 
