@@ -325,17 +325,17 @@ rtk rg -n 'PASSED WITH EXPECTED OPTIONAL SKIPS|R CMD check --as-cran|4 NOTEs|Def
 |---|-------|---------|---------------|
 | A1 | The release checklist/notes artifact should be named `.planning/phases/43-documentation-and-release-notes/43-v1.10-release-notes.md`. | Planning Recommendations; Target Files | Planner may choose a different phase-local filename, but DOC-02 can still be satisfied if the artifact records the required content. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should the release checklist also be copied into a root-level `NEWS.md`?** [ASSUMED]
+1. **RESOLVED: Should the release checklist also be copied into a root-level `NEWS.md`?** [ASSUMED]
    What we know: DOC-02 requires a v1.10 checklist or notes artifact, but does not name `NEWS.md`. [VERIFIED: .planning/REQUIREMENTS.md]
    What's unclear: The repo currently has no root `NEWS.md` in the scanned release-facing file list. [VERIFIED: user prompt file list; repo scan]
-   Recommendation: Keep the required artifact phase-local for v1.10 unless the planner/user explicitly scopes package-level `NEWS.md`. [ASSUMED]
+   Resolution: Keep the required artifact phase-local for v1.10. Do not create a package-level `NEWS.md` in Phase 43 unless the user explicitly asks for it later. [ASSUMED]
 
-2. **Should final Phase 43 rerun the full Phase 42 gate?** [ASSUMED]
+2. **RESOLVED: Should final Phase 43 rerun the full Phase 42 gate?** [ASSUMED]
    What we know: Phase 42 already passed the full gate with expected optional skips. [VERIFIED: .planning/phases/42-release-validation-gate/42-GATE-RUN.md]
    What's unclear: Phase 43 may only change prose, but roxygen/example/vignette changes can affect generated docs. [VERIFIED: CLAUDE.md]
-   Recommendation: Run docs generation for 43-01; reserve full `devtools::test()` or full `R CMD check --as-cran` for material roxygen/example changes or phase gate confidence. [ASSUMED]
+   Resolution: Require docs generation and DOC-01/DOC-02 source scans during execution. Reuse Phase 42 full-gate evidence unless Phase 43 materially changes executable examples, tests, or behavior; if that happens, rerun the relevant Phase 42 gate tier. [ASSUMED]
 
 ## Sources
 
