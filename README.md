@@ -54,13 +54,14 @@ gg2d3 also supports `geom_sf()` for polygon-family (`POLYGON`,
 (`LINESTRING`, `MULTILINESTRING`) geometries. Rows that are unsupported,
 empty, invalid, or missing are skipped with warnings while accepted rows
 render; known CRS inputs are normalized in R before serialization, and
-missing CRS coordinates are serialized as-is with a warning. Browser
-validation covers sf family interactivity, stacked overlays, faceted and
-empty panels, and zoom suppression. See the main vignette for
-map-feature caveats.
+missing CRS coordinates are serialized as-is with a warning. Optional
+browser validation is R/testthat/chromote based and may skip cleanly;
+when available, it covers sf family interactivity, stacked overlays,
+faceted and empty panels, and zoom suppression. See the main vignette
+for map-feature caveats.
 
-ordinary geom_polygon() does not currently have a D3 renderer. This is
-separate from supported geom_sf() polygon-family rendering.
+Ordinary `geom_polygon()` does not currently have a D3 renderer. This is
+separate from supported `geom_sf()` polygon-family rendering.
 
 ### Scales & Coordinates
 
