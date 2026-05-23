@@ -16,7 +16,7 @@ Requirements for the Release Hardening milestone. Each maps to exactly one roadm
 ### Release-Blocking Debt
 
 - [x] **DEBT-01**: Recent advisory follow-ups are either fixed or explicitly classified as non-blocking, including direct `pkgload`/`rprojroot` dependency declarations and facet browser assertions that preserve panel identity.
-- [ ] **DEBT-02**: Known release-facing renderer/documentation debt is triaged and addressed where blocking, including stale `GeomPolygon` references and rect out-of-bounds behavior; any deferred items are documented with rationale.
+- [x] **DEBT-02**: Known release-facing renderer/documentation debt is triaged and addressed where blocking, including stale `GeomPolygon` references and rect out-of-bounds behavior; any deferred items are documented with rationale.
 
 ### Validation Gate
 
