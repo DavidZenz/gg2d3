@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Release Hardening
-status: planning
-stopped_at: Phase 41 context gathered
-last_updated: "2026-05-23T16:38:25.436Z"
-last_activity: 2026-05-23 -- Phase 41 context gathered; ready for Phase 41 planning
+status: ready_to_execute
+stopped_at: Phase 41 planned; ready to execute
+last_updated: "2026-05-23T16:51:38.312Z"
+last_activity: 2026-05-23 -- Phase 41 planned with 2 plans; ready to execute
 progress:
   total_phases: 4
   completed_phases: 1
@@ -100,11 +100,12 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: Phase 41 context gathered
-Stopped at: Phase 41 context gathered
-Resume file: .planning/phases/41-release-blocking-debt-triage/41-CONTEXT.md
+Stopped at: Phase 41 planned; ready to execute
+Resume file: .planning/phases/41-release-blocking-debt-triage/41-01-PLAN.md
 
 **Completed Phase:** 40 (Package Hygiene) — 3/3 plans — 2026-05-23
-**Planned Phase:** 40 (Package Hygiene) — 3 plans — 2026-05-22T17:07:20.671Z
+
+**Planned Phase:** 41 (Release-Blocking Debt Triage) — 2 plans — 2026-05-23T16:51:38.303Z
 **Completed Plan:** 39-01 (sf helper extraction) — 2026-05-22T11:29:57Z
 **Completed Plan:** 39-02 (ggplot2 compatibility wrappers) — 2026-05-22T11:33:56Z
 **Completed Plan:** 39-03 (bounded regression gate) — 2026-05-22T11:37:16Z
