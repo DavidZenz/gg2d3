@@ -67,7 +67,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VAL-02 | Phase 42 | Complete |
 | VAL-03 | Phase 42 | Complete |
 | DOC-01 | Phase 43 | Complete |
-| DOC-02 | Phase 43 | Pending |
+| DOC-02 | Phase 43 | Complete |
 
 **Coverage:**
 - v1.10 requirements: 10 total

@@ -10,9 +10,9 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.10 is focused on release hardening after the v1.9 sf expansion. Package hygiene, release-blocking debt triage, and repeatable release validation are now complete; the current focus is documentation and release-note polish.
+v1.10 Release Hardening is complete. Package hygiene, release-blocking debt triage, repeatable release validation, documentation polish, release notes, residual-risk notes, and next-milestone candidates are validated for the release-quality checkpoint.
 
-## Current Milestone: v1.10 Release Hardening
+## Completed Milestone: v1.10 Release Hardening
 
 **Goal:** Prepare gg2d3 for a cleaner release-quality checkpoint by closing package hygiene gaps, validating the release surface, and documenting known residual risks.
 
@@ -93,10 +93,11 @@ v1.10 is focused on release hardening after the v1.9 sf expansion. Package hygie
 - ✓ Package metadata, optional dependency skip behavior, and generated artifact hygiene for release readiness — v1.10 Phase 40
 - ✓ Release-blocking debt triage for dependency/facet advisories, ordinary `geom_polygon()` support signaling, and rect/tile out-of-bounds diagnostics — v1.10 Phase 41
 - ✓ Repeatable local release validation gate covering tests, docs, `R CMD check`, expected optional skips, failure artifacts, and Phase 43 handoff evidence — v1.10 Phase 42
+- ✓ Documentation and release-note polish describing the shipped polygon/point/line `geom_sf()` contract, optional browser validation, residual risks, deferred non-blockers, and next-milestone candidates — v1.10 Phase 43
 
 ### Active
 
-- Documentation and release-note polish for the v1.10 release-hardening checkpoint.
+- None. v1.10 release-hardening phases are complete.
 
 ### Out of Scope
 
@@ -159,6 +160,7 @@ gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus pro
 | local generated artifact boundaries | Browser fixtures, logs, visual outputs, and check artifacts should be preserved for debugging under ignored paths and excluded from source package builds | ✓ Good — implemented and verified in Phase 40 |
 | two-tier local release validation gate | Maintainers need quick day-to-day validation plus full release evidence without weakening optional browser/spatial skips | ✓ Good — implemented and verified in Phase 42 |
 | gate-run-derived release handoff | Release notes should reuse summarized gate evidence and artifact paths rather than publish local logs or reinterpret raw command output | ✓ Good — implemented and verified in Phase 42 |
+| source-first release documentation polish | README, vignettes, roxygen source, generated help, and release notes should describe the shipped polygon/point/line `geom_sf()` contract without stale milestone language | ✓ Good — implemented and verified in Phase 43 |
 
 ## Evolution
 
@@ -178,4 +180,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-23 after completing Phase 42 Release Validation Gate*
+*Last updated: 2026-05-23 after completing Phase 43 Documentation And Release Notes*

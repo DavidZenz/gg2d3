@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Release Hardening
-status: verifying
-stopped_at: Completed 43-02-PLAN.md
+status: milestone_complete
+stopped_at: v1.10 Release Hardening complete; ready for milestone archival
 last_updated: "2026-05-23T20:08:33.802Z"
 last_activity: 2026-05-23
 progress:
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-22)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** Phase 43 — Documentation And Release Notes
+**Current focus:** v1.10 Release Hardening complete
 
 ## Current Position
 
-Phase: 43 (Documentation And Release Notes) — EXECUTING
-Plan: 43-02 of 2
-Status: Phase complete — ready for verification
+Phase: 43
+Plan: Not started
+Status: Milestone complete
 Last activity: 2026-05-23
 
 Progress: [██████████] 100%
@@ -117,12 +117,13 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-05-23T20:08:33.777Z
-Stopped at: Completed 43-02-PLAN.md
-Resume file: None
+Stopped at: v1.10 Release Hardening complete; ready for milestone archival
+Resume file: .planning/phases/43-documentation-and-release-notes/43-VERIFICATION.md
 
 **Completed Phase:** 40 (Package Hygiene) — 3/3 plans — 2026-05-23
 **Completed Phase:** 41 (Release-Blocking Debt Triage) — 2/2 plans — 2026-05-23
 **Completed Phase:** 42 (Release Validation Gate) — 3/3 plans — 2026-05-23
+**Completed Phase:** 43 (Documentation And Release Notes) — 2/2 plans — 2026-05-23
 
 **Discussed Phase:** 42 (Release Validation Gate) — context ready — 2026-05-23
 
@@ -134,4 +135,5 @@ Resume file: None
 **Completed Milestone:** v1.9 sf Robustness and Expansion — 2026-05-22
 **Started Milestone:** v1.10 Release Hardening — 2026-05-22
 **Planned Phase:** 40 (Package Hygiene) — 3 plans — 2026-05-22
-**Next Plan:** 43-01 (Documentation source/generated language sweep) — ready to execute — 2026-05-23
+**Completed Milestone:** v1.10 Release Hardening — 2026-05-23
+**Next Step:** Archive v1.10 with `$gsd-complete-milestone` or start the next milestone.
