@@ -37,11 +37,17 @@ The only ad hoc relative path outside the shared helper convention was `../../te
 
 - `^test_output$`
 - `^test_output/`
+- `^(.*/)?test_output($|/)`
 - `^test_.*_files$`
+- `^(.*/)?test_.*_files($|/)`
 - `^.*\\.Rcheck$`
 - `^[^/]+\\.html$`
 - `^[^/]+\\.png$`
 - `^[^/]+\\.pdf$`
+- `^AGENTS\\.md$`
+- `^(.*/)?CLAUDE\\.md$`
+- `^\\.claude($|/)`
+- `^\\.planning($|/)`
 
 The root-level HTML/PNG/PDF patterns avoid excluding nested installed package assets.
 
@@ -50,7 +56,8 @@ The root-level HTML/PNG/PDF patterns avoid excluding nested installed package as
 Changed files:
 
 - `.gitignore` - added root-level `/*.pdf`.
-- `.Rbuildignore` - added local generated output exclusions.
+- `.Rbuildignore` - added local generated output exclusions, including nested `test_output/` and `test_*_files/` directories that can exist under `tests/testthat/`.
+- `.Rbuildignore` - added local planning/agent guidance exclusions so source package builds do not include `.planning/`, `.claude/`, `AGENTS.md`, or `CLAUDE.md` files.
 - `tests/testthat/test-date-scales.R` - replaced `../../test_output` with `.date_scale_test_output_dir()`, reusing `.test_output_dir()` when available and otherwise resolving the package root before writing `test_output/visual_test_date_scales.html`.
 
 ## Verification Evidence
@@ -65,6 +72,8 @@ rtk rg -n "\\.\\./\\.\\./test_output" tests/testthat/test-date-scales.R
 rtk git check-ignore test_output/browser-sf/phase40-artifact-smoke.html
 rtk git check-ignore test_output/browser-sf/phase40-artifact-smoke-page-errors.log
 rtk Rscript --vanilla -e 'devtools::load_all(quiet = TRUE); testthat::test_file("tests/testthat/test-date-scales.R")'
+cd /private/tmp && rtk R CMD build --no-build-vignettes --no-manual /Users/davidzenz/R/gg2d3
+tar -tzf /private/tmp/gg2d3_0.0.0.9000.tar.gz | rg "\\.planning|\\.claude|AGENTS\\.md|CLAUDE\\.md|test_output|Rcheck"
 ```
 
 Outcomes:
@@ -74,4 +83,5 @@ Outcomes:
 - No `../../test_output` references remain in `tests/testthat/test-date-scales.R`.
 - `test_output/browser-sf/phase40-artifact-smoke.html` is ignored.
 - `test_output/browser-sf/phase40-artifact-smoke-page-errors.log` is ignored.
-- `tests/testthat/test-date-scales.R` passed with 35 assertions and 1 expected visual-test skip.
+- `tests/testthat/test-date-scales.R` passed with 43 assertions and 1 expected visual-test skip.
+- Source package build from `/private/tmp` completed; tarball inspection returned no `.planning`, `.claude`, `AGENTS.md`, `CLAUDE.md`, `test_output`, or `Rcheck` paths.

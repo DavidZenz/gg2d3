@@ -19,6 +19,7 @@ key-files:
 key-decisions:
   - "Kept crosstalk, sf, geojsonsf, and chromote in Suggests because their runtime/test paths remain optional and guarded."
   - "Added VignetteBuilder: knitr to match vignette engine usage."
+  - "Added Depends: R (>= 4.1.0) after review because source/tests use the native pipe operator."
 patterns-established:
   - "Every direct optional dependency in tests, visual checks, README, and vignettes is represented in Suggests or documented as no-action."
 requirements-completed: [HYG-01]
@@ -42,6 +43,7 @@ completed: 2026-05-23
 
 - Created an auditable direct dependency scan with DESCRIPTION classification.
 - Added missing optional dependency declarations for `htmltools`, `V8`, `knitr`, `rmarkdown`, `scales`, `mgcv`, `maps`, and `devtools`.
+- Added an explicit `R (>= 4.1.0)` dependency floor for native-pipe compatibility.
 - Preserved optional runtime behavior by keeping `crosstalk`, `sf`, `geojsonsf`, and `chromote` in `Suggests`.
 
 ## Task Commits
@@ -50,7 +52,7 @@ This inline execution commit contains all plan 40-01 tasks.
 
 ## Files Created/Modified
 
-- `DESCRIPTION` - Adds missing `Suggests` entries and `VignetteBuilder: knitr`.
+- `DESCRIPTION` - Adds missing `Suggests` entries, `VignetteBuilder: knitr`, and `Depends: R (>= 4.1.0)`.
 - `.planning/phases/40-package-hygiene/40-DEPENDENCY-AUDIT.md` - Records scan commands, direct usage, classification, and no-action/deferred decisions.
 
 ## Decisions Made

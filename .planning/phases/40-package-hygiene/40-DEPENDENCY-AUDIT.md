@@ -32,6 +32,10 @@ Added to Imports:
 
 - No new packages. Existing `ggplot2`, `htmlwidgets`, `jsonlite`, `grid`, and `rlang` remain the direct runtime Imports.
 
+Added to Depends:
+
+- `R (>= 4.1.0)` because package tests/source use the native pipe operator and `R CMD build` otherwise injects this dependency implicitly.
+
 Added to Suggests:
 
 - `devtools` for README and helper-driven development commands.

@@ -10,6 +10,7 @@ provides:
   - "Generated artifact path audit"
   - "Ignore and build-ignore coverage for local generated outputs"
   - "Project-root output helper for date-scale visual test"
+  - "Date-scale visual-test assertion hardening from code review"
 affects: [release-hardening, validation-gate, local-artifacts]
 tech-stack:
   added: []
@@ -45,8 +46,9 @@ completed: 2026-05-23
 ## Accomplishments
 
 - Created an artifact audit for generated browser fixtures, visual outputs, and local check outputs.
-- Added `.Rbuildignore` coverage for local generated outputs and `.gitignore` coverage for root-level PDFs.
+- Added `.Rbuildignore` coverage for local generated outputs, planning/agent artifacts, nested test output directories, and `.gitignore` coverage for root-level PDFs.
 - Replaced the date-scale visual test's `../../test_output` path with a package-root helper.
+- Hardened date-scale tests so temporal break assertions require non-empty break vectors and the visual test renders all five constructed plots.
 
 ## Task Commits
 
@@ -56,8 +58,8 @@ This inline execution commit contains all plan 40-03 tasks.
 
 - `.planning/phases/40-package-hygiene/40-ARTIFACT-AUDIT.md` - Records generated paths, ignore coverage, build-ignore coverage, required changes, and verification evidence.
 - `.gitignore` - Adds `/*.pdf`.
-- `.Rbuildignore` - Excludes `test_output/`, `test_*_files`, `*.Rcheck`, and root-level generated HTML/PNG/PDF files.
-- `tests/testthat/test-date-scales.R` - Adds `.date_scale_test_output_dir()` and uses it for the visual HTML artifact.
+- `.Rbuildignore` - Excludes root/nested `test_output/`, root/nested `test_*_files`, `*.Rcheck`, planning/agent artifacts, and root-level generated HTML/PNG/PDF files.
+- `tests/testthat/test-date-scales.R` - Adds `.date_scale_test_output_dir()`, uses it for visual HTML artifacts, requires non-empty temporal breaks, and renders all visual-test plots.
 
 ## Decisions Made
 
@@ -86,7 +88,8 @@ Phase 41 can focus on release-blocking debt without inherited package-source noi
 - `rtk rg -n "\\^test_output|Rcheck" .Rbuildignore` passed.
 - `rtk git check-ignore test_output/browser-sf/phase40-artifact-smoke.html` passed.
 - `rtk git check-ignore test_output/browser-sf/phase40-artifact-smoke-page-errors.log` passed.
-- `rtk Rscript --vanilla -e 'devtools::load_all(quiet = TRUE); testthat::test_file("tests/testthat/test-date-scales.R")'` passed with 35 assertions and 1 expected visual-test skip.
+- `rtk Rscript --vanilla -e 'devtools::load_all(quiet = TRUE); testthat::test_file("tests/testthat/test-date-scales.R")'` passed with 43 assertions and 1 expected visual-test skip.
+- `rtk R CMD build --no-build-vignettes --no-manual /Users/davidzenz/R/gg2d3` passed from `/private/tmp`, and tarball inspection found no `.planning`, `.claude`, `AGENTS.md`, `CLAUDE.md`, `test_output`, or `Rcheck` paths.
 
 ---
 *Phase: 40-package-hygiene*

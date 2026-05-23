@@ -10,9 +10,15 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+^AGENTS\.md$
+^(.*/)?CLAUDE\.md$
+^\.claude($|/)
+^\.planning($|/)
 ^test_output$
 ^test_output/
+^(.*/)?test_output($|/)
 ^test_.*_files$
+^(.*/)?test_.*_files($|/)
 ^.*\.Rcheck$
 ^[^/]+\.html$
 ^[^/]+\.png$

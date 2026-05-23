@@ -45,6 +45,7 @@ test_that("Date x-axis produces temporal scale with ms domain", {
   # Domain should be in milliseconds (Date epoch = days * 86400000)
   expect_true(all(ir$scales$x$domain > 1e12))
   # Breaks should also be in ms
+  expect_gt(length(ir$scales$x$breaks), 0)
   expect_true(all(ir$scales$x$breaks > 1e12))
   # Data values should be in ms
   expect_true(ir$layers[[1]]$data[[1]]$x > 1e12)
@@ -62,6 +63,7 @@ test_that("POSIXct x-axis produces temporal scale with ms domain", {
   expect_equal(ir$scales$x$type, "continuous")
   expect_equal(ir$scales$x$transform, "time")
   expect_true(all(ir$scales$x$domain > 1e12))
+  expect_gt(length(ir$scales$x$breaks), 0)
   expect_true(all(ir$scales$x$breaks > 1e12))
 })
 
@@ -113,6 +115,8 @@ test_that("Date on y-axis works", {
   ir <- as_d3_ir(p)
 
   expect_equal(ir$scales$y$transform, "date")
+  expect_gt(length(ir$scales$y$breaks), 0)
+  expect_true(all(ir$scales$y$breaks > 1e12))
   expect_true(all(ir$scales$y$domain > 1e12))
 })
 
@@ -205,7 +209,11 @@ test_that("date_breaks correctly influences IR breaks", {
   # Should have different number of breaks
   expect_true(length(ir1$scales$x$breaks) != length(ir2$scales$x$breaks))
   # All breaks should be in ms
+  expect_gt(length(ir1$scales$x$breaks), 0)
+  expect_gt(length(ir2$scales$x$breaks), 0)
   expect_true(all(ir1$scales$x$breaks > 1e12))
+  expect_true(all(ir2$scales$x$breaks > 1e12))
+  expect_false(identical(ir1$scales$x$breaks, ir2$scales$x$breaks))
 })
 
 test_that("date_labels extracted for both date and datetime scales", {
@@ -302,13 +310,21 @@ test_that("visual test: date/time scales render correctly", {
     scale_x_date(date_labels = "%b") +
     ggtitle("Date X-Axis: Bar Chart")
 
-  # Save primary widget with tooltip
-  w1 <- gg2d3(p1) |> d3_tooltip()
-  htmlwidgets::saveWidget(
-    w1,
-    file.path(out_dir, "visual_test_date_scales.html"),
-    selfcontained = FALSE
+  plots <- list(
+    date_line = p1,
+    posix_hourly = p2,
+    date_y = p3,
+    flipped_date = p4,
+    date_bar = p5
   )
 
-  expect_true(file.exists(file.path(out_dir, "visual_test_date_scales.html")))
+  for (name in names(plots)) {
+    out_file <- file.path(out_dir, paste0("visual_test_", name, ".html"))
+    htmlwidgets::saveWidget(
+      gg2d3(plots[[name]]) |> d3_tooltip(),
+      out_file,
+      selfcontained = FALSE
+    )
+    expect_true(file.exists(out_file), info = name)
+  }
 })
