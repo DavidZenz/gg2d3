@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.10 is focused on release hardening after the v1.9 sf expansion. Package hygiene and release-blocking debt triage are now complete; the current focus is repeatable release validation and documentation polish.
+v1.10 is focused on release hardening after the v1.9 sf expansion. Package hygiene, release-blocking debt triage, and repeatable release validation are now complete; the current focus is documentation and release-note polish.
 
 ## Current Milestone: v1.10 Release Hardening
 
@@ -92,10 +92,11 @@ v1.10 is focused on release hardening after the v1.9 sf expansion. Package hygie
 - ✓ Package internals hardening for sf helper boundaries, ggplot2 compatibility wrappers, and bounded regression coverage — v1.9 Phase 39
 - ✓ Package metadata, optional dependency skip behavior, and generated artifact hygiene for release readiness — v1.10 Phase 40
 - ✓ Release-blocking debt triage for dependency/facet advisories, ordinary `geom_polygon()` support signaling, and rect/tile out-of-bounds diagnostics — v1.10 Phase 41
+- ✓ Repeatable local release validation gate covering tests, docs, `R CMD check`, expected optional skips, failure artifacts, and Phase 43 handoff evidence — v1.10 Phase 42
 
 ### Active
 
-- Reproducible release validation gates and documentation/release-note polish.
+- Documentation and release-note polish for the v1.10 release-hardening checkpoint.
 
 ### Out of Scope
 
@@ -156,6 +157,8 @@ gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus pro
 | ggplot2 compatibility quarantine | Unavoidable private ggplot2 calls should be isolated behind internal wrappers with characterization tests and explicit comments | ✓ Good — implemented and verified in Phase 39 |
 | release-hygiene dependency classification | Direct optional test, browser, vignette, visual-check, and helper dependencies should be declared in `Suggests`, while guarded runtime paths stay optional unless required unconditionally | ✓ Good — implemented and verified in Phase 40 |
 | local generated artifact boundaries | Browser fixtures, logs, visual outputs, and check artifacts should be preserved for debugging under ignored paths and excluded from source package builds | ✓ Good — implemented and verified in Phase 40 |
+| two-tier local release validation gate | Maintainers need quick day-to-day validation plus full release evidence without weakening optional browser/spatial skips | ✓ Good — implemented and verified in Phase 42 |
+| gate-run-derived release handoff | Release notes should reuse summarized gate evidence and artifact paths rather than publish local logs or reinterpret raw command output | ✓ Good — implemented and verified in Phase 42 |
 
 ## Evolution
 
@@ -175,4 +178,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-23 after completing Phase 40 Package Hygiene*
+*Last updated: 2026-05-23 after completing Phase 42 Release Validation Gate*
