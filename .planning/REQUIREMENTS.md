@@ -20,9 +20,9 @@ Requirements for the Release Hardening milestone. Each maps to exactly one roadm
 
 ### Validation Gate
 
-- [ ] **VAL-01**: Maintainer can run a documented local release gate that covers package tests, documentation generation, and an `R CMD check`-style package check with expected optional skips.
-- [ ] **VAL-02**: Release validation exercises representative non-sf plots, polygon/point/line sf plots, facet/legend/date/coord_flip behavior, and browser smoke coverage without weakening CRAN-compatible skip behavior.
-- [ ] **VAL-03**: Validation failures leave actionable logs or artifacts, and the documented release gate explains where to inspect failures.
+- [x] **VAL-01**: Maintainer can run a documented local release gate that covers package tests, documentation generation, and an `R CMD check`-style package check with expected optional skips.
+- [x] **VAL-02**: Release validation exercises representative non-sf plots, polygon/point/line sf plots, facet/legend/date/coord_flip behavior, and browser smoke coverage without weakening CRAN-compatible skip behavior.
+- [x] **VAL-03**: Validation failures leave actionable logs or artifacts, and the documented release gate explains where to inspect failures.
 
 ### Documentation And Release Notes
 
@@ -63,9 +63,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HYG-03 | Phase 40 | Complete |
 | DEBT-01 | Phase 41 | Complete |
 | DEBT-02 | Phase 41 | Complete |
-| VAL-01 | Phase 42 | Pending |
-| VAL-02 | Phase 42 | Pending |
-| VAL-03 | Phase 42 | Pending |
+| VAL-01 | Phase 42 | Complete |
+| VAL-02 | Phase 42 | Complete |
+| VAL-03 | Phase 42 | Complete |
 | DOC-01 | Phase 43 | Pending |
 | DOC-02 | Phase 43 | Pending |
 

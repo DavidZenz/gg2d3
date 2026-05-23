@@ -75,7 +75,7 @@ Plans:
   3. Validation failures leave actionable logs or artifacts, and the release-gate documentation tells maintainers where to inspect them.
 **Plans**: 3 plans
 Plans:
-- [ ] 42-01-PLAN.md — Define the local release gate commands and expected skip behavior.
+- [x] 42-01-PLAN.md — Define the local release gate commands and expected skip behavior.
 - [ ] 42-02-PLAN.md — Run the release gate, repair release-blocking failures, and record the verification evidence.
 - [ ] 42-03-PLAN.md — Document validation failure artifacts and browser smoke debugging paths.
 
@@ -101,7 +101,7 @@ Phases execute in numeric order: 40 → 41 → 42 → 43
 |-------|--------------|----------------|--------|-----------|
 | 40. Package Hygiene | HYG-01, HYG-02, HYG-03 | 3/3 | Complete    | 2026-05-23 |
 | 41. Release-Blocking Debt Triage | DEBT-01, DEBT-02 | 2/2 | Complete    | 2026-05-23 |
-| 42. Release Validation Gate | VAL-01, VAL-02, VAL-03 | 0/3 | Pending | - |
+| 42. Release Validation Gate | VAL-01, VAL-02, VAL-03 | 1/3 | In Progress | - |
 | 43. Documentation And Release Notes | DOC-01, DOC-02 | 0/2 | Pending | - |
 
 ## Archived Milestones

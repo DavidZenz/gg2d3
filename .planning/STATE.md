@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Release Hardening
 status: executing
-stopped_at: Phase 42 planned; ready for execution
-last_updated: "2026-05-23T18:43:01.663Z"
-last_activity: 2026-05-23 -- Phase 42 execution started
+stopped_at: Completed 42-01-PLAN.md
+last_updated: "2026-05-23T18:48:43.764Z"
+last_activity: 2026-05-23
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 10
-  completed_plans: 5
-  percent: 50
+  total_plans: 8
+  completed_plans: 6
+  percent: 75
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-22)
 ## Current Position
 
 Phase: 42 (Release Validation Gate) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 42
-Last activity: 2026-05-23 -- Phase 42 execution started
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-05-23
 
-Progress: [#####-----] 50%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [#####-----] 50%
 | Phase 36 P01 | 6m13s | 2 tasks | 4 files |
 | Phase 36 P02 | 3m50s | 2 tasks | 1 files |
 | Phase 36 P03 | recovered | 2 tasks | 2 files |
+| Phase 42 P01 | 3m | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,8 @@ Recent decisions affecting current work:
 - 39-02: Routed panel axis, range, and label extraction through compatibility helpers while preserving layout, legend, date, and coord_flip behavior.
 - 39-03: Added `test-regression-core.R` as a bounded cross-surface regression gate for representative IR behavior and sf renderer contracts.
 - 39-03: Kept browser validation optional; CRAN-gated browser tests skip cleanly while non-browser assertions still run.
+- 42-01: Documented the release gate as fixed maintainer commands rather than adding executable wrapper scripts.
+- 42-01: Preserved Phase 40 optional browser/spatial skip semantics as expected evidence when messages are explicit.
 
 ### Pending Todos
 
@@ -99,9 +102,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: Planned Phase 42 Release Validation Gate
-Stopped at: Phase 42 planned; ready for execution
-Resume file: .planning/phases/42-release-validation-gate/42-01-PLAN.md
+Last session: 2026-05-23T18:48:43.756Z
+Stopped at: Completed 42-01-PLAN.md
+Resume file: None
 
 **Completed Phase:** 40 (Package Hygiene) — 3/3 plans — 2026-05-23
 **Completed Phase:** 41 (Release-Blocking Debt Triage) — 2/2 plans — 2026-05-23
