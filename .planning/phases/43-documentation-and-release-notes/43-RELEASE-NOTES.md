@@ -60,17 +60,27 @@ and zoom suppression language.
 ## Residual Risks
 
 - Optional live browser validation is environment-dependent and remains
-  skip-aware by design.
-- Private ggplot2 theme API compatibility remains quarantined behind internal
-  compatibility helpers.
-- Final package check retained 4 NOTEs as release evidence.
+  skip-aware by design. It may skip cleanly when CRAN-like execution,
+  `sf`, `geojsonsf`, `chromote`, Chrome/Chromium, or chromote launch gates
+  are unavailable.
+- The private ggplot2 theme API compatibility risk remains quarantined behind
+  internal compatibility helpers. This keeps the risk visible without widening
+  the release-hardening scope.
+- Final package check retained 4 NOTEs as release evidence after Phase 42
+  repaired ERROR/WARNING output.
+- The current `geom_sf()` contract covers polygon-family, point-family, and
+  line-family rows. Advanced sf behavior remains future work, not a v1.10
+  requirement.
 
 ## Deferred Non-Blockers
 
 - Deferred non-blocker: ordinary `geom_polygon()` support signaling remains
-  separate from supported `geom_sf()` polygon-family rendering.
+  separate from supported `geom_sf()` polygon-family rendering. The v1.10
+  release notes do not add an ordinary polygon renderer or promote ordinary
+  `geom_polygon()` to shipped support.
 - Deferred non-blocker: rect/tile out-of-bounds behavior remains future
-  renderer debt pending focused evidence.
+  renderer debt pending a focused reproduction. Current evidence does not
+  make a broad rect/tile renderer rewrite a v1.10 requirement.
 
 Source: `.planning/phases/41-release-blocking-debt-triage/41-DEBT-AUDIT.md`.
 
@@ -84,21 +94,24 @@ release notes:
 - `test_output/browser-sf/*-page-errors.log`
 - `test_output/browser-sf/*-browser-log.json`
 - `/private/tmp/gg2d3_*.Rcheck/00check.log`
-- `/private/tmp/gg2d3_0.0.0.9000.tar.gz`
+- `/private/tmp/gg2d3_*.tar.gz`
 
 ## Recommended Next-Milestone Candidates
 
 These candidates are outside the v1.10 release hardening scope:
 
 - Plan ordinary `geom_polygon()` renderer parity as a separate future phase if
-  parity coverage requires it.
+  parity coverage requires it; it is not a v1.10 requirement.
 - Add a focused rect/tile out-of-bounds reproduction before changing renderer
-  behavior.
-- Consider advanced sf features after the current polygon/point/line family
-  contract stays stable.
-- Define large-dataset performance budgets for complex SVG outputs.
+  behavior; a fix should follow evidence, not precede it.
+- Consider advanced sf features such as `GEOMETRYCOLLECTION`,
+  `geom_sf_text()`, and `geom_sf_label()` after the current
+  polygon/point/line family contract stays stable.
+- Define large-dataset performance budgets and simplification guidance for
+  complex SVG outputs.
 - Consider future screenshot or perceptual regression checks after DOM/source
-  guards are stable.
+  guards are stable. This is a future validation candidate, not a v1.10
+  requirement.
 
 ## Source Artifacts
 
