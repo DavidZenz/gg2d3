@@ -33,7 +33,7 @@
 
 - [x] **Phase 40: Package Hygiene** - Maintainers can run tests, examples, docs, and optional validation tooling without undeclared dependencies or source-tree artifact noise.
 - [x] **Phase 41: Release-Blocking Debt Triage** - Maintainers have fixed or explicitly deferred known release-facing debt with rationale.
-- [ ] **Phase 42: Release Validation Gate** - Maintainers can run and interpret a repeatable local release gate covering tests, docs, checks, and browser validation behavior.
+- [x] **Phase 42: Release Validation Gate** - Maintainers can run and interpret a repeatable local release gate covering tests, docs, checks, and browser validation behavior.
 - [ ] **Phase 43: Documentation And Release Notes** - Users and maintainers have current docs, release notes, residual-risk notes, and next-milestone candidates.
 
 ## Phase Details
@@ -76,8 +76,8 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 42-01-PLAN.md — Define the local release gate commands and expected skip behavior.
-- [ ] 42-02-PLAN.md — Run the release gate, repair release-blocking failures, and record the verification evidence.
-- [ ] 42-03-PLAN.md — Document validation failure artifacts and browser smoke debugging paths.
+- [x] 42-02-PLAN.md — Run the release gate, repair release-blocking failures, and record the verification evidence.
+- [x] 42-03-PLAN.md — Document validation failure artifacts and browser smoke debugging paths.
 
 ### Phase 43: Documentation And Release Notes
 **Goal**: Users and maintainers have current docs, release notes, residual-risk notes, and next-milestone candidates.
@@ -101,7 +101,7 @@ Phases execute in numeric order: 40 → 41 → 42 → 43
 |-------|--------------|----------------|--------|-----------|
 | 40. Package Hygiene | HYG-01, HYG-02, HYG-03 | 3/3 | Complete    | 2026-05-23 |
 | 41. Release-Blocking Debt Triage | DEBT-01, DEBT-02 | 2/2 | Complete    | 2026-05-23 |
-| 42. Release Validation Gate | VAL-01, VAL-02, VAL-03 | 1/3 | In Progress | - |
+| 42. Release Validation Gate | VAL-01, VAL-02, VAL-03 | 3/3 | Complete    | 2026-05-23 |
 | 43. Documentation And Release Notes | DOC-01, DOC-02 | 0/2 | Pending | - |
 
 ## Archived Milestones
