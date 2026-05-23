@@ -1,5 +1,26 @@
 # Milestones
 
+## v1.10 Release Hardening (Shipped: 2026-05-23)
+
+**Phases completed:** 4 phases, 10 plans, 28 tasks
+
+**Key accomplishments:**
+
+- Dependency metadata now covers direct runtime, test, browser, visual-check, README, and vignette package usage.
+- Optional browser and spatial validation skip behavior is documented and verified without adding new tooling.
+- Local browser, visual, and check artifacts now resolve to predictable ignored paths and are excluded from package builds.
+- Release advisory follow-ups classified with source-backed dependency and facet identity evidence
+- Ordinary polygon and rect/tile release debt classified with corrected public support documentation
+- Two-tier local release validation contract with preserved browser/spatial skip semantics and artifact-backed coverage mapping
+- Quick/full release gate execution with expected optional skips, repaired package-check blockers, and recorded `/private/tmp` check artifacts
+- Gate-run-derived verification report and maintainer debugging handoff for browser, documentation, test, and package-check failures
+- DOC-01 documentation now consistently states the shipped polygon-family, point-family, and line-family `geom_sf()` contract across source docs, generated README/help, and coverage evidence.
+- DOC-02 now has a v1.10 release checklist summarizing Phase 42 gate outcomes, expected optional skips, residual risks, deferred non-blockers, and future candidates without publishing local logs.
+
+**Known deferred items at close:** 2 context-question groups acknowledged and resolved/deferred through Phase 41/42 artifacts and Phase 43 release notes. See `.planning/STATE.md` Deferred Items.
+
+---
+
 ## v1.9 sf Robustness and Expansion (Shipped: 2026-05-22)
 
 **Phases completed:** 4 phases, 13 plans, 32 tasks

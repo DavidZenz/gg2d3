@@ -22,7 +22,17 @@ v1.10 Release Hardening is complete. Package hygiene, release-blocking debt tria
 - Reproducible release validation gates covering package tests, representative browser skips/runs, documentation generation, and package check behavior.
 - Release notes and docs polish that describe the current v1.9/v1.10 support contract without stale milestone language.
 
-## Last Shipped Milestone: v1.9 sf Robustness and Expansion
+## Next Milestone Goals
+
+To be defined with `$gsd-new-milestone`. Candidate areas carried forward from v1.10 release notes:
+
+- Ordinary `geom_polygon()` renderer parity as a separate future phase.
+- A focused rect/tile out-of-bounds reproduction and fix if evidence proves a rendering mismatch.
+- Advanced sf features such as `GEOMETRYCOLLECTION`, `geom_sf_text()`, `geom_sf_label()`, or projection-aware map interactions.
+- Large-dataset performance budgets and simplification guidance for complex SVG outputs.
+- Screenshot or perceptual regression testing once the DOM/source guards remain stable.
+
+## Previous Shipped Milestone: v1.9 sf Robustness and Expansion
 
 **Goal:** Strengthen the `geom_sf` foundation with automated browser validation, non-polygon sf geometry support, and core package hardening.
 
@@ -180,4 +190,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-23 after completing Phase 43 Documentation And Release Notes*
+*Last updated: 2026-05-23 after archiving v1.10 Release Hardening*

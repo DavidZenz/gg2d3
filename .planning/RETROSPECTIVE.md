@@ -2,6 +2,39 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.10 — Release Hardening
+
+**Shipped:** 2026-05-23
+**Phases:** 4 | **Plans:** 10
+
+### What Was Built
+- Package metadata, optional dependency classification, generated artifact ignores, and local validation output paths were hardened for release-facing work.
+- Release-blocking debt was triaged across dependency/facet advisories, ordinary `geom_polygon()` support signaling, and rect/tile out-of-bounds behavior.
+- A two-tier local release validation gate was documented and run with expected optional browser/spatial skips and actionable artifact paths.
+- README, vignettes, diagnostics docs, roxygen source, generated help, and release notes now describe the shipped polygon/point/line `geom_sf()` contract and residual risks.
+
+### What Worked
+- Phase-level release gates made the final release notes factual rather than speculative.
+- Treating optional skips as explicit evidence kept CRAN-friendly behavior from looking like missing coverage.
+- Source-first documentation edits kept generated README/help aligned with package code.
+
+### What Was Inefficient
+- Some context questions remained open until milestone close, even though later phase artifacts had effectively resolved them.
+- Closeout tooling still required manual polish around roadmap collapse and state wording.
+- Documentation generation surfaced advisory package-version notes (`bslib`, `cpp11`) that were useful context but not release blockers.
+
+### Patterns Established
+- Release evidence should summarize outcomes and point to artifact locations rather than copy local logs into release-facing docs.
+- Generated browser, visual, and check artifacts need predictable ignored paths before broad validation is comfortable.
+- Expected optional skips are part of the validation contract when their messages are clear and tested.
+
+### Key Lessons
+1. Mark context questions resolved when phase decisions are made, not only at milestone close.
+2. Docs-only phases still need source/generated parity checks and scans for accidental tooling or renderer changes.
+3. Milestone completion helpers are useful for canonical archives, but roadmap and project narrative still need deliberate review.
+
+---
+
 ## Milestone: v1.8 — Production geom_sf Polygon MVP
 
 **Shipped:** 2026-05-20

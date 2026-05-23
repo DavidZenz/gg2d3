@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Release Hardening
-status: milestone_complete
-stopped_at: v1.10 Release Hardening complete; ready for milestone archival
-last_updated: "2026-05-23T20:08:33.802Z"
+status: completed
+stopped_at: v1.10 Release Hardening archived; ready for next milestone definition
+last_updated: "2026-05-23T20:54:54.591Z"
 last_activity: 2026-05-23
 progress:
   total_phases: 4
@@ -18,16 +18,16 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-22)
+See: .planning/PROJECT.md (updated 2026-05-23)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
 **Current focus:** v1.10 Release Hardening complete
 
 ## Current Position
 
-Phase: 43
-Plan: Not started
-Status: Milestone complete
+Phase: None
+Plan: None
+Status: No active milestone
 Last activity: 2026-05-23
 
 Progress: [██████████] 100%
@@ -104,7 +104,7 @@ None yet.
 
 ### Blockers/Concerns
 
-Phase 36 code review left two advisory follow-ups: add direct `pkgload` and `rprojroot` Suggests entries, and tighten facet smoke assertions so panel identity is preserved instead of only sorted count distributions.
+None active. v1.10 advisory follow-ups were resolved or explicitly classified in Phase 41 and documented through Phase 43 release notes.
 
 ## Deferred Items
 
@@ -114,11 +114,18 @@ Items acknowledged and carried forward from previous milestone close:
 |----------|------|--------|-------------|
 | Validation | DOM-level browser smoke testing for rendered sf paths and brush behavior | Completed in Phase 36 | v1.8 audit |
 
+Items acknowledged at v1.10 milestone close on 2026-05-23:
+
+| Category | Item | Status |
+|----------|------|--------|
+| context_questions | Phase 41 `41-CONTEXT.md` open questions about ordinary `geom_polygon()`, rect/tile out-of-bounds behavior, and debt audit artifact shape | Resolved by Phase 41 debt audit and carried forward as documented deferred non-blockers where applicable |
+| context_questions | Phase 42 `42-CONTEXT.md` open questions about release gate command spelling, full gate shape, and documentation filename/location | Resolved by Phase 42 validation gate and Phase 43 release notes/checklist |
+
 ## Session Continuity
 
-Last session: 2026-05-23T20:08:33.777Z
-Stopped at: v1.10 Release Hardening complete; ready for milestone archival
-Resume file: .planning/phases/43-documentation-and-release-notes/43-VERIFICATION.md
+Last session: 2026-05-23T20:54:54.591Z
+Stopped at: v1.10 Release Hardening archived; ready for next milestone definition
+Resume file: .planning/ROADMAP.md
 
 **Completed Phase:** 40 (Package Hygiene) — 3/3 plans — 2026-05-23
 **Completed Phase:** 41 (Release-Blocking Debt Triage) — 2/2 plans — 2026-05-23
@@ -136,4 +143,4 @@ Resume file: .planning/phases/43-documentation-and-release-notes/43-VERIFICATION
 **Started Milestone:** v1.10 Release Hardening — 2026-05-22
 **Planned Phase:** 40 (Package Hygiene) — 3 plans — 2026-05-22
 **Completed Milestone:** v1.10 Release Hardening — 2026-05-23
-**Next Step:** Archive v1.10 with `$gsd-complete-milestone` or start the next milestone.
+**Next Step:** Start the next milestone with `$gsd-new-milestone`.
