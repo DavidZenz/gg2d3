@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Release Hardening
 status: executing
-stopped_at: Completed 42-01-PLAN.md
-last_updated: "2026-05-23T18:48:43.764Z"
+stopped_at: Completed 42-02-PLAN.md
+last_updated: "2026-05-23T19:09:45.658Z"
 last_activity: 2026-05-23
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 8
-  completed_plans: 6
-  percent: 75
+  completed_plans: 7
+  percent: 88
 ---
 
 # Project State
@@ -30,7 +30,7 @@ Plan: 2 of 3
 Status: Ready to execute
 Last activity: 2026-05-23
 
-Progress: [████████░░] 75%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [████████░░] 75%
 | Phase 36 P02 | 3m50s | 2 tasks | 1 files |
 | Phase 36 P03 | recovered | 2 tasks | 2 files |
 | Phase 42 P01 | 3m | 2 tasks | 2 files |
+| Phase 42 P02 | 16m27s | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,8 @@ Recent decisions affecting current work:
 - 39-03: Kept browser validation optional; CRAN-gated browser tests skip cleanly while non-browser assertions still run.
 - 42-01: Documented the release gate as fixed maintainer commands rather than adding executable wrapper scripts.
 - 42-01: Preserved Phase 40 optional browser/spatial skip semantics as expected evidence when messages are explicit.
+- 42-02: Classified missing sf and browser smoke skips as expected optional evidence when explicit messages matched the release gate contract.
+- 42-02: Repaired only scoped release-gate blockers found by local tests and R CMD check; retained remaining R CMD check NOTEs as release evidence.
 
 ### Pending Todos
 
@@ -102,8 +105,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-23T18:48:43.756Z
-Stopped at: Completed 42-01-PLAN.md
+Last session: 2026-05-23T19:09:45.649Z
+Stopped at: Completed 42-02-PLAN.md
 Resume file: None
 
 **Completed Phase:** 40 (Package Hygiene) — 3/3 plans — 2026-05-23
