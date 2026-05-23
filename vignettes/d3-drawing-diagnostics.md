@@ -30,7 +30,8 @@ Interactivity targets `.geom-sf` polygon, point, and line marks. Tooltip,
 hover, custom handler, and Shiny-style callback payloads are sanitized
 source-row objects. Brush selection uses representative-anchor brushing from
 rendered `data-cx` and `data-cy` anchors rather than geometric intersection.
-Browser validation covers sf family interactivity, stacked overlays, faceted and
+Optional browser validation is R/testthat/chromote based and may skip cleanly;
+when available, it covers sf family interactivity, stacked overlays, faceted and
 empty panels, skipped rows, and zoom suppression.
 
 Map anti-features are explicit: no tile basemaps, no slippy map controls, no

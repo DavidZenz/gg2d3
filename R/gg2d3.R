@@ -5,6 +5,8 @@
 #' `MULTILINESTRING`) layers. The map anti-features are explicit: no tile
 #' basemaps, slippy map controls, JavaScript-side CRS reprojection, true
 #' geometry-overlap brushing, or large-map performance guarantees.
+#' Optional browser validation for sf behavior is R/testthat/chromote based and
+#' may skip cleanly when optional local tooling is unavailable.
 #'
 #' @param x ggplot object or IR list from as_d3_ir()
 #' @param width Optional widget width passed to htmlwidgets.

@@ -41,7 +41,8 @@ gg2d3(p, width = 800, height = 500)
 
 ## Supported geoms
 
-gg2d3 supports the core Cartesian geoms below plus polygon-family `geom_sf()`.
+gg2d3 supports the core Cartesian geoms below plus polygon-family,
+point-family, and line-family `geom_sf()`.
 All aesthetics that ggplot2 maps (color, fill, size, shape, alpha, linewidth)
 are carried through to D3.
 
@@ -170,7 +171,7 @@ nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
   gg2d3()
 ```
 
-The v1.9 `geom_sf()` support contract is intentionally explicit:
+The `geom_sf()` support contract is intentionally explicit:
 
 - Accepted families are polygon-family (`POLYGON`, `MULTIPOLYGON`),
   point-family (`POINT`, `MULTIPOINT`), and line-family (`LINESTRING`,
@@ -180,7 +181,8 @@ The v1.9 `geom_sf()` support contract is intentionally explicit:
 - Rows that are unsupported, empty, invalid, or missing emit
   `geom_sf layer skipped %d unsupported, empty, invalid, or missing geometries`
   and are skipped while accepted rows remain renderable.
-- Browser validation covers sf family interactivity, stacked overlays, faceted
+- Optional browser validation is R/testthat/chromote based and may skip cleanly;
+  when available, it covers sf family interactivity, stacked overlays, faceted
   and empty panels, and zoom suppression.
 - gg2d3 does not provide tile basemaps, slippy map controls, JavaScript-side
   CRS reprojection, true geometry-overlap brushing, or large-map performance

@@ -258,6 +258,8 @@ Crosstalk behavior:
   anchors from `data-cx` and `data-cy` rather than true geometry-overlap
   brushing; these representative anchors are stable panel-local hit-test
   points. `d3_zoom()` warns with `d3_zoom() does not support geom_sf layers yet; zoom has been suppressed.` and returns the unzoomed widget.
+  Optional browser validation for these sf interactions is R/testthat/chromote
+  based and may skip cleanly when optional local tooling is unavailable.
 - **Zoom extent** — `scale_extent[1]` must be >= 1. Setting it below 1 would
   allow zooming further out than the original view, which distorts axis
   labels; the function raises an error instead.
