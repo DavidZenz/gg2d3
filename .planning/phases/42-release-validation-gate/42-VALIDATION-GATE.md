@@ -74,6 +74,46 @@ Missing optional browser/spatial tooling is expected skip evidence, not a releas
 
 Browser smoke artifacts are local debugging evidence under ignored paths. Inspect them locally and redact logs before sharing outside the release-validation context.
 
+## Debugging Failed Gates
+
+### Browser Smoke Debugging
+
+When browser smoke validation fails after the optional gates pass, inspect the local browser artifacts before changing renderer code:
+
+- `test_output/browser-sf/*.html` for the saved widget fixture or failure copy.
+- `test_output/browser-sf/*-console.log` for browser console output.
+- `test_output/browser-sf/*-page-errors.log` for JavaScript exception output.
+- `test_output/browser-sf/*-browser-log.json` for structured browser smoke logs.
+
+If live browser validation skips, first confirm the skip message matches one of the expected optional skip contracts: `Chrome/Chromium not available for chromote sf smoke tests` or `chromote session launch unavailable:`. Matching optional skip messages are not release failures; different browser errors should be treated as release-gate failures and debugged from the artifact paths above.
+
+### Package Check Debugging
+
+For package-check failures, inspect `/private/tmp/gg2d3_*.Rcheck/00check.log` first. Rebuild the package from the repository root, then rerun the check from `/private/tmp`:
+
+```bash
+rtk Rscript --vanilla -e 'cat(read.dcf("DESCRIPTION")[1, "Version"])'
+cd /private/tmp
+rtk R CMD build --no-manual /Users/davidzenz/R/gg2d3
+rtk R CMD check --as-cran gg2d3_0.0.0.9000.tar.gz
+```
+
+Replace `gg2d3_0.0.0.9000.tar.gz` with the version built from `DESCRIPTION`.
+
+### Documentation Debugging
+
+For documentation-generation failures or unexpected generated diffs, rerun:
+
+```bash
+rtk Rscript --vanilla -e 'devtools::document(); devtools::build_readme()'
+```
+
+Then inspect diffs in `README.md`, `NAMESPACE`, and `man/*.Rd`.
+
+### Test Failure Debugging
+
+For release-surface test failures, start with the failing test file named in the output and compare it to the coverage matrix above. The primary release-gate test files are `test-regression-core.R`, `test-sf-browser.R`, `test-sf-ir.R`, `test-sf-renderer.R`, `test-facets.R`, `test-facet-grid.R`, `test-legends.R`, `test-date-scales.R`, and `test-coord-flip.R`.
+
 ## Phase 42 Evidence Files
 
 - `.planning/phases/42-release-validation-gate/42-VALIDATION-GATE.md` records the maintainer-facing command and interpretation contract.
