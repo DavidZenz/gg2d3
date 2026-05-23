@@ -34,7 +34,7 @@
 - [x] **Phase 40: Package Hygiene** - Maintainers can run tests, examples, docs, and optional validation tooling without undeclared dependencies or source-tree artifact noise.
 - [x] **Phase 41: Release-Blocking Debt Triage** - Maintainers have fixed or explicitly deferred known release-facing debt with rationale.
 - [x] **Phase 42: Release Validation Gate** - Maintainers can run and interpret a repeatable local release gate covering tests, docs, checks, and browser validation behavior.
-- [ ] **Phase 43: Documentation And Release Notes** - Users and maintainers have current docs, release notes, residual-risk notes, and next-milestone candidates.
+- [x] **Phase 43: Documentation And Release Notes** - Users and maintainers have current docs, release notes, residual-risk notes, and next-milestone candidates.
 
 ## Phase Details
 
@@ -90,7 +90,7 @@ Plans:
 **Plans**: 2 plans
 Plans:
 - [x] 43-01-PLAN.md — Sweep README, vignettes, diagnostics docs, roxygen source, and generated help for release-consistent language.
-- [ ] 43-02-PLAN.md — Create v1.10 release checklist/notes with residual risks and next-milestone candidates.
+- [x] 43-02-PLAN.md — Create v1.10 release checklist/notes with residual risks and next-milestone candidates.
 
 ## Progress
 
@@ -102,7 +102,7 @@ Phases execute in numeric order: 40 → 41 → 42 → 43
 | 40. Package Hygiene | HYG-01, HYG-02, HYG-03 | 3/3 | Complete    | 2026-05-23 |
 | 41. Release-Blocking Debt Triage | DEBT-01, DEBT-02 | 2/2 | Complete    | 2026-05-23 |
 | 42. Release Validation Gate | VAL-01, VAL-02, VAL-03 | 3/3 | Complete    | 2026-05-23 |
-| 43. Documentation And Release Notes | DOC-01, DOC-02 | 1/2 | In Progress | - |
+| 43. Documentation And Release Notes | DOC-01, DOC-02 | 2/2 | Complete    | 2026-05-23 |
 
 ## Archived Milestones
 
