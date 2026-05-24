@@ -307,17 +307,15 @@ test_that("rect renderer and update path both handle rect.geom-rect", {
 | A1 | A reversed-scale DOM mismatch would appear as mirrored or shifted rects relative to tick order. [ASSUMED] | Common Pitfalls | Tests might need a different oracle, such as comparing ggplot2 grob coordinates or a browser-measured coordinate table. |
 | A2 | Update-path divergence would likely surface after zoom/pan or transition. [ASSUMED] | Common Pitfalls | If no rect update interaction exists in the phase, source-contract parity may be enough and browser zoom smoke may be unnecessary. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should optional browser DOM smoke be included in `45-01` or `45-02`?** [VERIFIED: .planning/phases/45-rect-and-tile-edge-closure/45-CONTEXT.md]
+1. **RESOLVED: Optional browser DOM smoke belongs in `45-02`, only if needed.** [VERIFIED: .planning/phases/45-rect-and-tile-edge-closure/45-CONTEXT.md; .planning/phases/45-rect-and-tile-edge-closure/45-02-PLAN.md]
    - What we know: Browser smoke is allowed but optional and must skip cleanly. [VERIFIED: 45-CONTEXT.md; tests/testthat/helper-browser-polygon.R]
-   - What's unclear: Whether IR/source tests alone will classify the suspected mismatch. [VERIFIED: source inspection]
-   - Recommendation: Put IR/source classification in `45-01`; reserve browser DOM smoke for `45-02` when a visible clipping/update question remains. [VERIFIED: .planning/ROADMAP.md; tests/testthat/test-polygon-browser.R]
+   - Resolution: `45-01` performs IR/source classification only. `45-02` adds optional browser DOM smoke only when a visible clipping, facet placement, reversed-scale DOM geometry, coord_flip DOM geometry, or update-path question remains after IR/source tests. [VERIFIED: .planning/phases/45-rect-and-tile-edge-closure/45-01-PLAN.md; .planning/phases/45-rect-and-tile-edge-closure/45-02-PLAN.md]
 
-2. **Does reversed scale behavior need a fix or only a characterization test?** [VERIFIED: local R probe]
+2. **RESOLVED: Reversed scale behavior gets characterized first and fixed only with DOM/source evidence.** [VERIFIED: local R probe; .planning/phases/45-rect-and-tile-edge-closure/45-01-PLAN.md; .planning/phases/45-rect-and-tile-edge-closure/45-02-PLAN.md]
    - What we know: Local `ggplot_build()` changed `xmin=0,xmax=1` into `xmin=0,xmax=-1` under `scale_x_reverse()`, and gg2d3 also emits `transform = "reverse"`. [VERIFIED: local R probe]
-   - What's unclear: Whether browser DOM coordinates match ggplot2's intended visual output. [VERIFIED: source inspection]
-   - Recommendation: Include one reversed continuous rect fixture in `45-01` and only patch if DOM-measured geometry is wrong. [VERIFIED: .planning/phases/45-rect-and-tile-edge-closure/45-CONTEXT.md]
+   - Resolution: `45-01` includes a reversed continuous rect fixture and classification. `45-02` patches only if the classification marks reversed-scale behavior as a visible or DOM-measurable mismatch; otherwise it is closed as a tested non-issue. [VERIFIED: .planning/phases/45-rect-and-tile-edge-closure/45-CONTEXT.md; .planning/phases/45-rect-and-tile-edge-closure/45-02-PLAN.md]
 
 ## Environment Availability
 
