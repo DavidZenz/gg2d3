@@ -59,10 +59,19 @@ Most theme elements are translated, but some edge cases are not covered:
 
 ## Rect/tile edge cases
 
-`geom_rect` and `geom_tile` are clipped at the panel boundary, but rectangles
-whose bounds extend beyond scale limits or interact with transformed/reversed
-scales remain a known edge case. The current release treats this as deferred
-non-blocking renderer debt unless a focused regression proves otherwise.
+Phase 45 closed the deferred `geom_rect` and `geom_tile` out-of-bounds item.
+Focused fixtures distinguish scale-limit censoring from `coord_cartesian()` and
+SVG clipping: scale limits can produce `NA` bounds before gg2d3 sees the rows,
+while coordinate limits preserve finite bounds and rely on the panel clip path.
+
+Confirmed renderer/update mismatches were fixed at the D3 boundary. Categorical
+tile positioning now uses band-scale center values with `bandwidth()` dimensions,
+rect borders use the registry stroke/linewidth accessors, and the
+`rect.geom-rect` update path mirrors band-scale and `coord_flip()` geometry.
+The remaining scale-limit, reversed-scale, coordinate-limit, and facet cases are
+closed as tested non-issues in the Phase 45 classification notes. Transformed
+scale expansion remains out of scope for this closure and broader public support
+contract wording is left to Phase 47.
 
 ## Private API dependency
 
