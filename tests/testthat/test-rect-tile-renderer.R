@@ -126,3 +126,10 @@ test_that("RECT-02 rect update path is band and flip safe", {
   expect_match(rect_update, "flippedRectWidth")
   expect_match(rect_update, "rectHeight")
 })
+
+test_that("Phase 45 does not require browser smoke for rect/tile closure", {
+  notes <- classification_notes()
+
+  expect_false(grepl("browser-required", notes, fixed = TRUE))
+  expect_match(notes, "Browser smoke: not required")
+})
