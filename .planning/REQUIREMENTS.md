@@ -10,9 +10,8 @@ Requirements for the Geometry Parity milestone. Each maps to exactly one roadmap
 ### Ordinary Polygon Rendering
 
 - [x] **POLY-01**: `as_d3_ir()` recognizes ordinary `geom_polygon()` layers and preserves grouped polygon row order, x/y coordinates, and mapped fill, stroke, alpha, linewidth, and linetype aesthetics.
-- [x] **POLY-02
-**: The D3 renderer draws ordinary `geom_polygon()` groups as closed SVG paths that match ggplot2 positioning, fill/stroke styling, clipping, and facet panel placement for representative Cartesian plots.
-- [ ] **POLY-03**: Existing tooltip, hover, brush, and custom handler APIs can target ordinary polygon marks with stable classes, row identity, and sanitized callback payloads.
+- [x] **POLY-02**: The D3 renderer draws ordinary `geom_polygon()` groups as closed SVG paths that match ggplot2 positioning, fill/stroke styling, clipping, and facet panel placement for representative Cartesian plots.
+- [x] **POLY-03**: Existing tooltip, hover, brush, and custom handler APIs can target ordinary polygon marks with stable classes, row identity, and sanitized callback payloads.
 
 ### Rect And Tile Edge Behavior
 
@@ -61,7 +60,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | POLY-01 | Phase 44 | Complete |
 | POLY-02 | Phase 44 | Complete |
-| POLY-03 | Phase 44 | Pending |
+| POLY-03 | Phase 44 | Complete |
 | RECT-01 | Phase 45 | Pending |
 | RECT-02 | Phase 45 | Pending |
 | SFANN-01 | Phase 46 | Pending |

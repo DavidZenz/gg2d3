@@ -32,7 +32,7 @@
 - Integer phases (44, 45, 46, 47): Planned milestone work
 - Decimal phases (44.1, 44.2): Urgent insertions, if needed
 
-- [ ] **Phase 44: Ordinary geom_polygon Support** - Users can render ordinary `geom_polygon()` layers as grouped D3 paths with representative styling, facets, and existing interactivity hooks.
+- [x] **Phase 44: Ordinary geom_polygon Support** - Users can render ordinary `geom_polygon()` layers as grouped D3 paths with representative styling, facets, and existing interactivity hooks.
 - [ ] **Phase 45: Rect And Tile Edge Closure** - Maintainers have reproduced and fixed, or explicitly closed with evidence, the deferred rect/tile out-of-bounds behavior.
 - [ ] **Phase 46: sf Text And Label Annotations** - Users can render `geom_sf_text()` and `geom_sf_label()` at projected anchors aligned with existing sf panel projections.
 - [ ] **Phase 47: Geometry Parity Docs And Validation** - Users and maintainers have current docs, validation coverage, and support-contract notes for v1.11 geometry parity.
@@ -52,7 +52,7 @@
 Plans:
 - [x] 44-01-PLAN.md — Add ordinary `geom_polygon()` IR extraction and validation fixtures.
 - [x] 44-02-PLAN.md — Implement D3 grouped polygon path rendering with styling, clipping, and facet coverage.
-- [ ] 44-03-PLAN.md — Wire polygon interactivity selectors, sanitized payloads, and regression coverage.
+- [x] 44-03-PLAN.md — Wire polygon interactivity selectors, sanitized payloads, and regression coverage.
 
 ### Phase 45: Rect And Tile Edge Closure
 **Goal**: Maintainers have reproduced and fixed, or explicitly closed with evidence, the deferred rect/tile out-of-bounds behavior.
@@ -103,7 +103,7 @@ Phases execute in numeric order: 44 → 45 → 46 → 47
 
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
-| 44. Ordinary geom_polygon Support | POLY-01, POLY-02, POLY-03 | 2/3 | In Progress | — |
+| 44. Ordinary geom_polygon Support | POLY-01, POLY-02, POLY-03 | 3/3 | Complete | 2026-05-24 |
 | 45. Rect And Tile Edge Closure | RECT-01, RECT-02 | 0/2 | Not started | — |
 | 46. sf Text And Label Annotations | SFANN-01, SFANN-02, SFANN-03 | 0/3 | Not started | — |
 | 47. Geometry Parity Docs And Validation | DOCVAL-01 | 0/2 | Not started | — |
