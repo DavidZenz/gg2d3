@@ -25,3 +25,7 @@ Transformed scales: skipped per D-03 unless later evidence requires them.
 ## Scale Limits Versus Coordinate Limits
 
 Scale limits are classified separately from coordinate limits per D-02. Scale limits can censor built rect bounds before gg2d3 sees the data, so missing rendered rows in those cases are ggplot2-compatible. Coordinate limits preserve complete bounds and depend on SVG panel clipping, so off-panel SVG coordinates are not a mismatch by themselves.
+
+## Browser Smoke Disposition
+
+Browser smoke: not required for Plan 45-02 closure. The remaining questions were source-measurable at the renderer/update boundary: `rect.js` now uses finite band-center geometry for categorical tiles, stroke/linewidth accessors for rect borders, and `geom-registry.js` now mirrors band-scale and `coord_flip()` rect geometry. No unresolved browser-smoke gate remains in the classification.
