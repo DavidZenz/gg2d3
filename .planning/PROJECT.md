@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.11 Geometry Parity is being defined. The milestone focuses on closing the ordinary polygon and rect/tile geometry gaps carried forward from v1.10, then extending the current sf renderer contract to text and label annotations.
+v1.11 Geometry Parity is in progress. Phase 44 shipped ordinary `geom_polygon()` support as grouped closed D3 paths with representative styling, facets, zoom/update compatibility, sanitized interaction payloads, and grouped/faceted crosstalk key coverage. The next focus is Phase 45 rect/tile edge behavior.
 
 ## Current Milestone: v1.11 Geometry Parity
 
@@ -103,10 +103,11 @@ v1.11 Geometry Parity is being defined. The milestone focuses on closing the ord
 - ✓ Release-blocking debt triage for dependency/facet advisories, ordinary `geom_polygon()` support signaling, and rect/tile out-of-bounds diagnostics — v1.10 Phase 41
 - ✓ Repeatable local release validation gate covering tests, docs, `R CMD check`, expected optional skips, failure artifacts, and Phase 43 handoff evidence — v1.10 Phase 42
 - ✓ Documentation and release-note polish describing the shipped polygon/point/line `geom_sf()` contract, optional browser validation, residual risks, deferred non-blockers, and next-milestone candidates — v1.10 Phase 43
+- ✓ Ordinary `geom_polygon()` IR recognition, grouped closed-path D3 rendering, facets, styling, zoom/update behavior, sanitized interactivity payloads, and grouped/faceted crosstalk key binding — v1.11 Phase 44
 
 ### Active
 
-- v1.11 Geometry Parity requirements for ordinary `geom_polygon()`, rect/tile edge behavior, and sf text/label annotations.
+- v1.11 Geometry Parity requirements for rect/tile edge behavior and sf text/label annotations.
 
 ### Out of Scope
 
@@ -171,6 +172,8 @@ gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus pro
 | gate-run-derived release handoff | Release notes should reuse summarized gate evidence and artifact paths rather than publish local logs or reinterpret raw command output | ✓ Good — implemented and verified in Phase 42 |
 | source-first release documentation polish | README, vignettes, roxygen source, generated help, and release notes should describe the shipped polygon/point/line `geom_sf()` contract without stale milestone language | ✓ Good — implemented and verified in Phase 43 |
 | combined geometry-parity milestone | Ordinary polygon, rect/tile edge behavior, and sf annotations share renderer/IR/interactivity risk and should be planned together after v1.10 hardening | Pending — v1.11 scope |
+| ordinary polygon grouped path renderer | Ordinary `geom_polygon()` should render through a dedicated grouped closed-path module, not by branching line/path renderers that sort or assume open paths | ✓ Good — implemented and verified in Phase 44 |
+| representative polygon crosstalk keys | Grouped/faceted ordinary polygon paths should carry private source-row indices for crosstalk while public callbacks keep underscore-prefixed renderer fields sanitized | ✓ Good — implemented and verified in Phase 44 |
 
 ## Evolution
 
@@ -190,4 +193,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-24 after starting v1.11 Geometry Parity*
+*Last updated: 2026-05-24 after completing Phase 44 Ordinary geom_polygon Support*
