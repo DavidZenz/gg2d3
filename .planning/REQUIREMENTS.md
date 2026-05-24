@@ -58,20 +58,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| POLY-01 | TBD | Pending |
-| POLY-02 | TBD | Pending |
-| POLY-03 | TBD | Pending |
-| RECT-01 | TBD | Pending |
-| RECT-02 | TBD | Pending |
-| SFANN-01 | TBD | Pending |
-| SFANN-02 | TBD | Pending |
-| SFANN-03 | TBD | Pending |
-| DOCVAL-01 | TBD | Pending |
+| POLY-01 | Phase 44 | Pending |
+| POLY-02 | Phase 44 | Pending |
+| POLY-03 | Phase 44 | Pending |
+| RECT-01 | Phase 45 | Pending |
+| RECT-02 | Phase 45 | Pending |
+| SFANN-01 | Phase 46 | Pending |
+| SFANN-02 | Phase 46 | Pending |
+| SFANN-03 | Phase 46 | Pending |
+| DOCVAL-01 | Phase 47 | Pending |
 
 **Coverage:**
 - v1.11 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9
+- Mapped to phases: 9
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-24*
+*Last updated: 2026-05-24 after creating v1.11 roadmap*

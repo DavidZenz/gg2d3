@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.11
 milestone_name: Geometry Parity
-status: defining_requirements
-stopped_at: v1.11 Geometry Parity started; defining requirements and roadmap
+status: roadmap_ready
+stopped_at: v1.11 Geometry Parity roadmap created; ready to discuss Phase 44
 last_updated: "2026-05-24T00:00:00+02:00"
 last_activity: 2026-05-24
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 10
   completed_plans: 0
   percent: 0
 ---
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-05-24)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 44
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-24 — Milestone v1.11 started
+Status: Ready for phase discussion
+Last activity: 2026-05-24 — v1.11 roadmap created
 
 Progress: [----------] 0%
 
@@ -36,18 +36,18 @@ Progress: [----------] 0%
 
 **Velocity:**
 
-- Total plans completed: 10 (v1.10 milestone)
-- Average duration: 6m13s
-- Total execution time: 6m13s
+- Total plans completed: 0 (v1.11 milestone)
+- Average duration: —
+- Total execution time: —
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 40 | 3 | - | - |
-| 41 | 2 | - | - |
-| 42 | 3 | - | - |
-| 43 | 2 | - | - |
+| 44 | 0/3 | - | - |
+| 45 | 0/2 | - | - |
+| 46 | 0/3 | - | - |
+| 47 | 0/2 | - | - |
 
 *Updated after each plan completion*
 | Phase 36 P01 | 6m13s | 2 tasks | 4 files |
@@ -100,7 +100,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-Define and map v1.11 requirements for ordinary `geom_polygon()`, rect/tile edge behavior, and sf text/label annotations.
+Discuss and plan Phase 44 Ordinary `geom_polygon()` Support.
 
 ### Blockers/Concerns
 
@@ -124,8 +124,8 @@ Items acknowledged at v1.10 milestone close on 2026-05-23:
 ## Session Continuity
 
 Last session: 2026-05-24T00:00:00+02:00
-Stopped at: v1.11 Geometry Parity started; defining requirements and roadmap
-Resume file: .planning/PROJECT.md
+Stopped at: v1.11 Geometry Parity roadmap created; ready to discuss Phase 44
+Resume file: .planning/ROADMAP.md
 
 **Completed Phase:** 40 (Package Hygiene) — 3/3 plans — 2026-05-23
 **Completed Phase:** 41 (Release-Blocking Debt Triage) — 2/2 plans — 2026-05-23
@@ -144,4 +144,5 @@ Resume file: .planning/PROJECT.md
 **Planned Phase:** 40 (Package Hygiene) — 3 plans — 2026-05-22
 **Completed Milestone:** v1.10 Release Hardening — 2026-05-23
 **Started Milestone:** v1.11 Geometry Parity — 2026-05-24
-**Next Step:** Define requirements and create the v1.11 roadmap.
+**Planned Milestone:** v1.11 Geometry Parity — 4 phases — 2026-05-24
+**Next Step:** `$gsd-discuss-phase 44`

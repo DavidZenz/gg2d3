@@ -14,10 +14,99 @@
 - ✅ **v1.8 Production geom_sf Polygon MVP** — Phases 32-35 (shipped 2026-05-20)
 - ✅ **v1.9 sf Robustness and Expansion** — Phases 36-39 (shipped 2026-05-22)
 - ✅ **v1.10 Release Hardening** — Phases 40-43 (shipped 2026-05-23)
+- 🚧 **v1.11 Geometry Parity** — Phases 44-47 (in progress)
 
 ## Active Milestone
 
-No active milestone. Run `$gsd-new-milestone` to define the next requirements set and roadmap phases.
+### 🚧 v1.11 Geometry Parity
+
+**Milestone Goal:** Close the remaining geometry-parity gaps around ordinary polygons, rect/tile edge behavior, and sf annotations.
+
+**Requirements:** 9 total, 9 mapped
+**Phases:** 4
+**Starting phase:** 44
+
+## Phases
+
+**Phase Numbering:**
+- Integer phases (44, 45, 46, 47): Planned milestone work
+- Decimal phases (44.1, 44.2): Urgent insertions, if needed
+
+- [ ] **Phase 44: Ordinary geom_polygon Support** - Users can render ordinary `geom_polygon()` layers as grouped D3 paths with representative styling, facets, and existing interactivity hooks.
+- [ ] **Phase 45: Rect And Tile Edge Closure** - Maintainers have reproduced and fixed, or explicitly closed with evidence, the deferred rect/tile out-of-bounds behavior.
+- [ ] **Phase 46: sf Text And Label Annotations** - Users can render `geom_sf_text()` and `geom_sf_label()` at projected anchors aligned with existing sf panel projections.
+- [ ] **Phase 47: Geometry Parity Docs And Validation** - Users and maintainers have current docs, validation coverage, and support-contract notes for v1.11 geometry parity.
+
+## Phase Details
+
+### Phase 44: Ordinary geom_polygon Support
+**Goal**: Users can render ordinary `geom_polygon()` layers as grouped D3 paths with representative styling, facets, and existing interactivity hooks.
+**Depends on**: v1.10 archive
+**Requirements**: POLY-01, POLY-02, POLY-03
+**Success Criteria** (what must be TRUE):
+  1. `as_d3_ir()` recognizes `GeomPolygon` layers and preserves group/order, x/y coordinates, and supported aesthetics.
+  2. D3 renders each ordinary polygon group as a closed SVG path with ggplot2-like fill, stroke, alpha, clipping, and facet placement.
+  3. Polygon marks participate in tooltip, hover, brush, and handler APIs through stable selectors and sanitized payloads.
+  4. Representative unit/source checks cover single-panel, grouped, faceted, and interactivity-facing polygon behavior.
+**Plans**: 3 plans
+Plans:
+- [ ] 44-01-PLAN.md — Add ordinary `geom_polygon()` IR extraction and validation fixtures.
+- [ ] 44-02-PLAN.md — Implement D3 grouped polygon path rendering with styling, clipping, and facet coverage.
+- [ ] 44-03-PLAN.md — Wire polygon interactivity selectors, sanitized payloads, and regression coverage.
+
+### Phase 45: Rect And Tile Edge Closure
+**Goal**: Maintainers have reproduced and fixed, or explicitly closed with evidence, the deferred rect/tile out-of-bounds behavior.
+**Depends on**: Phase 44
+**Requirements**: RECT-01, RECT-02
+**Success Criteria** (what must be TRUE):
+  1. A focused fixture matrix covers rect/tile behavior under relevant scale limits and coordinate limits.
+  2. Any confirmed mismatch is fixed at the renderer or IR boundary with regression tests.
+  3. If the suspected mismatch is not reproducible, the non-issue is locked with tests and documented rationale.
+  4. The outcome is recorded in diagnostics or validation notes so the v1.10 deferred item is closed cleanly.
+**Plans**: 2 plans
+Plans:
+- [ ] 45-01-PLAN.md — Build the rect/tile out-of-bounds reproduction matrix and classify observed behavior.
+- [ ] 45-02-PLAN.md — Fix confirmed mismatches or document and test the verified non-issue path.
+
+### Phase 46: sf Text And Label Annotations
+**Goal**: Users can render `geom_sf_text()` and `geom_sf_label()` at projected anchors aligned with existing sf panel projections.
+**Depends on**: Phase 45
+**Requirements**: SFANN-01, SFANN-02, SFANN-03
+**Success Criteria** (what must be TRUE):
+  1. R-side sf annotation extraction captures labels, supported aesthetics, geometry anchors, panel membership, and skipped-row diagnostics.
+  2. D3 renders sf text and label marks at projected anchors for single-panel, stacked-layer, and faceted sf plots.
+  3. sf annotation marks reuse existing tooltip, hover, brush, and handler contracts where meaningful without leaking private geometry metadata.
+  4. Representative tests cover polygon, point, line, skipped-row, and faceted sf annotation cases.
+**Plans**: 3 plans
+Plans:
+- [ ] 46-01-PLAN.md — Add `geom_sf_text()` and `geom_sf_label()` IR extraction, anchors, aesthetics, and diagnostics.
+- [ ] 46-02-PLAN.md — Implement sf text/label D3 rendering against existing panel projection metadata.
+- [ ] 46-03-PLAN.md — Harden sf annotation interactivity, facets, skipped rows, and regression coverage.
+
+### Phase 47: Geometry Parity Docs And Validation
+**Goal**: Users and maintainers have current docs, validation coverage, and support-contract notes for v1.11 geometry parity.
+**Depends on**: Phase 46
+**Requirements**: DOCVAL-01
+**Success Criteria** (what must be TRUE):
+  1. README, vignettes, diagnostics docs, roxygen source, and generated help describe the v1.11 polygon, rect/tile, and sf annotation contract.
+  2. Validation notes link representative tests or browser smoke coverage for ordinary polygons, rect/tile edge behavior, and sf annotations.
+  3. Deferred/future geometry items remain explicit and scoped rather than implied as shipped support.
+**Plans**: 2 plans
+Plans:
+- [ ] 47-01-PLAN.md — Sweep source and generated documentation for v1.11 geometry parity language.
+- [ ] 47-02-PLAN.md — Record validation evidence, residual risks, and next-milestone candidates.
+
+## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 44 → 45 → 46 → 47
+
+| Phase | Requirements | Plans Complete | Status | Completed |
+|-------|--------------|----------------|--------|-----------|
+| 44. Ordinary geom_polygon Support | POLY-01, POLY-02, POLY-03 | 0/3 | Not started | — |
+| 45. Rect And Tile Edge Closure | RECT-01, RECT-02 | 0/2 | Not started | — |
+| 46. sf Text And Label Annotations | SFANN-01, SFANN-02, SFANN-03 | 0/3 | Not started | — |
+| 47. Geometry Parity Docs And Validation | DOCVAL-01 | 0/2 | Not started | — |
 
 ## Archived Milestones
 
@@ -72,4 +161,4 @@ See `.planning/milestones/` and archived roadmap files for full details on the M
 </details>
 
 ---
-*Roadmap updated: 2026-05-23 after archiving v1.10 Release Hardening*
+*Roadmap updated: 2026-05-24 after creating v1.11 Geometry Parity*
