@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.11
 milestone_name: Geometry Parity
 status: executing
-stopped_at: Completed 44-01-PLAN.md
-last_updated: "2026-05-24T18:09:46.561Z"
+stopped_at: Completed 44-02-PLAN.md
+last_updated: "2026-05-24T18:17:51.363Z"
 last_activity: 2026-05-24
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 33
+  completed_plans: 2
+  percent: 67
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-24)
 ## Current Position
 
 Phase: 44 (Ordinary geom_polygon Support) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-05-24
 
-Progress: [███░░░░░░░] 33%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 43 P01 | 4m14s | 3 tasks | 8 files |
 | Phase 43 P02 | 3m18s | 2 tasks | 2 files |
 | Phase 44 P01 | 4 min | 2 tasks | 1 files |
+| Phase 44 P02 | 5 min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,9 @@ Recent decisions affecting current work:
 - 43-02: Marked next-milestone candidates as future work, not v1.10 requirements.
 - 44-01: Preserved validate_ir() return contract as IR unchanged; polygon tests assert no-warning validation success.
 - 44-01: Kept R-side production code unchanged because existing as_d3_ir() and validate_ir() already satisfy POLY-01.
+- 44-02: Implemented ordinary geom_polygon as a dedicated grouped closed-path renderer instead of branching line.js.
+- 44-02: Bound each polygon path to a representative public row and stored update-only vertex data under _polygonPoints.
+- 44-02: Kept polygon zoom/update separate from existing array-bound line/path update behavior.
 
 ### Pending Todos
 
@@ -126,8 +130,8 @@ Items acknowledged at v1.10 milestone close on 2026-05-23:
 
 ## Session Continuity
 
-Last session: 2026-05-24T18:09:46.534Z
-Stopped at: Completed 44-01-PLAN.md
+Last session: 2026-05-24T18:17:51.355Z
+Stopped at: Completed 44-02-PLAN.md
 Resume file: None
 
 **Completed Phase:** 40 (Package Hygiene) — 3/3 plans — 2026-05-23

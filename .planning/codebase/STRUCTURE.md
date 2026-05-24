@@ -13,6 +13,7 @@ gg2d3/
 │   └── htmlwidgets/             # HTMLWidgets integration
 │       ├── gg2d3.js             # D3 rendering engine (716 lines)
 │       ├── gg2d3.yaml           # Widget configuration
+│       ├── modules/geoms/       # Registered D3 geom renderer modules
 │       └── lib/d3/              # D3.js library
 │           └── d3.v7.min.js     # D3 v7 (vendored)
 ├── tests/
@@ -41,9 +42,10 @@ gg2d3/
 
 **inst/htmlwidgets/ - Widget Assets:**
 - Purpose: HTMLWidgets binding and D3 rendering
-- Contains: JavaScript rendering engine, widget configuration, D3 library
-- Key files: `gg2d3.js` (main rendering), `gg2d3.yaml` (htmlwidgets config)
+- Contains: JavaScript rendering engine, widget configuration, modular D3 renderers, D3 library
+- Key files: `gg2d3.js` (main rendering), `gg2d3.yaml` (htmlwidgets config), `modules/geom-registry.js`, `modules/geoms/*.js`
 - D3 library vendored at `inst/htmlwidgets/lib/d3/d3.v7.min.js`
+- Ordinary `geom_polygon()` renders through `modules/geoms/polygon.js` as grouped closed SVG paths.
 
 **tests/testthat/ - Test Suite:**
 - Purpose: IR extraction and widget output verification
