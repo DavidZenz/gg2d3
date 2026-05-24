@@ -48,9 +48,9 @@ test_that("POLY-03 brush module keeps polygons on generic path bbox branch", {
   expect_match(brush_js, "data-cx")
   expect_match(brush_js, "data-cy")
 
-  expect_false(grepl("geom-polygon.*data-cx", brush_js))
-  expect_false(grepl("geom-polygon.*data-cy", brush_js))
-  expect_false(grepl("path\\.geom-polygon.*classList\\.contains\\('geom-sf'\\)", brush_js))
+  polygon_lines <- grep("geom-polygon", strsplit(brush_js, "\n", fixed = TRUE)[[1]], value = TRUE)
+  expect_true(length(polygon_lines) > 0)
+  expect_false(any(grepl("data-cx|data-cy|classList\\.contains\\('geom-sf'\\)", polygon_lines)))
 
   sf_branch <- regexpr("classList\\.contains\\('geom-sf'\\)", brush_js)
   bbox_branch <- regexpr("getBBox", brush_js)

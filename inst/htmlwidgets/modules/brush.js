@@ -31,6 +31,7 @@
     'rect.geom-bar',
     'rect.geom-rect',
     'path.geom-line',
+    'path.geom-polygon',
     'path.geom-area',
     'path.geom-density',
     'path.geom-smooth',

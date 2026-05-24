@@ -25,6 +25,7 @@
     'rect.geom-bar',             // geom_bar
     'rect.geom-rect',            // geom_rect / geom_tile
     'path.geom-line',            // geom_line
+    'path.geom-polygon',         // geom_polygon
     'path.geom-area',            // geom_area
     'path.geom-density',         // geom_density
     'path.geom-smooth',          // geom_smooth
