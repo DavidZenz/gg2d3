@@ -1,36 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.10
-milestone_name: Release Hardening
-status: completed
-stopped_at: v1.10 Release Hardening archived; ready for next milestone definition
-last_updated: "2026-05-23T20:54:54.591Z"
-last_activity: 2026-05-23
+milestone: v1.11
+milestone_name: Geometry Parity
+status: defining_requirements
+stopped_at: v1.11 Geometry Parity started; defining requirements and roadmap
+last_updated: "2026-05-24T00:00:00+02:00"
+last_activity: 2026-05-24
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 10
-  completed_plans: 10
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-23)
+See: .planning/PROJECT.md (updated 2026-05-24)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** v1.10 Release Hardening complete
+**Current focus:** v1.11 Geometry Parity
 
 ## Current Position
 
-Phase: None
-Plan: None
-Status: No active milestone
-Last activity: 2026-05-23
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-24 — Milestone v1.11 started
 
-Progress: [██████████] 100%
+Progress: [----------] 0%
 
 ## Performance Metrics
 
@@ -100,7 +100,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+Define and map v1.11 requirements for ordinary `geom_polygon()`, rect/tile edge behavior, and sf text/label annotations.
 
 ### Blockers/Concerns
 
@@ -123,9 +123,9 @@ Items acknowledged at v1.10 milestone close on 2026-05-23:
 
 ## Session Continuity
 
-Last session: 2026-05-23T20:54:54.591Z
-Stopped at: v1.10 Release Hardening archived; ready for next milestone definition
-Resume file: .planning/ROADMAP.md
+Last session: 2026-05-24T00:00:00+02:00
+Stopped at: v1.11 Geometry Parity started; defining requirements and roadmap
+Resume file: .planning/PROJECT.md
 
 **Completed Phase:** 40 (Package Hygiene) — 3/3 plans — 2026-05-23
 **Completed Phase:** 41 (Release-Blocking Debt Triage) — 2/2 plans — 2026-05-23
@@ -143,4 +143,5 @@ Resume file: .planning/ROADMAP.md
 **Started Milestone:** v1.10 Release Hardening — 2026-05-22
 **Planned Phase:** 40 (Package Hygiene) — 3 plans — 2026-05-22
 **Completed Milestone:** v1.10 Release Hardening — 2026-05-23
-**Next Step:** Start the next milestone with `$gsd-new-milestone`.
+**Started Milestone:** v1.11 Geometry Parity — 2026-05-24
+**Next Step:** Define requirements and create the v1.11 roadmap.

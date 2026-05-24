@@ -10,27 +10,26 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.10 Release Hardening is complete. Package hygiene, release-blocking debt triage, repeatable release validation, documentation polish, release notes, residual-risk notes, and next-milestone candidates are validated for the release-quality checkpoint.
+v1.11 Geometry Parity is being defined. The milestone focuses on closing the ordinary polygon and rect/tile geometry gaps carried forward from v1.10, then extending the current sf renderer contract to text and label annotations.
+
+## Current Milestone: v1.11 Geometry Parity
+
+**Goal:** Close the remaining geometry-parity gaps around ordinary polygons, rect/tile edge behavior, and sf annotations.
+
+**Target features:**
+- Ordinary `geom_polygon()` rendering with grouped paths, fill/stroke aesthetics, facets, and existing interactivity hooks where applicable.
+- A focused rect/tile out-of-bounds reproduction that either fixes the renderer mismatch or documents a verified non-issue.
+- `geom_sf_text()` and `geom_sf_label()` support, scoped to useful centroid/anchor behavior and the existing polygon/point/line sf contract.
 
 ## Completed Milestone: v1.10 Release Hardening
 
 **Goal:** Prepare gg2d3 for a cleaner release-quality checkpoint by closing package hygiene gaps, validating the release surface, and documenting known residual risks.
 
-**Target features:**
+**Shipped features:**
 - Package metadata and dependency hygiene for tests, docs, optional browser tooling, and spatial helpers.
 - Release-blocking debt triage for stale references, known renderer edge cases, and advisory follow-ups from recent reviews.
 - Reproducible release validation gates covering package tests, representative browser skips/runs, documentation generation, and package check behavior.
 - Release notes and docs polish that describe the current v1.9/v1.10 support contract without stale milestone language.
-
-## Next Milestone Goals
-
-To be defined with `$gsd-new-milestone`. Candidate areas carried forward from v1.10 release notes:
-
-- Ordinary `geom_polygon()` renderer parity as a separate future phase.
-- A focused rect/tile out-of-bounds reproduction and fix if evidence proves a rendering mismatch.
-- Advanced sf features such as `GEOMETRYCOLLECTION`, `geom_sf_text()`, `geom_sf_label()`, or projection-aware map interactions.
-- Large-dataset performance budgets and simplification guidance for complex SVG outputs.
-- Screenshot or perceptual regression testing once the DOM/source guards remain stable.
 
 ## Previous Shipped Milestone: v1.9 sf Robustness and Expansion
 
@@ -107,7 +106,7 @@ To be defined with `$gsd-new-milestone`. Candidate areas carried forward from v1
 
 ### Active
 
-- None. v1.10 release-hardening phases are complete.
+- v1.11 Geometry Parity requirements for ordinary `geom_polygon()`, rect/tile edge behavior, and sf text/label annotations.
 
 ### Out of Scope
 
@@ -126,8 +125,8 @@ gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus pro
 **Known tech debt:**
 - Monolithic `as_d3_ir()` function (~1000 lines) still needs broader modularization beyond the extracted sf helper boundaries
 - Private ggplot2 theme access remains necessary but is quarantined in `R/ggplot2_compat.R` behind compatibility helpers
-- Ordinary `geom_polygon()` still has no D3 renderer and is explicitly deferred as a non-blocking parity item
-- rect/tile out-of-bounds behavior remains a deferred non-blocking renderer edge case pending a focused reproduction
+- Ordinary `geom_polygon()` renderer parity is active v1.11 work
+- rect/tile out-of-bounds behavior is active v1.11 reproduction/fix work
 - Browser-side sf behavior now has DOM-level smoke harness coverage; live Chrome execution still depends on optional local browser dependencies
 
 ## Constraints
@@ -171,6 +170,7 @@ gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus pro
 | two-tier local release validation gate | Maintainers need quick day-to-day validation plus full release evidence without weakening optional browser/spatial skips | ✓ Good — implemented and verified in Phase 42 |
 | gate-run-derived release handoff | Release notes should reuse summarized gate evidence and artifact paths rather than publish local logs or reinterpret raw command output | ✓ Good — implemented and verified in Phase 42 |
 | source-first release documentation polish | README, vignettes, roxygen source, generated help, and release notes should describe the shipped polygon/point/line `geom_sf()` contract without stale milestone language | ✓ Good — implemented and verified in Phase 43 |
+| combined geometry-parity milestone | Ordinary polygon, rect/tile edge behavior, and sf annotations share renderer/IR/interactivity risk and should be planned together after v1.10 hardening | Pending — v1.11 scope |
 
 ## Evolution
 
@@ -190,4 +190,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-23 after archiving v1.10 Release Hardening*
+*Last updated: 2026-05-24 after starting v1.11 Geometry Parity*
