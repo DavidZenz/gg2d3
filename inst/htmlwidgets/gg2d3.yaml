@@ -26,6 +26,7 @@ dependencies:
       - geom-registry.js
       - geoms/point.js
       - geoms/line.js
+      - geoms/polygon.js
       - geoms/bar.js
       - geoms/rect.js
       - geoms/text.js
