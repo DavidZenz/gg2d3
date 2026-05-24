@@ -84,15 +84,16 @@
       ? d3.line().curve(d3.curveLinearClosed).x(p => yScale(p.y) + yOff).y(p => xScale(p.x) + xOff)
       : d3.line().curve(d3.curveLinearClosed).x(p => xScale(p.x) + xOff).y(p => yScale(p.y) + yOff);
 
-    const grouped = d3.group(dat, d => val(get(d, "group")) ?? 1);
+    const indexedRows = dat.map((d, sourceIndex) => ({ d, sourceIndex }));
+    const grouped = d3.group(indexedRows, row => val(get(row.d, "group")) ?? 1);
     let polygonsDrawn = 0;
 
     grouped.forEach(arr => {
       const pts = arr
-        .map(d => {
-          const xVal = isXBand ? val(get(d, aes.x)) : num(get(d, aes.x));
-          const yVal = isYBand ? val(get(d, aes.y)) : num(get(d, aes.y));
-          return { x: xVal, y: yVal, d };
+        .map(row => {
+          const xVal = isXBand ? val(get(row.d, aes.x)) : num(get(row.d, aes.x));
+          const yVal = isYBand ? val(get(row.d, aes.y)) : num(get(row.d, aes.y));
+          return { x: xVal, y: yVal, d: row.d, sourceIndex: row.sourceIndex };
         })
         .filter(isValidPoint);
 
@@ -101,6 +102,7 @@
       const firstPoint = pts[0].d;
       const publicRow = Object.assign({}, firstPoint);
       publicRow._polygonPoints = pts;
+      publicRow._sourceIndex = pts[0].sourceIndex;
 
       g.append("path")
         .datum(publicRow)

@@ -76,8 +76,23 @@ test_that("POLY-03 polygon renderer keeps private points underscore-prefixed onl
 
   expect_match(polygon_js, "_polygonPoints")
   expect_match(polygon_js, "publicRow\\._polygonPoints")
+  expect_match(polygon_js, "_sourceIndex")
+  expect_match(polygon_js, "publicRow\\._sourceIndex")
+  expect_match(polygon_js, "sourceIndex")
   expect_match(polygon_js, "\\.datum\\(publicRow\\)")
   expect_false(grepl("polygonPoints", gsub("_polygonPoints", "", polygon_js), fixed = TRUE))
+})
+
+test_that("POLY-03 crosstalk keys use representative polygon source indices", {
+  crosstalk_js <- read_module("inst/htmlwidgets/modules/crosstalk.js")
+  polygon_js <- read_module("inst/htmlwidgets/modules/geoms/polygon.js")
+
+  expect_match(crosstalk_js, "crosstalkKeyIndex")
+  expect_match(crosstalk_js, "d\\._sourceIndex")
+  expect_match(crosstalk_js, "Number\\.isFinite\\(sourceIndex\\)")
+  expect_match(crosstalk_js, "keyArray\\[rowIndex\\]")
+  expect_match(polygon_js, "dat\\.map\\(\\(d, sourceIndex\\)")
+  expect_match(polygon_js, "publicRow\\._sourceIndex = pts\\[0\\]\\.sourceIndex")
 })
 
 test_that("POLY-03 callback paths do not expose polygon private points literally", {

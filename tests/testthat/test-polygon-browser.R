@@ -70,6 +70,21 @@ library(ggplot2)
     geom_polygon(colour = "#283618", linewidth = 0.7, alpha = 0.8)
 }
 
+.browser_polygon_crosstalk_plot <- function() {
+  testthat::skip_if_not_installed("crosstalk")
+  dat <- .browser_polygon_data()
+  dat$row_key <- paste0("row-", seq_len(nrow(dat)))
+  shared <- crosstalk::SharedData$new(
+    dat,
+    key = ~ row_key,
+    group = "phase44_polygon_crosstalk"
+  )
+  p <- ggplot(dat, aes(x, y, group = group, fill = group)) +
+    geom_polygon(colour = "#283618", linewidth = 0.7, alpha = 0.8)
+  p$data <- shared
+  p
+}
+
 .browser_polygon_paths_script <- function() {
   paste(
     "(() => Array.from(document.querySelectorAll('path.geom-polygon')).map(path => ({",
@@ -89,6 +104,13 @@ library(ggplot2)
   paste(
     "(() => Array.from(document.querySelectorAll('.panel'))",
     ".map(panel => panel.querySelectorAll('path.geom-polygon').length))()"
+  )
+}
+
+.browser_polygon_crosstalk_keys_script <- function() {
+  paste(
+    "(() => Array.from(document.querySelectorAll('path.geom-polygon'))",
+    ".map(path => path.getAttribute('data-crosstalk-key') || ''))()"
   )
 }
 
@@ -327,6 +349,33 @@ test_that("POLY-03 DOM: polygon interaction payloads are representative and sani
       },
       error = function(e) {
         write_browser_polygon_failure_artifacts("phase44-polygon-interactivity", html_path, logs)
+        stop(e)
+      }
+    )
+  })
+})
+
+test_that("POLY-03 DOM: grouped polygon crosstalk keys use representative source rows", {
+  skip_browser_polygon_smoke()
+
+  html_path <- save_browser_polygon_widget(
+    gg2d3(.browser_polygon_crosstalk_plot()),
+    "phase44-polygon-crosstalk.html"
+  )
+
+  with_chromote_session({
+    logs <- browser_polygon_console_collector(session)
+
+    tryCatch(
+      {
+        session$go_to(.browser_polygon_file_url(html_path), delay = 1)
+        .browser_polygon_wait_for_paths(session, 2L)
+        keys <- as.character(unlist(eval_js_value(session, .browser_polygon_crosstalk_keys_script())))
+        expect_equal(keys, c("row-1", "row-5"))
+        assert_no_polygon_browser_errors(logs)
+      },
+      error = function(e) {
+        write_browser_polygon_failure_artifacts("phase44-polygon-crosstalk", html_path, logs)
         stop(e)
       }
     )
