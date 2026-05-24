@@ -84,14 +84,19 @@ test_that("POLY-03 polygon renderer keeps private points underscore-prefixed onl
 })
 
 test_that("POLY-03 crosstalk keys use representative polygon source indices", {
+  gg2d3_js <- read_module("inst/htmlwidgets/gg2d3.js")
   crosstalk_js <- read_module("inst/htmlwidgets/modules/crosstalk.js")
   polygon_js <- read_module("inst/htmlwidgets/modules/geoms/polygon.js")
 
+  expect_match(gg2d3_js, "indexedLayerData")
+  expect_match(gg2d3_js, "_sourceIndex: i")
+  expect_match(gg2d3_js, "indexedLayerData\\.filter\\(function\\(d\\)")
   expect_match(crosstalk_js, "crosstalkKeyIndex")
   expect_match(crosstalk_js, "d\\._sourceIndex")
   expect_match(crosstalk_js, "Number\\.isFinite\\(sourceIndex\\)")
   expect_match(crosstalk_js, "keyArray\\[rowIndex\\]")
   expect_match(polygon_js, "dat\\.map\\(\\(d, sourceIndex\\)")
+  expect_match(polygon_js, "existingIndex")
   expect_match(polygon_js, "publicRow\\._sourceIndex = pts\\[0\\]\\.sourceIndex")
 })
 

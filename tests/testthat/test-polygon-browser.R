@@ -70,7 +70,7 @@ library(ggplot2)
     geom_polygon(colour = "#283618", linewidth = 0.7, alpha = 0.8)
 }
 
-.browser_polygon_crosstalk_plot <- function() {
+.browser_polygon_crosstalk_plot <- function(faceted = FALSE) {
   testthat::skip_if_not_installed("crosstalk")
   dat <- .browser_polygon_data()
   dat$row_key <- paste0("row-", seq_len(nrow(dat)))
@@ -82,6 +82,9 @@ library(ggplot2)
   p <- ggplot(dat, aes(x, y, group = group, fill = group)) +
     geom_polygon(colour = "#283618", linewidth = 0.7, alpha = 0.8)
   p$data <- shared
+  if (isTRUE(faceted)) {
+    p <- p + facet_wrap(~ group)
+  }
   p
 }
 
@@ -358,26 +361,39 @@ test_that("POLY-03 DOM: polygon interaction payloads are representative and sani
 test_that("POLY-03 DOM: grouped polygon crosstalk keys use representative source rows", {
   skip_browser_polygon_smoke()
 
-  html_path <- save_browser_polygon_widget(
-    gg2d3(.browser_polygon_crosstalk_plot()),
-    "phase44-polygon-crosstalk.html"
+  fixtures <- list(
+    grouped = list(
+      plot = .browser_polygon_crosstalk_plot(),
+      file = "phase44-polygon-crosstalk.html"
+    ),
+    faceted = list(
+      plot = .browser_polygon_crosstalk_plot(faceted = TRUE),
+      file = "phase44-polygon-faceted-crosstalk.html"
+    )
   )
 
   with_chromote_session({
     logs <- browser_polygon_console_collector(session)
 
-    tryCatch(
-      {
-        session$go_to(.browser_polygon_file_url(html_path), delay = 1)
-        .browser_polygon_wait_for_paths(session, 2L)
-        keys <- as.character(unlist(eval_js_value(session, .browser_polygon_crosstalk_keys_script())))
-        expect_equal(keys, c("row-1", "row-5"))
-        assert_no_polygon_browser_errors(logs)
-      },
-      error = function(e) {
-        write_browser_polygon_failure_artifacts("phase44-polygon-crosstalk", html_path, logs)
-        stop(e)
-      }
-    )
+    for (name in names(fixtures)) {
+      html_path <- save_browser_polygon_widget(
+        gg2d3(fixtures[[name]]$plot),
+        fixtures[[name]]$file
+      )
+
+      tryCatch(
+        {
+          session$go_to(.browser_polygon_file_url(html_path), delay = 1)
+          .browser_polygon_wait_for_paths(session, 2L)
+          keys <- as.character(unlist(eval_js_value(session, .browser_polygon_crosstalk_keys_script())))
+          expect_equal(keys, c("row-1", "row-5"))
+          assert_no_polygon_browser_errors(logs)
+        },
+        error = function(e) {
+          write_browser_polygon_failure_artifacts(paste0("phase44-polygon-crosstalk-", name), html_path, logs)
+          stop(e)
+        }
+      )
+    }
   })
 })

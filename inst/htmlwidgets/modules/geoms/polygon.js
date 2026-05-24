@@ -84,7 +84,13 @@
       ? d3.line().curve(d3.curveLinearClosed).x(p => yScale(p.y) + yOff).y(p => xScale(p.x) + xOff)
       : d3.line().curve(d3.curveLinearClosed).x(p => xScale(p.x) + xOff).y(p => yScale(p.y) + yOff);
 
-    const indexedRows = dat.map((d, sourceIndex) => ({ d, sourceIndex }));
+    const indexedRows = dat.map((d, sourceIndex) => {
+      const existingIndex = Number(d && d._sourceIndex);
+      return {
+        d,
+        sourceIndex: Number.isFinite(existingIndex) && existingIndex >= 0 ? existingIndex : sourceIndex
+      };
+    });
     const grouped = d3.group(indexedRows, row => val(get(row.d, "group")) ?? 1);
     let polygonsDrawn = 0;
 

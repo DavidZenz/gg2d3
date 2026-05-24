@@ -88,12 +88,15 @@ HTMLWidgets.widget({
       let drawn = 0;
       (ir.layers || []).forEach(function(layer) {
         const layerData = layer.data || [];
+        const indexedLayerData = layerData.map(function(d, i) {
+          return Object.assign({}, d, { _sourceIndex: i });
+        });
         let filteredLayer;
 
         // sf layers keep data and geometries as parallel arrays, so facet
         // filtering must preserve the original data/geometry index pairs.
         if (layer.geom === "sf" && Array.isArray(layer.geometries)) {
-          const sfPairs = layerData.map(function(d, i) {
+          const sfPairs = indexedLayerData.map(function(d, i) {
             return { data: d, geometry: layer.geometries[i] };
           });
           const filteredPairs = isFaceted
@@ -108,8 +111,8 @@ HTMLWidgets.widget({
         } else {
           // Create a copy of the layer with filtered data for this panel
           const filteredData = isFaceted
-            ? layerData.filter(function(d) { return d.PANEL === panelNum; })
-            : layerData;  // non-faceted: use all data
+            ? indexedLayerData.filter(function(d) { return d.PANEL === panelNum; })
+            : indexedLayerData;  // non-faceted: use all data
           filteredLayer = Object.assign({}, layer, { data: filteredData });
         }
 
