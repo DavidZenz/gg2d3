@@ -281,6 +281,16 @@
       .transition(t)
       .attr('d', d => line(d));
 
+    // Closed path geoms (polygon)
+    const closedLine = d3.line()
+      .curve(d3.curveLinearClosed)
+      .x(pt => xScaleFunc(pt.x))
+      .y(pt => yScaleFunc(pt.y));
+
+    container.selectAll('path.geom-polygon')
+      .transition(t)
+      .attr('d', d => closedLine(d && d._polygonPoints ? d._polygonPoints : []));
+
     // geom_area & geom_density
     // ggplot2 density uses ymin for stacking, else it fills to baseline (usually 0)
     // We'll use a helper that checks for ymin

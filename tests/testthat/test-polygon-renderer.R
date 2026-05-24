@@ -51,3 +51,15 @@ test_that("POLY-02 polygon renderer handles missing fill and stroke explicitly",
   expect_match(polygon_js, "fill.*none|none.*fill")
   expect_match(polygon_js, "stroke.*none|none.*stroke")
 })
+
+test_that("POLY-02 polygon paths participate in path update plumbing", {
+  registry_js <- read_repo_file("inst/htmlwidgets/modules/geom-registry.js")
+
+  update_start <- regexpr("Closed path geoms \\(polygon\\)", registry_js)
+  expect_true(update_start[[1]] > 0)
+  update_block <- substr(registry_js, update_start[[1]], nchar(registry_js))
+
+  expect_match(update_block, "path\\.geom-polygon")
+  expect_match(update_block, "_polygonPoints")
+  expect_match(update_block, "curveLinearClosed")
+})

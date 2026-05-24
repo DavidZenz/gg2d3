@@ -13,6 +13,7 @@ path_geoms <- list(
   list(file = "density.js", class = "geom-density"),
   list(file = "density.js", class = "geom-density-outline"),
   list(file = "ribbon.js",  class = "geom-ribbon"),
+  list(file = "polygon.js", class = "geom-polygon"),
   list(file = "smooth.js",  class = "geom-smooth"),
   list(file = "smooth.js",  class = "geom-smooth-ribbon")
 )
@@ -43,3 +44,11 @@ for (entry in path_geoms) {
     })
   })
 }
+
+test_that("polygon path geom stores private point datum for closed zoom updates", {
+  src <- readLines(file.path(geoms_dir, "polygon.js"), warn = FALSE)
+  expect_true(any(grepl('"geom-polygon"', src, fixed = TRUE)),
+              info = "polygon.js must render path.geom-polygon")
+  expect_true(any(grepl("_polygonPoints", src, fixed = TRUE)),
+              info = "polygon.js must store source points for zoom updates")
+})
