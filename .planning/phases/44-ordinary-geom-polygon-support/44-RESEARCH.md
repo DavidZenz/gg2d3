@@ -457,22 +457,28 @@ Pattern follows optional sf browser tests with DOM assertions and clean skips. [
 |---|-------|---------|---------------|
 | A1 | `crosstalk.js` should be updated for `path.geom-polygon` if POLY-03 "row identity" is interpreted to include linked-view key binding, even though POLY-03 names tooltip/hover/brush/custom handler APIs and the phase focus names "existing interactivity hooks." [ASSUMED] | Phase Requirements, Architecture Patterns | If wrong, planner might include one extra source/test edit; low blast radius. |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+Resolved during Phase 44 planning on 2026-05-24:
+
+- Include `path.geom-polygon` in `inst/htmlwidgets/modules/crosstalk.js` selector coverage as part of POLY-03, reusing the existing crosstalk behavior with no new API.
+- Include polygon zoom/update handling in Phase 44 via `inst/htmlwidgets/modules/geom-registry.js` and `tests/testthat/test-zoom-path-datum.R`.
+- Do not add `subgroup`, hole preservation, or explicit topology semantics in Phase 44; grouped ordinary polygons use ggplot2 built row order and defer topology semantics.
 
 1. **Should ordinary polygon crosstalk be included in POLY-03?**
    - What we know: `crosstalk.js` has its own selector list and binds keys to marks by selector. [VERIFIED: inst/htmlwidgets/modules/crosstalk.js:22-36, inst/htmlwidgets/modules/crosstalk.js:118-130]
    - What's unclear: POLY-03 names tooltip, hover, brush, and custom handlers, while broader project docs include linked views as existing interactivity. [VERIFIED: .planning/REQUIREMENTS.md; .planning/PROJECT.md]
-   - Recommendation: Include `path.geom-polygon` in `crosstalk.js` source guards if the plan already touches selectors, but do not add new crosstalk behavior. [ASSUMED]
+   - Resolution: Include `path.geom-polygon` in `crosstalk.js` source guards because the plan already touches selector plumbing, but do not add new crosstalk behavior.
 
 2. **Should polygon zoom/update be required in Phase 44?**
    - What we know: `updateGeoms()` handles path geoms for zoom/reset, but the success criteria do not explicitly name zoom. [VERIFIED: inst/htmlwidgets/modules/geom-registry.js:275-283; .planning/ROADMAP.md]
    - What's unclear: Existing interactivity hooks may imply zoom compatibility for non-sf Cartesian geoms. [VERIFIED: .planning/PROJECT.md]
-   - Recommendation: Add `path.geom-polygon` to `updateGeoms()` and extend `test-zoom-path-datum.R`; this is small and prevents an obvious regression. [VERIFIED: tests/testthat/test-zoom-path-datum.R:1-18]
+   - Resolution: Add `path.geom-polygon` to `updateGeoms()` and extend `test-zoom-path-datum.R`; this is small and prevents an obvious regression. [VERIFIED: tests/testthat/test-zoom-path-datum.R:1-18]
 
 3. **Should subgroup/hole source columns be preserved for future work?**
    - What we know: ggplot2 documents `subgroup` and hole support, but Phase 44 defers explicit hole/topology behavior. [CITED: https://ggplot2.tidyverse.org/reference/geom_polygon.html; VERIFIED: 44-CONTEXT.md]
    - What's unclear: `R/as_d3_ir.R` currently does not keep `subgroup`. [VERIFIED: R/as_d3_ir.R:238-252]
-   - Recommendation: Do not add subgroup support in Phase 44 unless a simple source test proves it is already available without topology logic. [VERIFIED: 44-CONTEXT.md]
+   - Resolution: Do not add subgroup support in Phase 44. Subgroup/hole preservation and topology semantics remain explicitly deferred. [VERIFIED: 44-CONTEXT.md]
 
 ## Environment Availability
 
