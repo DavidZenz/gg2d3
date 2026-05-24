@@ -16,7 +16,7 @@ Requirements for the Geometry Parity milestone. Each maps to exactly one roadmap
 ### Rect And Tile Edge Behavior
 
 - [x] **RECT-01**: Maintainers have a focused regression fixture that reproduces the deferred rect/tile out-of-bounds behavior across the relevant scale-limit and coordinate-limit cases, or proves the suspected mismatch is no longer present.
-- [ ] **RECT-02**: Confirmed rect/tile out-of-bounds mismatches are fixed in the renderer or IR boundary, while non-issues are locked with tests and documented rationale.
+- [x] **RECT-02**: Confirmed rect/tile out-of-bounds mismatches are fixed in the renderer or IR boundary, while non-issues are locked with tests and documented rationale.
 
 ### sf Text And Label Annotations
 
@@ -62,7 +62,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POLY-02 | Phase 44 | Complete |
 | POLY-03 | Phase 44 | Complete |
 | RECT-01 | Phase 45 | Complete |
-| RECT-02 | Phase 45 | Pending |
+| RECT-02 | Phase 45 | Complete |
 | SFANN-01 | Phase 46 | Pending |
 | SFANN-02 | Phase 46 | Pending |
 | SFANN-03 | Phase 46 | Pending |
