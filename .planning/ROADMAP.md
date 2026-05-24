@@ -50,7 +50,7 @@
   4. Representative unit/source checks cover single-panel, grouped, faceted, and interactivity-facing polygon behavior.
 **Plans**: 3 plans
 Plans:
-- [ ] 44-01-PLAN.md — Add ordinary `geom_polygon()` IR extraction and validation fixtures.
+- [x] 44-01-PLAN.md — Add ordinary `geom_polygon()` IR extraction and validation fixtures.
 - [ ] 44-02-PLAN.md — Implement D3 grouped polygon path rendering with styling, clipping, and facet coverage.
 - [ ] 44-03-PLAN.md — Wire polygon interactivity selectors, sanitized payloads, and regression coverage.
 
@@ -103,7 +103,7 @@ Phases execute in numeric order: 44 → 45 → 46 → 47
 
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
-| 44. Ordinary geom_polygon Support | POLY-01, POLY-02, POLY-03 | 0/3 | Not started | — |
+| 44. Ordinary geom_polygon Support | POLY-01, POLY-02, POLY-03 | 1/3 | In Progress | — |
 | 45. Rect And Tile Edge Closure | RECT-01, RECT-02 | 0/2 | Not started | — |
 | 46. sf Text And Label Annotations | SFANN-01, SFANN-02, SFANN-03 | 0/3 | Not started | — |
 | 47. Geometry Parity Docs And Validation | DOCVAL-01 | 0/2 | Not started | — |

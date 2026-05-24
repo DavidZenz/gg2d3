@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.11
 milestone_name: Geometry Parity
 status: executing
-stopped_at: v1.11 Geometry Parity roadmap created; ready to discuss Phase 44
-last_updated: "2026-05-24T17:59:04.269Z"
-last_activity: 2026-05-24 -- Phase 44 planning complete
+stopped_at: Completed 44-01-PLAN.md
+last_updated: "2026-05-24T18:09:46.561Z"
+last_activity: 2026-05-24
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 10
-  completed_plans: 0
-  percent: 0
+  total_plans: 3
+  completed_plans: 1
+  percent: 33
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-24)
 
 **Core value:** Any ggplot2 plot should render identically in D3 — same visual output, but now interactive and web-native.
-**Current focus:** v1.11 Geometry Parity
+**Current focus:** Phase 44 — Ordinary geom_polygon Support
 
 ## Current Position
 
-Phase: 44
-Plan: —
+Phase: 44 (Ordinary geom_polygon Support) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-05-24 -- Phase 44 planning complete
+Last activity: 2026-05-24
 
-Progress: [----------] 0%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [----------] 0%
 | Phase 42 P03 | 2m28s | 2 tasks | 3 files |
 | Phase 43 P01 | 4m14s | 3 tasks | 8 files |
 | Phase 43 P02 | 3m18s | 2 tasks | 2 files |
+| Phase 44 P01 | 4 min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,8 @@ Recent decisions affecting current work:
 - 43-02: Summarized Phase 42 release evidence at the outcome level instead of pasting local logs.
 - 43-02: Kept ordinary geom_polygon() and rect/tile out-of-bounds work as deferred non-blockers.
 - 43-02: Marked next-milestone candidates as future work, not v1.10 requirements.
+- 44-01: Preserved validate_ir() return contract as IR unchanged; polygon tests assert no-warning validation success.
+- 44-01: Kept R-side production code unchanged because existing as_d3_ir() and validate_ir() already satisfy POLY-01.
 
 ### Pending Todos
 
@@ -123,9 +126,9 @@ Items acknowledged at v1.10 milestone close on 2026-05-23:
 
 ## Session Continuity
 
-Last session: 2026-05-24T00:00:00+02:00
-Stopped at: v1.11 Geometry Parity roadmap created; ready to discuss Phase 44
-Resume file: .planning/ROADMAP.md
+Last session: 2026-05-24T18:09:46.534Z
+Stopped at: Completed 44-01-PLAN.md
+Resume file: None
 
 **Completed Phase:** 40 (Package Hygiene) — 3/3 plans — 2026-05-23
 **Completed Phase:** 41 (Release-Blocking Debt Triage) — 2/2 plans — 2026-05-23
