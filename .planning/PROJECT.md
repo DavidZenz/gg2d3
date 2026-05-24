@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.11 Geometry Parity is in progress. Phase 44 shipped ordinary `geom_polygon()` support as grouped closed D3 paths with representative styling, facets, zoom/update compatibility, sanitized interaction payloads, and grouped/faceted crosstalk key coverage. The next focus is Phase 45 rect/tile edge behavior.
+v1.11 Geometry Parity is in progress. Phase 44 shipped ordinary `geom_polygon()` support as grouped closed D3 paths with representative styling, facets, zoom/update compatibility, sanitized interaction payloads, and grouped/faceted crosstalk key coverage. Phase 45 closed the deferred rect/tile edge behavior with a focused fixture matrix, D3-boundary fixes for categorical tile and update-path geometry, and diagnostics evidence. The next focus is Phase 46 sf text and label annotations.
 
 ## Current Milestone: v1.11 Geometry Parity
 
@@ -104,10 +104,11 @@ v1.11 Geometry Parity is in progress. Phase 44 shipped ordinary `geom_polygon()`
 - ✓ Repeatable local release validation gate covering tests, docs, `R CMD check`, expected optional skips, failure artifacts, and Phase 43 handoff evidence — v1.10 Phase 42
 - ✓ Documentation and release-note polish describing the shipped polygon/point/line `geom_sf()` contract, optional browser validation, residual risks, deferred non-blockers, and next-milestone candidates — v1.10 Phase 43
 - ✓ Ordinary `geom_polygon()` IR recognition, grouped closed-path D3 rendering, facets, styling, zoom/update behavior, sanitized interactivity payloads, and grouped/faceted crosstalk key binding — v1.11 Phase 44
+- ✓ Rect/tile edge behavior fixture matrix, ggplot2-compatible non-issue classification, categorical tile renderer fixes, update-path parity fixes, and diagnostics closure — v1.11 Phase 45
 
 ### Active
 
-- v1.11 Geometry Parity requirements for rect/tile edge behavior and sf text/label annotations.
+- v1.11 Geometry Parity requirements for sf text/label annotations.
 
 ### Out of Scope
 
@@ -126,8 +127,7 @@ gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus pro
 **Known tech debt:**
 - Monolithic `as_d3_ir()` function (~1000 lines) still needs broader modularization beyond the extracted sf helper boundaries
 - Private ggplot2 theme access remains necessary but is quarantined in `R/ggplot2_compat.R` behind compatibility helpers
-- Ordinary `geom_polygon()` renderer parity is active v1.11 work
-- rect/tile out-of-bounds behavior is active v1.11 reproduction/fix work
+- sf text/label annotations are active v1.11 work
 - Browser-side sf behavior now has DOM-level smoke harness coverage; live Chrome execution still depends on optional local browser dependencies
 
 ## Constraints
@@ -174,6 +174,7 @@ gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus pro
 | combined geometry-parity milestone | Ordinary polygon, rect/tile edge behavior, and sf annotations share renderer/IR/interactivity risk and should be planned together after v1.10 hardening | Pending — v1.11 scope |
 | ordinary polygon grouped path renderer | Ordinary `geom_polygon()` should render through a dedicated grouped closed-path module, not by branching line/path renderers that sort or assume open paths | ✓ Good — implemented and verified in Phase 44 |
 | representative polygon crosstalk keys | Grouped/faceted ordinary polygon paths should carry private source-row indices for crosstalk while public callbacks keep underscore-prefixed renderer fields sanitized | ✓ Good — implemented and verified in Phase 44 |
+| rect/tile edge closure boundary | Rect/tile out-of-bounds behavior should be classified against ggplot2 built data first, fixed only at the implicated D3 renderer/update boundary, and closed as non-issue where panel clipping or scale-limit censoring is expected | ✓ Good — implemented and verified in Phase 45 |
 
 ## Evolution
 
@@ -193,4 +194,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-24 after completing Phase 44 Ordinary geom_polygon Support*
+*Last updated: 2026-05-24 after completing Phase 45 Rect And Tile Edge Closure*
