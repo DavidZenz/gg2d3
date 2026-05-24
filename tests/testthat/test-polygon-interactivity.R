@@ -34,6 +34,8 @@ test_that("POLY-03 events module sanitizes polygon callback data", {
   expect_match(events_js, "setInputValue\\(shinyId, publicDatum\\)")
   expect_match(events_js, "mouseoverHandler\\.call\\(this, event, sanitizeEventDatum\\(d\\)\\)")
   expect_match(events_js, "mouseoutHandler\\.call\\(this, event, sanitizeEventDatum\\(d\\)\\)")
+  expect_match(events_js, "compileEventHandler")
+  expect_match(events_js, "return \\(")
   expect_false(grepl("_polygonPoints", events_js, fixed = TRUE))
 })
 

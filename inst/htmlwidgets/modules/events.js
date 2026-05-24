@@ -65,6 +65,20 @@
     return sanitized;
   }
 
+  function compileEventHandler(handlerSource) {
+    if (!handlerSource) return null;
+    const src = String(handlerSource).trim();
+    const looksLikeFnExpr = /^\s*(function\b|\(?\s*[\w\s,]*\)?\s*=>)/.test(src);
+    if (looksLikeFnExpr) {
+      const fn = (new Function('return (' + src + ');'))();
+      if (typeof fn !== 'function') {
+        throw new Error('handler did not evaluate to a function');
+      }
+      return fn;
+    }
+    return new Function('event', 'd', src);
+  }
+
   function getLegendKeyAestheticAliases(aesthetic) {
     if (aesthetic === 'colour') return ['colour', 'color', 'fill'];
     if (aesthetic === 'color') return ['color', 'colour', 'fill'];
@@ -668,9 +682,9 @@
     if (!config) return;
     const svg = d3.select(el).select('svg');
 
-    const clickHandler = config.click ? new Function('event', 'd', config.click) : null;
-    const mouseoverHandler = config.mouseover ? new Function('event', 'd', config.mouseover) : null;
-    const mouseoutHandler = config.mouseout ? new Function('event', 'd', config.mouseout) : null;
+    const clickHandler = compileEventHandler(config.click);
+    const mouseoverHandler = compileEventHandler(config.mouseover);
+    const mouseoutHandler = compileEventHandler(config.mouseout);
     const shinyId = config.shiny_id;
 
     INTERACTIVE_SELECTORS.forEach(selector => {
