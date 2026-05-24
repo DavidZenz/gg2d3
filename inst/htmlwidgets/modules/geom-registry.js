@@ -202,9 +202,59 @@
   function updateGeoms(container, xScale, yScale, options) {
     const flip = !!options.flip;
     const t = options.transition || d3.transition().duration(0);
+    const val = window.gg2d3.helpers.val;
+    const num = window.gg2d3.helpers.num;
 
     const xScaleFunc = flip ? yScale : xScale;
     const yScaleFunc = flip ? xScale : yScale;
+    const isXBand = typeof xScale.bandwidth === "function";
+    const isYBand = typeof yScale.bandwidth === "function";
+
+    function bandValue(d, centerKey, boundKey) {
+      const center = val(d && d[centerKey]);
+      if (center !== null && center !== undefined) return center;
+      return val(d && d[boundKey]);
+    }
+
+    function rectX(d) {
+      if (isXBand) return xScale(bandValue(d, 'x', 'xmin'));
+      return Math.min(xScale(num(d.xmin)), xScale(num(d.xmax)));
+    }
+
+    function rectY(d) {
+      if (isYBand) return yScale(bandValue(d, 'y', 'ymin'));
+      return Math.min(yScale(num(d.ymin)), yScale(num(d.ymax)));
+    }
+
+    function rectWidth(d) {
+      if (isXBand) return xScale.bandwidth();
+      return Math.abs(xScale(num(d.xmax)) - xScale(num(d.xmin)));
+    }
+
+    function rectHeight(d) {
+      if (isYBand) return yScale.bandwidth();
+      return Math.abs(yScale(num(d.ymax)) - yScale(num(d.ymin)));
+    }
+
+    function flippedRectX(d) {
+      if (isYBand) return yScale(bandValue(d, 'y', 'ymin'));
+      return Math.min(yScale(num(d.ymin)), yScale(num(d.ymax)));
+    }
+
+    function flippedRectY(d) {
+      if (isXBand) return xScale(bandValue(d, 'x', 'xmin'));
+      return Math.min(xScale(num(d.xmin)), xScale(num(d.xmax)));
+    }
+
+    function flippedRectWidth(d) {
+      if (isYBand) return yScale.bandwidth();
+      return Math.abs(yScale(num(d.ymax)) - yScale(num(d.ymin)));
+    }
+
+    function flippedRectHeight(d) {
+      if (isXBand) return xScale.bandwidth();
+      return Math.abs(xScale(num(d.xmax)) - xScale(num(d.xmin)));
+    }
 
     // geom_point
     container.selectAll('circle.geom-point')
@@ -243,10 +293,22 @@
     // geom_rect / geom_tile
     container.selectAll('rect.geom-rect')
       .transition(t)
-      .attr('x', d => Math.min(xScaleFunc(d.xmin), xScaleFunc(d.xmax)))
-      .attr('y', d => Math.min(yScaleFunc(d.ymin), yScaleFunc(d.ymax)))
-      .attr('width', d => Math.abs(xScaleFunc(d.xmax) - xScaleFunc(d.xmin)))
-      .attr('height', d => Math.abs(yScaleFunc(d.ymax) - yScaleFunc(d.ymin)));
+      .attr('x', d => {
+        if (flip) return flippedRectX(d);
+        return rectX(d);
+      })
+      .attr('y', d => {
+        if (flip) return flippedRectY(d);
+        return rectY(d);
+      })
+      .attr('width', d => {
+        if (flip) return flippedRectWidth(d);
+        return rectWidth(d);
+      })
+      .attr('height', d => {
+        if (flip) return flippedRectHeight(d);
+        return rectHeight(d);
+      });
 
     // geom_text
     container.selectAll('text.geom-text')

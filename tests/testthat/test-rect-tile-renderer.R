@@ -59,26 +59,36 @@ test_that("RECT-01 rect renderer handles band scales, coord flip, and continuous
   expect_match(rect_js, "isXBand")
   expect_match(rect_js, "isYBand")
   expect_match(rect_js, "Math\\.abs")
-  expect_match(rect_js, "xScale\\(xmin\\)")
-  expect_match(rect_js, "yScale\\(ymax\\)")
+  expect_match(rect_js, "function rectX")
+  expect_match(rect_js, "function rectY")
+  expect_match(rect_js, "Math\\.min\\(xScale\\(num\\(get\\(d, aes\\.xmin\\)\\)\\)")
+  expect_match(rect_js, "Math\\.min\\(yScale\\(num\\(get\\(d, aes\\.ymin\\)\\)\\)")
 })
 
-test_that("RECT-01 rect renderer uses registry fill and opacity accessors and records stroke follow-up", {
+test_that("RECT-02 rect renderer uses registry fill, stroke, linewidth, and opacity accessors", {
   rect_js <- read_repo_file("inst/htmlwidgets/modules/geoms/rect.js")
   registry_js <- read_repo_file("inst/htmlwidgets/modules/geom-registry.js")
-  notes <- classification_notes()
 
   expect_match(registry_js, "return \\{ strokeColor, fillColor, opacity \\}")
   expect_match(rect_js, "makeColorAccessors")
   expect_match(rect_js, "fillColor")
+  expect_match(rect_js, "strokeColor")
+  expect_match(rect_js, "\\.attr\\(\"stroke\"")
+  expect_match(rect_js, "\\.attr\\(\"stroke-width\"")
+  expect_match(rect_js, "mmToPxLinewidth")
+  expect_match(rect_js, "rectStroke")
+  expect_match(rect_js, "rectLinewidth")
   expect_match(rect_js, "opacity")
+})
 
-  if (grepl("strokeColor", rect_js, fixed = TRUE) && grepl("\\.attr\\(\"stroke\"", rect_js)) {
-    expect_match(rect_js, "strokeColor")
-    expect_match(rect_js, "\\.attr\\(\"stroke\"")
-  } else {
-    expect_match(notes, "Initial render stroke accessor mismatch candidate")
-  }
+test_that("RECT-02 rect renderer uses band centers for categorical tile positioning", {
+  rect_js <- read_repo_file("inst/htmlwidgets/modules/geoms/rect.js")
+
+  expect_match(rect_js, "function bandValue")
+  expect_match(rect_js, "isXBand\\) return xScale\\(bandValue\\(d, aes\\.x, aes\\.xmin\\)\\)")
+  expect_match(rect_js, "isYBand\\) return yScale\\(bandValue\\(d, aes\\.y, aes\\.ymin\\)\\)")
+  expect_match(rect_js, "if \\(isXBand\\) return xScale\\.bandwidth\\(\\)")
+  expect_match(rect_js, "if \\(isYBand\\) return yScale\\.bandwidth\\(\\)")
 })
 
 test_that("RECT-01 rect update path targets rect.geom-rect and updates geometry", {
@@ -95,23 +105,24 @@ test_that("RECT-01 rect update path targets rect.geom-rect and updates geometry"
   expect_match(rect_update, "Math\\.abs")
 })
 
-test_that("RECT-01 rect update path is either band and flip safe or classified for Plan 45-02", {
+test_that("RECT-02 rect update path is band and flip safe", {
   registry_js <- read_repo_file("inst/htmlwidgets/modules/geom-registry.js")
-  notes <- classification_notes()
 
   rect_update <- source_block_after(registry_js, "geom_rect / geom_tile")
   next_section <- regexpr("geom_text", rect_update)
   expect_true(next_section[[1]] > 0)
   rect_update <- substr(rect_update, 1, next_section[[1]])
 
-  has_band_safe_logic <- grepl("bandwidth", rect_update, fixed = TRUE)
+  has_band_safe_logic <- grepl("bandwidth", registry_js, fixed = TRUE)
   has_explicit_flip_branch <- grepl("if (flip)", rect_update, fixed = TRUE)
 
-  if (has_band_safe_logic && has_explicit_flip_branch) {
-    expect_true(has_band_safe_logic)
-    expect_true(has_explicit_flip_branch)
-  } else {
-    expect_match(notes, "Update-path mismatch candidate")
-    expect_match(notes, "geom-registry\\.js")
-  }
+  expect_true(has_band_safe_logic)
+  expect_true(has_explicit_flip_branch)
+  expect_match(registry_js, "function rectX")
+  expect_match(registry_js, "function flippedRectX")
+  expect_match(registry_js, "xScale\\(bandValue\\(d, 'x', 'xmin'\\)\\)")
+  expect_match(registry_js, "yScale\\(bandValue\\(d, 'y', 'ymin'\\)\\)")
+  expect_match(rect_update, "rect\\.geom-rect")
+  expect_match(rect_update, "flippedRectWidth")
+  expect_match(rect_update, "rectHeight")
 })
