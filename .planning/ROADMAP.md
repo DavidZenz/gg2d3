@@ -65,7 +65,7 @@ Plans:
   4. The outcome is recorded in diagnostics or validation notes so the v1.10 deferred item is closed cleanly.
 **Plans**: 2 plans
 Plans:
-- [ ] 45-01-PLAN.md — Build the rect/tile out-of-bounds reproduction matrix and classify observed behavior.
+- [x] 45-01-PLAN.md — Build the rect/tile out-of-bounds reproduction matrix and classify observed behavior.
 - [ ] 45-02-PLAN.md — Fix confirmed mismatches or document and test the verified non-issue path.
 
 ### Phase 46: sf Text And Label Annotations
@@ -104,7 +104,7 @@ Phases execute in numeric order: 44 → 45 → 46 → 47
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
 | 44. Ordinary geom_polygon Support | POLY-01, POLY-02, POLY-03 | 3/3 | Complete | 2026-05-24 |
-| 45. Rect And Tile Edge Closure | RECT-01, RECT-02 | 0/2 | Not started | — |
+| 45. Rect And Tile Edge Closure | RECT-01, RECT-02 | 1/2 | In progress | — |
 | 46. sf Text And Label Annotations | SFANN-01, SFANN-02, SFANN-03 | 0/3 | Not started | — |
 | 47. Geometry Parity Docs And Validation | DOCVAL-01 | 0/2 | Not started | — |
 
