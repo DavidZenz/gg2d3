@@ -20,9 +20,9 @@ Requirements for the Geometry Parity milestone. Each maps to exactly one roadmap
 
 ### sf Text And Label Annotations
 
-- [ ] **SFANN-01**: `geom_sf_text()` and `geom_sf_label()` inputs are extracted into IR with label text, supported aesthetics, geometry anchors, panel membership, and explicit skip diagnostics for unsupported, empty, invalid, or missing geometries.
-- [ ] **SFANN-02**: The D3 renderer places sf text and labels at projected anchors that align with existing polygon/point/line sf panel projections in single-panel, stacked-layer, and faceted plots.
-- [ ] **SFANN-03**: sf text and label marks support the existing tooltip, hover, brush, and handler contracts where meaningful without exposing renderer-private geometry metadata.
+- [x] **SFANN-01**: `geom_sf_text()` and `geom_sf_label()` inputs are extracted into IR with label text, supported aesthetics, geometry anchors, panel membership, and explicit skip diagnostics for unsupported, empty, invalid, or missing geometries.
+- [x] **SFANN-02**: The D3 renderer places sf text and labels at projected anchors that align with existing polygon/point/line sf panel projections in single-panel, stacked-layer, and faceted plots.
+- [x] **SFANN-03**: sf text and label marks support the existing tooltip, hover, brush, and handler contracts where meaningful without exposing renderer-private geometry metadata.
 
 ### Documentation And Validation
 
@@ -63,9 +63,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POLY-03 | Phase 44 | Complete |
 | RECT-01 | Phase 45 | Complete |
 | RECT-02 | Phase 45 | Complete |
-| SFANN-01 | Phase 46 | Pending |
-| SFANN-02 | Phase 46 | Pending |
-| SFANN-03 | Phase 46 | Pending |
+| SFANN-01 | Phase 46 | Complete |
+| SFANN-02 | Phase 46 | Complete |
+| SFANN-03 | Phase 46 | Complete |
 | DOCVAL-01 | Phase 47 | Pending |
 
 **Coverage:**

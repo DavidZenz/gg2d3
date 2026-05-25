@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.11 Geometry Parity is in progress. Phase 44 shipped ordinary `geom_polygon()` support as grouped closed D3 paths with representative styling, facets, zoom/update compatibility, sanitized interaction payloads, and grouped/faceted crosstalk key coverage. Phase 45 closed the deferred rect/tile edge behavior with a focused fixture matrix, D3-boundary fixes for categorical tile and update-path geometry, and diagnostics evidence. The next focus is Phase 46 sf text and label annotations.
+v1.11 Geometry Parity is in progress. Phase 44 shipped ordinary `geom_polygon()` support as grouped closed D3 paths with representative styling, facets, zoom/update compatibility, sanitized interaction payloads, and grouped/faceted crosstalk key coverage. Phase 45 closed the deferred rect/tile edge behavior with a focused fixture matrix, D3-boundary fixes for categorical tile and update-path geometry, and diagnostics evidence. Phase 46 shipped `geom_sf_text()` and `geom_sf_label()` IR extraction, D3 projected-anchor rendering, and existing interactivity contracts with sanitized public payloads. The next focus is Phase 47 geometry parity documentation and validation.
 
 ## Current Milestone: v1.11 Geometry Parity
 

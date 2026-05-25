@@ -34,7 +34,7 @@
 
 - [x] **Phase 44: Ordinary geom_polygon Support** - Users can render ordinary `geom_polygon()` layers as grouped D3 paths with representative styling, facets, and existing interactivity hooks.
 - [x] **Phase 45: Rect And Tile Edge Closure** - Maintainers have reproduced and fixed, or explicitly closed with evidence, the deferred rect/tile out-of-bounds behavior.
-- [ ] **Phase 46: sf Text And Label Annotations** - Users can render `geom_sf_text()` and `geom_sf_label()` at projected anchors aligned with existing sf panel projections.
+- [x] **Phase 46: sf Text And Label Annotations** - Users can render `geom_sf_text()` and `geom_sf_label()` at projected anchors aligned with existing sf panel projections.
 - [ ] **Phase 47: Geometry Parity Docs And Validation** - Users and maintainers have current docs, validation coverage, and support-contract notes for v1.11 geometry parity.
 
 ## Phase Details
@@ -81,7 +81,7 @@ Plans:
 Plans:
 - [x] 46-01-PLAN.md — Add `geom_sf_text()` and `geom_sf_label()` IR extraction, anchors, aesthetics, and diagnostics.
 - [x] 46-02-PLAN.md — Implement sf text/label D3 rendering against existing panel projection metadata.
-- [ ] 46-03-PLAN.md — Harden sf annotation interactivity, facets, skipped rows, and regression coverage.
+- [x] 46-03-PLAN.md — Harden sf annotation interactivity, facets, skipped rows, and regression coverage.
 
 ### Phase 47: Geometry Parity Docs And Validation
 **Goal**: Users and maintainers have current docs, validation coverage, and support-contract notes for v1.11 geometry parity.
@@ -105,7 +105,7 @@ Phases execute in numeric order: 44 → 45 → 46 → 47
 |-------|--------------|----------------|--------|-----------|
 | 44. Ordinary geom_polygon Support | POLY-01, POLY-02, POLY-03 | 3/3 | Complete | 2026-05-24 |
 | 45. Rect And Tile Edge Closure | RECT-01, RECT-02 | 2/2 | Complete | 2026-05-24 |
-| 46. sf Text And Label Annotations | SFANN-01, SFANN-02, SFANN-03 | 0/3 | Not started | — |
+| 46. sf Text And Label Annotations | SFANN-01, SFANN-02, SFANN-03 | 3/3 | Complete | 2026-05-25 |
 | 47. Geometry Parity Docs And Validation | DOCVAL-01 | 0/2 | Not started | — |
 
 ## Archived Milestones
