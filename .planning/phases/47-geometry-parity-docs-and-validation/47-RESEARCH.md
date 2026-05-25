@@ -311,17 +311,17 @@ These commands exercise live DOM smoke when optional local browser/spatial depen
 
 All claims in this research were verified against local project files or local tool probes; no `[ASSUMED]` claims are used. [VERIFIED: local repository inspection]
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Exact validation artifact filename**
+1. **Exact validation artifact filename — RESOLVED**
    - What we know: Context allows a dedicated new file, diagnostics, or both if success criteria are covered. [VERIFIED: 47-CONTEXT.md]
    - What's unclear: The roadmap does not mandate the filename. [VERIFIED: .planning/ROADMAP.md]
-   - Recommendation: Use `.planning/phases/47-geometry-parity-docs-and-validation/47-VALIDATION.md` for the matrix and link/mention it from diagnostics. [VERIFIED: prior phase pattern in 44-VALIDATION.md, 45-VALIDATION.md, 46-VALIDATION.md]
+   - Resolution: Use `.planning/phases/47-geometry-parity-docs-and-validation/47-VALIDATION.md` for the matrix and link/mention it from diagnostics. [VERIFIED: prior phase pattern in 44-VALIDATION.md, 45-VALIDATION.md, 46-VALIDATION.md]
 
-2. **Whether to run full package tests in Phase 47**
+2. **Whether to run full package tests in Phase 47 — RESOLVED**
    - What we know: Focused tests are enough for representative evidence, while `devtools::test()` is the standard full package command. [VERIFIED: AGENTS.md; 47-CONTEXT.md]
    - What's unclear: The roadmap does not require a full release gate for this docs-only phase. [VERIFIED: .planning/ROADMAP.md]
-   - Recommendation: Run focused docs/geometry checks during plans; reserve `devtools::test()` for final phase verification or when generated docs raise broader concerns. [VERIFIED: 47-CONTEXT.md; prior 42-VALIDATION-GATE.md]
+   - Resolution: Run focused docs/geometry checks during plans; reserve `devtools::test()` for final phase verification or when generated docs raise broader concerns. [VERIFIED: 47-CONTEXT.md; prior 42-VALIDATION-GATE.md]
 
 ## Environment Availability
 
