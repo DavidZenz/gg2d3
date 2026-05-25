@@ -16,8 +16,9 @@ validate_ir <- function(ir) {
     "density", "smooth",
     "hline", "vline", "abline", "dotplot", "rug",
     "errorbar", "linerange", "pointrange", "polygon",
-    "sf"
+    "sf", "sf_text", "sf_label"
   )
+  sf_like_geoms <- c("sf", "sf_text", "sf_label")
 
   # Check that IR is a list
   if (!is.list(ir)) {
@@ -75,7 +76,7 @@ validate_ir <- function(ir) {
       warning(sprintf("Layer %d uses unrecognized geom type '%s'", i, layer$geom), call. = FALSE)
     }
 
-    if (layer$geom == "sf") {
+    if (layer$geom %in% sf_like_geoms) {
       if (!"geometries" %in% names(layer) || !is.character(layer$geometries)) {
         stop(sprintf("Layer %d sf layer geometries must be a character vector", i), call. = FALSE)
       }
@@ -101,6 +102,23 @@ validate_ir <- function(ir) {
         if (!is.character(layer$sf_family) || length(layer$sf_family) != 1L ||
             !(is.na(layer$sf_family) || layer$sf_family %in% valid_sf_families)) {
           warning(sprintf("Layer %d sf layer has invalid sf_family", i), call. = FALSE)
+        }
+      }
+
+      if (layer$geom %in% c("sf_text", "sf_label")) {
+        expected_annotation_type <- sub("^sf_", "", layer$geom)
+        if (is.null(layer$annotation_type) ||
+            !is.character(layer$annotation_type) ||
+            length(layer$annotation_type) != 1L ||
+            !identical(layer$annotation_type, expected_annotation_type)) {
+          stop(
+            sprintf(
+              "Layer %d sf annotation layer annotation_type must be '%s'",
+              i,
+              expected_annotation_type
+            ),
+            call. = FALSE
+          )
         }
       }
     }

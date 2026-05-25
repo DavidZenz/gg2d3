@@ -194,7 +194,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
     # --- robust geom name ---
     gobj  <- b$plot$layers[[i]]$geom
-    gcl   <- class(gobj)[1]
+    gcl_raw <- class(gobj)
+    gcl   <- gcl_raw[1]
     gname <- switch(gcl,
                     GeomPoint  = "point",
                     GeomLine   = "line",
@@ -223,6 +224,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
                     GeomPointrange = "pointrange",
                     GeomPolygon= "polygon",
                     GeomSf     = "sf",
+                    GeomSfText = "sf_text",
+                    GeomSfLabel = "sf_label",
                     # Fallbacks
                     {
                       if (!is.null(gobj$objname)) {
@@ -234,6 +237,23 @@ as_d3_ir <- function(p, width = 640, height = 400,
                       }
                     }
     )
+
+    stat_obj <- b$plot$layers[[i]]$stat
+    sf_annotation_tokens <- tolower(c(
+      gname,
+      gcl_raw,
+      if (!is.null(gobj$objname)) gobj$objname else character(),
+      class(stat_obj),
+      if (!is.null(stat_obj$objname)) stat_obj$objname else character()
+    ))
+    uses_sf_coordinates <- any(grepl("statsfcoordinates|sf_coordinates|sfcoordinates", sf_annotation_tokens))
+    if (any(grepl("sf_text|sftext", sf_annotation_tokens)) ||
+        (uses_sf_coordinates && identical(gcl, "GeomText"))) {
+      gname <- "sf_text"
+    } else if (any(grepl("sf_label|sflabel", sf_annotation_tokens)) ||
+               (uses_sf_coordinates && identical(gcl, "GeomLabel"))) {
+      gname <- "sf_label"
+    }
 
     # columns we keep
     keep_aes <- c(
@@ -354,6 +374,21 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
     if (gname == "sf") {
       payload <- sf_layer_ir_payload(df, aes, g_params, var_names)
+      if (length(payload$coord_geometry) > 0L) {
+        sf_coord_geometries[[length(sf_coord_geometries) + 1L]] <<- payload$coord_geometry
+        for (panel_key in names(payload$panel_geometries)) {
+          existing <- sf_panel_geometries[[panel_key]]
+          sf_panel_geometries[[panel_key]] <<- if (is.null(existing)) {
+            payload$panel_geometries[[panel_key]]
+          } else {
+            c(existing, payload$panel_geometries[[panel_key]])
+          }
+        }
+      }
+      payload$layer
+    } else if (gname %in% c("sf_text", "sf_label")) {
+      annotation_type <- sub("^sf_", "", gname)
+      payload <- sf_annotation_layer_ir_payload(df, aes, g_params, var_names, annotation_type)
       if (length(payload$coord_geometry) > 0L) {
         sf_coord_geometries[[length(sf_coord_geometries) + 1L]] <<- payload$coord_geometry
         for (panel_key in names(payload$panel_geometries)) {

@@ -227,6 +227,7 @@ sf_layer_data_rows <- function(df) {
   keep_aes <- c(
     "PANEL", "x", "y", "xend", "yend", "xmin", "xmax", "ymin", "ymax",
     "colour", "fill", "size", "alpha", "group", "label",
+    "hjust", "vjust", "angle", "fontface", "family",
     "stroke", "shape", "linewidth", "linetype", "lineend",
     "slope", "intercept", "xintercept", "yintercept",
     "lower", "middle", "upper", "outliers", "notchupper", "notchlower",
@@ -257,8 +258,7 @@ sf_layer_data_rows <- function(df) {
 }
 
 
-sf_layer_ir_payload <- function(df, aes, params, var_names) {
-  sf_prepared <- prepare_sf_geometry_ir(df)
+sf_panel_geometries <- function(sf_prepared) {
   panel_geometries <- list()
 
   if (length(sf_prepared$geometry) > 0L) {
@@ -279,6 +279,13 @@ sf_layer_ir_payload <- function(df, aes, params, var_names) {
     }
   }
 
+  panel_geometries
+}
+
+
+sf_layer_ir_payload <- function(df, aes, params, var_names) {
+  sf_prepared <- prepare_sf_geometry_ir(df)
+
   list(
     layer = list(
       geom           = "sf",
@@ -293,7 +300,34 @@ sf_layer_ir_payload <- function(df, aes, params, var_names) {
       var_names      = var_names
     ),
     coord_geometry = sf_prepared$geometry,
-    panel_geometries = panel_geometries
+    panel_geometries = sf_panel_geometries(sf_prepared)
+  )
+}
+
+
+sf_annotation_layer_ir_payload <- function(df, aes, params, var_names, annotation_type) {
+  if (!annotation_type %in% c("text", "label")) {
+    stop("sf annotation_type must be 'text' or 'label'", call. = FALSE)
+  }
+
+  sf_prepared <- prepare_sf_geometry_ir(df)
+
+  list(
+    layer = list(
+      geom           = paste0("sf_", annotation_type),
+      annotation_type = annotation_type,
+      geom_type      = sf_prepared$geom_type,
+      sf_family      = sf_prepared$sf_family,
+      geometries     = sf_prepared$geometries,
+      data           = sf_layer_data_rows(sf_prepared$data),
+      aes            = aes,
+      params         = params,
+      crs            = sf_prepared$crs,
+      sf_diagnostics = sf_prepared$sf_diagnostics,
+      var_names      = var_names
+    ),
+    coord_geometry = sf_prepared$geometry,
+    panel_geometries = sf_panel_geometries(sf_prepared)
   )
 }
 
