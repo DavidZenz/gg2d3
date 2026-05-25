@@ -26,7 +26,7 @@ Requirements for the Geometry Parity milestone. Each maps to exactly one roadmap
 
 ### Documentation And Validation
 
-- [ ] **DOCVAL-01**: README, vignettes, diagnostics docs, roxygen source, generated help, and validation notes describe the v1.11 ordinary polygon, rect/tile edge, and sf annotation support contract with representative tests or browser smoke coverage.
+- [x] **DOCVAL-01**: README, vignettes, diagnostics docs, roxygen source, generated help, and validation notes describe the v1.11 ordinary polygon, rect/tile edge, and sf annotation support contract with representative tests or browser smoke coverage.
 
 ## Future Requirements
 
@@ -66,7 +66,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SFANN-01 | Phase 46 | Complete |
 | SFANN-02 | Phase 46 | Complete |
 | SFANN-03 | Phase 46 | Complete |
-| DOCVAL-01 | Phase 47 | Pending |
+| DOCVAL-01 | Phase 47 | Complete |
 
 **Coverage:**
 - v1.11 requirements: 9 total
@@ -75,4 +75,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-24*
-*Last updated: 2026-05-24 after creating v1.11 roadmap*
+*Last updated: 2026-05-25 after completing 47-01 public source docs*

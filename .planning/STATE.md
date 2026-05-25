@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.11
 milestone_name: Geometry Parity
 status: executing
-stopped_at: Phase 47 context gathered
-last_updated: "2026-05-25T13:04:16.701Z"
-last_activity: 2026-05-25 -- Phase 47 execution started
+stopped_at: Completed 47-01-PLAN.md
+last_updated: "2026-05-25T13:09:59.364Z"
+last_activity: 2026-05-25
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 11
-  completed_plans: 8
-  percent: 73
+  completed_plans: 9
+  percent: 82
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-24)
 ## Current Position
 
 Phase: 47 (Geometry Parity Docs And Validation) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 47
-Last activity: 2026-05-25 -- Phase 47 execution started
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-05-25
 
-Progress: [████████--] 80%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
@@ -47,7 +47,7 @@ Progress: [████████--] 80%
 | 44 | 3/3 | - | - |
 | 45 | 2/2 | 13m16s | 6m38s |
 | 46 | 3/3 | 1h50m | 36m40s |
-| 47 | 0/2 | - | - |
+| 47 | 1/3 | 4m | 4m |
 
 *Updated after each plan completion*
 | Phase 36 P01 | 6m13s | 2 tasks | 4 files |
@@ -66,6 +66,7 @@ Progress: [████████--] 80%
 | Phase 46 P01 | 35m | 3 tasks | 5 files |
 | Phase 46 P02 | 40m | 3 tasks | 5 files |
 | Phase 46 P03 | 35m | 3 tasks | 4 files |
+| Phase 47 P01 | 4m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,8 @@ Recent decisions affecting current work:
 - 45-02: Categorical tile geometry is fixed at the D3 renderer/update boundary by using band center values for position and bandwidth for dimensions.
 - 45-02: Browser smoke was not added because all remaining rect/tile questions were resolved by IR/source contracts and classification evidence.
 - 45-02: Transformed-scale rect/tile expansion remains outside Phase 45 per D-03.
+- 47-01: Kept source docs only; Plan 47-02 owns generated README and man artifacts.
+- 47-01: Public geometry support wording keeps limitations adjacent and links detailed residual risks to diagnostics.
 
 ### Pending Todos
 
@@ -144,9 +147,9 @@ Items acknowledged at v1.10 milestone close on 2026-05-23:
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 47 context gathered
-Resume file: --resume-file
+Last session: 2026-05-25T13:09:59.354Z
+Stopped at: Completed 47-01-PLAN.md
+Resume file: None
 
 **Completed Phase:** 40 (Package Hygiene) — 3/3 plans — 2026-05-23
 **Completed Phase:** 41 (Release-Blocking Debt Triage) — 2/2 plans — 2026-05-23
