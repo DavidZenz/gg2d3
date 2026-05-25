@@ -30,6 +30,7 @@
     'path.geom-smooth',
     'path.geom-ribbon',
     'path.geom-violin',
+    '.geom-sf',                  // geom_sf and sf annotations: path/circle/text/g marks
     'text.geom-text',
     'line.geom-segment',
     'rect.geom-boxplot-box',
