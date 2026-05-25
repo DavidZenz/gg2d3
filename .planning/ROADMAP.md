@@ -15,18 +15,86 @@
 - ✅ **v1.9 sf Robustness and Expansion** — Phases 36-39 (shipped 2026-05-22)
 - ✅ **v1.10 Release Hardening** — Phases 40-43 (shipped 2026-05-23)
 - ✅ **v1.11 Geometry Parity** — Phases 44-47 (shipped 2026-05-25)
+- 🚧 **v1.12 Quality & Architecture Hardening** — Phases 48-51 (active)
 
 ## Active Milestone
 
-No active milestone. Start the next cycle with `$gsd-new-milestone`.
+### 🚧 v1.12 Quality & Architecture Hardening
+
+**Milestone Goal:** Make gg2d3 easier to trust and extend by adding visual/browser regression coverage, reducing renderer/IR maintenance burden, and closing high-value geometry polish gaps.
+
+**Requirements:** 9 total, 9 mapped
+**Phases:** 4
+**Starting phase:** 48
 
 ## Phases
 
-No active phase plan. Phase numbering resumes at 48 for the next milestone unless an inserted decimal phase is needed.
+**Phase Numbering:**
+- Integer phases (48, 49, 50, 51): Planned milestone work
+- Decimal phases (48.1, 48.2): Urgent insertions, if needed
+
+- [ ] **Phase 48: Browser Visual Smoke Coverage** - Maintainers can generate deterministic browser-rendered visual artifacts for representative gg2d3 surfaces, with explicit optional-dependency skip behavior.
+- [ ] **Phase 49: IR Helper Boundary Hardening** - Maintainers can change selected high-risk `as_d3_ir()` responsibilities through focused helpers without representative IR drift.
+- [ ] **Phase 50: Renderer Wiring And Interaction Contracts** - Supported geoms have less duplication-prone renderer/update/interactivity wiring, with tests guarding missing wiring and public payload sanitization.
+- [ ] **Phase 51: Geometry Edge-Case Classification And Polish** - Maintainers have verified outcomes for transformed rect/tile behavior, ordinary polygon topology, and text/label placement candidates.
+
+## Phase Details
+
+### Phase 48: Browser Visual Smoke Coverage
+**Goal**: Maintainers can generate deterministic browser-rendered visual artifacts for representative gg2d3 surfaces, with explicit optional-dependency skip behavior.
+**Depends on**: v1.11 archive
+**Requirements**: VIS-01, VIS-02, VIS-03
+**Success Criteria** (what must be TRUE):
+  1. A documented local command renders representative gg2d3 plots into inspectable image artifacts under an ignored local output directory.
+  2. The visual smoke set covers Cartesian geoms, facets, interactivity-facing marks, sf marks, ordinary polygons, and sf annotations.
+  3. Browser visual validation skips with explicit messages when Chrome, chromote, sf, geojsonsf, or equivalent optional dependencies are unavailable.
+  4. Failure artifacts give maintainers enough local evidence to inspect what rendered without committing generated outputs.
+**Plans**: TBD
+
+### Phase 49: IR Helper Boundary Hardening
+**Goal**: Maintainers can change selected high-risk `as_d3_ir()` responsibilities through focused helpers without representative IR drift.
+**Depends on**: Phase 48
+**Requirements**: ARCH-01
+**Success Criteria** (what must be TRUE):
+  1. Selected high-risk IR responsibilities are isolated behind named internal helpers with clear inputs and outputs.
+  2. Representative non-sf, sf, facet, scale, and annotation IR fixtures remain unchanged except for intentional documented differences.
+  3. Failures in helper-level characterization tests identify the affected IR boundary rather than only the monolithic `as_d3_ir()` path.
+**Plans**: TBD
+
+### Phase 50: Renderer Wiring And Interaction Contracts
+**Goal**: Supported geoms have less duplication-prone renderer/update/interactivity wiring, with tests guarding missing wiring and public payload sanitization.
+**Depends on**: Phase 49
+**Requirements**: ARCH-02, ARCH-03
+**Success Criteria** (what must be TRUE):
+  1. Geom registration, update handlers, and interactivity selectors are expressed through a less duplication-prone source of truth or validation gate.
+  2. Tests fail when a supported geom lacks expected renderer registration, update handling, or interaction selector coverage.
+  3. Public tooltip, hover, brush, and handler payloads consistently omit renderer-private fields across registered geoms.
+  4. Ordinary polygons and sf text/label annotations are included in the interaction sanitization coverage.
+**Plans**: TBD
+
+### Phase 51: Geometry Edge-Case Classification And Polish
+**Goal**: Maintainers have verified outcomes for transformed rect/tile behavior, ordinary polygon topology, and text/label placement candidates.
+**Depends on**: Phase 50
+**Requirements**: GEOM-01, GEOM-02, GEOM-03
+**Success Criteria** (what must be TRUE):
+  1. Transformed-scale rect/tile behavior is classified with focused fixtures and either fixed at the implicated boundary or documented as an explicit non-goal with evidence.
+  2. Ordinary polygon topology, hole, and subgroup behavior is characterized against ggplot2 output with supported cases locked by tests.
+  3. Unsupported polygon topology cases are documented without implying full GIS topology repair.
+  4. Text and label collision/path-following candidates have either a small verified improvement or an implementation-ready deferral note with evidence.
+  5. Diagnostics or validation notes summarize the final geometry-polish contract for future milestone planning.
+**Plans**: TBD
 
 ## Progress
 
-No active milestone progress table. Completed milestone details are archived below.
+**Execution Order:**
+Phases execute in numeric order: 48 → 49 → 50 → 51
+
+| Phase | Requirements | Plans Complete | Status | Completed |
+|-------|--------------|----------------|--------|-----------|
+| 48. Browser Visual Smoke Coverage | VIS-01, VIS-02, VIS-03 | 0/TBD | Not started | - |
+| 49. IR Helper Boundary Hardening | ARCH-01 | 0/TBD | Not started | - |
+| 50. Renderer Wiring And Interaction Contracts | ARCH-02, ARCH-03 | 0/TBD | Not started | - |
+| 51. Geometry Edge-Case Classification And Polish | GEOM-01, GEOM-02, GEOM-03 | 0/TBD | Not started | - |
 
 ## Archived Milestones
 
@@ -90,4 +158,4 @@ See `.planning/milestones/` and archived roadmap files for full details on the M
 </details>
 
 ---
-*Roadmap updated: 2026-05-25 after archiving v1.11 Geometry Parity*
+*Roadmap updated: 2026-05-25 after creating v1.12 Quality & Architecture Hardening*

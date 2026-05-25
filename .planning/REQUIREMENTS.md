@@ -58,21 +58,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VIS-01 | TBD | Pending |
-| VIS-02 | TBD | Pending |
-| VIS-03 | TBD | Pending |
-| ARCH-01 | TBD | Pending |
-| ARCH-02 | TBD | Pending |
-| ARCH-03 | TBD | Pending |
-| GEOM-01 | TBD | Pending |
-| GEOM-02 | TBD | Pending |
-| GEOM-03 | TBD | Pending |
+| VIS-01 | Phase 48 | Pending |
+| VIS-02 | Phase 48 | Pending |
+| VIS-03 | Phase 48 | Pending |
+| ARCH-01 | Phase 49 | Pending |
+| ARCH-02 | Phase 50 | Pending |
+| ARCH-03 | Phase 50 | Pending |
+| GEOM-01 | Phase 51 | Pending |
+| GEOM-02 | Phase 51 | Pending |
+| GEOM-03 | Phase 51 | Pending |
 
 **Coverage:**
 - v1.12 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9
+- Mapped to phases: 9
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-25*
-*Last updated: 2026-05-25 after initial definition*
+*Last updated: 2026-05-25 after creating v1.12 roadmap*
