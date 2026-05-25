@@ -1,9 +1,9 @@
 ---
 phase: 47
 slug: geometry-parity-docs-and-validation
-status: finalizing
+status: final
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-05-25
 ---
 
@@ -55,6 +55,31 @@ rtk Rscript --vanilla -e 'pattern <- { prefix <- paste("rtk", "rg", "-n"); claim
 | Ordinary geom_polygon() | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-polygon-ir.R"); testthat::test_file("tests/testthat/test-polygon-renderer.R"); testthat::test_file("tests/testthat/test-polygon-interactivity.R")'` | pass | Exit 0 with no skips; representative IR, renderer source, and interactivity source evidence all ran. |
 | Rect/tile edge behavior | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-rect-tile-ir.R"); testthat::test_file("tests/testthat/test-rect-tile-renderer.R")'` | pass | Exit 0 with no skips; fixture matrix and renderer/update source contracts all ran. |
 | geom_sf_text() / geom_sf_label() | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-sf-annotations-ir.R"); testthat::test_file("tests/testthat/test-sf-annotations-renderer.R"); testthat::test_file("tests/testthat/test-sf-annotations-interactivity.R")'` | explicit skip | Exit 0; `tests/testthat/test-sf-annotations-ir.R` skipped because optional local `sf` is unavailable, while renderer and interactivity source-contract tests ran. `geojsonsf` remains part of the documented optional spatial dependency boundary. |
+
+---
+
+## Optional Browser Smoke
+
+| Geometry area | Command | Outcome | Skip reason |
+|---------------|---------|---------|-------------|
+| Ordinary geom_polygon() | `rtk env NOT_CRAN=true Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-polygon-browser.R")'` | explicit skip | Exit 0; five browser smoke tests skipped with `chromote session launch unavailable: Cannot find an available port`. This is an optional browser/Chrome execution skip, not a source validation failure. |
+| geom_sf_text() / geom_sf_label() | `rtk env NOT_CRAN=true Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-sf-annotations-browser.R")'` | explicit skip | Exit 0; two browser smoke tests skipped because optional local `sf` cannot be loaded. `geojsonsf`, `chromote`, and Chrome/Chromium remain part of the documented optional browser/spatial boundary. |
+
+---
+
+## Residual Risks And Next-Milestone Candidates
+
+These candidates are not shipped by Phase 47.
+
+- polygon topology/hole repair beyond grouped closed paths (`FUT-01`).
+- transformed-scale rect/tile expansion.
+- tile basemaps and slippy controls (`FUT-04`).
+- JavaScript-side CRS reprojection (`FUT-04`).
+- ggrepel collision avoidance (`FUT-03`).
+- rich text.
+- rotation parity.
+- path-following annotation placement (`FUT-03`).
+- screenshot or perceptual regression testing (`FUT-05`).
 
 ---
 
