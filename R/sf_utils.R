@@ -5,8 +5,9 @@
 #' and serializes each geometry as a GeoJSON geometry string via
 #' `geojsonsf::sfc_geojson()` (per D-10).
 #'
-#' gg2d3's public `geom_sf()` renderer accepts polygon, point, and line
-#' geometry families. Missing CRS emits
+#' gg2d3's public sf renderer accepts polygon, point, and line geometry
+#' families for `geom_sf()` and projected-anchor annotation support for
+#' `geom_sf_text()` and `geom_sf_label()`. Missing CRS emits
 #' "geom_sf layer has missing CRS; coordinates will be serialized as-is".
 #' Unsupported, empty, invalid, or missing geometries emit
 #' "geom_sf layer skipped %d unsupported, empty, invalid, or missing geometries"
@@ -58,10 +59,11 @@ extract_sf_geometries <- function(df) {
 #' non-renderable rows before GeoJSON serialization, while preserving source row
 #' identity for downstream data/geometry joins.
 #'
-#' Polygon, point, and line geometries are accepted by default. Missing
-#' CRS warns with "geom_sf layer has missing CRS; coordinates will be serialized
-#' as-is". Skipped rows warn with "geom_sf layer skipped %d unsupported, empty,
-#' invalid, or missing geometries".
+#' Polygon, point, and line geometries are accepted by default for sf layers,
+#' including `geom_sf_text()` and `geom_sf_label()` projected-anchor
+#' annotations. Missing CRS warns with "geom_sf layer has missing CRS;
+#' coordinates will be serialized as-is". Skipped rows warn with "geom_sf layer
+#' skipped %d unsupported, empty, invalid, or missing geometries".
 #'
 #' @param df A data.frame containing an sfc geometry column
 #' @param supported_types Character vector of geometry types to retain

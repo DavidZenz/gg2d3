@@ -4,9 +4,10 @@
 #' other elements are dimmed (reduced opacity) and the hovered element can
 #' optionally receive a highlight stroke.
 #'
-#' For `geom_sf()` layers, hover attaches to `.geom-sf` polygon-family,
-#' point-family, and line-family marks and exposes sanitized source-row payloads
-#' to shared event handling.
+#' For ordinary `geom_polygon()` paths and `geom_sf()` polygon-family,
+#' point-family, line-family, `geom_sf_text()`, and `geom_sf_label()` marks,
+#' hover uses the existing shared event handling path and exposes sanitized
+#' source-row payloads without renderer-private fields.
 #'
 #' @param widget A gg2d3 widget object created by \code{gg2d3()}
 #' @param opacity Numeric opacity value (0-1) for non-hovered elements.

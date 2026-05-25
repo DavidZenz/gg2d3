@@ -1,12 +1,19 @@
 #' Render a ggplot as a D3 widget
 #'
-#' gg2d3 supports `geom_sf()` polygon-family (`POLYGON`, `MULTIPOLYGON`),
-#' point-family (`POINT`, `MULTIPOINT`), and line-family (`LINESTRING`,
-#' `MULTILINESTRING`) layers. The map anti-features are explicit: no tile
-#' basemaps, slippy map controls, JavaScript-side CRS reprojection, true
-#' geometry-overlap brushing, or large-map performance guarantees.
-#' Optional browser validation for sf behavior is R/testthat/chromote based and
-#' may skip cleanly when optional local tooling is unavailable.
+#' gg2d3 supports ordinary `geom_polygon()` as grouped closed SVG paths,
+#' `geom_rect()` and `geom_tile()` edge behavior for the shipped Cartesian
+#' scale and panel-clipping contract, and `geom_sf()` polygon-family
+#' (`POLYGON`, `MULTIPOLYGON`), point-family (`POINT`, `MULTIPOINT`), and
+#' line-family (`LINESTRING`, `MULTILINESTRING`) layers. `geom_sf_text()` and
+#' `geom_sf_label()` render labels at projected anchors aligned with the
+#' existing sf panel projection.
+#'
+#' Detailed caveats for polygon topology, rect/tile transformed-scale behavior,
+#' sf annotation placement, ggrepel-style collision avoidance, path-following
+#' text, and map anti-features are tracked in
+#' `vignettes/d3-drawing-diagnostics.md`. Optional browser validation for sf
+#' behavior is R/testthat/chromote based and may skip cleanly when optional
+#' local tooling is unavailable.
 #'
 #' @param x ggplot object or IR list from as_d3_ir()
 #' @param width Optional widget width passed to htmlwidgets.

@@ -4,11 +4,13 @@
 #' create a selection rectangle; data points inside the selection are highlighted
 #' while points outside are dimmed. Double-click to clear the selection.
 #'
-#' For `geom_sf()` layers, brushing uses representative-anchor selection from
-#' rendered `data-cx` and `data-cy` coordinates on `.geom-sf` polygon-family,
-#' point-family, and line-family marks. Brush callbacks receive sanitized
-#' source-row payloads; true geometry-overlap brushing is outside the current
-#' map anti-features boundary.
+#' Ordinary `geom_polygon()` paths brush by SVG path bounds. For `geom_sf()`
+#' polygon-family, point-family, line-family, `geom_sf_text()`, and
+#' `geom_sf_label()` marks, brushing uses representative projected-anchor
+#' selection from rendered `data-cx` and `data-cy` coordinates. Brush callbacks
+#' receive sanitized source-row payloads and do not expose renderer-private
+#' fields; true geometry-overlap brushing is outside the current map
+#' anti-features boundary.
 #'
 #' @param widget A gg2d3 widget object created by \code{gg2d3()}
 #' @param direction Character string specifying brush direction.

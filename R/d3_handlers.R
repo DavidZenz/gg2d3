@@ -1,9 +1,11 @@
 #' Add custom JavaScript event handlers to the plot
 #'
-#' Handlers receive public data rows for rendered marks. For `geom_sf()` layers,
-#' handlers attach to `.geom-sf` polygon-family, point-family, and line-family
-#' marks and pass sanitized source-row payloads to custom JavaScript callbacks
-#' and Shiny-style `shiny_id` click updates.
+#' Handlers receive public data rows for rendered marks. Ordinary
+#' `geom_polygon()` paths and `geom_sf()` polygon-family, point-family,
+#' line-family, `geom_sf_text()`, and `geom_sf_label()` marks reuse the
+#' existing callback path and pass sanitized source-row payloads to custom
+#' JavaScript callbacks and Shiny-style `shiny_id` click updates without
+#' exposing renderer-private fields.
 #'
 #' @param widget A gg2d3 widget.
 #' @param click Optional JS function string for click events.
