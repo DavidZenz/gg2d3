@@ -14,11 +14,11 @@
 - ✅ **v1.8 Production geom_sf Polygon MVP** — Phases 32-35 (shipped 2026-05-20)
 - ✅ **v1.9 sf Robustness and Expansion** — Phases 36-39 (shipped 2026-05-22)
 - ✅ **v1.10 Release Hardening** — Phases 40-43 (shipped 2026-05-23)
-- 🚧 **v1.11 Geometry Parity** — Phases 44-47 (in progress)
+- ✅ **v1.11 Geometry Parity** — Phases 44-47 (shipped 2026-05-25)
 
 ## Active Milestone
 
-### 🚧 v1.11 Geometry Parity
+### ✅ v1.11 Geometry Parity
 
 **Milestone Goal:** Close the remaining geometry-parity gaps around ordinary polygons, rect/tile edge behavior, and sf annotations.
 

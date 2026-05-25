@@ -10,13 +10,13 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.11 Geometry Parity is in progress. Phase 44 shipped ordinary `geom_polygon()` support as grouped closed D3 paths with representative styling, facets, zoom/update compatibility, sanitized interaction payloads, and grouped/faceted crosstalk key coverage. Phase 45 closed the deferred rect/tile edge behavior with a focused fixture matrix, D3-boundary fixes for categorical tile and update-path geometry, and diagnostics evidence. Phase 46 shipped `geom_sf_text()` and `geom_sf_label()` IR extraction, D3 projected-anchor rendering, and existing interactivity contracts with sanitized public payloads. The next focus is Phase 47 geometry parity documentation and validation.
+v1.11 Geometry Parity is complete. Phase 44 shipped ordinary `geom_polygon()` support as grouped closed D3 paths with representative styling, facets, zoom/update compatibility, sanitized interaction payloads, and grouped/faceted crosstalk key coverage. Phase 45 closed the deferred rect/tile edge behavior with a focused fixture matrix, D3-boundary fixes for categorical tile and update-path geometry, and diagnostics evidence. Phase 46 shipped `geom_sf_text()` and `geom_sf_label()` IR extraction, D3 projected-anchor rendering, and existing interactivity contracts with sanitized public payloads. Phase 47 completed the public documentation, roxygen/generated help, diagnostics, validation evidence, and support-contract handoff for v1.11 geometry parity. The next focus is milestone archival and next-milestone selection.
 
-## Current Milestone: v1.11 Geometry Parity
+## Current Milestone: v1.11 Geometry Parity (complete)
 
 **Goal:** Close the remaining geometry-parity gaps around ordinary polygons, rect/tile edge behavior, and sf annotations.
 
-**Target features:**
+**Shipped features:**
 - Ordinary `geom_polygon()` rendering with grouped paths, fill/stroke aesthetics, facets, and existing interactivity hooks where applicable.
 - A focused rect/tile out-of-bounds reproduction that either fixes the renderer mismatch or documents a verified non-issue.
 - `geom_sf_text()` and `geom_sf_label()` support, scoped to useful centroid/anchor behavior and the existing polygon/point/line sf contract.
