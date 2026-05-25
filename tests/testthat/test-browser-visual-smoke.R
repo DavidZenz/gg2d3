@@ -272,12 +272,46 @@ test_that("BVIS-01 browser visual smoke artifacts are generated for representati
   # Set GG2D3_BROWSER_VISUAL_SMOKE=true to generate local browser artifacts.
   skip_browser_visual_smoke()
 
-  fixtures <- .browser_visual_non_sf_fixtures()
-  expect_equal(vapply(fixtures, `[[`, character(1), "id"), c(
+  non_sf_fixtures <- .browser_visual_non_sf_fixtures()
+  expect_equal(vapply(non_sf_fixtures, `[[`, character(1), "id"), c(
     "cartesian-point-line-text",
     "cartesian-bars-rects",
     "facet-wrap-points",
     "interactivity-point-brush-tooltip",
     "ordinary-polygon"
   ))
+
+  sf_matrix <- .browser_visual_sf_matrix()
+  fixtures <- c(non_sf_fixtures, sf_matrix$fixtures)
+  rows <- sf_matrix$skipped
+
+  with_chromote_session({
+    logs <- browser_visual_console_collector(session)
+
+    for (fixture in fixtures) {
+      fixture$logs <- logs
+      rows <- c(rows, list(capture_browser_visual_fixture(session, fixture)))
+    }
+  }, width = 960, height = 720)
+
+  index <- write_browser_visual_index(rows)
+  # Report artifacts are test_output/browser-visual-smoke/index.html and index.json.
+  expect_true(file.exists(index$html))
+  expect_true(file.exists(index$json))
+
+  non_skipped <- rows[vapply(rows, function(row) !identical(row$status, "skipped"), logical(1))]
+  for (row in non_skipped) {
+    expect_equal(row$status, "passed", info = row$error %||% row$id)
+    expect_true(nzchar(row$html))
+    expect_true(nzchar(row$screenshot))
+    expect_true(nzchar(row$dom_summary))
+    expect_true(nzchar(row$browser_log))
+    expect_true(file.exists(row$html))
+    expect_true(file.exists(row$screenshot))
+    expect_true(file.exists(row$dom_summary))
+    expect_true(file.exists(row$browser_log))
+  }
+
+  # Full artifact command:
+  # NOT_CRAN=true GG2D3_BROWSER_VISUAL_SMOKE=true Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-browser-visual-smoke.R")'
 })
