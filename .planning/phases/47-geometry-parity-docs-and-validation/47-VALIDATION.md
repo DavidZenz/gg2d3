@@ -48,6 +48,16 @@ rtk Rscript --vanilla -e 'pattern <- { prefix <- paste("rtk", "rg", "-n"); claim
 
 ---
 
+## Command Evidence
+
+| Geometry area | Command | Outcome | Notes |
+|---------------|---------|---------|-------|
+| Ordinary geom_polygon() | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-polygon-ir.R"); testthat::test_file("tests/testthat/test-polygon-renderer.R"); testthat::test_file("tests/testthat/test-polygon-interactivity.R")'` | pass | Exit 0 with no skips; representative IR, renderer source, and interactivity source evidence all ran. |
+| Rect/tile edge behavior | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-rect-tile-ir.R"); testthat::test_file("tests/testthat/test-rect-tile-renderer.R")'` | pass | Exit 0 with no skips; fixture matrix and renderer/update source contracts all ran. |
+| geom_sf_text() / geom_sf_label() | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-sf-annotations-ir.R"); testthat::test_file("tests/testthat/test-sf-annotations-renderer.R"); testthat::test_file("tests/testthat/test-sf-annotations-interactivity.R")'` | explicit skip | Exit 0; `tests/testthat/test-sf-annotations-ir.R` skipped because optional local `sf` is unavailable, while renderer and interactivity source-contract tests ran. `geojsonsf` remains part of the documented optional spatial dependency boundary. |
+
+---
+
 ## Sampling Rate
 
 - **After every task commit:** Run the focused command for the geometry area or docs surface touched by the task.
