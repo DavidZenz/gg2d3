@@ -23,6 +23,16 @@ test_that("SFANN-02 panel renderer filters sf annotation data and geometries tog
   expect_match(gg2d3_js, "panelData && panelData\\.sf_bbox")
 })
 
+test_that("SFANN-02 panel renderer routes sf_text and sf_label through sf-like filtering", {
+  gg2d3_js <- read_repo_file("inst/htmlwidgets/gg2d3.js")
+
+  expect_match(gg2d3_js, 'function isSfLikeLayer\\(layer\\)')
+  expect_match(gg2d3_js, '\\["sf", "sf_text", "sf_label"\\]')
+  expect_match(gg2d3_js, "isSfLikeLayer\\(layer\\) && Array\\.isArray\\(layer\\.geometries\\)")
+  expect_match(gg2d3_js, "data: filteredPairs\\.map")
+  expect_match(gg2d3_js, "geometries: filteredPairs\\.map")
+})
+
 test_that("SFANN-02 sf renderer declares annotation projection and anchor helpers", {
   sf_js <- read_repo_file("inst/htmlwidgets/modules/geoms/sf.js")
 

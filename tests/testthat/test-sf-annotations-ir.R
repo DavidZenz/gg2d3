@@ -139,7 +139,7 @@ test_that("SFANN-01 stacked sf and sf annotation layers share sf_bbox", {
   expect_no_warning(validate_ir(ir))
 })
 
-test_that("SFANN-01 facet_wrap preserves sf annotation PANEL membership and panel bboxes", {
+test_that("SFANN-01 SFANN-02 facet_wrap preserves sf annotation PANEL membership and panel bboxes", {
   source_sf <- sf::st_sf(
     label = c("A", "B"),
     panel = factor(c("A", "B"), levels = c("A", "B")),
@@ -162,5 +162,63 @@ test_that("SFANN-01 facet_wrap preserves sf annotation PANEL membership and pane
   expect_equal(length(ir$panels), 2L)
   expect_true(all(vapply(ir$panels, function(panel) !is.null(panel$sf_bbox), logical(1))))
   expect_false(identical(ir$panels[[1]]$sf_bbox, ir$panels[[2]]$sf_bbox))
+  expect_no_warning(validate_ir(ir))
+})
+
+test_that("SFANN-02 stacked sf base and point-line annotation span one panel sf_bbox", {
+  base_sf <- sf::st_sf(
+    label = "base",
+    geometry = sf::st_sfc(sf::st_polygon(list(sfann_square_ring(0, 0, 1, 1))), crs = 4326)
+  )
+  annotation_sf <- sf::st_sf(
+    label = c("point", "line"),
+    geometry = sf::st_sfc(
+      sf::st_point(c(10, 20)),
+      sf::st_linestring(matrix(c(30, -5, 35, -6), ncol = 2, byrow = TRUE)),
+      crs = 4326
+    )
+  )
+
+  ir <- as_d3_ir(
+    ggplot2::ggplot() +
+      ggplot2::geom_sf(data = base_sf) +
+      ggplot2::geom_sf_text(data = annotation_sf, ggplot2::aes(label = label))
+  )
+  annotation_layer <- ir$layers[[2]]
+  row_families <- vapply(annotation_layer$data, function(row) row$.sf_family, character(1))
+
+  expect_equal(vapply(ir$layers, `[[`, character(1), "geom"), c("sf", "sf_text"))
+  expect_equal(row_families, c("point", "line"))
+  expect_equal(ir$panels[[1]]$sf_bbox, c(0, -6, 35, 20))
+  expect_no_warning(validate_ir(ir))
+})
+
+test_that("SFANN-02 facet_grid preserves sf annotation PANEL membership and panel bboxes", {
+  source_sf <- sf::st_sf(
+    label = c("NW", "SE"),
+    row = factor(c("north", "south"), levels = c("north", "south")),
+    col = factor(c("west", "east"), levels = c("west", "east")),
+    geometry = sf::st_sfc(
+      sf::st_point(c(0, 0)),
+      sf::st_point(c(100, 50)),
+      crs = 4326
+    )
+  )
+
+  ir <- as_d3_ir(
+    ggplot2::ggplot(source_sf, ggplot2::aes(label = label)) +
+      ggplot2::geom_sf_label() +
+      ggplot2::facet_grid(row ~ col, drop = FALSE)
+  )
+  layer <- expect_sf_annotation_layer(ir$layers[[1]], "sf_label", "label")
+  panels <- vapply(layer$data, function(row) row$PANEL, integer(1))
+  panel_has_bbox <- vapply(ir$panels, function(panel) !is.null(panel$sf_bbox), logical(1))
+  panel_bboxes <- ir$panels[panel_has_bbox]
+
+  expect_equal(ir$facets$type, "grid")
+  expect_equal(length(ir$panels), 4L)
+  expect_equal(length(unique(panels)), 2L)
+  expect_equal(sum(panel_has_bbox), 2L)
+  expect_false(identical(panel_bboxes[[1]]$sf_bbox, panel_bboxes[[2]]$sf_bbox))
   expect_no_warning(validate_ir(ir))
 })
