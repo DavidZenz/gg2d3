@@ -80,7 +80,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 46-01-PLAN.md — Add `geom_sf_text()` and `geom_sf_label()` IR extraction, anchors, aesthetics, and diagnostics.
-- [ ] 46-02-PLAN.md — Implement sf text/label D3 rendering against existing panel projection metadata.
+- [x] 46-02-PLAN.md — Implement sf text/label D3 rendering against existing panel projection metadata.
 - [ ] 46-03-PLAN.md — Harden sf annotation interactivity, facets, skipped rows, and regression coverage.
 
 ### Phase 47: Geometry Parity Docs And Validation
