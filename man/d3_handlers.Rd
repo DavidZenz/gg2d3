@@ -28,8 +28,10 @@ automatically update a Shiny input with this ID.}
 The modified widget.
 }
 \description{
-Handlers receive public data rows for rendered marks. For \code{geom_sf()} layers,
-handlers attach to \code{.geom-sf} polygon-family, point-family, and line-family
-marks and pass sanitized source-row payloads to custom JavaScript callbacks
-and Shiny-style \code{shiny_id} click updates.
+Handlers receive public data rows for rendered marks. Ordinary
+\code{geom_polygon()} paths and \code{geom_sf()} polygon-family, point-family,
+line-family, \code{geom_sf_text()}, and \code{geom_sf_label()} marks reuse the
+existing callback path and pass sanitized source-row payloads to custom
+JavaScript callbacks and Shiny-style \code{shiny_id} click updates without
+exposing renderer-private fields.
 }

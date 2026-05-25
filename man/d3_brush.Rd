@@ -41,11 +41,13 @@ create a selection rectangle; data points inside the selection are highlighted
 while points outside are dimmed. Double-click to clear the selection.
 }
 \details{
-For \code{geom_sf()} layers, brushing uses representative-anchor selection from
-rendered \code{data-cx} and \code{data-cy} coordinates on \code{.geom-sf} polygon-family,
-point-family, and line-family marks. Brush callbacks receive sanitized
-source-row payloads; true geometry-overlap brushing is outside the current
-map anti-features boundary.
+Ordinary \code{geom_polygon()} paths brush by SVG path bounds. For \code{geom_sf()}
+polygon-family, point-family, line-family, \code{geom_sf_text()}, and
+\code{geom_sf_label()} marks, brushing uses representative projected-anchor
+selection from rendered \code{data-cx} and \code{data-cy} coordinates. Brush callbacks
+receive sanitized source-row payloads and do not expose renderer-private
+fields; true geometry-overlap brushing is outside the current map
+anti-features boundary.
 }
 \examples{
 \dontrun{

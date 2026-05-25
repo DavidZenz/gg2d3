@@ -29,9 +29,10 @@ other elements are dimmed (reduced opacity) and the hovered element can
 optionally receive a highlight stroke.
 }
 \details{
-For \code{geom_sf()} layers, hover attaches to \code{.geom-sf} polygon-family,
-point-family, and line-family marks and exposes sanitized source-row payloads
-to shared event handling.
+For ordinary \code{geom_polygon()} paths and \code{geom_sf()} polygon-family,
+point-family, line-family, \code{geom_sf_text()}, and \code{geom_sf_label()} marks,
+hover uses the existing shared event handling path and exposes sanitized
+source-row payloads without renderer-private fields.
 }
 \examples{
 \dontrun{

@@ -30,9 +30,10 @@ Enables interactive tooltips on hover for a gg2d3 widget. Tooltips display
 data values associated with each visual element (points, bars, etc.).
 }
 \details{
-For \code{geom_sf()} layers, tooltips attach to \code{.geom-sf} polygon-family,
-point-family, and line-family marks. Tooltip data uses sanitized source-row
-payloads with renderer-only fields removed.
+For ordinary \code{geom_polygon()} paths and \code{geom_sf()} polygon-family,
+point-family, line-family, \code{geom_sf_text()}, and \code{geom_sf_label()} marks,
+tooltips reuse the existing callback path. Tooltip data uses sanitized
+source-row payloads and does not expose renderer-private fields.
 }
 \examples{
 \dontrun{

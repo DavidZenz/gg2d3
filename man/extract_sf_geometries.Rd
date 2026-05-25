@@ -19,8 +19,9 @@ and serializes each geometry as a GeoJSON geometry string via
 \code{geojsonsf::sfc_geojson()} (per D-10).
 }
 \details{
-gg2d3's public \code{geom_sf()} renderer accepts polygon, point, and line
-geometry families. Missing CRS emits
+gg2d3's public sf renderer accepts polygon, point, and line geometry
+families for \code{geom_sf()} and projected-anchor annotation support for
+\code{geom_sf_text()} and \code{geom_sf_label()}. Missing CRS emits
 "geom_sf layer has missing CRS; coordinates will be serialized as-is".
 Unsupported, empty, invalid, or missing geometries emit
 "geom_sf layer skipped \%d unsupported, empty, invalid, or missing geometries"

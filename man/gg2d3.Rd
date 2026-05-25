@@ -16,11 +16,19 @@ gg2d3(x, width = NULL, height = NULL, elementId = NULL)
 \item{elementId}{Optional htmlwidgets element id.}
 }
 \description{
-gg2d3 supports \code{geom_sf()} polygon-family (\code{POLYGON}, \code{MULTIPOLYGON}),
-point-family (\code{POINT}, \code{MULTIPOINT}), and line-family (\code{LINESTRING},
-\code{MULTILINESTRING}) layers. The map anti-features are explicit: no tile
-basemaps, slippy map controls, JavaScript-side CRS reprojection, true
-geometry-overlap brushing, or large-map performance guarantees.
-Optional browser validation for sf behavior is R/testthat/chromote based and
-may skip cleanly when optional local tooling is unavailable.
+gg2d3 supports ordinary \code{geom_polygon()} as grouped closed SVG paths,
+\code{geom_rect()} and \code{geom_tile()} edge behavior for the shipped Cartesian
+scale and panel-clipping contract, and \code{geom_sf()} polygon-family
+(\code{POLYGON}, \code{MULTIPOLYGON}), point-family (\code{POINT}, \code{MULTIPOINT}), and
+line-family (\code{LINESTRING}, \code{MULTILINESTRING}) layers. \code{geom_sf_text()} and
+\code{geom_sf_label()} render labels at projected anchors aligned with the
+existing sf panel projection.
+}
+\details{
+Detailed caveats for polygon topology, rect/tile transformed-scale behavior,
+sf annotation placement, ggrepel-style collision avoidance, path-following
+text, and map anti-features are tracked in
+\code{vignettes/d3-drawing-diagnostics.md}. Optional browser validation for sf
+behavior is R/testthat/chromote based and may skip cleanly when optional
+local tooling is unavailable.
 }
