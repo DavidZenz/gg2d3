@@ -66,7 +66,7 @@ completed: 2026-05-25
 2. **Task 2: Run and record representative source validation commands** - `73dcd48` (docs)
 3. **Task 3: Record optional browser smoke semantics and next-milestone candidates** - `92a2524` (docs)
 
-**Plan metadata:** pending final metadata commit.
+**Plan metadata:** recorded in the final docs metadata commit.
 
 ## Files Created/Modified
 
