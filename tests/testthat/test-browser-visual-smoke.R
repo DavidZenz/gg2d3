@@ -125,6 +125,149 @@ library(ggplot2)
   )
 }
 
+.browser_visual_sf_skip_rows <- function(ids, deps) {
+  lapply(ids, function(id) {
+    list(
+      id = id,
+      category = if (grepl("^sf-annotations", id)) "sf-annotations" else "sf",
+      status = "skipped",
+      html = "",
+      screenshot = "",
+      dom_summary = "",
+      browser_log = "",
+      skip_reason = deps$message,
+      error = NULL
+    )
+  })
+}
+
+.browser_visual_sf_matrix <- function() {
+  sf_ids <- c(
+    "sf-polygon-point-line",
+    "sf-facet-wrap",
+    "sf-annotations-text-label",
+    "sf-annotations-skipped-row"
+  )
+  deps <- browser_visual_optional_dependencies(require_sf = TRUE, require_geojsonsf = TRUE)
+  if (!isTRUE(deps$available)) {
+    return(list(fixtures = list(), skipped = .browser_visual_sf_skip_rows(sf_ids, deps)))
+  }
+
+  square <- function(xmin = 0, ymin = 0, xmax = 1, ymax = 1) {
+    matrix(
+      c(xmin, ymin, xmax, ymin, xmax, ymax, xmin, ymax, xmin, ymin),
+      ncol = 2,
+      byrow = TRUE
+    )
+  }
+
+  polygon_sf <- sf::st_sf(
+    kind = "polygon",
+    geometry = sf::st_sfc(sf::st_polygon(list(square())), crs = 4326)
+  )
+  point_sf <- sf::st_sf(
+    kind = "point",
+    geometry = sf::st_sfc(sf::st_point(c(2, 2)), crs = 4326)
+  )
+  line_sf <- sf::st_sf(
+    kind = "line",
+    geometry = sf::st_sfc(sf::st_linestring(matrix(c(3, 0, 4, 1, 5, 0), ncol = 2, byrow = TRUE)), crs = 4326)
+  )
+
+  facet_point <- sf::st_sf(
+    facet = factor("A", levels = c("A", "B", "C")),
+    geometry = sf::st_sfc(sf::st_point(c(0, 0)), crs = 4326)
+  )
+  facet_line <- sf::st_sf(
+    facet = factor("B", levels = c("A", "B", "C")),
+    geometry = sf::st_sfc(sf::st_linestring(matrix(c(1, 0, 2, 1), ncol = 2, byrow = TRUE)), crs = 4326)
+  )
+
+  annotation_text <- sf::st_sf(
+    label = "text",
+    geometry = sf::st_sfc(sf::st_point(c(0, 0)), crs = 4326)
+  )
+  annotation_label <- sf::st_sf(
+    label = "label",
+    geometry = sf::st_sfc(sf::st_linestring(matrix(c(1, 0, 2, 1, 3, 0), ncol = 2, byrow = TRUE)), crs = 4326)
+  )
+  skipped_annotation <- sf::st_sf(
+    label = c("ok", "skip"),
+    # GEOMETRYCOLLECTION is intentionally unsupported and should produce a skipped-row warning.
+    geometry = sf::st_sfc(
+      sf::st_point(c(0, 0)),
+      sf::st_geometrycollection(list(sf::st_point(c(10, 10)))),
+      crs = 4326
+    )
+  )
+
+  skipped_widget <- testthat::expect_warning(
+    gg2d3(
+      ggplot(skipped_annotation, aes(label = label)) +
+        geom_sf_text()
+    ),
+    regexp = "skipped"
+  )
+
+  list(
+    fixtures = list(
+      list(
+        id = "sf-polygon-point-line",
+        category = "sf",
+        widget = gg2d3(
+          ggplot() +
+            geom_sf(data = polygon_sf, fill = "#B3D4FC") +
+            geom_sf(data = point_sf, colour = "#D1495B") +
+            geom_sf(data = line_sf, colour = "#4062BB")
+        ),
+        expected = .browser_visual_expected(
+          ".geom-sf" = 3,
+          ".geom-sf-polygon" = 1,
+          ".geom-sf-point" = 1,
+          ".geom-sf-line" = 1
+        )
+      ),
+      list(
+        id = "sf-facet-wrap",
+        category = "sf",
+        widget = gg2d3(
+          ggplot() +
+            geom_sf(data = facet_point) +
+            geom_sf(data = facet_line) +
+            facet_wrap(~ facet, drop = FALSE)
+        ),
+        expected = .browser_visual_expected(
+          ".panel" = 3,
+          ".geom-sf" = 2
+        )
+      ),
+      list(
+        id = "sf-annotations-text-label",
+        category = "sf-annotations",
+        widget = gg2d3(
+          ggplot() +
+            geom_sf_text(data = annotation_text, aes(label = label)) +
+            geom_sf_label(data = annotation_label, aes(label = label), fill = "white")
+        ),
+        expected = .browser_visual_expected(
+          "text.geom-sf.geom-sf-text" = 1,
+          "g.geom-sf.geom-sf-label" = 1,
+          ".geom-sf" = 2
+        )
+      ),
+      list(
+        id = "sf-annotations-skipped-row",
+        category = "sf-annotations",
+        widget = skipped_widget,
+        expected = .browser_visual_expected(
+          "text.geom-sf.geom-sf-text" = 1
+        )
+      )
+    ),
+    skipped = list()
+  )
+}
+
 test_that("BVIS-01 browser visual smoke artifacts are generated for representative fixtures", {
   # Set GG2D3_BROWSER_VISUAL_SMOKE=true to generate local browser artifacts.
   skip_browser_visual_smoke()
