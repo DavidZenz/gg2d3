@@ -2,6 +2,44 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.11 — Geometry Parity
+
+**Shipped:** 2026-05-25
+**Phases:** 4 | **Plans:** 11
+
+### What Was Built
+- Ordinary `geom_polygon()` support now covers IR recognition, grouped closed-path D3 rendering, facets, styling, zoom/update behavior, sanitized interaction payloads, browser smoke coverage, and grouped/faceted crosstalk key binding.
+- Rect/tile edge behavior was classified against ggplot2 built data, with categorical tile and update-path mismatches fixed at the D3 boundary and transformed-scale expansion explicitly deferred.
+- `geom_sf_text()` and `geom_sf_label()` now extract label IR, render projected anchors in single-panel/stacked/faceted sf plots, and reuse the existing `.geom-sf` tooltip, hover, brush, handler, and crosstalk contracts.
+- README, vignettes, diagnostics docs, roxygen source, generated help, and validation evidence now describe the v1.11 geometry support contract and residual risks.
+
+### What Worked
+- Grouping ordinary polygon, rect/tile edge closure, and sf annotations into one geometry-parity milestone kept related renderer/IR/interactivity risks visible together.
+- Source-contract tests were fast and effective for renderer/update behavior that did not require live browser execution.
+- Optional browser/spatial skips were recorded as explicit validation outcomes, which kept local dependency gaps from being mistaken for missing source evidence.
+
+### What Was Inefficient
+- The final milestone close still required manual cleanup around stale state counters, roadmap collapse, and PROJECT wording after SDK helpers did their mechanical work.
+- Browser smoke remained dependent on optional local `chromote`, Chrome, and `sf` availability, so some evidence had to be recorded as explicit skips.
+- Generated documentation work surfaced dependency-version notes that were useful context but not milestone blockers.
+
+### Patterns Established
+- Geometry renderer phases should validate three surfaces together: IR extraction, D3 source/update contracts, and public interaction payload sanitization.
+- Rect/tile and other edge-behavior questions should be classified against ggplot2 built data before changing renderer behavior.
+- Documentation closure should be source-first, with generated README/help committed only after source wording and caveats are stable.
+
+### Key Lessons
+1. Public support docs need adjacent caveats, not distant limitations, when behavior is newly shipped but intentionally scoped.
+2. Optional browser/spatial dependency skips are acceptable milestone evidence when source/unit coverage passes and skip messages are explicit.
+3. Milestone archive helpers are good for moving files, but final state, roadmap, and project narrative still need a deliberate human-shaped pass.
+
+### Cost Observations
+- Model mix: not tracked.
+- Sessions: one concentrated GSD run from Phase 44 through Phase 47 completion and archive across 2026-05-24 to 2026-05-25.
+- Notable: Most rework was closeout/documentation consistency, not core renderer implementation.
+
+---
+
 ## Milestone: v1.10 — Release Hardening
 
 **Shipped:** 2026-05-23
@@ -152,6 +190,8 @@
 
 | Milestone | Phases | Plans | Key Pattern |
 |-----------|--------|-------|-------------|
+| v1.11 | 4 | 11 | Geometry parity bundle → source contracts → docs/validation handoff |
+| v1.10 | 4 | 10 | Release hardening → evidence-driven docs → archive hygiene |
 | v1.8 | 4 | 11 | Research handoff → production implementation → docs/validation hardening |
 | v1.7 | 4 | 6 | Research → prototype → design contract → implementation blueprint |
 | v1.6 | 3 | 4 | Milestone audit → gap closure phase |
@@ -162,9 +202,11 @@
 - Documentation regeneration deferred and forgotten
 - Validation metadata can become stale even when phase verification passes
 - Milestone closeout tooling can leave stale state or noisy summaries that need human review before archive commits
+- Optional browser/spatial dependencies need explicit skip semantics to avoid ambiguity in milestone evidence
 
 ### What to Watch
 
 - As geom count grows (25+), INTERACTIVE_SELECTORS maintenance becomes a scaling concern — consider auto-registration pattern
 - Spatial support should not expand into GIS-engine behavior without explicit product intent and validation budget
 - Browser-side sf behavior would benefit from an automated DOM smoke layer before adding more geometry types
+- Generated documentation changes should be paired with stale-claim scans before milestone close
