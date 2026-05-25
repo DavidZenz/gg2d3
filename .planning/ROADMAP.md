@@ -49,7 +49,12 @@
   2. The visual smoke set covers Cartesian geoms, facets, interactivity-facing marks, sf marks, ordinary polygons, and sf annotations.
   3. Browser visual validation skips with explicit messages when Chrome, chromote, sf, geojsonsf, or equivalent optional dependencies are unavailable.
   4. Failure artifacts give maintainers enough local evidence to inspect what rendered without committing generated outputs.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 48-01-PLAN.md — Shared browser visual smoke helper and artifact/report contract.
+- [ ] 48-02-PLAN.md — Opt-in visual smoke fixture matrix and runner.
+- [ ] 48-03-PLAN.md — Maintainer diagnostics documentation and final source hygiene checks.
 
 ### Phase 49: IR Helper Boundary Hardening
 **Goal**: Maintainers can change selected high-risk `as_d3_ir()` responsibilities through focused helpers without representative IR drift.
