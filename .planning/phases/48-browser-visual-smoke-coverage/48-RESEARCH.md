@@ -327,17 +327,17 @@ NOT_CRAN=true GG2D3_BROWSER_VISUAL_SMOKE=true Rscript --vanilla -e 'pkgload::loa
 |---|-------|---------|---------------|
 | A1 | A missing `sf` package could block non-sf output if dependency checks are global. | Common Pitfalls | Planner may over-split dependency groups, but the split still improves skip reporting. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Where should the explicit maintainer command be documented?**
+1. **RESOLVED: Document the explicit maintainer command in maintainer-facing diagnostics.**
    - What we know: Phase 48 requires an explicit command, and existing project docs include vignettes/diagnostics and planning validation artifacts. [VERIFIED: .planning/phases/48-browser-visual-smoke-coverage/48-CONTEXT.md; vignettes/d3-drawing-diagnostics.md]
-   - What's unclear: Whether to add user-facing package docs or keep it in maintainer diagnostics only. [VERIFIED: .planning/phases/48-browser-visual-smoke-coverage/48-CONTEXT.md]
-   - Recommendation: Put the command in `vignettes/d3-drawing-diagnostics.md` or a maintainer-facing diagnostics doc, not README marketing copy. [ASSUMED]
+   - Decision: Put the command in `vignettes/d3-drawing-diagnostics.md` in a maintainer-facing browser visual smoke artifacts section, not README marketing copy. [RESOLVED by 48-03-PLAN.md]
+   - Plan coverage: Plan 03 Task 1 updates `vignettes/d3-drawing-diagnostics.md` with the quick skip-friendly command, full artifact command, artifact directory, generated filenames, coverage matrix, and skip semantics.
 
-2. **Should successful fixture artifacts include browser logs even when empty?**
+2. **RESOLVED: Write browser-log JSON for every fixture row, including successful rows.**
    - What we know: Phase 48 requires screenshots, HTML, logs, and report; existing log helpers write logs mainly on failure. [VERIFIED: .planning/phases/48-browser-visual-smoke-coverage/48-CONTEXT.md; tests/testthat/helper-browser-sf.R]
-   - What's unclear: Whether empty success logs should be written as files or only represented in `index.json`. [ASSUMED]
-   - Recommendation: Write `*-browser-log.json` for every row for report consistency. [ASSUMED]
+   - Decision: Write `*-browser-log.json` for every executable row and include skipped-row status in `index.json` / `index.html` for report consistency. [RESOLVED by 48-01-PLAN.md and 48-02-PLAN.md]
+   - Plan coverage: Plan 01 Task 2 defines `write_browser_visual_artifacts()` to write browser-log JSON alongside HTML, PNG screenshot, and DOM summary JSON; Plan 02 records skipped sf rows with explicit `skip_reason` values.
 
 ## Environment Availability
 
@@ -446,4 +446,3 @@ NOT_CRAN=true GG2D3_BROWSER_VISUAL_SMOKE=true Rscript --vanilla -e 'pkgload::loa
 
 **Research date:** 2026-05-25
 **Valid until:** 2026-06-24 for local code patterns; recheck package versions and browser availability before implementation.
-
