@@ -91,10 +91,11 @@ Plans:
   1. README, vignettes, diagnostics docs, roxygen source, and generated help describe the v1.11 polygon, rect/tile, and sf annotation contract.
   2. Validation notes link representative tests or browser smoke coverage for ordinary polygons, rect/tile edge behavior, and sf annotations.
   3. Deferred/future geometry items remain explicit and scoped rather than implied as shipped support.
-**Plans**: 2 plans
+**Plans**: 3 plans
 Plans:
-- [ ] 47-01-PLAN.md — Sweep source and generated documentation for v1.11 geometry parity language.
-- [ ] 47-02-PLAN.md — Record validation evidence, residual risks, and next-milestone candidates.
+- [ ] 47-01-PLAN.md — Update public source docs and diagnostics caveats for v1.11 geometry parity language.
+- [ ] 47-02-PLAN.md — Update roxygen source docs and regenerate README/help artifacts.
+- [ ] 47-03-PLAN.md — Record validation evidence, residual risks, and next-milestone candidates.
 
 ## Progress
 
@@ -106,7 +107,7 @@ Phases execute in numeric order: 44 → 45 → 46 → 47
 | 44. Ordinary geom_polygon Support | POLY-01, POLY-02, POLY-03 | 3/3 | Complete | 2026-05-24 |
 | 45. Rect And Tile Edge Closure | RECT-01, RECT-02 | 2/2 | Complete | 2026-05-24 |
 | 46. sf Text And Label Annotations | SFANN-01, SFANN-02, SFANN-03 | 3/3 | Complete | 2026-05-25 |
-| 47. Geometry Parity Docs And Validation | DOCVAL-01 | 0/2 | Not started | — |
+| 47. Geometry Parity Docs And Validation | DOCVAL-01 | 0/3 | Not started | — |
 
 ## Archived Milestones
 
