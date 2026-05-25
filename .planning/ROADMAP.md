@@ -95,7 +95,7 @@ Plans:
 Plans:
 - [x] 47-01-PLAN.md — Update public source docs and diagnostics caveats for v1.11 geometry parity language.
 - [ ] 47-02-PLAN.md — Update roxygen source docs and regenerate README/help artifacts.
-- [ ] 47-03-PLAN.md — Record validation evidence, residual risks, and next-milestone candidates.
+- [x] 47-03-PLAN.md — Record validation evidence, residual risks, and next-milestone candidates.
 
 ## Progress
 
@@ -107,7 +107,7 @@ Phases execute in numeric order: 44 → 45 → 46 → 47
 | 44. Ordinary geom_polygon Support | POLY-01, POLY-02, POLY-03 | 3/3 | Complete | 2026-05-24 |
 | 45. Rect And Tile Edge Closure | RECT-01, RECT-02 | 2/2 | Complete | 2026-05-24 |
 | 46. sf Text And Label Annotations | SFANN-01, SFANN-02, SFANN-03 | 3/3 | Complete | 2026-05-25 |
-| 47. Geometry Parity Docs And Validation | DOCVAL-01 | 1/3 | In progress | — |
+| 47. Geometry Parity Docs And Validation | DOCVAL-01 | 2/3 | In progress | — |
 
 ## Archived Milestones
 
