@@ -65,7 +65,7 @@ This phase does not add new renderer behavior. New geometry features, new intera
 - `R/gg2d3.R` — Main roxygen help source for `gg2d3()`.
 - `R/d3_tooltip.R`, `R/d3_brush.R`, `R/d3_handlers.R`, `R/d3_hover.R`, `R/d3_crosstalk.R` — Roxygen sources for interactivity contracts that mention geometry target support.
 - `R/sf_utils.R` — Roxygen source for sf geometry extraction helpers.
-- `man/gg2d3.Rd`, `man/d3_tooltip.Rd`, `man/d3_brush.Rd`, `man/d3_handlers.Rd`, `man/d3_hover.Rd`, `man/d3_crosstalk.Rd`, `man/extract_sf_geometries.Rd` — Generated help surfaces to verify after roxygen regeneration.
+- `man/gg2d3.Rd`, `man/d3_tooltip.Rd`, `man/d3_brush.Rd`, `man/d3_handlers.Rd`, `man/d3_hover.Rd`, `man/d3_crosstalk_internal.Rd`, `man/extract_sf_geometries.Rd` — Generated help surfaces to verify after roxygen regeneration.
 
 ### Representative Validation Evidence
 - `tests/testthat/test-polygon-ir.R` — Ordinary polygon IR extraction, row order, panels, and aesthetics.
