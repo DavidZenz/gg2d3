@@ -54,6 +54,34 @@ Optional browser validation is R/testthat/chromote based and may skip cleanly;
 when available, it covers sf family interactivity, stacked overlays, faceted and
 empty panels, skipped rows, and zoom suppression.
 
+## Browser visual smoke artifacts
+
+Maintainers can generate local browser-rendered visual smoke artifacts with the
+opt-in test runner. The skip-friendly command is:
+
+```bash
+Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-browser-visual-smoke.R")'
+```
+
+The full artifact command is:
+
+```bash
+NOT_CRAN=true GG2D3_BROWSER_VISUAL_SMOKE=true Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-browser-visual-smoke.R")'
+```
+
+Generated files live under `test_output/browser-visual-smoke/`, which is ignored
+by git and excluded from package builds. The report files are `index.html` and
+`index.json`; each executable fixture can also produce `<fixture>.html`,
+`<fixture>.png`, `<fixture>-dom-summary.json`, and
+`<fixture>-browser-log.json`.
+
+Coverage includes Cartesian geoms, facets, interactivity-facing marks, ordinary
+`geom_polygon()`, sf geometry marks, and `geom_sf_text()` /
+`geom_sf_label()` annotations. The run may skip explicitly when
+`GG2D3_BROWSER_VISUAL_SMOKE` is not true, when Chrome/Chromium or chromote
+launch is unavailable, or for sf-dependent rows when `sf` or `geojsonsf` is
+unavailable.
+
 Map anti-features are explicit: no tile basemaps, no slippy map controls, no
 JavaScript-side CRS reprojection, no true geometry-overlap brushing, no
 `GEOMETRYCOLLECTION` expansion, and no large-map performance guarantees.
