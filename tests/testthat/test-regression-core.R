@@ -100,6 +100,32 @@ test_that("HARD-03 regression matrix covers sf families", {
   expect_true(all(c("line", "point", "polygon") %in% mixed_ir$layers[[1]]$sf_diagnostics$accepted_geometry_families))
 })
 
+test_that("SFANN-01 regression matrix covers sf text and label annotation IR", {
+  skip_if_not_installed("sf")
+  skip_if_not_installed("geojsonsf")
+
+  polygon_sf <- sf::st_sf(
+    label = "A",
+    geometry = sf::st_sfc(sf::st_polygon(list(regression_square_ring())), crs = 4326)
+  )
+
+  ir <- expect_regression_ir_ok(
+    ggplot2::ggplot(polygon_sf) +
+      ggplot2::geom_sf_text(ggplot2::aes(label = label)) +
+      ggplot2::geom_sf_label(ggplot2::aes(label = label), fill = "white")
+  )
+  layer_geoms <- vapply(ir$layers, `[[`, character(1), "geom")
+  annotation_layers <- ir$layers[layer_geoms %in% c("sf_text", "sf_label")]
+
+  expect_true("sf_text" %in% layer_geoms)
+  expect_true("sf_label" %in% layer_geoms)
+  expect_true(all(vapply(
+    annotation_layers,
+    function(layer) length(layer$data) == length(layer$geometries),
+    logical(1)
+  )))
+})
+
 test_that("HARD-03 regression matrix covers facets legends dates and coord_flip", {
   facet_ir <- expect_regression_ir_ok(
     ggplot2::ggplot(mtcars, ggplot2::aes(factor(cyl), mpg)) +
