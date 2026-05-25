@@ -54,7 +54,7 @@
 Plans:
 - [x] 48-01-PLAN.md — Shared browser visual smoke helper and artifact/report contract.
 - [x] 48-02-PLAN.md — Opt-in visual smoke fixture matrix and runner.
-- [ ] 48-03-PLAN.md — Maintainer diagnostics documentation and final source hygiene checks.
+- [x] 48-03-PLAN.md — Maintainer diagnostics documentation and final source hygiene checks.
 
 ### Phase 49: IR Helper Boundary Hardening
 **Goal**: Maintainers can change selected high-risk `as_d3_ir()` responsibilities through focused helpers without representative IR drift.
@@ -96,7 +96,7 @@ Phases execute in numeric order: 48 → 49 → 50 → 51
 
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
-| 48. Browser Visual Smoke Coverage | VIS-01, VIS-02, VIS-03 | 2/3 | Executing | - |
+| 48. Browser Visual Smoke Coverage | VIS-01, VIS-02, VIS-03 | 3/3 | Executed | - |
 | 49. IR Helper Boundary Hardening | ARCH-01 | 0/TBD | Not started | - |
 | 50. Renderer Wiring And Interaction Contracts | ARCH-02, ARCH-03 | 0/TBD | Not started | - |
 | 51. Geometry Edge-Case Classification And Polish | GEOM-01, GEOM-02, GEOM-03 | 0/TBD | Not started | - |
