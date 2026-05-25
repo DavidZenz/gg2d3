@@ -1,15 +1,15 @@
 ---
 phase: 47
 slug: geometry-parity-docs-and-validation
-status: draft
+status: finalizing
 nyquist_compliant: true
 wave_0_complete: false
 created: 2026-05-25
 ---
 
-# Phase 47 - Validation Strategy
+# Phase 47 - Validation Evidence
 
-> Per-phase validation contract for feedback sampling during execution.
+> Representative evidence map for the v1.11 geometry parity documentation and validation handoff.
 
 ---
 
@@ -23,6 +23,28 @@ created: 2026-05-25
 | **Full suite command** | `rtk Rscript --vanilla -e 'devtools::test()'` |
 | **Docs generation command** | `rtk Rscript --vanilla -e 'devtools::document(); devtools::build_readme()'` |
 | **Estimated runtime** | Focused checks under a few minutes; full suite varies with optional browser/spatial skips |
+
+---
+
+## Feature-to-Evidence Matrix
+
+| Geometry area | Support contract | Source/IR/unit evidence | Optional browser smoke | Skip semantics | Residual risk |
+|---------------|------------------|-------------------------|------------------------|----------------|---------------|
+| Ordinary geom_polygon() | Ordinary `geom_polygon()` renders grouped closed SVG paths with mapped fill, stroke, alpha, linewidth, linetype, facets, zoom/update compatibility, and sanitized interaction payloads. | `tests/testthat/test-polygon-ir.R` proves IR row order, panels, and aesthetics; `tests/testthat/test-polygon-renderer.R` proves renderer registration, grouped closed paths, styling, and update plumbing; `tests/testthat/test-polygon-interactivity.R` proves tooltip, hover, brush, handler, and crosstalk selector/source-row contracts. | `tests/testthat/test-polygon-browser.R` optionally exercises live DOM paths, facets, styling, sanitized payloads, brushing, and crosstalk keys. | Optional browser smoke may explicitly skip when `chromote` or Chrome/Chromium is unavailable; source/IR/unit evidence remains the support gate. | Topology/hole repair beyond grouped closed paths remains outside Phase 47. |
+| Rect/tile edge behavior | Rect/tile behavior distinguishes ggplot2-compatible scale-limit censoring from coordinate clipping, preserves complete finite bounds where ggplot2 does, and fixes categorical tile/update-path geometry at the D3 boundary. | `tests/testthat/test-rect-tile-ir.R` proves the fixture matrix for scale limits, coordinate limits, discrete tiles, reversed scales, coord flip, and facets; `tests/testthat/test-rect-tile-renderer.R` proves rect/tile renderer and update-path contracts; `.planning/phases/45-rect-and-tile-edge-closure/45-RECT-TILE-CLASSIFICATION.md` records the classification rationale. | Not required for Phase 45 closure. | Browser smoke is not required for Phase 45 closure because the remaining questions were source-measurable at the IR/renderer/update boundary. | Transformed-scale expansion remains outside Phase 47. |
+| geom_sf_text() / geom_sf_label() | `geom_sf_text()` and `geom_sf_label()` extract accepted sf polygon, point, and line geometries into projected-anchor text/label marks with diagnostics and existing sanitized interaction contracts. | `tests/testthat/test-sf-annotations-ir.R` proves IR extraction, anchors, facets, diagnostics, and skipped rows; `tests/testthat/test-sf-annotations-renderer.R` proves renderer projection/DOM contracts; `tests/testthat/test-sf-annotations-interactivity.R` proves tooltip, hover, brush, handler, and sanitizer contracts. | `tests/testthat/test-sf-annotations-browser.R` optionally exercises live DOM text/label marks, projected anchors, facets, skipped-row behavior, and public interaction payloads. | Optional spatial/browser smoke may explicitly skip when `sf`, `geojsonsf`, `chromote`, or Chrome/Chromium is unavailable; source/IR/unit evidence remains separate from DOM smoke. | ggrepel collision avoidance, rich text, rotation parity, and path-following annotation placement remain outside Phase 47. |
+
+---
+
+## Stale Claim Guard
+
+Validation notes use an inverted, RTK-prefixed `Rscript` check so a no-match
+search exits 0 and prints offending matches before exiting 1 when stale claims
+remain:
+
+```bash
+rtk Rscript --vanilla -e 'pattern <- { prefix <- paste("rtk", "rg", "-n"); claims <- c("does not currently have a D3 renderer", "no renderer is registered", "geom_sf_text"); paste0(prefix, ".*(", paste(claims, collapse = "|"), ")") }; files <- c(".planning/phases/47-geometry-parity-docs-and-validation/47-VALIDATION.md"); hits <- suppressWarnings(system2("rg", c("-n", shQuote(pattern), files), stdout = TRUE, stderr = TRUE)); if (length(hits)) { cat(paste(hits, collapse = "\n"), "\n"); quit(status = 1) }'
+```
 
 ---
 
