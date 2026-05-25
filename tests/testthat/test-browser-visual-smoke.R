@@ -268,6 +268,14 @@ library(ggplot2)
   )
 }
 
+.browser_visual_log_slice <- function(logs, start) {
+  entries <- browser_visual_logs(logs)
+  if (length(entries) <= start) {
+    return(list())
+  }
+  entries[(start + 1L):length(entries)]
+}
+
 test_that("BVIS-01 browser visual smoke artifacts are generated for representative fixtures", {
   # Set GG2D3_BROWSER_VISUAL_SMOKE=true to generate local browser artifacts.
   skip_browser_visual_smoke()
@@ -289,7 +297,8 @@ test_that("BVIS-01 browser visual smoke artifacts are generated for representati
     logs <- browser_visual_console_collector(session)
 
     for (fixture in fixtures) {
-      fixture$logs <- logs
+      log_start <- length(browser_visual_logs(logs))
+      fixture$logs <- function() .browser_visual_log_slice(logs, log_start)
       rows <- c(rows, list(capture_browser_visual_fixture(session, fixture)))
     }
   }, width = 960, height = 720)
