@@ -35,7 +35,7 @@
 - [x] **Phase 44: Ordinary geom_polygon Support** - Users can render ordinary `geom_polygon()` layers as grouped D3 paths with representative styling, facets, and existing interactivity hooks.
 - [x] **Phase 45: Rect And Tile Edge Closure** - Maintainers have reproduced and fixed, or explicitly closed with evidence, the deferred rect/tile out-of-bounds behavior.
 - [x] **Phase 46: sf Text And Label Annotations** - Users can render `geom_sf_text()` and `geom_sf_label()` at projected anchors aligned with existing sf panel projections.
-- [ ] **Phase 47: Geometry Parity Docs And Validation** - Users and maintainers have current docs, validation coverage, and support-contract notes for v1.11 geometry parity.
+- [x] **Phase 47: Geometry Parity Docs And Validation** - Users and maintainers have current docs, validation coverage, and support-contract notes for v1.11 geometry parity.
 
 ## Phase Details
 
@@ -94,7 +94,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 47-01-PLAN.md — Update public source docs and diagnostics caveats for v1.11 geometry parity language.
-- [ ] 47-02-PLAN.md — Update roxygen source docs and regenerate README/help artifacts.
+- [x] 47-02-PLAN.md — Update roxygen source docs and regenerate README/help artifacts.
 - [x] 47-03-PLAN.md — Record validation evidence, residual risks, and next-milestone candidates.
 
 ## Progress
@@ -107,7 +107,7 @@ Phases execute in numeric order: 44 → 45 → 46 → 47
 | 44. Ordinary geom_polygon Support | POLY-01, POLY-02, POLY-03 | 3/3 | Complete | 2026-05-24 |
 | 45. Rect And Tile Edge Closure | RECT-01, RECT-02 | 2/2 | Complete | 2026-05-24 |
 | 46. sf Text And Label Annotations | SFANN-01, SFANN-02, SFANN-03 | 3/3 | Complete | 2026-05-25 |
-| 47. Geometry Parity Docs And Validation | DOCVAL-01 | 2/3 | In progress | — |
+| 47. Geometry Parity Docs And Validation | DOCVAL-01 | 3/3 | Complete | 2026-05-25 |
 
 ## Archived Milestones
 
