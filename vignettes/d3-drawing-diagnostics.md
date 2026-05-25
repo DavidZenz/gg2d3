@@ -7,11 +7,25 @@ from what ggplot2 produces.
 ## Geom coverage
 
 gg2d3 supports core Cartesian geoms (point, line, path, bar, col, rect, tile,
-text, area, ribbon, segment, hline/vline/abline, boxplot, violin, density,
-smooth) plus polygon-family, point-family, and line-family `geom_sf`.
+text, polygon, area, ribbon, segment, hline/vline/abline, boxplot, violin,
+density, smooth) plus polygon-family, point-family, and line-family `geom_sf`
+and projected-anchor `geom_sf_text()` / `geom_sf_label()` annotations.
 
 Geoms outside this set (for example `geom_contour`) log a warning and do not
 render.
+
+## Ordinary `geom_polygon()` support
+
+Ordinary `geom_polygon()` renders grouped closed SVG paths from ggplot2 built
+data. Row order is preserved inside each group, core fill/stroke/alpha/
+linewidth/linetype styling is carried through, and facets plus existing
+tooltip, hover, brush, handler, and linked-view hooks are supported at the path
+mark level.
+
+Residual risks remain explicit: topology/hole repair beyond clean grouped
+closed paths is not shipped by Phase 47. The renderer does not infer GIS
+topology, ring containment, or hole winding for arbitrary polygon input; users
+should provide groups that ggplot2 already builds into the intended path order.
 
 ## `geom_sf` support
 
@@ -23,8 +37,14 @@ R before serialization. If a layer has no CRS, gg2d3 warns that coordinates
 will be serialized as-is.
 
 Unsupported, empty, invalid, or missing sf geometries are skipped with a
-warning while accepted rows remain renderable. `GEOMETRYCOLLECTION`,
-`geom_sf_text()`, and `geom_sf_label()` are not supported.
+warning while accepted rows remain renderable. `GEOMETRYCOLLECTION` expansion is
+not supported.
+
+`geom_sf_text()` and `geom_sf_label()` are supported for the accepted sf
+families above. They render text and label groups at projected anchors aligned
+with the same panel projection used by polygon, point, and line sf marks.
+Tooltip, hover, handler, and brush behavior reuse the existing `.geom-sf`
+interaction path with sanitized public payloads.
 
 Interactivity targets `.geom-sf` polygon, point, and line marks. Tooltip,
 hover, custom handler, and Shiny-style callback payloads are sanitized
@@ -37,6 +57,10 @@ empty panels, skipped rows, and zoom suppression.
 Map anti-features are explicit: no tile basemaps, no slippy map controls, no
 JavaScript-side CRS reprojection, no true geometry-overlap brushing, no
 `GEOMETRYCOLLECTION` expansion, and no large-map performance guarantees.
+
+Annotation anti-features are also explicit: ggrepel collision avoidance, rich
+text, rotation parity, and path-following annotation placement are not shipped
+by Phase 47.
 
 ## Text options
 
@@ -69,9 +93,23 @@ tile positioning now uses band-scale center values with `bandwidth()` dimensions
 rect borders use the registry stroke/linewidth accessors, and the
 `rect.geom-rect` update path mirrors band-scale and `coord_flip()` geometry.
 The remaining scale-limit, reversed-scale, coordinate-limit, and facet cases are
-closed as tested non-issues in the Phase 45 classification notes. Transformed
-scale expansion remains out of scope for this closure and broader public support
-contract wording is left to Phase 47.
+closed as tested non-issues in the Phase 45 classification notes. Full
+rect/tile transformed-scale edge parity remains out of scope for this closure
+and is not shipped by Phase 47.
+
+## Phase 47 residual-risk list
+
+The v1.11 geometry parity contract is deliberately bounded. The following items
+are deferred and not shipped by Phase 47:
+
+- Polygon topology/hole repair beyond grouped closed paths.
+- Full rect/tile transformed-scale edge parity.
+- Tile basemaps and slippy map controls.
+- JavaScript-side CRS reprojection.
+- ggrepel collision avoidance.
+- Rich text for text and label annotations.
+- Rotation parity for text and label annotations.
+- Path-following annotation placement.
 
 ## Private API dependency
 
