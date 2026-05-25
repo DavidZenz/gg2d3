@@ -10,7 +10,16 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.11 Geometry Parity is shipped and archived. gg2d3 now supports ordinary `geom_polygon()` as grouped closed D3 paths, closes the documented rect/tile edge-behavior gap with classification evidence and D3-boundary fixes, and supports `geom_sf_text()` / `geom_sf_label()` at projected anchors with existing sanitized interaction contracts. Public docs, roxygen/generated help, diagnostics, and validation evidence now describe that v1.11 geometry support contract. The next focus is selecting and planning the next milestone.
+v1.11 Geometry Parity is shipped and archived. gg2d3 now supports ordinary `geom_polygon()` as grouped closed D3 paths, closes the documented rect/tile edge-behavior gap with classification evidence and D3-boundary fixes, and supports `geom_sf_text()` / `geom_sf_label()` at projected anchors with existing sanitized interaction contracts. Public docs, roxygen/generated help, diagnostics, and validation evidence now describe that v1.11 geometry support contract. The next focus is v1.12 quality and architecture hardening: visual/browser regression confidence, renderer maintainability, and selected geometry polish.
+
+## Current Milestone: v1.12 Quality & Architecture Hardening
+
+**Goal:** Make gg2d3 easier to trust and extend by adding visual/browser regression coverage, reducing renderer/IR maintenance burden, and closing high-value geometry polish gaps.
+
+**Target features:**
+- Screenshot or perceptual regression coverage for representative browser-rendered plots, with explicit skip semantics for optional local browser dependencies.
+- Renderer and IR architecture cleanup that reduces maintenance risk around the monolithic `as_d3_ir()` path, geom registration, update handlers, and interactivity selectors.
+- Selected geometry polish for known deferred gaps such as transformed-scale rect/tile behavior, polygon topology/hole behavior, label collision avoidance, or path-following annotations.
 
 ## Last Shipped Milestone: v1.11 Geometry Parity
 
@@ -21,10 +30,6 @@ v1.11 Geometry Parity is shipped and archived. gg2d3 now supports ordinary `geom
 - A focused rect/tile out-of-bounds reproduction that either fixes the renderer mismatch or documents a verified non-issue.
 - `geom_sf_text()` and `geom_sf_label()` support, scoped to useful centroid/anchor behavior and the existing polygon/point/line sf contract.
 - Source-first public documentation, generated help, diagnostics, and validation evidence for the shipped geometry-parity contract.
-
-## Next Milestone Goals
-
-To be defined with `$gsd-new-milestone`.
 
 ## Completed Milestone: v1.10 Release Hardening
 
@@ -115,7 +120,7 @@ To be defined with `$gsd-new-milestone`.
 
 ### Active
 
-- Next milestone requirements to be defined.
+- v1.12 requirements for visual/browser regression confidence, renderer/IR maintainability, and selected geometry polish.
 
 ### Out of Scope
 
@@ -203,4 +208,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-25 after archiving v1.11 Geometry Parity milestone*
+*Last updated: 2026-05-25 after starting v1.12 Quality & Architecture Hardening*
