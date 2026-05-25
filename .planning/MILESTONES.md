@@ -1,5 +1,35 @@
 # Milestones
 
+## v1.11 Geometry Parity (Shipped: 2026-05-25)
+
+**Phases completed:** 4 phases, 11 plans, 29 tasks
+
+**Delivered:** Geometry parity closure for ordinary polygons, rect/tile edge behavior, and sf text/label annotations, with source-first documentation and validation evidence.
+
+**Key accomplishments:**
+
+- Ordinary `geom_polygon()` IR characterization coverage for row-order-preserving grouped polygons with facets and core style aesthetics
+- D3 grouped `geom_polygon()` rendering with closed SVG paths, style handling, yaml loading, and zoom update support
+- Ordinary `geom_polygon()` marks now participate in existing selector-driven interactivity with sanitized representative payload coverage
+- Rect/tile edge behavior classified with ggplot2-built-data fixtures and renderer/update source contracts for Plan 45-02.
+- Rect/tile renderer mismatches fixed at the D3 boundary with diagnostics and verification notes closing the deferred v1.10 item.
+- R-side sf annotation extraction now produces validated `sf_text` and `sf_label` IR with geometry diagnostics and panel metadata.
+- D3 rendering now places `sf_text` and `sf_label` marks from projected sf anchors using panel-local bbox metadata.
+- sf annotation marks now reuse existing `.geom-sf` tooltip, hover, brush, handler, and crosstalk plumbing with sanitized public payloads.
+- Source documentation now describes shipped ordinary polygon, rect/tile edge, and sf annotation support with adjacent v1.11 caveats and diagnostics links.
+- Roxygen and generated help now describe v1.11 ordinary polygon, rect/tile, and sf annotation support from source-first documentation.
+- Representative geometry parity evidence matrix with source-command outcomes, optional browser skip semantics, and future-risk handoff for v1.11
+
+**Stats:**
+- 95 files changed across code, tests, docs, and planning artifacts
+- 12,358 insertions / 334 deletions in the milestone diff
+- 4 phases, 11 plans, 29 tasks
+- 2 days from first v1.11 phase context to archive
+
+**Known deferred items at close:** 0 open GSD artifacts. No formal `v1.11-MILESTONE-AUDIT.md` was present; closeout relied on the clear open-artifact audit plus phase verification and code review artifacts.
+
+---
+
 ## v1.10 Release Hardening (Shipped: 2026-05-23)
 
 **Phases completed:** 4 phases, 10 plans, 28 tasks

@@ -10,9 +10,9 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.11 Geometry Parity is complete. Phase 44 shipped ordinary `geom_polygon()` support as grouped closed D3 paths with representative styling, facets, zoom/update compatibility, sanitized interaction payloads, and grouped/faceted crosstalk key coverage. Phase 45 closed the deferred rect/tile edge behavior with a focused fixture matrix, D3-boundary fixes for categorical tile and update-path geometry, and diagnostics evidence. Phase 46 shipped `geom_sf_text()` and `geom_sf_label()` IR extraction, D3 projected-anchor rendering, and existing interactivity contracts with sanitized public payloads. Phase 47 completed the public documentation, roxygen/generated help, diagnostics, validation evidence, and support-contract handoff for v1.11 geometry parity. The next focus is milestone archival and next-milestone selection.
+v1.11 Geometry Parity is shipped and archived. gg2d3 now supports ordinary `geom_polygon()` as grouped closed D3 paths, closes the documented rect/tile edge-behavior gap with classification evidence and D3-boundary fixes, and supports `geom_sf_text()` / `geom_sf_label()` at projected anchors with existing sanitized interaction contracts. Public docs, roxygen/generated help, diagnostics, and validation evidence now describe that v1.11 geometry support contract. The next focus is selecting and planning the next milestone.
 
-## Current Milestone: v1.11 Geometry Parity (complete)
+## Last Shipped Milestone: v1.11 Geometry Parity
 
 **Goal:** Close the remaining geometry-parity gaps around ordinary polygons, rect/tile edge behavior, and sf annotations.
 
@@ -20,6 +20,11 @@ v1.11 Geometry Parity is complete. Phase 44 shipped ordinary `geom_polygon()` su
 - Ordinary `geom_polygon()` rendering with grouped paths, fill/stroke aesthetics, facets, and existing interactivity hooks where applicable.
 - A focused rect/tile out-of-bounds reproduction that either fixes the renderer mismatch or documents a verified non-issue.
 - `geom_sf_text()` and `geom_sf_label()` support, scoped to useful centroid/anchor behavior and the existing polygon/point/line sf contract.
+- Source-first public documentation, generated help, diagnostics, and validation evidence for the shipped geometry-parity contract.
+
+## Next Milestone Goals
+
+To be defined with `$gsd-new-milestone`.
 
 ## Completed Milestone: v1.10 Release Hardening
 
@@ -105,10 +110,12 @@ v1.11 Geometry Parity is complete. Phase 44 shipped ordinary `geom_polygon()` su
 - ✓ Documentation and release-note polish describing the shipped polygon/point/line `geom_sf()` contract, optional browser validation, residual risks, deferred non-blockers, and next-milestone candidates — v1.10 Phase 43
 - ✓ Ordinary `geom_polygon()` IR recognition, grouped closed-path D3 rendering, facets, styling, zoom/update behavior, sanitized interactivity payloads, and grouped/faceted crosstalk key binding — v1.11 Phase 44
 - ✓ Rect/tile edge behavior fixture matrix, ggplot2-compatible non-issue classification, categorical tile renderer fixes, update-path parity fixes, and diagnostics closure — v1.11 Phase 45
+- ✓ `geom_sf_text()` and `geom_sf_label()` IR extraction, projected-anchor D3 rendering, facets/skipped-row coverage, and sanitized interaction contracts — v1.11 Phase 46
+- ✓ Geometry parity documentation and validation handoff across README, vignettes, diagnostics, roxygen/generated help, and validation evidence — v1.11 Phase 47
 
 ### Active
 
-- v1.11 Geometry Parity requirements for sf text/label annotations.
+- Next milestone requirements to be defined.
 
 ### Out of Scope
 
@@ -127,7 +134,7 @@ gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus pro
 **Known tech debt:**
 - Monolithic `as_d3_ir()` function (~1000 lines) still needs broader modularization beyond the extracted sf helper boundaries
 - Private ggplot2 theme access remains necessary but is quarantined in `R/ggplot2_compat.R` behind compatibility helpers
-- sf text/label annotations are active v1.11 work
+- Transform-scale rect/tile edge parity, polygon topology/hole repair beyond grouped closed paths, ggrepel-style collision avoidance, and path-following text remain future geometry candidates.
 - Browser-side sf behavior now has DOM-level smoke harness coverage; live Chrome execution still depends on optional local browser dependencies
 
 ## Constraints
@@ -171,10 +178,12 @@ gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus pro
 | two-tier local release validation gate | Maintainers need quick day-to-day validation plus full release evidence without weakening optional browser/spatial skips | ✓ Good — implemented and verified in Phase 42 |
 | gate-run-derived release handoff | Release notes should reuse summarized gate evidence and artifact paths rather than publish local logs or reinterpret raw command output | ✓ Good — implemented and verified in Phase 42 |
 | source-first release documentation polish | README, vignettes, roxygen source, generated help, and release notes should describe the shipped polygon/point/line `geom_sf()` contract without stale milestone language | ✓ Good — implemented and verified in Phase 43 |
-| combined geometry-parity milestone | Ordinary polygon, rect/tile edge behavior, and sf annotations share renderer/IR/interactivity risk and should be planned together after v1.10 hardening | Pending — v1.11 scope |
+| combined geometry-parity milestone | Ordinary polygon, rect/tile edge behavior, and sf annotations share renderer/IR/interactivity risk and should be planned together after v1.10 hardening | ✓ Good — shipped as v1.11 |
 | ordinary polygon grouped path renderer | Ordinary `geom_polygon()` should render through a dedicated grouped closed-path module, not by branching line/path renderers that sort or assume open paths | ✓ Good — implemented and verified in Phase 44 |
 | representative polygon crosstalk keys | Grouped/faceted ordinary polygon paths should carry private source-row indices for crosstalk while public callbacks keep underscore-prefixed renderer fields sanitized | ✓ Good — implemented and verified in Phase 44 |
 | rect/tile edge closure boundary | Rect/tile out-of-bounds behavior should be classified against ggplot2 built data first, fixed only at the implicated D3 renderer/update boundary, and closed as non-issue where panel clipping or scale-limit censoring is expected | ✓ Good — implemented and verified in Phase 45 |
+| sf annotation anchor contract | `geom_sf_text()` and `geom_sf_label()` should render projected anchors aligned with existing sf panel projection metadata rather than adding ggrepel or path-following placement in the first pass | ✓ Good — implemented and verified in Phase 46 |
+| source-first geometry support documentation | README, vignettes, roxygen source, generated help, and diagnostics should describe shipped geometry parity with adjacent caveats and validation evidence | ✓ Good — implemented and verified in Phase 47 |
 
 ## Evolution
 
@@ -194,4 +203,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-24 after completing Phase 45 Rect And Tile Edge Closure*
+*Last updated: 2026-05-25 after archiving v1.11 Geometry Parity milestone*
