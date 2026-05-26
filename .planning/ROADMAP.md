@@ -97,7 +97,7 @@ Phases execute in numeric order: 48 → 49 → 50 → 51
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
 | 48. Browser Visual Smoke Coverage | VIS-01, VIS-02, VIS-03 | 3/3 | Complete | 2026-05-26 |
-| 49. IR Helper Boundary Hardening | ARCH-01 | 0/TBD | Not started | - |
+| 49. IR Helper Boundary Hardening | ARCH-01 | 0/TBD | Context ready | - |
 | 50. Renderer Wiring And Interaction Contracts | ARCH-02, ARCH-03 | 0/TBD | Not started | - |
 | 51. Geometry Edge-Case Classification And Polish | GEOM-01, GEOM-02, GEOM-03 | 0/TBD | Not started | - |
 
