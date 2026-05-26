@@ -80,7 +80,10 @@ Plans:
   2. Tests fail when a supported geom lacks expected renderer registration, update handling, or interaction selector coverage.
   3. Public tooltip, hover, brush, and handler payloads consistently omit renderer-private fields across registered geoms.
   4. Ordinary polygons and sf text/label annotations are included in the interaction sanitization coverage.
-**Plans**: TBD
+**Plans**:
+- [ ] 50-01-PLAN.md — Internal geom contract plus renderer registration and update coverage source tests.
+- [ ] 50-02-PLAN.md — Events, brush, and crosstalk selector contract coverage with explicit module-specific differences.
+- [ ] 50-03-PLAN.md — Shared public payload sanitizer, private-field contract coverage, and final validation notes.
 
 ### Phase 51: Geometry Edge-Case Classification And Polish
 **Goal**: Maintainers have verified outcomes for transformed rect/tile behavior, ordinary polygon topology, and text/label placement candidates.
@@ -103,7 +106,7 @@ Phases execute in numeric order: 48 → 49 → 50 → 51
 |-------|--------------|----------------|--------|-----------|
 | 48. Browser Visual Smoke Coverage | VIS-01, VIS-02, VIS-03 | 3/3 | Complete | 2026-05-26 |
 | 49. IR Helper Boundary Hardening | ARCH-01 | 3/3 | Complete | 2026-05-26 |
-| 50. Renderer Wiring And Interaction Contracts | ARCH-02, ARCH-03 | 0/TBD | Not started | - |
+| 50. Renderer Wiring And Interaction Contracts | ARCH-02, ARCH-03 | 0/3 | Ready to execute | - |
 | 51. Geometry Edge-Case Classification And Polish | GEOM-01, GEOM-02, GEOM-03 | 0/TBD | Not started | - |
 
 ## Archived Milestones
