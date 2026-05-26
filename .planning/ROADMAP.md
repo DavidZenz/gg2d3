@@ -35,7 +35,7 @@
 
 - [x] **Phase 48: Browser Visual Smoke Coverage** - Maintainers can generate deterministic browser-rendered visual artifacts for representative gg2d3 surfaces, with explicit optional-dependency skip behavior.
 - [x] **Phase 49: IR Helper Boundary Hardening** - Maintainers can change selected high-risk `as_d3_ir()` responsibilities through focused helpers without representative IR drift.
-- [ ] **Phase 50: Renderer Wiring And Interaction Contracts** - Supported geoms have less duplication-prone renderer/update/interactivity wiring, with tests guarding missing wiring and public payload sanitization.
+- [x] **Phase 50: Renderer Wiring And Interaction Contracts** - Supported geoms have less duplication-prone renderer/update/interactivity wiring, with tests guarding missing wiring and public payload sanitization.
 - [ ] **Phase 51: Geometry Edge-Case Classification And Polish** - Maintainers have verified outcomes for transformed rect/tile behavior, ordinary polygon topology, and text/label placement candidates.
 
 ## Phase Details
@@ -83,7 +83,7 @@ Plans:
 **Plans**:
 - [x] 50-01-PLAN.md — Internal geom contract plus renderer registration and update coverage source tests.
 - [x] 50-02-PLAN.md — Events, brush, and crosstalk selector contract coverage with explicit module-specific differences.
-- [ ] 50-03-PLAN.md — Shared public payload sanitizer, private-field contract coverage, and final validation notes.
+- [x] 50-03-PLAN.md — Shared public payload sanitizer, private-field contract coverage, and final validation notes.
 
 ### Phase 51: Geometry Edge-Case Classification And Polish
 **Goal**: Maintainers have verified outcomes for transformed rect/tile behavior, ordinary polygon topology, and text/label placement candidates.
@@ -106,7 +106,7 @@ Phases execute in numeric order: 48 → 49 → 50 → 51
 |-------|--------------|----------------|--------|-----------|
 | 48. Browser Visual Smoke Coverage | VIS-01, VIS-02, VIS-03 | 3/3 | Complete | 2026-05-26 |
 | 49. IR Helper Boundary Hardening | ARCH-01 | 3/3 | Complete | 2026-05-26 |
-| 50. Renderer Wiring And Interaction Contracts | ARCH-02, ARCH-03 | 2/3 | In Progress | - |
+| 50. Renderer Wiring And Interaction Contracts | ARCH-02, ARCH-03 | 3/3 | Complete | 2026-05-26 |
 | 51. Geometry Edge-Case Classification And Polish | GEOM-01, GEOM-02, GEOM-03 | 0/TBD | Not started | - |
 
 ## Archived Milestones
