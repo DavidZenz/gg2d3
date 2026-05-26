@@ -64,7 +64,7 @@ Plans:
   1. Selected high-risk IR responsibilities are isolated behind named internal helpers with clear inputs and outputs.
   2. Representative non-sf, sf, facet, scale, and annotation IR fixtures remain unchanged except for intentional documented differences.
   3. Failures in helper-level characterization tests identify the affected IR boundary rather than only the monolithic `as_d3_ir()` path.
-**Plans**: TBD
+**Plans**: 3 plans
 
 ### Phase 50: Renderer Wiring And Interaction Contracts
 **Goal**: Supported geoms have less duplication-prone renderer/update/interactivity wiring, with tests guarding missing wiring and public payload sanitization.
@@ -97,7 +97,7 @@ Phases execute in numeric order: 48 → 49 → 50 → 51
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
 | 48. Browser Visual Smoke Coverage | VIS-01, VIS-02, VIS-03 | 3/3 | Complete | 2026-05-26 |
-| 49. IR Helper Boundary Hardening | ARCH-01 | 0/TBD | Context ready | - |
+| 49. IR Helper Boundary Hardening | ARCH-01 | 0/3 | Ready to execute | - |
 | 50. Renderer Wiring And Interaction Contracts | ARCH-02, ARCH-03 | 0/TBD | Not started | - |
 | 51. Geometry Edge-Case Classification And Polish | GEOM-01, GEOM-02, GEOM-03 | 0/TBD | Not started | - |
 

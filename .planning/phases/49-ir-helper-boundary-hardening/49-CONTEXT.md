@@ -59,7 +59,7 @@ Out of scope: renderer wiring cleanup, interaction payload registry changes, vis
 ### R-side IR implementation
 - `R/as_d3_ir.R` — Current monolithic IR generator and primary refactor target.
 - `R/ggplot2_compat.R` — Existing compatibility wrappers around ggplot2 internals; keep private API handling quarantined here where possible.
-- `R/sf_helpers.R` — Existing sf extraction helper boundary and integration contract.
+- `R/sf_utils.R` — Existing sf extraction helper boundary and integration contract.
 - `R/validate_ir.R` — IR schema guard that should continue to pass after helper extraction.
 
 ### Representative tests
