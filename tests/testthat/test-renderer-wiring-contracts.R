@@ -180,3 +180,51 @@ test_that("crosstalk selector contract preserves intentional differences", {
   expect_match(contract_js, "crosstalk.js does not currently bind rug marks", fixed = TRUE)
   expect_match(contract_js, "crosstalk.js does not currently bind interval component marks", fixed = TRUE)
 })
+
+test_that("public data sanitizer strips underscore-prefixed fields", {
+  public_data_js <- read_module("inst/htmlwidgets/modules/public-data.js")
+  yaml <- read_module("inst/htmlwidgets/gg2d3.yaml")
+
+  expect_match(public_data_js, "window.gg2d3.publicData", fixed = TRUE)
+  expect_match(public_data_js, "sanitizeDatum", fixed = TRUE)
+  expect_match(public_data_js, "publicFieldNames", fixed = TRUE)
+  expect_true(grepl("String\\(key\\)\\.startsWith\\('_'\\)|key\\.startsWith\\('_'\\)", public_data_js))
+  expect_lt(
+    regexpr("public-data\\.js", yaml)[[1]],
+    regexpr("tooltip\\.js", yaml)[[1]]
+  )
+})
+
+test_that("tooltip events and brush delegate to public sanitizer", {
+  events_js <- read_module("inst/htmlwidgets/modules/events.js")
+  brush_js <- read_module("inst/htmlwidgets/modules/brush.js")
+  tooltip_js <- read_module("inst/htmlwidgets/modules/tooltip.js")
+
+  expect_match(events_js, "sanitizeEventDatum", fixed = TRUE)
+  expect_match(brush_js, "sanitizeSelectedDatum", fixed = TRUE)
+  expect_match(tooltip_js, "sanitizeTooltipDatum", fixed = TRUE)
+
+  for (js in list(events_js, brush_js, tooltip_js)) {
+    expect_match(js, "publicData.sanitizeDatum", fixed = TRUE)
+  }
+  expect_match(tooltip_js, "config.fields.filter(k => !String(k).startsWith('_'))", fixed = TRUE)
+})
+
+test_that("polygon and sf private fields are contract-covered", {
+  contract_js <- read_module("inst/htmlwidgets/modules/geom-contracts.js")
+  test_sources <- paste(
+    read_module("tests/testthat/test-polygon-interactivity.R"),
+    read_module("tests/testthat/test-sf-interactivity.R"),
+    read_module("tests/testthat/test-sf-annotations-interactivity.R"),
+    sep = "\n"
+  )
+  private_fields <- c(
+    "_polygonPoints", "_sourceIndex", "_geom", "_centroid",
+    "_sfFamily", "_sfAnchor", "_pointCoord", "_pointIndex"
+  )
+
+  for (field in private_fields) {
+    expect_match(contract_js, field, fixed = TRUE)
+    expect_match(test_sources, field, fixed = TRUE)
+  }
+})

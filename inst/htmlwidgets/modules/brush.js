@@ -414,7 +414,7 @@
 
     var sanitized = {};
     Object.keys(d).forEach(function(key) {
-      if (String(key).startsWith('_')) return;
+      if (key.startsWith('_')) return;
       sanitized[key] = d[key];
     });
     return sanitized;
