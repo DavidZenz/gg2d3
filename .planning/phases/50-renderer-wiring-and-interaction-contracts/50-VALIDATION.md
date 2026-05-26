@@ -1,7 +1,7 @@
 ---
 phase: 50
 slug: renderer-wiring-and-interaction-contracts
-status: draft
+status: executed
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-05-26
@@ -34,12 +34,12 @@ Phase 50 validates JavaScript renderer wiring through source-level contract test
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 50-01-01 | 01 | 1 | ARCH-02 | T-50-01 | Supported renderer names are represented in the contract. | source contract | `Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-renderer-wiring-contracts.R")'` | W0 existing test infra | pending |
-| 50-01-02 | 01 | 1 | ARCH-02 | T-50-02 | Update selectors are contract-covered or explicitly excluded. | source contract | same as above | W0 existing test infra | pending |
-| 50-02-01 | 02 | 2 | ARCH-02 | T-50-03 | Events and brush selectors are contract-covered. | source contract | same as above | W0 existing test infra | pending |
-| 50-02-02 | 02 | 2 | ARCH-02 | T-50-04 | Crosstalk selector differences are intentional and tested. | source contract | same as above | W0 existing test infra | pending |
-| 50-03-01 | 03 | 3 | ARCH-03 | T-50-05 | Public tooltip/event/brush payloads strip private fields. | source contract | same as above | W0 existing test infra | pending |
-| 50-03-02 | 03 | 3 | ARCH-03 | T-50-06 | Polygon and sf annotation private fields remain internal. | regression | full suite command above | W0 existing test infra | pending |
+| 50-01-01 | 01 | 1 | ARCH-02 | T-50-01 | Supported renderer names are represented in the contract. | source contract | `Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-renderer-wiring-contracts.R")'` | W0 existing test infra | passed |
+| 50-01-02 | 01 | 1 | ARCH-02 | T-50-02 | Update selectors are contract-covered or explicitly excluded. | source contract | same as above | W0 existing test infra | passed |
+| 50-02-01 | 02 | 2 | ARCH-02 | T-50-03 | Events and brush selectors are contract-covered. | source contract | same as above | W0 existing test infra | passed |
+| 50-02-02 | 02 | 2 | ARCH-02 | T-50-04 | Crosstalk selector differences are intentional and tested. | source contract | same as above | W0 existing test infra | passed |
+| 50-03-01 | 03 | 3 | ARCH-03 | T-50-05 | Public tooltip/event/brush payloads strip private fields. | source contract | same as above | W0 existing test infra | passed |
+| 50-03-02 | 03 | 3 | ARCH-03 | T-50-06 | Polygon and sf annotation private fields remain internal. | regression | full suite command above | W0 existing test infra | passed with optional sf skip |
 
 ## Wave 0 Requirements
 
@@ -68,6 +68,15 @@ Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/
 - Events, brush, and crosstalk selector coverage is derived from or validated against contract metadata.
 - Tooltip, event callbacks, Shiny event payloads, and brush callback payloads use a shared sanitizer or are contract-tested to omit underscore-prefixed fields.
 - Polygon and sf annotation private fields are covered by tests.
+
+## Phase 50 Execution Notes
+
+Executed: 2026-05-26T19:52:19Z
+
+- Contract suite: `Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-renderer-wiring-contracts.R")'` passed with 206 expectations, 0 failures, 0 skips.
+- Polygon/sf/source regression suite: `Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-polygon-interactivity.R"); testthat::test_file("tests/testthat/test-polygon-renderer.R"); testthat::test_file("tests/testthat/test-sf-interactivity.R"); testthat::test_file("tests/testthat/test-sf-annotations-interactivity.R"); testthat::test_file("tests/testthat/test-zoom-path-datum.R")'` passed. `test-sf-interactivity.R` skipped one optional `{sf}` check because `{sf}` cannot be loaded.
+- Regression core: `Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-regression-core.R")'` passed. Two optional `{sf}` checks skipped because `{sf}` cannot be loaded.
+- Browser visual smoke: `Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-browser-visual-smoke.R")'` skipped by policy because `GG2D3_BROWSER_VISUAL_SMOKE=true` was not set.
 
 ## Known Skip Conditions
 
