@@ -19,7 +19,7 @@
   /**
    * CSS selectors for interactive geom elements (shared with brush.js).
    */
-  const INTERACTIVE_SELECTORS = [
+  const FALLBACK_INTERACTIVE_SELECTORS = [
     'circle.geom-point',
     'rect.geom-bar',
     'rect.geom-rect',
@@ -36,6 +36,13 @@
     'rect.geom-boxplot-box',
     'circle.geom-boxplot-outlier'
   ];
+  const contractCrosstalkSelectors = window.gg2d3.geomContracts &&
+    typeof window.gg2d3.geomContracts.selectorsFor === 'function'
+      ? window.gg2d3.geomContracts.selectorsFor('crosstalk')
+      : [];
+  const INTERACTIVE_SELECTORS = contractCrosstalkSelectors.length
+    ? contractCrosstalkSelectors
+    : FALLBACK_INTERACTIVE_SELECTORS;
 
   /**
    * Store active SelectionHandle instances by element ID.

@@ -161,3 +161,22 @@ test_that("events and brush selector contracts cover interactive geoms", {
   expect_match(events_js, "selectorsFor\\('events'\\)")
   expect_match(brush_js, "selectorsFor\\('brush'\\)")
 })
+
+test_that("crosstalk selector contract preserves intentional differences", {
+  contract_js <- read_module("inst/htmlwidgets/modules/geom-contracts.js")
+  crosstalk_js <- read_module("inst/htmlwidgets/modules/crosstalk.js")
+  expected <- c(
+    "circle.geom-point", "rect.geom-bar", "rect.geom-rect",
+    "path.geom-line", "path.geom-polygon", "path.geom-area",
+    "path.geom-density", "path.geom-smooth", "path.geom-ribbon",
+    "path.geom-violin", ".geom-sf", "text.geom-text",
+    "line.geom-segment", "rect.geom-boxplot-box",
+    "circle.geom-boxplot-outlier"
+  )
+
+  expect_true(all(expected %in% contract_interaction_selectors(contract_js, "crosstalk")))
+  expect_match(crosstalk_js, "selectorsFor\\('crosstalk'\\)")
+  expect_match(contract_js, "crosstalk.js does not currently bind dotplot marks", fixed = TRUE)
+  expect_match(contract_js, "crosstalk.js does not currently bind rug marks", fixed = TRUE)
+  expect_match(contract_js, "crosstalk.js does not currently bind interval component marks", fixed = TRUE)
+})
