@@ -52,11 +52,6 @@
 **Plans**: 3 plans
 
 Plans:
-- [x] 49-01-PLAN.md — Scale, axis break, transform, and temporal metadata helper boundary.
-- [x] 49-02-PLAN.md — Layer rowization, geom naming, aesthetic maps, and non-sf layer assembly helper boundary.
-- [x] 49-03-PLAN.md — Facet/panel metadata helper boundary and final Phase 49 validation.
-
-Plans:
 - [x] 48-01-PLAN.md — Shared browser visual smoke helper and artifact/report contract.
 - [x] 48-02-PLAN.md — Opt-in visual smoke fixture matrix and runner.
 - [x] 48-03-PLAN.md — Maintainer diagnostics documentation and final source hygiene checks.
@@ -70,6 +65,11 @@ Plans:
   2. Representative non-sf, sf, facet, scale, and annotation IR fixtures remain unchanged except for intentional documented differences.
   3. Failures in helper-level characterization tests identify the affected IR boundary rather than only the monolithic `as_d3_ir()` path.
 **Plans**: 3 plans
+
+Plans:
+- [x] 49-01-PLAN.md — Scale, axis break, transform, and temporal metadata helper boundary.
+- [x] 49-02-PLAN.md — Layer rowization, geom naming, aesthetic maps, and non-sf layer assembly helper boundary.
+- [x] 49-03-PLAN.md — Facet/panel metadata helper boundary and final Phase 49 validation.
 
 ### Phase 50: Renderer Wiring And Interaction Contracts
 **Goal**: Supported geoms have less duplication-prone renderer/update/interactivity wiring, with tests guarding missing wiring and public payload sanitization.
