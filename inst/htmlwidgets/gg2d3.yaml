@@ -18,6 +18,7 @@ dependencies:
       - theme.js
       - layout.js
       - legend.js
+      - geom-contracts.js
       - tooltip.js
       - events.js
       - zoom.js
