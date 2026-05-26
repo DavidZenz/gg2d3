@@ -77,6 +77,24 @@ contract_update_selectors <- function(contract_js) {
   sort(unique(selectors))
 }
 
+contract_interaction_selectors <- function(contract_js, surface) {
+  entries <- extract_contract_entries(contract_js)
+  selectors <- unlist(lapply(entries, function(entry) {
+    lines <- strsplit(entry, "\n", fixed = TRUE)[[1]]
+    start <- grep(paste0("^        ", surface, ":"), lines)
+    if (length(start) == 0L) {
+      return(character())
+    }
+    starts <- grep("^        (events|brush|crosstalk):", lines)
+    private_start <- grep("^      privateFields:", lines)
+    end_candidates <- c(starts[starts > start[1]], private_start[private_start > start[1]])
+    end <- if (length(end_candidates)) min(end_candidates) - 1L else length(lines)
+    strings <- extract_js_strings(paste(lines[start[1]:end], collapse = "\n"))
+    strings[grepl("^(\\.|[a-zA-Z]+[.#])", strings)]
+  }), use.names = FALSE)
+  sort(unique(selectors))
+}
+
 test_that("geom contract lists every registered renderer alias", {
   contract_js <- read_module("inst/htmlwidgets/modules/geom-contracts.js")
 
@@ -121,4 +139,25 @@ test_that("geom contract exposes private renderer fields", {
   for (field in private_fields) {
     expect_match(contract_js, field, fixed = TRUE)
   }
+})
+
+test_that("events and brush selector contracts cover interactive geoms", {
+  contract_js <- read_module("inst/htmlwidgets/modules/geom-contracts.js")
+  events_js <- read_module("inst/htmlwidgets/modules/events.js")
+  brush_js <- read_module("inst/htmlwidgets/modules/brush.js")
+  expected <- c(
+    "circle.geom-point", "rect.geom-bar", "rect.geom-rect",
+    "path.geom-line", "path.geom-polygon", "path.geom-area",
+    "path.geom-density", "path.geom-smooth", "path.geom-ribbon",
+    "path.geom-violin", ".geom-sf", "text.geom-text",
+    "line.geom-segment", "rect.geom-boxplot-box",
+    "circle.geom-boxplot-outlier", "circle.geom-dotplot",
+    "line.geom-rug", "line.interval-line", "line.errorbar-cap-top",
+    "line.errorbar-cap-bottom", "circle.pointrange-point"
+  )
+
+  expect_true(all(expected %in% contract_interaction_selectors(contract_js, "events")))
+  expect_true(all(expected %in% contract_interaction_selectors(contract_js, "brush")))
+  expect_match(events_js, "selectorsFor\\('events'\\)")
+  expect_match(brush_js, "selectorsFor\\('brush'\\)")
 })

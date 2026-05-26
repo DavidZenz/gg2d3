@@ -20,7 +20,7 @@
    * Uses class selectors for paths to distinguish geom types.
    * Excludes non-interactive elements like panel backgrounds.
    */
-  const INTERACTIVE_SELECTORS = [
+  const FALLBACK_INTERACTIVE_SELECTORS = [
     'circle.geom-point',         // geom_point
     'rect.geom-bar',             // geom_bar
     'rect.geom-rect',            // geom_rect / geom_tile
@@ -43,6 +43,13 @@
     'line.errorbar-cap-bottom',    // errorbar bottom cap (GEOM-22)
     'circle.pointrange-point'      // pointrange center dot (GEOM-22)
   ];
+  const contractEventSelectors = window.gg2d3.geomContracts &&
+    typeof window.gg2d3.geomContracts.selectorsFor === 'function'
+      ? window.gg2d3.geomContracts.selectorsFor('events')
+      : [];
+  const INTERACTIVE_SELECTORS = contractEventSelectors.length
+    ? contractEventSelectors
+    : FALLBACK_INTERACTIVE_SELECTORS;
 
   // Per-widget legend interaction controllers.
   // WeakMap ensures cleanup when widget DOM nodes are removed.

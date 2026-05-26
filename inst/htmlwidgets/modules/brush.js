@@ -26,7 +26,7 @@
   /**
    * CSS selectors for interactive geom elements.
    */
-  var INTERACTIVE_SELECTORS = [
+  var FALLBACK_INTERACTIVE_SELECTORS = [
     'circle.geom-point',
     'rect.geom-bar',
     'rect.geom-rect',
@@ -49,6 +49,13 @@
     'line.errorbar-cap-bottom',    // errorbar bottom cap (GEOM-22)
     'circle.pointrange-point'      // pointrange center dot (GEOM-22)
   ];
+  var contractBrushSelectors = window.gg2d3.geomContracts &&
+    typeof window.gg2d3.geomContracts.selectorsFor === 'function'
+      ? window.gg2d3.geomContracts.selectorsFor('brush')
+      : [];
+  var INTERACTIVE_SELECTORS = contractBrushSelectors.length
+    ? contractBrushSelectors
+    : FALLBACK_INTERACTIVE_SELECTORS;
 
   /**
    * Attach brush behavior to a gg2d3 widget.
