@@ -62,3 +62,73 @@ test_that("scale helper preserves discrete domains and coord_flip labels", {
   expect_equal(ir$axes$x$label, "Miles per Gallon", info = "scale helper coord_flip x label")
   expect_equal(ir$axes$y$label, "Cylinders", info = "scale helper coord_flip y label")
 })
+
+test_that("layer helper preserves geom names and row data", {
+  rect_df <- data.frame(xmin = 0, xmax = 1, ymin = 0, ymax = 1)
+  text_df <- data.frame(x = 1, y = 1, label = "A")
+  polygon_df <- data.frame(
+    x = c(0, 1, 1, 0),
+    y = c(0, 0, 1, 1),
+    id = 1
+  )
+
+  p <- ggplot(mtcars, aes(wt, mpg)) +
+    geom_point(data = mtcars[1:2, ]) +
+    geom_line(data = mtcars[1:3, ]) +
+    geom_rect(
+      data = rect_df,
+      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+      inherit.aes = FALSE
+    ) +
+    geom_text(data = text_df, aes(x = x, y = y, label = label), inherit.aes = FALSE) +
+    geom_polygon(data = polygon_df, aes(x = x, y = y, group = id), inherit.aes = FALSE)
+  ir <- as_d3_ir(p)
+
+  expect_equal(
+    vapply(ir$layers, `[[`, character(1), "geom"),
+    c("point", "line", "rect", "text", "polygon"),
+    info = "layer helper geom dispatch"
+  )
+
+  row <- ir$layers[[1]]$data[[1]]
+  expect_true(is.numeric(row$x), info = "layer helper scalar x value")
+  expect_true(is.numeric(row$y), info = "layer helper scalar y value")
+
+  discrete_ir <- as_d3_ir(ggplot(mtcars, aes(factor(cyl), mpg)) + geom_point())
+  expect_false(is.factor(discrete_ir$layers[[1]]$data[[1]]$x), info = "layer helper drops factor class")
+})
+
+test_that("layer helper preserves aesthetic variable maps", {
+  p <- ggplot(mtcars, aes(wt, mpg, colour = factor(cyl))) +
+    geom_point()
+  ir <- as_d3_ir(p)
+  var_names <- ir$layers[[1]]$var_names
+
+  expect_equal(var_names$x, "wt", info = "layer helper var_names x")
+  expect_equal(var_names$y, "mpg", info = "layer helper var_names y")
+  expect_equal(var_names$colour, "factor(cyl)", info = "layer helper var_names colour")
+  expect_equal(ir$aes_by_var$wt, "x", info = "layer helper aes_by_var x")
+  expect_equal(ir$aes_by_var$mpg, "y", info = "layer helper aes_by_var y")
+  expect_equal(ir$aes_by_var[["factor(cyl)"]], "colour", info = "layer helper aes_by_var colour")
+})
+
+test_that("layer helper preserves sf annotation layer contracts", {
+  testthat::skip_if_not_installed("sf")
+  testthat::skip_if_not_installed("geojsonsf")
+
+  source_sf <- sf::st_sf(
+    label = "here",
+    geometry = sf::st_sfc(sf::st_point(c(0, 1)), crs = 4326)
+  )
+  ir <- as_d3_ir(
+    ggplot(source_sf, aes(label = label)) +
+      ggplot2::geom_sf_text()
+  )
+  layer <- ir$layers[[1]]
+
+  expect_equal(layer$geom, "sf_text", info = "layer helper sf annotation geom")
+  expect_equal(layer$annotation_type, "text", info = "layer helper sf annotation type")
+  expect_true(length(layer$geometries) > 0, info = "layer helper sf annotation geometries")
+  expect_true("row_id" %in% names(layer$data[[1]]), info = "layer helper sf annotation row id")
+  expect_equal(layer$var_names$label, "label", info = "layer helper sf annotation var_names")
+})
