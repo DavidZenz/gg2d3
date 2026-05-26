@@ -412,184 +412,6 @@ as_d3_ir <- function(p, width = 640, height = 400,
     }
   })
 
-  # Validate log scale domains (must be strictly positive)
-  validate_log_domain <- function(scale_obj, domain, axis_name) {
-    trans <- scale_obj$trans
-    if (is.null(trans)) return(invisible(TRUE))
-
-    is_log <- grepl("log", trans$name, ignore.case = TRUE) &&
-              !grepl("pseudo_log|symlog", trans$name, ignore.case = TRUE)
-
-    if (is_log && any(domain <= 0)) {
-      stop(sprintf(
-        paste0(
-          "Log scale on %s-axis has non-positive domain [%.4g, %.4g].\n",
-          "Log scales require strictly positive values.\n",
-          "Consider:\n",
-          "  - scale_%s_continuous(trans = 'pseudo_log') for data including zero\n",
-          "  - Filtering data to positive values\n",
-          "  - Using a linear scale"
-        ),
-        axis_name, domain[1], domain[2], axis_name
-      ), call. = FALSE)
-    }
-
-    invisible(TRUE)
-  }
-
-  # Extract scale transformation metadata for IR
-  get_scale_transform <- function(scale_obj) {
-    if (is.null(scale_obj$trans)) {
-      return(NULL)
-    }
-
-    trans_name <- scale_obj$trans$name
-
-    # Map ggplot2 trans names to D3 equivalents
-    result <- list()
-
-    if (trans_name == "identity") {
-      # No transform needed
-      return(NULL)
-    } else if (trans_name == "log-10" || trans_name == "log10") {
-      result$transform <- "log10"
-      result$base <- 10
-    } else if (trans_name == "log-2" || trans_name == "log2") {
-      result$transform <- "log2"
-      result$base <- 2
-    } else if (trans_name == "log") {
-      result$transform <- "log"
-      result$base <- exp(1)
-    } else if (trans_name == "sqrt") {
-      result$transform <- "sqrt"
-    } else if (trans_name == "reverse") {
-      result$transform <- "reverse"
-    } else if (trans_name == "pseudo_log") {
-      result$transform <- "symlog"
-    } else {
-      # Unknown transform, pass through name
-      result$transform <- trans_name
-    }
-
-    result
-  }
-
-  # Check if scale is discrete and get proper domain
-  get_scale_info <- function(scale_obj, panel_params_axis, axis_name) {
-    if (scale_obj$is_discrete()) {
-      # Discrete scale: get labels from scale object
-      domain <- scale_obj$get_limits()
-      list(type = "categorical", domain = unname(domain))
-    } else {
-      # Continuous scale: extract already-expanded domain from panel_params
-      # The panel_params contain ggplot2's pre-computed expanded range
-
-      # Try to get the continuous_range (already expanded by ggplot2)
-      expanded_range <- gg2d3_continuous_range(panel_params_axis)
-
-      # Fallback: if we couldn't get range from panel_params, use scale limits
-      if (is.null(expanded_range) || length(expanded_range) != 2) {
-        warning("Could not extract range from panel_params, falling back to scale limits")
-        expanded_range <- tryCatch(
-          scale_obj$get_limits(),
-          error = function(e) c(0, 1)
-        )
-        # Apply manual 5% expansion as last resort
-        if (!is.null(expanded_range) && length(expanded_range) == 2) {
-          range_span <- diff(expanded_range)
-          expansion <- range_span * 0.05
-          expanded_range <- c(expanded_range[1] - expansion, expanded_range[2] + expansion)
-        }
-      }
-
-      # Validate log domains before building result
-      validate_log_domain(scale_obj, expanded_range, axis_name)
-
-      # Build result with transform info
-      result <- list(type = "continuous", domain = unname(expanded_range))
-
-      # Add transformation metadata if present
-      transform_info <- get_scale_transform(scale_obj)
-      if (!is.null(transform_info)) {
-        result <- c(result, transform_info)
-      }
-
-      # Temporal scale handling: convert domain to milliseconds and extract metadata
-      trans_name <- if (!is.null(scale_obj$trans)) scale_obj$trans$name else NULL
-      if (!is.null(trans_name) && trans_name %in% c("date", "time")) {
-        # Convert domain to milliseconds
-        if (trans_name == "date") {
-          # Date: values are days since epoch -> multiply by 86400000
-          result$domain <- result$domain * 86400000
-        } else if (trans_name == "time") {
-          # POSIXct/datetime: values are seconds since epoch -> multiply by 1000
-          result$domain <- result$domain * 1000
-        }
-
-        # Extract date format pattern from scale closure
-        format_pattern <- NULL
-        if (!is.null(scale_obj$labels) && is.function(scale_obj$labels)) {
-          format_pattern <- tryCatch({
-            outer_env <- environment(scale_obj$labels)
-            f <- outer_env$f
-            if (is.function(f)) {
-              inner_env <- environment(f)
-              dl <- inner_env$date_labels
-              if (!is.null(dl) && !inherits(dl, "waiver") && nzchar(dl)) dl else NULL
-            } else {
-              NULL
-            }
-          }, error = function(e) NULL)
-        }
-        result$format <- format_pattern
-
-        # Extract timezone from datetime scale
-        if (trans_name == "time") {
-          timezone <- tryCatch({
-            tz_val <- scale_obj$timezone
-            if (!is.null(tz_val) && tz_val != "") {
-              tz_val
-            } else {
-              if (is.function(scale_obj$labels)) {
-                env <- environment(scale_obj$labels)
-                tz_val2 <- env$tz
-                if (!is.null(tz_val2) && tz_val2 != "") {
-                  tz_val2
-                } else {
-                  f <- env$f
-                  if (is.function(f)) {
-                    env_f <- environment(f)
-                    tz_val3 <- env_f$tz
-                    if (!is.null(tz_val3) && tz_val3 != "") tz_val3 else NULL
-                  } else {
-                    NULL
-                  }
-                }
-              } else {
-                NULL
-              }
-            }
-          }, error = function(e) NULL)
-
-          if (is.null(timezone) || timezone == "") {
-            timezone <- tryCatch({
-              attr(scale_obj$range$range, "tzone")[1]
-            }, error = function(e) NULL)
-          }
-
-          result$timezone <- if (!is.null(timezone) && timezone != "") timezone else "UTC"
-        }
-
-        # Include pre-formatted labels as fallback
-        formatted_labels <- gg2d3_panel_labels(panel_params_axis)
-        if (length(formatted_labels) == 0L) formatted_labels <- NULL
-        result$labels <- formatted_labels
-      }
-
-      result
-    }
-  }
-
   allc <- unlist(lapply(b$data, function(df) if ("colour" %in% names(df)) df$colour))
 
   # Helper for color domain
@@ -608,40 +430,21 @@ as_d3_ir <- function(p, width = 640, height = 400,
     pp_y <- gg2d3_panel_axis(first_panel_params, "y")
   }
 
-  x_breaks <- pp_x$breaks
-  y_breaks <- pp_y$breaks
-  x_minor_breaks <- pp_x$minor_breaks
-  y_minor_breaks <- pp_y$minor_breaks
-
-  x_breaks <- x_breaks[!is.na(x_breaks)]
-  y_breaks <- y_breaks[!is.na(y_breaks)]
-  x_minor_breaks <- if (!is.null(x_minor_breaks)) x_minor_breaks[!is.na(x_minor_breaks)] else NULL
-  y_minor_breaks <- if (!is.null(y_minor_breaks)) y_minor_breaks[!is.na(y_minor_breaks)] else NULL
-
   x_trans_name <- if (!is.null(xscale_obj$trans)) xscale_obj$trans$name else NULL
-  if (!is.null(x_trans_name) && x_trans_name == "date") {
-    x_breaks <- x_breaks * 86400000
-    if (!is.null(x_minor_breaks)) x_minor_breaks <- x_minor_breaks * 86400000
-  } else if (!is.null(x_trans_name) && x_trans_name == "time") {
-    x_breaks <- x_breaks * 1000
-    if (!is.null(x_minor_breaks)) x_minor_breaks <- x_minor_breaks * 1000
-  }
-
   y_trans_name <- if (!is.null(yscale_obj$trans)) yscale_obj$trans$name else NULL
-  if (!is.null(y_trans_name) && y_trans_name == "date") {
-    y_breaks <- y_breaks * 86400000
-    if (!is.null(y_minor_breaks)) y_minor_breaks <- y_minor_breaks * 86400000
-  } else if (!is.null(y_trans_name) && y_trans_name == "time") {
-    y_breaks <- y_breaks * 1000
-    if (!is.null(y_minor_breaks)) y_minor_breaks <- y_minor_breaks * 1000
-  }
+  x_break_info <- gg2d3_ir_axis_breaks(pp_x, x_trans_name)
+  y_break_info <- gg2d3_ir_axis_breaks(pp_y, y_trans_name)
+  x_breaks <- x_break_info$breaks
+  y_breaks <- y_break_info$breaks
+  x_minor_breaks <- x_break_info$minor_breaks
+  y_minor_breaks <- y_break_info$minor_breaks
 
   scales <- list(
-    x = c(get_scale_info(xscale_obj, pp_x, "x"), list(
+    x = c(gg2d3_ir_scale_info(xscale_obj, pp_x, "x"), list(
       breaks = unname(x_breaks),
       minor_breaks = if (!is.null(x_minor_breaks)) unname(x_minor_breaks) else NULL
     )),
-    y = c(get_scale_info(yscale_obj, pp_y, "y"), list(
+    y = c(gg2d3_ir_scale_info(yscale_obj, pp_y, "y"), list(
       breaks = unname(y_breaks),
       minor_breaks = if (!is.null(y_minor_breaks)) unname(y_minor_breaks) else NULL
     ))
