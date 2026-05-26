@@ -82,7 +82,7 @@ Plans:
   4. Ordinary polygons and sf text/label annotations are included in the interaction sanitization coverage.
 **Plans**:
 - [x] 50-01-PLAN.md — Internal geom contract plus renderer registration and update coverage source tests.
-- [ ] 50-02-PLAN.md — Events, brush, and crosstalk selector contract coverage with explicit module-specific differences.
+- [x] 50-02-PLAN.md — Events, brush, and crosstalk selector contract coverage with explicit module-specific differences.
 - [ ] 50-03-PLAN.md — Shared public payload sanitizer, private-field contract coverage, and final validation notes.
 
 ### Phase 51: Geometry Edge-Case Classification And Polish
@@ -106,7 +106,7 @@ Phases execute in numeric order: 48 → 49 → 50 → 51
 |-------|--------------|----------------|--------|-----------|
 | 48. Browser Visual Smoke Coverage | VIS-01, VIS-02, VIS-03 | 3/3 | Complete | 2026-05-26 |
 | 49. IR Helper Boundary Hardening | ARCH-01 | 3/3 | Complete | 2026-05-26 |
-| 50. Renderer Wiring And Interaction Contracts | ARCH-02, ARCH-03 | 1/3 | In Progress | - |
+| 50. Renderer Wiring And Interaction Contracts | ARCH-02, ARCH-03 | 2/3 | In Progress | - |
 | 51. Geometry Edge-Case Classification And Polish | GEOM-01, GEOM-02, GEOM-03 | 0/TBD | Not started | - |
 
 ## Archived Milestones
