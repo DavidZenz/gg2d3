@@ -132,3 +132,88 @@ test_that("layer helper preserves sf annotation layer contracts", {
   expect_true("row_id" %in% names(layer$data[[1]]), info = "layer helper sf annotation row id")
   expect_equal(layer$var_names$label, "label", info = "layer helper sf annotation var_names")
 })
+
+test_that("facet helper preserves wrap and grid layout metadata", {
+  wrap_ir <- as_d3_ir(
+    ggplot(mtcars, aes(wt, mpg)) +
+      geom_point() +
+      facet_wrap(~ cyl)
+  )
+  expect_equal(wrap_ir$facets$type, "wrap", info = "facet helper wrap type")
+  expect_true(wrap_ir$facets$nrow >= 1L, info = "facet helper wrap nrow")
+  expect_true(wrap_ir$facets$ncol >= 1L, info = "facet helper wrap ncol")
+  expect_equal(length(wrap_ir$panels), length(wrap_ir$facets$layout), info = "facet helper wrap panels")
+  expect_true(all(c("PANEL", "ROW", "COL", "SCALE_X", "SCALE_Y") %in% names(wrap_ir$facets$layout[[1]])))
+
+  grid_ir <- as_d3_ir(
+    ggplot(mtcars, aes(wt, mpg)) +
+      geom_point() +
+      facet_grid(cyl ~ am)
+  )
+  expect_equal(grid_ir$facets$type, "grid", info = "facet helper grid type")
+  expect_equal(grid_ir$facets$nrow, 3L, info = "facet helper grid nrow")
+  expect_equal(grid_ir$facets$ncol, 2L, info = "facet helper grid ncol")
+  expect_equal(length(grid_ir$panels), 6L, info = "facet helper grid panels")
+  expect_true(is.integer(grid_ir$facets$layout[[1]]$SCALE_X), info = "facet helper SCALE_X integer")
+  expect_true(is.integer(grid_ir$facets$layout[[1]]$SCALE_Y), info = "facet helper SCALE_Y integer")
+})
+
+test_that("facet helper preserves free scale panel ranges", {
+  df <- data.frame(
+    x = c(1, 2, 100, 200),
+    y = c(1, 2, 50, 60),
+    panel = factor(c("A", "A", "B", "B"))
+  )
+  ir <- as_d3_ir(
+    ggplot(df, aes(x, y)) +
+      geom_point() +
+      facet_wrap(~ panel, scales = "free")
+  )
+
+  expect_equal(ir$facets$scales, "free", info = "facet helper free scale mode")
+  expect_equal(length(ir$panels), 2L, info = "facet helper free panels")
+  expect_false(identical(ir$panels[[1]]$x_range, ir$panels[[2]]$x_range), info = "facet helper free x ranges")
+  expect_false(identical(ir$panels[[1]]$y_range, ir$panels[[2]]$y_range), info = "facet helper free y ranges")
+  expect_true(length(ir$panels[[1]]$x_breaks) > 0, info = "facet helper free x breaks")
+  expect_true(length(ir$panels[[1]]$y_breaks) > 0, info = "facet helper free y breaks")
+})
+
+test_that("facet helper preserves sf panel bbox contracts", {
+  testthat::skip_if_not_installed("sf")
+  testthat::skip_if_not_installed("geojsonsf")
+
+  square_ring <- function(xmin, ymin, xmax, ymax) {
+    matrix(
+      c(
+        xmin, ymin,
+        xmax, ymin,
+        xmax, ymax,
+        xmin, ymax,
+        xmin, ymin
+      ),
+      ncol = 2,
+      byrow = TRUE
+    )
+  }
+  sf_data <- sf::st_sf(
+    row_var = factor(c("A", "B"), levels = c("A", "B")),
+    col_var = factor(c("X", "X"), levels = c("X", "Y")),
+    geometry = sf::st_sfc(
+      sf::st_polygon(list(square_ring(0, 0, 1, 1))),
+      sf::st_polygon(list(square_ring(100, 0, 101, 1))),
+      crs = 4326
+    )
+  )
+
+  ir <- as_d3_ir(
+    ggplot(sf_data) +
+      ggplot2::geom_sf() +
+      ggplot2::facet_grid(row_var ~ col_var, drop = FALSE)
+  )
+  panel_has_bbox <- vapply(ir$panels, function(panel) !is.null(panel$sf_bbox), logical(1))
+
+  expect_equal(ir$facets$type, "grid", info = "facet helper sf grid type")
+  expect_equal(length(ir$panels), 4L, info = "facet helper sf panel count")
+  expect_equal(sum(panel_has_bbox), 2L, info = "facet helper sf populated bboxes")
+  expect_true(any(!panel_has_bbox), info = "facet helper sf empty panel has NULL bbox")
+})

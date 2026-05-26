@@ -1,7 +1,7 @@
 ---
 phase: 49-ir-helper-boundary-hardening
 created: 2026-05-26
-status: planned
+status: executed
 source: 49-RESEARCH.md
 ---
 
@@ -37,3 +37,13 @@ Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/
 - Browser visual smoke is opt-in and skips unless `GG2D3_BROWSER_VISUAL_SMOKE=true`.
 - Chromote may be unable to launch inside sandboxed environments; that skip is acceptable when the message names the launch failure.
 
+## Phase 49 Execution Notes
+
+The required command families remain unchanged after implementation:
+
+- Helper-boundary tests: `tests/testthat/test-ir-helper-boundaries.R`
+- Core IR/facet/date tests: `test-ir.R`, `test-facets.R`, `test-facet-grid.R`, and `test-date-scales.R`
+- sf/sf-annotation tests: `test-sf-ir.R` and `test-sf-annotations-ir.R`
+- Browser visual smoke skip path: `test-browser-visual-smoke.R`
+
+Local execution observed explicit `{sf}` skips where sf-dependent tests were reached without the optional dependency available.
