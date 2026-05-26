@@ -293,14 +293,17 @@ test_that("BVIS-01 browser visual smoke artifacts are generated for representati
   fixtures <- c(non_sf_fixtures, sf_matrix$fixtures)
   rows <- sf_matrix$skipped
 
-  with_chromote_session({
+  rows <- with_chromote_session({
     logs <- browser_visual_console_collector(session)
+    captured_rows <- rows
 
     for (fixture in fixtures) {
       log_start <- length(browser_visual_logs(logs))
       fixture$logs <- function() .browser_visual_log_slice(logs, log_start)
-      rows <- c(rows, list(capture_browser_visual_fixture(session, fixture)))
+      captured_rows <- c(captured_rows, list(capture_browser_visual_fixture(session, fixture)))
     }
+
+    captured_rows
   }, width = 960, height = 720)
 
   index <- write_browser_visual_index(rows)

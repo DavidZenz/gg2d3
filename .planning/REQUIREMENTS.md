@@ -7,9 +7,9 @@
 
 ### Visual Validation
 
-- [ ] **VIS-01**: Maintainers can run a deterministic browser visual smoke command that renders representative gg2d3 plots to inspectable screenshot or image artifacts under an ignored local output directory.
-- [ ] **VIS-02**: Visual smoke coverage includes representative core surfaces: Cartesian geoms, facets, interactivity-facing marks, sf geometry marks, and the newly shipped polygon/sf-annotation geometry paths.
-- [ ] **VIS-03**: Visual/browser validation skips cleanly with explicit messages when optional local dependencies such as Chrome, chromote, sf, or geojsonsf are unavailable.
+- [x] **VIS-01**: Maintainers can run a deterministic browser visual smoke command that renders representative gg2d3 plots to inspectable screenshot or image artifacts under an ignored local output directory.
+- [x] **VIS-02**: Visual smoke coverage includes representative core surfaces: Cartesian geoms, facets, interactivity-facing marks, sf geometry marks, and the newly shipped polygon/sf-annotation geometry paths.
+- [x] **VIS-03**: Visual/browser validation skips cleanly with explicit messages when optional local dependencies such as Chrome, chromote, sf, or geojsonsf are unavailable.
 
 ### Architecture Maintainability
 
@@ -58,9 +58,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VIS-01 | Phase 48 | Pending |
-| VIS-02 | Phase 48 | Pending |
-| VIS-03 | Phase 48 | Pending |
+| VIS-01 | Phase 48 | Complete |
+| VIS-02 | Phase 48 | Complete |
+| VIS-03 | Phase 48 | Complete |
 | ARCH-01 | Phase 49 | Pending |
 | ARCH-02 | Phase 50 | Pending |
 | ARCH-03 | Phase 50 | Pending |
@@ -75,4 +75,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-25*
-*Last updated: 2026-05-25 after creating v1.12 roadmap*
+*Last updated: 2026-05-26 after completing Phase 48 verification*

@@ -57,6 +57,25 @@ browser_visual_require_opt_in <- function() {
   )
 }
 
+browser_visual_condition_message <- function(condition) {
+  if (!inherits(condition, "condition")) {
+    return(as.character(condition))
+  }
+
+  messages <- character()
+  current <- condition
+  while (inherits(current, "condition")) {
+    message <- current$message %||% conditionMessage(current)
+    message <- gsub("[[:space:]]+", " ", message)
+    if (nzchar(message)) {
+      messages <- c(messages, message)
+    }
+    current <- current$parent
+  }
+
+  paste(messages, collapse = " Caused by: ")
+}
+
 skip_browser_visual_smoke <- function() {
   browser_visual_require_opt_in()
   testthat::skip_on_cran()
@@ -77,7 +96,7 @@ skip_browser_visual_smoke <- function() {
     error = function(e) e
   )
   launch_message <- if (inherits(launch, "condition")) {
-    conditionMessage(launch)
+    browser_visual_condition_message(launch)
   } else {
     as.character(launch)
   }
@@ -349,11 +368,12 @@ capture_browser_visual_fixture <- function(session, fixture) {
       expected <- fixture$expected %||% list()
       for (selector in names(expected)) {
         actual <- .browser_visual_selector_count(session, selector)
-        testthat::expect_gte(
-          as.integer(actual),
-          as.integer(expected[[selector]]),
-          info = sprintf("Expected at least %s nodes for selector %s in %s", expected[[selector]], selector, id)
-        )
+        if (as.integer(actual) < as.integer(expected[[selector]])) {
+          testthat::fail(sprintf(
+            "Expected at least %s nodes for selector %s in %s; found %s",
+            expected[[selector]], selector, id, actual
+          ))
+        }
       }
 
       assert_no_browser_visual_errors(logs)
