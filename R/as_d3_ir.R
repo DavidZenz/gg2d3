@@ -461,76 +461,20 @@ as_d3_ir <- function(p, width = 640, height = 400,
     }
   }
 
-  facets_ir <- NULL; panels_ir <- NULL
-  tryCatch({
-    is_facet_wrap <- inherits(b$layout$facet, "FacetWrap")
-    is_facet_grid <- inherits(b$layout$facet, "FacetGrid")
-    if (is_facet_wrap) {
-      layout_df <- b$layout$layout; facet_vars <- names(b$layout$facet$params$facets)
-      free_params <- b$layout$facet$params$free
-      if (free_params$x && free_params$y) scales_mode <- "free" else if (free_params$x) scales_mode <- "free_x" else if (free_params$y) scales_mode <- "free_y" else scales_mode <- "fixed"
-      strips <- lapply(seq_along(facet_vars), function(l) {
-        var <- facet_vars[l]
-        level_labels <- lapply(seq_len(nrow(layout_df)), function(i) list(PANEL = as.integer(layout_df$PANEL[i]), label = as.character(layout_df[[var]][i])))
-        list(level = l, variable = var, labels = level_labels)
-      })
-      panels_ir <- lapply(seq_along(b$layout$panel_params), function(p) {
-        pp <- b$layout$panel_params[[p]]
-        if (is_flip) { ppx <- gg2d3_panel_axis(pp, "y"); ppy <- gg2d3_panel_axis(pp, "x") } else { ppx <- gg2d3_panel_axis(pp, "x"); ppy <- gg2d3_panel_axis(pp, "y") }
-        panel_x_range <- if (xscale_obj$is_discrete()) unname(xscale_obj$get_limits()) else unname(gg2d3_continuous_range(ppx))
-        panel_y_range <- if (yscale_obj$is_discrete()) unname(yscale_obj$get_limits()) else unname(gg2d3_continuous_range(ppy))
-        panel_x_breaks <- unname(ppx$breaks[!is.na(ppx$breaks)])
-        panel_y_breaks <- unname(ppy$breaks[!is.na(ppy$breaks)])
-        panel_x_minor_breaks <- if (!is.null(ppx$minor_breaks)) unname(ppx$minor_breaks[!is.na(ppx$minor_breaks)]) else NULL
-        panel_y_minor_breaks <- if (!is.null(ppy$minor_breaks)) unname(ppy$minor_breaks[!is.na(ppy$minor_breaks)]) else NULL
-        if (!is.null(x_trans_name) && x_trans_name == "date") { panel_x_range <- panel_x_range * 86400000; panel_x_breaks <- panel_x_breaks * 86400000; if (!is.null(panel_x_minor_breaks)) panel_x_minor_breaks <- panel_x_minor_breaks * 86400000
-        } else if (!is.null(x_trans_name) && x_trans_name == "time") { panel_x_range <- panel_x_range * 1000; panel_x_breaks <- panel_x_breaks * 1000; if (!is.null(panel_x_minor_breaks)) panel_x_minor_breaks <- panel_x_minor_breaks * 1000 }
-        if (!is.null(y_trans_name) && y_trans_name == "date") { panel_y_range <- panel_y_range * 86400000; panel_y_breaks <- panel_y_breaks * 86400000; if (!is.null(panel_y_minor_breaks)) panel_y_minor_breaks <- panel_y_minor_breaks * 86400000
-        } else if (!is.null(y_trans_name) && y_trans_name == "time") { panel_y_range <- panel_y_range * 1000; panel_y_breaks <- panel_y_breaks * 1000; if (!is.null(panel_y_minor_breaks)) panel_y_minor_breaks <- panel_y_minor_breaks * 1000 }
-        list(PANEL = as.integer(p), x_range = panel_x_range, y_range = panel_y_range, x_breaks = panel_x_breaks, y_breaks = panel_y_breaks, x_minor_breaks = panel_x_minor_breaks, y_minor_breaks = panel_y_minor_breaks)
-      })
-      panel_spacing <- tryCatch({ spacing <- gg2d3_calc_element("panel.spacing", th); if (!is.null(spacing)) grid::convertUnit(spacing, "inches", valueOnly = TRUE) * 96 else 7.3 }, error = function(e) 7.3)
-      facets_ir <- list(type = "wrap", vars = facet_vars, nrow = as.integer(max(layout_df$ROW)), ncol = as.integer(max(layout_df$COL)), scales = scales_mode, spacing = panel_spacing, layout = lapply(seq_len(nrow(layout_df)), function(i) { row <- as.list(layout_df[i, , drop = FALSE]); row$PANEL <- as.integer(row$PANEL); row$ROW <- as.integer(row$ROW); row$COL <- as.integer(row$COL); row$SCALE_X <- as.integer(row$SCALE_X); row$SCALE_Y <- as.integer(row$SCALE_Y); row }), strips = strips)
-    } else if (is_facet_grid) {
-      layout_df <- b$layout$layout; row_vars <- names(b$layout$facet$params$rows); col_vars <- names(b$layout$facet$params$cols)
-      free_params <- b$layout$facet$params$free
-      if (free_params$x && free_params$y) scales_mode <- "free" else if (free_params$x) scales_mode <- "free_x" else if (free_params$y) scales_mode <- "free_y" else scales_mode <- "fixed"
-      row_strips <- NULL; if (length(row_vars) > 0) { row_combos <- unique(layout_df[, c("ROW", row_vars), drop = FALSE]); row_strips <- lapply(seq_along(row_vars), function(l) { var <- row_vars[l]; level_labels <- lapply(seq_len(nrow(row_combos)), function(i) list(ROW = as.integer(row_combos$ROW[i]), label = as.character(row_combos[[var]][i]))); list(level = l, variable = var, labels = level_labels) }) }
-      col_strips <- NULL; if (length(col_vars) > 0) { col_combos <- unique(layout_df[, c("COL", col_vars), drop = FALSE]); col_strips <- lapply(seq_along(col_vars), function(l) { var <- col_vars[l]; level_labels <- lapply(seq_len(nrow(col_combos)), function(i) list(COL = as.integer(col_combos$COL[i]), label = as.character(col_combos[[var]][i]))); list(level = l, variable = var, labels = level_labels) }) }
-      panels_ir <- lapply(seq_along(b$layout$panel_params), function(p) {
-        pp <- b$layout$panel_params[[p]]
-        if (is_flip) { ppx <- gg2d3_panel_axis(pp, "y"); ppy <- gg2d3_panel_axis(pp, "x") } else { ppx <- gg2d3_panel_axis(pp, "x"); ppy <- gg2d3_panel_axis(pp, "y") }
-        panel_x_range <- if (xscale_obj$is_discrete()) unname(xscale_obj$get_limits()) else unname(gg2d3_continuous_range(ppx))
-        panel_y_range <- if (yscale_obj$is_discrete()) unname(yscale_obj$get_limits()) else unname(gg2d3_continuous_range(ppy))
-        panel_x_breaks <- unname(ppx$breaks[!is.na(ppx$breaks)])
-        panel_y_breaks <- unname(ppy$breaks[!is.na(ppy$breaks)])
-        panel_x_minor_breaks <- if (!is.null(ppx$minor_breaks)) unname(ppx$minor_breaks[!is.na(ppx$minor_breaks)]) else NULL
-        panel_y_minor_breaks <- if (!is.null(ppy$minor_breaks)) unname(ppy$minor_breaks[!is.na(ppy$minor_breaks)]) else NULL
-        if (!is.null(x_trans_name) && x_trans_name == "date") { panel_x_range <- panel_x_range * 86400000; panel_x_breaks <- panel_x_breaks * 86400000; if (!is.null(panel_x_minor_breaks)) panel_x_minor_breaks <- panel_x_minor_breaks * 86400000
-        } else if (!is.null(x_trans_name) && x_trans_name == "time") { panel_x_range <- panel_x_range * 1000; panel_x_breaks <- panel_x_breaks * 1000; if (!is.null(panel_x_minor_breaks)) panel_x_minor_breaks <- panel_x_minor_breaks * 1000 }
-        if (!is.null(y_trans_name) && y_trans_name == "date") { panel_y_range <- panel_y_range * 86400000; panel_y_breaks <- panel_y_breaks * 86400000; if (!is.null(panel_y_minor_breaks)) panel_y_minor_breaks <- panel_y_minor_breaks * 86400000
-        } else if (!is.null(y_trans_name) && y_trans_name == "time") { panel_y_range <- panel_y_range * 1000; panel_y_breaks <- panel_y_breaks * 1000; if (!is.null(panel_y_minor_breaks)) panel_y_minor_breaks <- panel_y_minor_breaks * 1000 }
-        list(PANEL = as.integer(p), x_range = panel_x_range, y_range = panel_y_range, x_breaks = panel_x_breaks, y_breaks = panel_y_breaks, x_minor_breaks = panel_x_minor_breaks, y_minor_breaks = panel_y_minor_breaks)
-      })
-      panel_spacing <- tryCatch({ spacing <- gg2d3_calc_element("panel.spacing", th); if (!is.null(spacing)) grid::convertUnit(spacing, "inches", valueOnly = TRUE) * 96 else 7.3 }, error = function(e) 7.3)
-      facets_ir <- list(type = "grid", rows = row_vars, cols = col_vars, scales = scales_mode, nrow = as.integer(max(layout_df$ROW)), ncol = as.integer(max(layout_df$COL)), spacing = panel_spacing, layout = lapply(seq_len(nrow(layout_df)), function(i) { row <- as.list(layout_df[i, , drop = FALSE]); row$PANEL <- as.integer(row$PANEL); row$ROW <- as.integer(row$ROW); row$COL <- as.integer(row$COL); row$SCALE_X <- as.integer(row$SCALE_X); row$SCALE_Y <- as.integer(row$SCALE_Y); row }), row_strips = row_strips, col_strips = col_strips)
-    } else {
-      facets_ir <- list(type = "null", vars = list(), nrow = 1L, ncol = 1L, layout = list(list(PANEL = 1L, ROW = 1L, COL = 1L, SCALE_X = 1L, SCALE_Y = 1L)), strips = list())
-      if (is_sf_coord) {
-        # sf panels: no meaningful Cartesian x/y scale domains; bbox is on coord object
-        panels_ir <- list(list(PANEL = 1L, x_range = NULL, y_range = NULL, x_breaks = NULL, y_breaks = NULL))
-      } else {
-        panels_ir <- list(list(PANEL = 1L, x_range = unname(scales$x$domain), y_range = unname(scales$y$domain), x_breaks = unname(x_breaks), y_breaks = unname(y_breaks)))
-      }
-    }
-  }, error = function(e) {
-    facets_ir <<- list(type = "null", vars = list(), nrow = 1L, ncol = 1L, layout = list(list(PANEL = 1L, ROW = 1L, COL = 1L, SCALE_X = 1L, SCALE_Y = 1L)), strips = list())
-    panels_ir <<- list(list(PANEL = 1L, x_range = unname(scales$x$domain), y_range = unname(scales$y$domain), x_breaks = unname(x_breaks), y_breaks = unname(y_breaks)))
-  })
-
-  if (is_sf_coord && !is.null(panels_ir)) {
-    panels_ir <- attach_sf_panel_bboxes(panels_ir, sf_panel_geometries)
-  }
+  facet_payload <- gg2d3_ir_facets(
+    b,
+    scales,
+    xscale_obj,
+    yscale_obj,
+    is_flip,
+    is_sf_coord,
+    x_trans_name,
+    y_trans_name,
+    th,
+    sf_panel_geometries
+  )
+  facets_ir <- facet_payload$facets
+  panels_ir <- facet_payload$panels
 
   # Build reverse map: variable name -> aesthetic key (first layer wins on collision).
   # Lets tooltip lookups resolve user-supplied variable names (e.g. "wt") back
