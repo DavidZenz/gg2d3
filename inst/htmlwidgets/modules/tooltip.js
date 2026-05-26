@@ -115,11 +115,15 @@
    * @returns {Object} Cloned row without underscore-prefixed fields
    */
   function sanitizeTooltipDatum(d) {
+    if (window.gg2d3.publicData &&
+        typeof window.gg2d3.publicData.sanitizeDatum === 'function') {
+      return window.gg2d3.publicData.sanitizeDatum(d) || {};
+    }
     if (!d || typeof d !== 'object' || Array.isArray(d)) return d || {};
 
     const sanitized = {};
     Object.keys(d).forEach(function(key) {
-      if (key.startsWith('_')) return;
+      if (String(key).startsWith('_')) return;
       sanitized[key] = d[key];
     });
     return sanitized;
