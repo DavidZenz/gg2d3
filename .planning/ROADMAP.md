@@ -34,7 +34,7 @@
 - Decimal phases (48.1, 48.2): Urgent insertions, if needed
 
 - [x] **Phase 48: Browser Visual Smoke Coverage** - Maintainers can generate deterministic browser-rendered visual artifacts for representative gg2d3 surfaces, with explicit optional-dependency skip behavior.
-- [ ] **Phase 49: IR Helper Boundary Hardening** - Maintainers can change selected high-risk `as_d3_ir()` responsibilities through focused helpers without representative IR drift.
+- [x] **Phase 49: IR Helper Boundary Hardening** - Maintainers can change selected high-risk `as_d3_ir()` responsibilities through focused helpers without representative IR drift.
 - [ ] **Phase 50: Renderer Wiring And Interaction Contracts** - Supported geoms have less duplication-prone renderer/update/interactivity wiring, with tests guarding missing wiring and public payload sanitization.
 - [ ] **Phase 51: Geometry Edge-Case Classification And Polish** - Maintainers have verified outcomes for transformed rect/tile behavior, ordinary polygon topology, and text/label placement candidates.
 
@@ -50,6 +50,11 @@
   3. Browser visual validation skips with explicit messages when Chrome, chromote, sf, geojsonsf, or equivalent optional dependencies are unavailable.
   4. Failure artifacts give maintainers enough local evidence to inspect what rendered without committing generated outputs.
 **Plans**: 3 plans
+
+Plans:
+- [x] 49-01-PLAN.md — Scale, axis break, transform, and temporal metadata helper boundary.
+- [x] 49-02-PLAN.md — Layer rowization, geom naming, aesthetic maps, and non-sf layer assembly helper boundary.
+- [x] 49-03-PLAN.md — Facet/panel metadata helper boundary and final Phase 49 validation.
 
 Plans:
 - [x] 48-01-PLAN.md — Shared browser visual smoke helper and artifact/report contract.
@@ -97,7 +102,7 @@ Phases execute in numeric order: 48 → 49 → 50 → 51
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
 | 48. Browser Visual Smoke Coverage | VIS-01, VIS-02, VIS-03 | 3/3 | Complete | 2026-05-26 |
-| 49. IR Helper Boundary Hardening | ARCH-01 | 0/3 | Ready to execute | - |
+| 49. IR Helper Boundary Hardening | ARCH-01 | 3/3 | Complete | 2026-05-26 |
 | 50. Renderer Wiring And Interaction Contracts | ARCH-02, ARCH-03 | 0/TBD | Not started | - |
 | 51. Geometry Edge-Case Classification And Polish | GEOM-01, GEOM-02, GEOM-03 | 0/TBD | Not started | - |
 
