@@ -25,58 +25,9 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
   `%||%` <- function(x, y) if (is.null(x)) y else x
 
-  keep_aes <- c(
-    "PANEL","x","y","xend","yend","xmin","xmax","ymin","ymax",
-    "colour","fill","size","alpha","group","label",
-    "slope","intercept","xintercept","yintercept"
-  )
-
-  # coerce to plain base types (no factors), then row-wise list with scalars
-  to_rows <- function(df) {
-    if (is.null(df) || !nrow(df)) return(list())
-    df <- df[, intersect(keep_aes, names(df)), drop = FALSE]
-    # drop factor classes to base vectors early
-    df[] <- lapply(df, function(col) {
-      if (is.factor(col)) as.character(col)          # colors may be hex already
-      else if (inherits(col, c("POSIXct","POSIXt"))) as.numeric(col) * 1000 # ms for JS time if ever needed
-      else if (inherits(col, "Date")) as.numeric(col) * 86400000            # ms days
-      else if (is.list(col)) I(col)                 # leave lists as-is
-      else col
-    })
-    rows <- vector("list", nrow(df))
-    for (i in seq_len(nrow(df))) {
-      # make true scalars (no length-1 vectors)
-      r <- lapply(df[i, , drop = FALSE], function(v) v[[1]])
-      names(r) <- names(df)
-      rows[[i]] <- r
-    }
-    rows
-  }
-
   # Extract scale objects early (needed for mapping discrete values)
   xscale_obj <- b$layout$panel_scales_x[[1]]
   yscale_obj <- b$layout$panel_scales_y[[1]]
-
-  # Helper to map discrete x/y values to labels
-  map_discrete <- function(values, scale_obj) {
-    if (scale_obj$is_discrete() && is.numeric(values)) {
-      labels <- scale_obj$get_limits()
-      # Only map if values are integer indices (not continuous)
-      # Check if all non-NA values are whole numbers
-      non_na <- !is.na(values)
-      if (all(values[non_na] == floor(values[non_na]))) {
-        # Values are integers, safe to use as indices
-        result <- rep(NA_character_, length(values))
-        result[non_na] <- labels[values[non_na]]
-        result
-      } else {
-        # Values are continuous, don't map
-        values
-      }
-    } else {
-      values
-    }
-  }
 
   # Extract a single theme element as a plain list for JSON serialization
   extract_theme_element <- function(element_name, theme) {
@@ -174,202 +125,46 @@ as_d3_ir <- function(p, width = 640, height = 400,
 
     # Map discrete x/y values to their labels (only if column exists and has values)
     if ("x" %in% names(df) && !all(is.na(df$x))) {
-      df$x <- map_discrete(df$x, xscale_obj)
+      df$x <- gg2d3_ir_map_discrete(df$x, xscale_obj)
     }
     if ("y" %in% names(df) && !all(is.na(df$y))) {
-      df$y <- map_discrete(df$y, yscale_obj)
+      df$y <- gg2d3_ir_map_discrete(df$y, yscale_obj)
     }
     if ("xmin" %in% names(df) && !all(is.na(df$xmin))) {
-      df$xmin <- map_discrete(df$xmin, xscale_obj)
+      df$xmin <- gg2d3_ir_map_discrete(df$xmin, xscale_obj)
     }
     if ("xmax" %in% names(df) && !all(is.na(df$xmax))) {
-      df$xmax <- map_discrete(df$xmax, xscale_obj)
+      df$xmax <- gg2d3_ir_map_discrete(df$xmax, xscale_obj)
     }
     if ("ymin" %in% names(df) && !all(is.na(df$ymin))) {
-      df$ymin <- map_discrete(df$ymin, yscale_obj)
+      df$ymin <- gg2d3_ir_map_discrete(df$ymin, yscale_obj)
     }
     if ("ymax" %in% names(df) && !all(is.na(df$ymax))) {
-      df$ymax <- map_discrete(df$ymax, yscale_obj)
+      df$ymax <- gg2d3_ir_map_discrete(df$ymax, yscale_obj)
     }
 
-    # --- robust geom name ---
-    gobj  <- b$plot$layers[[i]]$geom
-    gcl_raw <- class(gobj)
-    gcl   <- gcl_raw[1]
-    gname <- switch(gcl,
-                    GeomPoint  = "point",
-                    GeomLine   = "line",
-                    GeomPath   = "path",
-                    GeomCol    = "bar",
-                    GeomBar    = "bar",
-
-                    GeomArea   = "area",
-                    GeomText   = "text",
-                    GeomLabel  = "text",
-                    GeomRect   = "rect",
-                    GeomTile   = "rect",
-                    GeomSegment= "segment",
-                    GeomRibbon = "ribbon",
-                    GeomViolin = "violin",
-                    GeomBoxplot= "boxplot",
-                    GeomDensity= "density",
-                    GeomSmooth = "smooth",
-                    GeomHline  = "hline",
-                    GeomVline  = "vline",
-                    GeomAbline = "abline",
-                    GeomDotplot = "dotplot",
-                    GeomRug    = "rug",
-                    GeomErrorbar = "errorbar",
-                    GeomLinerange = "linerange",
-                    GeomPointrange = "pointrange",
-                    GeomPolygon= "polygon",
-                    GeomSf     = "sf",
-                    GeomSfText = "sf_text",
-                    GeomSfLabel = "sf_label",
-                    # Fallbacks
-                    {
-                      if (!is.null(gobj$objname)) {
-                        gobj$objname
-                      } else {
-                        # strip leading "Geom" and lowercase, e.g. "GeomPoint" -> "point"
-                        sub("^Geom", "", gcl) |>
-                          tolower()
-                      }
-                    }
-    )
-
-    stat_obj <- b$plot$layers[[i]]$stat
-    sf_annotation_tokens <- tolower(c(
-      gname,
-      gcl_raw,
-      if (!is.null(gobj$objname)) gobj$objname else character(),
-      class(stat_obj),
-      if (!is.null(stat_obj$objname)) stat_obj$objname else character()
-    ))
-    uses_sf_coordinates <- any(grepl("statsfcoordinates|sf_coordinates|sfcoordinates", sf_annotation_tokens))
-    if (any(grepl("sf_text|sftext", sf_annotation_tokens)) ||
-        (uses_sf_coordinates && identical(gcl, "GeomText"))) {
-      gname <- "sf_text"
-    } else if (any(grepl("sf_label|sflabel", sf_annotation_tokens)) ||
-               (uses_sf_coordinates && identical(gcl, "GeomLabel"))) {
-      gname <- "sf_label"
-    }
-
-    # columns we keep
-    keep_aes <- c(
-      "PANEL","x","y","xend","yend","xmin","xmax","ymin","ymax",
-      "colour","fill","size","alpha","group","label",
-      "stroke","shape","linewidth","linetype","lineend",
-      "slope","intercept","xintercept","yintercept",
-      # Statistical geom computed columns
-      "lower","middle","upper","outliers","notchupper","notchlower",
-      "width","violinwidth","density","scaled","count","ncount","ndensity",
-      "weight",
-      # Dotplot specific
-      "stackpos","binwidth","countidx",
-      # sf-specific: row index for geometry-aesthetic join (D-06)
-      "row_id",".sf_family"
-    )
-
-    # coerce + rowize (same as your latest version)
-    to_rows <- function(df) {
-      if (is.null(df) || !nrow(df)) return(list())
-      df <- df[, intersect(keep_aes, names(df)), drop = FALSE]
-      col_names <- names(df)
-      df[] <- lapply(col_names, function(colname) {
-        col <- df[[colname]]
-        if (colname == "PANEL") as.integer(col)  # PANEL must be integer
-        else if (is.factor(col)) as.character(col)
-        else if (inherits(col, c("POSIXct","POSIXt"))) as.numeric(col) * 1000
-        else if (inherits(col, "Date")) as.numeric(col) * 86400000
-        else if (is.list(col)) I(col)  # preserve list-columns (e.g., boxplot outliers)
-        else col
-      })
-      names(df) <- col_names
-      rows <- vector("list", nrow(df))
-      for (ii in seq_len(nrow(df))) {
-        r <- lapply(df[ii, , drop = FALSE], function(v) v[[1]])
-        names(r) <- names(df)
-        rows[[ii]] <- r
-      }
-      rows
-    }
-
+    layer_obj <- b$plot$layers[[i]]
+    gcl <- class(layer_obj$geom)[1]
+    gname <- gg2d3_ir_geom_name(layer_obj)
+    keep_aes <- gg2d3_ir_layer_keep_aes()
     cols <- intersect(keep_aes, names(df))
-    aes <- list(
-      x     = if ("x"     %in% cols) "x"     else NULL,
-      y     = if ("y"     %in% cols) "y"     else NULL,
-      xend  = if ("xend"  %in% cols) "xend"  else NULL,
-      yend  = if ("yend"  %in% cols) "yend"  else NULL,
-      xmin  = if ("xmin"  %in% cols) "xmin"  else NULL,
-      xmax  = if ("xmax"  %in% cols) "xmax"  else NULL,
-      ymin  = if ("ymin"  %in% cols) "ymin"  else NULL,
-      ymax  = if ("ymax"  %in% cols) "ymax"  else NULL,
-      color = if ("colour"%in% cols) "colour"else NULL,
-      fill  = if ("fill"  %in% cols) "fill"  else NULL,
-      size  = if ("size"  %in% cols) "size"  else NULL,
-      alpha = if ("alpha" %in% cols) "alpha" else NULL,
-      group = if ("group" %in% cols) "group" else NULL,
-      label = if ("label" %in% cols) "label" else NULL,
-      slope = if ("slope" %in% cols) "slope" else NULL,
-      intercept = if ("intercept" %in% cols) "intercept" else NULL,
-      xintercept = if ("xintercept" %in% cols) "xintercept" else NULL,
-      yintercept = if ("yintercept" %in% cols) "yintercept" else NULL,
-      # Dotplot
-      stackpos = if ("stackpos" %in% cols) "stackpos" else NULL,
-      binwidth = if ("binwidth" %in% cols) "binwidth" else NULL,
-      countidx = if ("countidx" %in% cols) "countidx" else NULL
-    )
+    aes <- gg2d3_ir_layer_aes(cols)
 
     # Convert temporal data columns to milliseconds (ggplot_build strips
     # Date/POSIXct class, leaving plain numeric days or seconds)
     x_tn <- if (!is.null(xscale_obj$trans)) xscale_obj$trans$name else NULL
     y_tn <- if (!is.null(yscale_obj$trans)) yscale_obj$trans$name else NULL
-
-    x_cols <- intersect(c("x", "xmin", "xmax", "xend", "xintercept"), names(df))
-    y_cols <- intersect(c("y", "ymin", "ymax", "yend", "yintercept"), names(df))
-
-    if (!is.null(x_tn) && x_tn == "date") {
-      for (cn in x_cols) if (is.numeric(df[[cn]])) df[[cn]] <- df[[cn]] * 86400000
-    } else if (!is.null(x_tn) && x_tn == "time") {
-      for (cn in x_cols) if (is.numeric(df[[cn]])) df[[cn]] <- df[[cn]] * 1000
-    }
-    if (!is.null(y_tn) && y_tn == "date") {
-      for (cn in y_cols) if (is.numeric(df[[cn]])) df[[cn]] <- df[[cn]] * 86400000
-    } else if (!is.null(y_tn) && y_tn == "time") {
-      for (cn in y_cols) if (is.numeric(df[[cn]])) df[[cn]] <- df[[cn]] * 1000
-    }
-
-    # Build aesthetic -> original variable name map for this layer
-    # (e.g., list(x = "wt", y = "mpg", colour = "factor(cyl)")).
-    # Used to let tooltip users reference original column names instead of
-    # internal aesthetic keys.
-    plot_mapping <- as.list(b$plot$mapping %||% list())
-    layer_mapping <- as.list(b$plot$layers[[i]]$mapping %||% list())
-    combined_mapping <- utils::modifyList(plot_mapping, layer_mapping)
-    var_names <- list()
-    if (length(combined_mapping) > 0) {
-      for (nm in names(combined_mapping)) {
-        label <- tryCatch(
-          rlang::as_label(combined_mapping[[nm]]),
-          error = function(e) NULL
-        )
-        if (!is.null(label) && nzchar(label)) var_names[[nm]] <- label
-      }
-      # ggplot2 normalizes "color" -> "colour" internally
-      if (!is.null(var_names$color) && is.null(var_names$colour)) {
-        var_names$colour <- var_names$color
-      }
-    }
+    df <- gg2d3_ir_apply_temporal_layer_columns(df, x_tn, y_tn)
+    var_names <- gg2d3_ir_var_names(b$plot$mapping, layer_obj$mapping)
 
     # Extract geom-specific parameters
-    g_params <- b$plot$layers[[i]]$aes_params
+    g_params <- layer_obj$aes_params
     if (gcl == "GeomRug") {
-      g_params$sides <- b$plot$layers[[i]]$geom_params$sides
+      g_params$sides <- layer_obj$geom_params$sides
     } else if (gcl == "GeomDotplot") {
-      g_params$method <- b$plot$layers[[i]]$geom_params$method
-      g_params$binaxis <- b$plot$layers[[i]]$geom_params$binaxis
-      g_params$stackdir <- b$plot$layers[[i]]$geom_params$stackdir
+      g_params$method <- layer_obj$geom_params$method
+      g_params$binaxis <- layer_obj$geom_params$binaxis
+      g_params$stackdir <- layer_obj$geom_params$stackdir
     }
 
     if (gname == "sf") {
@@ -402,13 +197,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
       }
       payload$layer
     } else {
-      list(
-        geom   = gname,          # <-- now always a non-NULL string like "point"
-        data   = to_rows(df),
-        aes    = aes,
-        params = g_params,
-        var_names = var_names
-      )
+      gg2d3_ir_non_sf_layer(gname, df, aes, g_params, var_names)
     }
   })
 
