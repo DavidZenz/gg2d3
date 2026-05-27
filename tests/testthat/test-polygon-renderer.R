@@ -63,3 +63,24 @@ test_that("POLY-02 polygon paths participate in path update plumbing", {
   expect_match(update_block, "_polygonPoints")
   expect_match(update_block, "curveLinearClosed")
 })
+
+test_that("GEOM-02 polygon renderer filters invalid points and skips too-small groups", {
+  polygon_js <- read_repo_file("inst/htmlwidgets/modules/geoms/polygon.js")
+
+  expect_match(polygon_js, "function isValidPoint")
+  expect_match(polygon_js, "Number\\.isFinite\\(p\\.x\\)")
+  expect_match(polygon_js, "Number\\.isFinite\\(p\\.y\\)")
+  expect_match(polygon_js, "\\.filter\\(isValidPoint\\)")
+  expect_match(polygon_js, "if \\(pts\\.length < 3\\) return")
+})
+
+test_that("GEOM-02 ordinary polygon renderer does not claim topology repair", {
+  polygon_js <- read_repo_file("inst/htmlwidgets/modules/geoms/polygon.js")
+
+  expect_false(grepl("subgroup", polygon_js, fixed = TRUE))
+  expect_false(grepl("fill-rule", polygon_js, fixed = TRUE))
+  expect_false(grepl("evenodd", polygon_js, fixed = TRUE))
+  expect_false(grepl("topology", polygon_js, fixed = TRUE))
+  expect_false(grepl("repair", polygon_js, fixed = TRUE))
+  expect_false(grepl("intersect", polygon_js, fixed = TRUE))
+})
