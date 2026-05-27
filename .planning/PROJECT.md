@@ -12,6 +12,16 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 v1.12 Quality & Architecture Hardening is complete. gg2d3 now has deterministic opt-in browser visual smoke artifacts, focused IR helper boundaries, renderer/update/interactivity wiring contract coverage, public interaction payload sanitization coverage, transformed rect/tile classification evidence, ordinary polygon topology/subgroup classification, and ordinary text size rendering. Remaining geometry candidates such as full polygon topology repair and ggrepel-style label placement are documented future work rather than implied support.
 
+## Current Milestone: v1.13 Regression & Release Polish
+
+**Goal:** Turn the new validation and architecture foundations into release-ready regression confidence while closing the next practical geometry polish gaps.
+
+**Target features:**
+- CI-ready visual and DOM regression coverage built on the v1.12 browser smoke artifact contract.
+- Deeper renderer and IR architecture consolidation around declarative geom contracts and remaining high-risk helper boundaries.
+- Focused geometry polish for label boxes, transformed rect/tile scale semantics, ordinary polygon subgroup/hole behavior, and text placement deferrals.
+- Release-facing documentation, validation gates, and package-site/readiness polish that describe the v1.13 support contract without overclaiming.
+
 ## Last Shipped Milestone: v1.12 Quality & Architecture Hardening
 
 **Goal:** Make gg2d3 easier to trust and extend by adding visual/browser regression coverage, reducing renderer/IR maintenance burden, and closing high-value geometry polish gaps.
@@ -124,7 +134,7 @@ v1.12 Quality & Architecture Hardening is complete. gg2d3 now has deterministic 
 
 ### Active
 
-- No active requirements. v1.12 is archived and the project is ready for the next milestone cycle.
+- v1.13 requirements for CI/browser regression confidence, renderer/IR architecture consolidation, selected geometry polish, and release-facing documentation/readiness.
 
 ### Out of Scope
 
@@ -218,4 +228,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 after completing v1.12 Quality & Architecture Hardening*
+*Last updated: 2026-05-27 after starting v1.13 Regression & Release Polish*

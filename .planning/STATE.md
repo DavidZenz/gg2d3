@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.12
-milestone_name: Quality & Architecture Hardening
-status: completed
-stopped_at: Archived v1.12 milestone
-last_updated: "2026-05-27T07:36:01.031Z"
-last_activity: 2026-05-27 -- Archived v1.12 Quality & Architecture Hardening
+milestone: v1.13
+milestone_name: Regression & Release Polish
+status: defining_requirements
+stopped_at: Started v1.13 milestone
+last_updated: "2026-05-27T08:00:00.000Z"
+last_activity: 2026-05-27 -- Started v1.13 Regression & Release Polish
 progress:
   total_phases: 4
-  completed_phases: 4
-  total_plans: 13
-  completed_plans: 13
-  percent: 100
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-27)
 
 **Core value:** Any ggplot2 plot should render identically in D3 -- same visual output, but now interactive and web-native.
-**Current focus:** Planning next milestone
+**Current focus:** v1.13 — Regression & Release Polish
 
 ## Current Position
 
-Phase: None
-Plan: Not started
-Status: v1.12 milestone archived
-Last activity: 2026-05-27 -- Archived v1.12 Quality & Architecture Hardening
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-27 -- Started v1.13 Regression & Release Polish
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 13 in v1.12
+- Total plans completed: 0 in v1.13
 - Average duration: Not recalculated for v1.12
 - Total execution time: Not tracked
 
@@ -44,10 +44,10 @@ Progress: [██████████] 100%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 48 | 3/3 | - | - |
-| 49 | 3/3 | - | - |
-| 50 | 3/3 | - | - |
-| 51 | 4/4 | - | - |
+| 52 | 0/? | - | - |
+| 53 | 0/? | - | - |
+| 54 | 0/? | - | - |
+| 55 | 0/? | - | - |
 
 *Updated after each plan completion*
 
@@ -85,9 +85,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: Archived v1.12 milestone
-Stopped at: Archived v1.12 milestone
-Resume file: .planning/MILESTONES.md
+Last session: Started v1.13 milestone
+Stopped at: Started v1.13 milestone
+Resume file: .planning/PROJECT.md
 
 **Completed Milestone:** v1.11 Geometry Parity -- 2026-05-25
 **Started Milestone:** v1.12 Quality & Architecture Hardening -- 2026-05-25
@@ -120,3 +120,7 @@ Resume file: .planning/MILESTONES.md
 **Completed Plan:** 51-04 (Geometry Edge-Case Classification And Polish) — final validation evidence and geometry-polish contract — 2026-05-27T05:54:11Z
 
 **Completed Phase:** 51 (Geometry Edge-Case Classification And Polish) — GEOM-01, GEOM-02, and GEOM-03 covered — 2026-05-27T06:03:00Z
+
+**Completed Milestone:** v1.12 Quality & Architecture Hardening -- 2026-05-27
+
+**Started Milestone:** v1.13 Regression & Release Polish -- 2026-05-27
