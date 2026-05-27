@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.12
 milestone_name: Quality & Architecture Hardening
-status: executing
-stopped_at: Completed 51-04-PLAN.md
-last_updated: "2026-05-27T05:54:11.000Z"
-last_activity: 2026-05-27 -- Completed Phase 51 plan 04 final validation
+status: milestone_complete
+stopped_at: Completed Phase 51 verification
+last_updated: "2026-05-27T06:04:00.000Z"
+last_activity: 2026-05-27 -- Completed Phase 51 geometry polish verification
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 13
   completed_plans: 13
   percent: 100
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-25)
 
 **Core value:** Any ggplot2 plot should render identically in D3 -- same visual output, but now interactive and web-native.
-**Current focus:** Phase 51 — Geometry Edge-Case Classification And Polish
+**Current focus:** v1.12 milestone complete
 
 ## Current Position
 
-Phase: 51 (Geometry Edge-Case Classification And Polish) — EXECUTING
+Phase: 51 (Geometry Edge-Case Classification And Polish) — COMPLETE
 Plan: 4 of 4
-Status: Ready for Phase 51 verification
-Last activity: 2026-05-27 -- Completed Phase 51 plan 04 final validation
+Status: Milestone complete
+Last activity: 2026-05-27 -- Completed Phase 51 geometry polish verification
 
 Progress: [██████████] 100%
 
@@ -36,7 +36,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 11 in v1.11
+- Total plans completed: 13 in v1.12
 - Average duration: Not recalculated for v1.12
 - Total execution time: Not tracked
 
@@ -78,22 +78,22 @@ Items acknowledged and carried forward from previous milestone close:
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| Validation | Screenshot or perceptual regression coverage for representative browser-rendered plots | Active in Phase 48 | v1.11 |
-| Architecture | Broader `as_d3_ir()` modularization beyond sf helper boundaries | Active in Phase 49 | v1.11 |
+| Validation | Screenshot or perceptual regression coverage for representative browser-rendered plots | Completed in Phase 48 | v1.11 |
+| Architecture | Broader `as_d3_ir()` modularization beyond sf helper boundaries | Completed in Phase 49 | v1.11 |
 | Architecture | Duplication around geom registration, update handlers, and interaction selectors | Completed in Phase 50 | v1.11 |
-| Geometry | Transformed-scale rect/tile behavior, polygon topology, and text/label placement polish | Active in Phase 51 | v1.11 |
+| Geometry | Transformed-scale rect/tile behavior, polygon topology, and text/label placement polish | Completed in Phase 51 | v1.11 |
 
 ## Session Continuity
 
-Last session: Completed 51-04-PLAN.md
-Stopped at: Completed 51-04-PLAN.md
-Resume file: .planning/phases/51-geometry-edge-case-classification-and-polish/51-VALIDATION.md
+Last session: Completed Phase 51 verification
+Stopped at: Completed Phase 51 verification
+Resume file: .planning/phases/51-geometry-edge-case-classification-and-polish/51-VERIFICATION.md
 
 **Completed Milestone:** v1.11 Geometry Parity -- 2026-05-25
 **Started Milestone:** v1.12 Quality & Architecture Hardening -- 2026-05-25
 **Planned Milestone:** v1.12 Quality & Architecture Hardening -- 4 phases -- 2026-05-25
 **Discussed Phase:** 48 (Browser Visual Smoke Coverage) -- context ready -- 2026-05-25
-**Next Step:** Run `$gsd-execute-phase 51`
+**Next Step:** Run `$gsd-complete-milestone` or `$gsd-new-milestone`
 
 **Phase 48 Verification:** Browser visual smoke verification passed -- 2026-05-26T07:28:32Z
 
@@ -118,3 +118,5 @@ Resume file: .planning/phases/51-geometry-edge-case-classification-and-polish/51
 **Completed Phase:** 50 (Renderer Wiring And Interaction Contracts) — ARCH-02 and ARCH-03 covered — 2026-05-26T19:52:19Z
 
 **Completed Plan:** 51-04 (Geometry Edge-Case Classification And Polish) — final validation evidence and geometry-polish contract — 2026-05-27T05:54:11Z
+
+**Completed Phase:** 51 (Geometry Edge-Case Classification And Polish) — GEOM-01, GEOM-02, and GEOM-03 covered — 2026-05-27T06:03:00Z

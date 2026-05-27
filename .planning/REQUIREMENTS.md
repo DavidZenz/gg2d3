@@ -14,8 +14,8 @@
 ### Architecture Maintainability
 
 - [x] **ARCH-01**: High-risk `as_d3_ir()` responsibilities are split or isolated behind focused helper boundaries without changing representative IR output.
-- [ ] **ARCH-02**: Geom registration, update handlers, and interactivity selectors are less duplication-prone, with tests that fail when a supported geom is missing expected renderer or interaction wiring.
-- [ ] **ARCH-03**: Public interaction payload sanitization remains consistent across registered geoms, including ordinary polygons and sf text/label annotations.
+- [x] **ARCH-02**: Geom registration, update handlers, and interactivity selectors are less duplication-prone, with tests that fail when a supported geom is missing expected renderer or interaction wiring.
+- [x] **ARCH-03**: Public interaction payload sanitization remains consistent across registered geoms, including ordinary polygons and sf text/label annotations.
 
 ### Geometry Polish
 
@@ -62,8 +62,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VIS-02 | Phase 48 | Complete |
 | VIS-03 | Phase 48 | Complete |
 | ARCH-01 | Phase 49 | Complete |
-| ARCH-02 | Phase 50 | Pending |
-| ARCH-03 | Phase 50 | Pending |
+| ARCH-02 | Phase 50 | Complete |
+| ARCH-03 | Phase 50 | Complete |
 | GEOM-01 | Phase 51 | Complete |
 | GEOM-02 | Phase 51 | Complete |
 | GEOM-03 | Phase 51 | Complete |
