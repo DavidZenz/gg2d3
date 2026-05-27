@@ -23,6 +23,12 @@ ir_bound_na_matrix <- function(rows) {
   }))
 }
 
+ir_bound_value_matrix <- function(rows) {
+  do.call(rbind, lapply(rows, function(row) {
+    as.numeric(unlist(row[rect_bounds], use.names = FALSE))
+  }))
+}
+
 classify_rect_ir_case <- function(plot) {
   built <- ggplot2::ggplot_build(plot)$data[[1]]
   ir <- as_d3_ir(plot)
@@ -145,4 +151,87 @@ test_that("RECT-01 faceted rects keep PANEL values across panels", {
   expect_true(length(panels) >= 2L)
   expect_true(all(case$built_complete))
   expect_true(all(case$ir_complete))
+})
+
+test_that("GEOM-01 log10 rect bounds mirror ggplot2 built transformed bounds", {
+  plot <- ggplot(
+    data.frame(
+      xmin = c(10, 100),
+      xmax = c(20, 200),
+      ymin = c(10, 100),
+      ymax = c(20, 200)
+    ),
+    aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)
+  ) +
+    geom_rect(fill = "#6699cc", colour = "#2f3e46") +
+    scale_x_log10() +
+    scale_y_log10()
+
+  case <- classify_rect_ir_case(plot)
+
+  expect_equal(case$ir$scales$x$transform, "log10")
+  expect_equal(case$ir$scales$y$transform, "log10")
+  expect_equal(unname(ir_bound_value_matrix(case$layer$data)), unname(as.matrix(case$built[, rect_bounds])), tolerance = 1e-8)
+  expect_true(all(case$ir_complete))
+})
+
+test_that("GEOM-01 sqrt tile bounds mirror ggplot2 built transformed bounds", {
+  plot <- ggplot(
+    data.frame(x = c(1, 4), y = c(9, 16)),
+    aes(x = x, y = y)
+  ) +
+    geom_tile(fill = "#d9a441", colour = "#5f4b32") +
+    scale_x_sqrt() +
+    scale_y_sqrt()
+
+  case <- classify_rect_ir_case(plot)
+
+  expect_equal(case$ir$scales$x$transform, "sqrt")
+  expect_equal(case$ir$scales$y$transform, "sqrt")
+  expect_equal(unname(ir_bound_value_matrix(case$layer$data)), unname(as.matrix(case$built[, rect_bounds])), tolerance = 1e-8)
+  expect_true(all(case$ir_complete))
+})
+
+test_that("GEOM-01 reverse rect x and y bounds mirror ggplot2 built transformed bounds", {
+  plot <- ggplot(
+    data.frame(
+      xmin = c(1, 3),
+      xmax = c(2, 4),
+      ymin = c(2, 4),
+      ymax = c(3, 5)
+    ),
+    aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)
+  ) +
+    geom_rect(fill = "#b56576", colour = "#5f0f40") +
+    scale_x_reverse() +
+    scale_y_reverse()
+
+  case <- classify_rect_ir_case(plot)
+
+  expect_equal(case$ir$scales$x$transform, "reverse")
+  expect_equal(case$ir$scales$y$transform, "reverse")
+  expect_equal(unname(ir_bound_value_matrix(case$layer$data)), unname(as.matrix(case$built[, rect_bounds])), tolerance = 1e-8)
+  expect_true(all(case$ir_complete))
+})
+
+test_that("GEOM-01 non-positive log rect bounds are censored before IR rendering", {
+  plot <- ggplot(
+    data.frame(
+      xmin = c(-1, 10),
+      xmax = c(10, 100),
+      ymin = c(10, 100),
+      ymax = c(20, 200)
+    ),
+    aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)
+  ) +
+    geom_rect(fill = "#6699cc", colour = "#2f3e46") +
+    scale_x_log10() +
+    scale_y_log10()
+
+  case <- suppressWarnings(classify_rect_ir_case(plot))
+
+  expect_true(any(!case$built_complete))
+  expect_equal(case$ir_complete, case$built_complete)
+  expect_equal(unname(is.na(as.matrix(case$built[, rect_bounds]))), unname(ir_bound_na_matrix(case$layer$data)))
+  expect_equal(unname(ir_bound_value_matrix(case$layer$data)), unname(as.matrix(case$built[, rect_bounds])), tolerance = 1e-8)
 })
