@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.11 Geometry Parity is shipped and archived. gg2d3 now supports ordinary `geom_polygon()` as grouped closed D3 paths, closes the documented rect/tile edge-behavior gap with classification evidence and D3-boundary fixes, and supports `geom_sf_text()` / `geom_sf_label()` at projected anchors with existing sanitized interaction contracts. Public docs, roxygen/generated help, diagnostics, and validation evidence now describe that v1.11 geometry support contract. The next focus is v1.12 quality and architecture hardening: visual/browser regression confidence, renderer maintainability, and selected geometry polish.
+v1.12 Quality & Architecture Hardening is complete. gg2d3 now has deterministic opt-in browser visual smoke artifacts, focused IR helper boundaries, renderer/update/interactivity wiring contract coverage, public interaction payload sanitization coverage, transformed rect/tile classification evidence, ordinary polygon topology/subgroup classification, and ordinary text size rendering. Remaining geometry candidates such as full polygon topology repair and ggrepel-style label placement are documented future work rather than implied support.
 
 ## Current Milestone: v1.12 Quality & Architecture Hardening
 
@@ -117,10 +117,14 @@ v1.11 Geometry Parity is shipped and archived. gg2d3 now supports ordinary `geom
 - ✓ Rect/tile edge behavior fixture matrix, ggplot2-compatible non-issue classification, categorical tile renderer fixes, update-path parity fixes, and diagnostics closure — v1.11 Phase 45
 - ✓ `geom_sf_text()` and `geom_sf_label()` IR extraction, projected-anchor D3 rendering, facets/skipped-row coverage, and sanitized interaction contracts — v1.11 Phase 46
 - ✓ Geometry parity documentation and validation handoff across README, vignettes, diagnostics, roxygen/generated help, and validation evidence — v1.11 Phase 47
+- ✓ Deterministic opt-in browser visual smoke coverage for representative Cartesian, facet, interactivity, polygon, sf, and sf annotation surfaces with explicit optional dependency skips — v1.12 Phase 48
+- ✓ High-risk `as_d3_ir()` helper boundaries isolated with representative IR behavior preserved — v1.12 Phase 49
+- ✓ Renderer registration, update-handler, interactivity-selector, and public payload sanitization contracts covered for registered geoms, ordinary polygons, and sf text/label annotations — v1.12 Phase 50
+- ✓ Geometry edge-case classification and polish for transformed rect/tile behavior, ordinary polygon subgroup/topology boundaries, and ordinary text size rendering with explicit label/topology deferrals — v1.12 Phase 51
 
 ### Active
 
-- v1.12 requirements for visual/browser regression confidence, renderer/IR maintainability, and selected geometry polish.
+- No active requirements. v1.12 is ready for milestone archival and the next milestone cycle.
 
 ### Out of Scope
 
@@ -208,4 +212,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-25 after starting v1.12 Quality & Architecture Hardening*
+*Last updated: 2026-05-27 after completing v1.12 Quality & Architecture Hardening*
