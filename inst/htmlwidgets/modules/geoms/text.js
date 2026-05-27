@@ -45,6 +45,17 @@
     const isYBand = typeof yScale.bandwidth === "function";
     const flip = !!options.flip;
 
+    function textSize(d) {
+      const constants = window.gg2d3.constants || {};
+      const pxPerMm = constants.PX_PER_MM || 3.7795275591;
+      const params = layer.params || {};
+      let sizeVal = val(get(d, "size"));
+      if (sizeVal == null && params.size != null) sizeVal = params.size;
+      if (sizeVal == null) return "10px";
+      const px = +sizeVal * pxPerMm;
+      return Number.isFinite(px) ? Math.max(1, px) + "px" : "10px";
+    }
+
     // Helper: get pixel position from scale + value, centering for band scales
     function scalePos(scale, v, isBand) {
       return isBand ? scale(v) + scale.bandwidth() / 2 : scale(v);
@@ -83,7 +94,7 @@
       .text(d => val(get(d, aes.label)))
       .attr("fill", d => strokeColor(d))
       .attr("opacity", d => opacity(d))
-      .style("font-size", "10px");
+      .style("font-size", d => textSize(d));
 
     return txt.length;
   }

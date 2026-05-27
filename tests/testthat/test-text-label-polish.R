@@ -48,13 +48,16 @@ test_that("GEOM-03 ordinary geom_label currently maps to text IR without label b
   expect_false(grepl("label-box", text_js, fixed = TRUE))
 })
 
-test_that("GEOM-03 ordinary text renderer baseline is centered fixed-size SVG text", {
+test_that("GEOM-03 ordinary text renderer is centered SVG text with mapped size support", {
   text_js <- read_repo_file("inst/htmlwidgets/modules/geoms/text.js")
 
   expect_match(text_js, "text\\.geom-text|geom-text")
   expect_match(text_js, "dominant-baseline\", \"middle\"")
   expect_match(text_js, "text-anchor\", \"middle\"")
-  expect_match(text_js, "font-size\", \"10px\"")
+  expect_match(text_js, "function textSize")
+  expect_match(text_js, "PX_PER_MM")
+  expect_match(text_js, "val\\(get\\(d, \"size\"\\)\\)")
+  expect_match(text_js, "font-size\", d => textSize\\(d\\)")
 })
 
 test_that("GEOM-03 ordinary text renderer does not implement collision or path-following placement", {
