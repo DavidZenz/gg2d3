@@ -12,11 +12,11 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 v1.12 Quality & Architecture Hardening is complete. gg2d3 now has deterministic opt-in browser visual smoke artifacts, focused IR helper boundaries, renderer/update/interactivity wiring contract coverage, public interaction payload sanitization coverage, transformed rect/tile classification evidence, ordinary polygon topology/subgroup classification, and ordinary text size rendering. Remaining geometry candidates such as full polygon topology repair and ggrepel-style label placement are documented future work rather than implied support.
 
-## Current Milestone: v1.12 Quality & Architecture Hardening
+## Last Shipped Milestone: v1.12 Quality & Architecture Hardening
 
 **Goal:** Make gg2d3 easier to trust and extend by adding visual/browser regression coverage, reducing renderer/IR maintenance burden, and closing high-value geometry polish gaps.
 
-**Target features:**
+**Shipped features:**
 - Screenshot or perceptual regression coverage for representative browser-rendered plots, with explicit skip semantics for optional local browser dependencies.
 - Renderer and IR architecture cleanup that reduces maintenance risk around the monolithic `as_d3_ir()` path, geom registration, update handlers, and interactivity selectors.
 - Selected geometry polish for known deferred gaps such as transformed-scale rect/tile behavior, polygon topology/hole behavior, label collision avoidance, or path-following annotations.
@@ -124,7 +124,7 @@ v1.12 Quality & Architecture Hardening is complete. gg2d3 now has deterministic 
 
 ### Active
 
-- No active requirements. v1.12 is ready for milestone archival and the next milestone cycle.
+- No active requirements. v1.12 is archived and the project is ready for the next milestone cycle.
 
 ### Out of Scope
 
@@ -138,13 +138,14 @@ v1.12 Quality & Architecture Hardening is complete. gg2d3 now has deterministic 
 
 ## Context
 
-gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus production polygon-family `geom_sf()` support. R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, D3 renders SVG through a registry-based geom dispatch system, and htmlwidgets bridges the browser output. The package supports 25 non-sf geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, non-Cartesian coordinates, a composable pipe-based interactivity API, and polygon-first sf rendering with tooltip, hover, handler, centroid brush, stacked-layer alignment, and faceted panel projection behavior.
+gg2d3 shipped v1.12 with a mature three-layer pipeline (R → IR → D3), production polygon/point/line-family `geom_sf()` support, ordinary polygon rendering, sf text/label annotations, deterministic opt-in browser visual smoke artifacts, and architecture hardening around high-risk IR and renderer/interactivity boundaries. R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, D3 renders SVG through a registry-based geom dispatch system, and htmlwidgets bridges the browser output. The package supports 25 non-sf geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, non-Cartesian coordinates, a composable pipe-based interactivity API, and polygon-first sf rendering with tooltip, hover, handler, centroid brush, stacked-layer alignment, and faceted panel projection behavior.
 
 **Known tech debt:**
-- Monolithic `as_d3_ir()` function (~1000 lines) still needs broader modularization beyond the extracted sf helper boundaries
-- Private ggplot2 theme access remains necessary but is quarantined in `R/ggplot2_compat.R` behind compatibility helpers
-- Transform-scale rect/tile edge parity, polygon topology/hole repair beyond grouped closed paths, ggrepel-style collision avoidance, and path-following text remain future geometry candidates.
-- Browser-side sf behavior now has DOM-level smoke harness coverage; live Chrome execution still depends on optional local browser dependencies
+- `as_d3_ir()` now has focused helper boundaries, but broader modularization beyond the high-risk helper slices remains future work.
+- Private ggplot2 theme access remains necessary but is quarantined in `R/ggplot2_compat.R` behind compatibility helpers.
+- Transform-scale rect/tile edge parity is classified at the shared scale factory / axis semantics boundary rather than fixed by a rect-only renderer change.
+- Polygon topology/hole repair beyond grouped closed paths, ggrepel-style collision avoidance, label boxes, and path-following text remain future geometry candidates.
+- Browser visual smoke has deterministic local artifacts and explicit skips; live Chrome execution still depends on optional local browser dependencies.
 
 ## Constraints
 
@@ -193,6 +194,11 @@ gg2d3 shipped v1.8 with a mature three-layer pipeline (R → IR → D3) plus pro
 | rect/tile edge closure boundary | Rect/tile out-of-bounds behavior should be classified against ggplot2 built data first, fixed only at the implicated D3 renderer/update boundary, and closed as non-issue where panel clipping or scale-limit censoring is expected | ✓ Good — implemented and verified in Phase 45 |
 | sf annotation anchor contract | `geom_sf_text()` and `geom_sf_label()` should render projected anchors aligned with existing sf panel projection metadata rather than adding ggrepel or path-following placement in the first pass | ✓ Good — implemented and verified in Phase 46 |
 | source-first geometry support documentation | README, vignettes, roxygen source, generated help, and diagnostics should describe shipped geometry parity with adjacent caveats and validation evidence | ✓ Good — implemented and verified in Phase 47 |
+| opt-in browser visual smoke artifacts | Browser validation should use local chromote-backed artifacts with explicit dependency skips before introducing CI/pixel-diff enforcement | ✓ Good — implemented and verified in Phase 48 |
+| high-risk IR helper boundaries first | v1.12 should isolate scale, layer, facet, and panel responsibilities without attempting a full `as_d3_ir()` rewrite | ✓ Good — implemented and verified in Phase 49 |
+| internal geom contracts for wiring | Renderer registration, update handling, and interactivity selectors should be guarded by source contracts so missing wiring fails tests | ✓ Good — implemented and verified in Phase 50 |
+| shared public datum sanitizer | Tooltip, hover, Shiny-style handler, and brush payload paths should share private-field stripping instead of duplicating sanitization | ✓ Good — implemented and verified in Phase 50 |
+| evidence-driven geometry polish | Rect/tile transforms, polygon topology, and text/label candidates should be classified against ggplot2/source behavior before claiming support or fixing local renderers | ✓ Good — implemented and verified in Phase 51 |
 
 ## Evolution
 

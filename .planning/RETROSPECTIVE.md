@@ -2,6 +2,44 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.12 — Quality & Architecture Hardening
+
+**Shipped:** 2026-05-27
+**Phases:** 4 | **Plans:** 13
+
+### What Was Built
+- Deterministic opt-in browser visual smoke coverage now produces local HTML, screenshot, DOM summary, browser-log, and report artifacts with explicit optional dependency skip behavior.
+- High-risk `as_d3_ir()` responsibilities now have focused helper boundaries for scale metadata, layer rowization, and facet/panel metadata while preserving representative IR behavior.
+- Renderer registration, update handlers, interactivity selectors, and public payload sanitization now have source-contract coverage across registered geoms, ordinary polygons, and sf text/label annotations.
+- Geometry edge cases were classified and polished: transformed rect/tile behavior is documented at the shared scale semantics boundary, ordinary polygon subgroup/topology behavior is tested without overclaiming GIS repair, and ordinary `geom_text(size=...)` now renders through the D3 text renderer.
+
+### What Worked
+- Starting with browser visual smoke coverage gave later architecture and geometry work a concrete rendered-artifact safety net.
+- Source-contract tests were a good fit for JavaScript wiring and renderer boundary checks that do not need live browser execution.
+- Evidence-first classification kept Phase 51 from turning broad topology and label-placement ideas into accidental support claims.
+
+### What Was Inefficient
+- The milestone close still needed manual cleanup because `gsd-sdk query milestone.complete` is miswired for this command and the direct CJS fallback only handles the mechanical archive portion.
+- The open-artifact audit reported a passed UAT file as an item requiring a decision, which needed interpretation before closeout.
+- Requirements and state metadata lagged behind completed Phase 50 until the final Phase 51 closeout pass corrected them.
+
+### Patterns Established
+- Browser smoke should stay opt-in locally until artifact stability and optional dependency behavior are boring enough for CI.
+- Renderer/interactivity wiring benefits from an internal geom contract table plus source tests that catch omissions early.
+- Geometry polish phases should separate "shipped support" from "classified non-goal" in tests, diagnostics, and validation notes.
+
+### Key Lessons
+1. Milestone close should treat passed UAT artifacts with zero pending scenarios as resolved, even if the audit tool reports their presence.
+2. SDK archive helpers are useful but not sufficient; ROADMAP collapse, PROJECT evolution, and retrospective writing need a deliberate pass.
+3. Small renderer improvements, such as ordinary text size, are safest when they follow an already-shipped convention from a neighboring renderer.
+
+### Cost Observations
+- Model mix: not tracked.
+- Sessions: one concentrated GSD run across Phase 48-51 execution and closeout from 2026-05-25 to 2026-05-27.
+- Notable: Most rework came from planning metadata and archive tooling quirks rather than code uncertainty.
+
+---
+
 ## Milestone: v1.11 — Geometry Parity
 
 **Shipped:** 2026-05-25
@@ -190,6 +228,7 @@
 
 | Milestone | Phases | Plans | Key Pattern |
 |-----------|--------|-------|-------------|
+| v1.12 | 4 | 13 | Visual smoke → helper boundaries → renderer contracts → geometry classification |
 | v1.11 | 4 | 11 | Geometry parity bundle → source contracts → docs/validation handoff |
 | v1.10 | 4 | 10 | Release hardening → evidence-driven docs → archive hygiene |
 | v1.8 | 4 | 11 | Research handoff → production implementation → docs/validation hardening |
@@ -203,10 +242,11 @@
 - Validation metadata can become stale even when phase verification passes
 - Milestone closeout tooling can leave stale state or noisy summaries that need human review before archive commits
 - Optional browser/spatial dependencies need explicit skip semantics to avoid ambiguity in milestone evidence
+- SDK query wrappers may lag direct CJS commands; inspect the underlying workflow/tool before assuming an archive failure means the task is blocked
 
 ### What to Watch
 
 - As geom count grows (25+), INTERACTIVE_SELECTORS maintenance becomes a scaling concern — consider auto-registration pattern
 - Spatial support should not expand into GIS-engine behavior without explicit product intent and validation budget
-- Browser-side sf behavior would benefit from an automated DOM smoke layer before adding more geometry types
+- Browser visual smoke artifacts are now available locally; the next risk frontier is whether they are stable enough for CI-hosted screenshot or DOM regression checks
 - Generated documentation changes should be paired with stale-claim scans before milestone close

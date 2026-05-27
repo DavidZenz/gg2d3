@@ -1,5 +1,37 @@
 # Milestones
 
+## v1.12 Quality & Architecture Hardening (Shipped: 2026-05-27)
+
+**Phases completed:** 4 phases, 13 plans, 31 tasks
+
+**Delivered:** Quality and architecture hardening for browser visual confidence, IR helper boundaries, renderer/interactivity contracts, and geometry edge-case classification.
+
+**Key accomplishments:**
+
+- Shared browser visual smoke helper for opt-in screenshots, DOM summaries, browser logs, and local reports
+- Opt-in browser visual smoke matrix covering Cartesian, facet, interactivity, polygon, sf, and sf annotation surfaces
+- Maintainer diagnostics now document the browser visual smoke command, artifact bundle, coverage, and skip behavior
+- Layer rowization, geom dispatch, aesthetic maps, var-name maps, and ordinary layer assembly now live behind internal helpers.
+- Facet and panel metadata construction now lives behind internal helpers with final Phase 49 validation coverage.
+- Internal geom contract metadata with source tests that guard renderer aliases and update selector coverage
+- Event, brush, and crosstalk selectors now derive from internal geom contracts with tests guarding polygon, sf, and module-specific coverage
+- Shared public datum sanitizer now strips renderer-private fields across tooltip, event, Shiny, and brush payload paths with final validation evidence recorded
+- Transformed rect/tile bounds are classified against ggplot2 built data, with the remaining parity issue recorded as shared scale semantics rather than a rect-only fix.
+- Ordinary polygon topology is classified as grouped closed-path behavior, with `subgroup` holes and topology repair explicitly outside the current contract.
+- Ordinary text/label behavior is classified, and `geom_text(size=...)` now renders through the ordinary D3 text renderer instead of always using `10px`.
+- Phase 51 validation evidence is executed and recorded, including focused geometry suites, expected browser-smoke skip behavior, and the final support/non-goal contract.
+
+**Stats:**
+
+- 53 files changed across code, tests, docs, and planning artifacts in the milestone diff
+- 5,485 insertions / 361 deletions in the milestone diff
+- 4 phases, 13 plans, 31 tasks
+- 2 days from first v1.12 phase context to archive
+
+**Known deferred items at close:** 0 open GSD blockers. The pre-close artifact audit reported the Phase 48 human UAT file, but it is `status: passed` with 0 pending scenarios and 0 gaps. No formal `v1.12-MILESTONE-AUDIT.md` was present; closeout relied on the clear open-artifact audit, phase verification reports, and code review artifacts.
+
+---
+
 ## v1.11 Geometry Parity (Shipped: 2026-05-25)
 
 **Phases completed:** 4 phases, 11 plans, 29 tasks
@@ -21,6 +53,7 @@
 - Representative geometry parity evidence matrix with source-command outcomes, optional browser skip semantics, and future-risk handoff for v1.11
 
 **Stats:**
+
 - 95 files changed across code, tests, docs, and planning artifacts
 - 12,358 insertions / 334 deletions in the milestone diff
 - 4 phases, 11 plans, 29 tasks
