@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: Regression & Release Polish
-status: defining_requirements
-stopped_at: Started v1.13 milestone
+status: planned
+stopped_at: Created v1.13 roadmap
 last_updated: "2026-05-27T08:00:00.000Z"
-last_activity: 2026-05-27 -- Started v1.13 Regression & Release Polish
+last_activity: 2026-05-27 -- Created v1.13 Regression & Release Polish roadmap
 progress:
   total_phases: 4
   completed_phases: 0
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-05-27)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 52 (CI Visual Regression Foundation)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-27 -- Started v1.13 Regression & Release Polish
+Status: Ready to discuss Phase 52
+Last activity: 2026-05-27 -- Created v1.13 Regression & Release Polish roadmap
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -85,9 +85,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: Started v1.13 milestone
-Stopped at: Started v1.13 milestone
-Resume file: .planning/PROJECT.md
+Last session: Created v1.13 roadmap
+Stopped at: Created v1.13 roadmap
+Resume file: .planning/ROADMAP.md
 
 **Completed Milestone:** v1.11 Geometry Parity -- 2026-05-25
 **Started Milestone:** v1.12 Quality & Architecture Hardening -- 2026-05-25
@@ -124,3 +124,5 @@ Resume file: .planning/PROJECT.md
 **Completed Milestone:** v1.12 Quality & Architecture Hardening -- 2026-05-27
 
 **Started Milestone:** v1.13 Regression & Release Polish -- 2026-05-27
+
+**Planned Milestone:** v1.13 Regression & Release Polish -- 4 phases -- 2026-05-27
