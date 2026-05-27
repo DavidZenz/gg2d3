@@ -95,7 +95,11 @@ Plans:
   3. Unsupported polygon topology cases are documented without implying full GIS topology repair.
   4. Text and label collision/path-following candidates have either a small verified improvement or an implementation-ready deferral note with evidence.
   5. Diagnostics or validation notes summarize the final geometry-polish contract for future milestone planning.
-**Plans**: TBD
+**Plans**:
+- [x] 51-01-PLAN.md — Transformed rect/tile scale-boundary classification.
+- [x] 51-02-PLAN.md — Ordinary polygon topology and subgroup/hole contract classification.
+- [x] 51-03-PLAN.md — Ordinary text/label polish scope and text size rendering.
+- [x] 51-04-PLAN.md — Final validation evidence and geometry-polish contract.
 
 ## Progress
 

@@ -18,7 +18,7 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-25)
+See: .planning/PROJECT.md (updated 2026-05-27)
 
 **Core value:** Any ggplot2 plot should render identically in D3 -- same visual output, but now interactive and web-native.
 **Current focus:** v1.12 milestone complete
