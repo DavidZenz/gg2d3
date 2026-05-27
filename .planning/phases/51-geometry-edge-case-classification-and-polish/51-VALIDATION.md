@@ -74,6 +74,14 @@ rtk git diff --check
 - Chrome/Chromium or Chromote launch failures are acceptable only when recorded explicitly and source/IR tests have passed.
 - sf annotation checks may skip when `{sf}` or `geojsonsf` is unavailable.
 
+## Interim Execution Notes
+
+### GEOM-01 Transformed Rect/Tile Boundary
+
+Plan 51-01 classified transformed rect/tile bounds as ggplot2-built values already copied into the IR. The renderer and update paths currently scale those bounds directly, while `scales.js` creates transformed D3 scales from transformed IR domains for log, sqrt, and reverse scales.
+
+That is a scale factory / axis semantics boundary, not a rect-only renderer fix. Phase 51 records this as an explicit non-goal for local rect/tile code unless a later validation pass identifies a smaller boundary. The source-contract tests in `tests/testthat/test-rect-tile-renderer.R` make this seam visible so future work can address it deliberately.
+
 ## Validation Sign-Off
 
 - [x] All planned tasks have automated verification commands.

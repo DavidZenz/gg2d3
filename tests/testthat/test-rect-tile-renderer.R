@@ -14,7 +14,18 @@ source_block_after <- function(source, marker) {
 }
 
 classification_notes <- function() {
-  read_repo_file(".planning/phases/45-rect-and-tile-edge-closure/45-RECT-TILE-CLASSIFICATION.md")
+  candidates <- c(
+    ".planning/phases/45-rect-and-tile-edge-closure/45-RECT-TILE-CLASSIFICATION.md",
+    ".planning/milestones/v1.11-phases/45-rect-and-tile-edge-closure/45-RECT-TILE-CLASSIFICATION.md"
+  )
+  existing <- candidates[file.exists(candidates)]
+  if (length(existing) == 0L) {
+    existing <- file.path("..", "..", candidates)[file.exists(file.path("..", "..", candidates))]
+  }
+  if (length(existing) == 0L) {
+    stop("Could not find Phase 45 rect/tile classification notes", call. = FALSE)
+  }
+  paste(readLines(existing[[1]], warn = FALSE), collapse = "\n")
 }
 
 rect_source_contract_terms <- c(
@@ -125,6 +136,45 @@ test_that("RECT-02 rect update path is band and flip safe", {
   expect_match(rect_update, "rect\\.geom-rect")
   expect_match(rect_update, "flippedRectWidth")
   expect_match(rect_update, "rectHeight")
+})
+
+test_that("GEOM-01 transformed rect boundary is classified at scale factory seam", {
+  scales_js <- read_repo_file("inst/htmlwidgets/modules/scales.js")
+  rect_js <- read_repo_file("inst/htmlwidgets/modules/geoms/rect.js")
+  registry_js <- read_repo_file("inst/htmlwidgets/modules/geom-registry.js")
+
+  expect_match(scales_js, "d3\\.scaleLog\\(\\)")
+  expect_match(scales_js, "d3\\.scaleSqrt\\(\\)")
+  expect_match(scales_js, "case \"reverse\"")
+
+  expect_match(rect_js, "xScale\\(num\\(get\\(d, aes\\.xmin\\)\\)\\)")
+  expect_match(rect_js, "xScale\\(num\\(get\\(d, aes\\.xmax\\)\\)\\)")
+  expect_match(rect_js, "yScale\\(num\\(get\\(d, aes\\.ymin\\)\\)\\)")
+  expect_match(rect_js, "yScale\\(num\\(get\\(d, aes\\.ymax\\)\\)\\)")
+
+  expect_match(registry_js, "xScale\\(num\\(d\\.xmin\\)\\)")
+  expect_match(registry_js, "xScale\\(num\\(d\\.xmax\\)\\)")
+  expect_match(registry_js, "yScale\\(num\\(d\\.ymin\\)\\)")
+  expect_match(registry_js, "yScale\\(num\\(d\\.ymax\\)\\)")
+})
+
+test_that("GEOM-01 rect render and update paths share direct transformed-bound scaling", {
+  rect_js <- read_repo_file("inst/htmlwidgets/modules/geoms/rect.js")
+  registry_js <- read_repo_file("inst/htmlwidgets/modules/geom-registry.js")
+
+  rect_render <- source_block_after(rect_js, "function rectX")
+  rect_update_helpers <- source_block_after(registry_js, "function rectX")
+  next_section <- regexpr("geom_point", rect_update_helpers)
+  expect_true(next_section[[1]] > 0)
+  rect_update_helpers <- substr(rect_update_helpers, 1, next_section[[1]])
+
+  expect_match(rect_render, "Math\\.min\\(xScale")
+  expect_match(rect_render, "Math\\.abs\\(x2 - x1\\)")
+  expect_match(rect_update_helpers, "Math\\.min\\(xScale")
+  expect_match(rect_update_helpers, "Math\\.abs\\(xScale\\(num\\(d\\.xmax\\)\\) - xScale\\(num\\(d\\.xmin\\)\\)\\)")
+
+  expect_false(grepl("untransform", rect_render, fixed = TRUE))
+  expect_false(grepl("untransform", rect_update_helpers, fixed = TRUE))
 })
 
 test_that("Phase 45 does not require browser smoke for rect/tile closure", {
