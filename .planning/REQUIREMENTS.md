@@ -21,7 +21,7 @@
 
 - [x] **GEOM-01**: Transformed-scale rect/tile behavior is classified with focused fixtures and either fixed at the implicated boundary or documented as an explicit non-goal with evidence.
 - [x] **GEOM-02**: Ordinary polygon topology and hole/subgroup behavior is characterized against ggplot2 output, with supported cases locked by tests and unsupported cases documented without overclaiming.
-- [ ] **GEOM-03**: Text and label geometry polish candidates, including collision avoidance and path-following placement, are either scoped into a small verified improvement or explicitly deferred with implementation-ready evidence.
+- [x] **GEOM-03**: Text and label geometry polish candidates, including collision avoidance and path-following placement, are either scoped into a small verified improvement or explicitly deferred with implementation-ready evidence.
 
 ## Future Requirements
 
@@ -66,7 +66,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ARCH-03 | Phase 50 | Pending |
 | GEOM-01 | Phase 51 | Complete |
 | GEOM-02 | Phase 51 | Complete |
-| GEOM-03 | Phase 51 | Pending |
+| GEOM-03 | Phase 51 | Complete |
 
 **Coverage:**
 - v1.12 requirements: 9 total
