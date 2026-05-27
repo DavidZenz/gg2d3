@@ -12,3 +12,21 @@ as_d3_ir(
   padding = list(top = 20, right = 20, bottom = 40, left = 50)
 )
 ```
+
+## Arguments
+
+- p:
+
+  A ggplot object.
+
+- width:
+
+  Widget width in pixels.
+
+- height:
+
+  Widget height in pixels.
+
+- padding:
+
+  Named list of top, right, bottom, and left plot padding in pixels.

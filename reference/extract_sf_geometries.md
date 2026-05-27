@@ -21,3 +21,17 @@ extract_sf_geometries(df)
 ## Value
 
 Character vector of GeoJSON geometry strings, one per row
+
+## Details
+
+gg2d3's public sf renderer accepts polygon, point, and line geometry
+families for
+[`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html) and
+projected-anchor annotation support for
+[`geom_sf_text()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+and
+[`geom_sf_label()`](https://ggplot2.tidyverse.org/reference/ggsf.html).
+Missing CRS emits "geom_sf layer has missing CRS; coordinates will be
+serialized as-is". Unsupported, empty, invalid, or missing geometries
+emit "geom_sf layer skipped %d unsupported, empty, invalid, or missing
+geometries" and are skipped before rendering.

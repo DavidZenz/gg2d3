@@ -328,6 +328,37 @@ Crosstalk behavior:
 - **Faceted plots** — brush selection is per-panel. Selecting in one
   facet does not dim elements in other facets; use Crosstalk for
   cross-panel linking.
+- **`geom_polygon` layers** — tooltip, hover, custom handlers,
+  Shiny-style click handlers, brush selection, and Crosstalk target
+  `path.geom-polygon` marks. Public callback payloads are sanitized
+  representative source-row objects. Brush selection uses the SVG path
+  bounds, not sf-style projected anchor points or topology-aware polygon
+  overlap.
+- **`geom_sf` layers** — tooltip, hover, custom handlers, Shiny-style
+  click handlers, and brush callbacks target `.geom-sf` polygon, point,
+  and line marks. Public callback payloads are sanitized source-row
+  objects with renderer-only fields removed. Brush selection uses
+  rendered representative anchors from `data-cx` and `data-cy` rather
+  than true geometry-overlap brushing; these representative anchors are
+  stable panel-local hit-test points.
+  [`d3_zoom()`](https://davidzenz.github.io/gg2d3/reference/d3_zoom.md)
+  warns with
+  `d3_zoom() does not support geom_sf layers yet; zoom has been suppressed.`
+  and returns the unzoomed widget. Optional browser validation for these
+  sf interactions is R/testthat/chromote based and may skip cleanly when
+  optional local tooling is unavailable.
+- **`geom_sf_text` and `geom_sf_label` layers** — sf annotations share
+  the `.geom-sf` interaction path.
+  [`geom_sf_text()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+  targets `text.geom-sf.geom-sf-text`;
+  [`geom_sf_label()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+  targets `g.geom-sf.geom-sf-label`. Tooltip, hover, handlers, and
+  Shiny-style clicks receive sanitized public payloads. Brush selection
+  uses projected anchor coordinates, so label bounds are not treated as
+  topology-aware geometry intersections.
+- **Geometry caveats** — see `vignettes/d3-drawing-diagnostics.md` for
+  detailed polygon, rect/tile, sf annotation, and map-feature
+  limitations.
 - **Zoom extent** — `scale_extent[1]` must be \>= 1. Setting it below 1
   would allow zooming further out than the original view, which distorts
   axis labels; the function raises an error instead.

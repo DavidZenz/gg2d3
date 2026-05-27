@@ -30,8 +30,17 @@ gg2d3(p, width = 800, height = 500)
 
 ## Supported geoms
 
-gg2d3 supports 15 geom types. All aesthetics that ggplot2 maps (color,
-fill, size, shape, alpha, linewidth) are carried through to D3.
+gg2d3 supports the core Cartesian geoms below, ordinary
+[`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html),
+polygon-family, point-family, and line-family
+[`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html), plus
+projected-anchor
+[`geom_sf_text()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+and
+[`geom_sf_label()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+annotations. All aesthetics that ggplot2 maps (color, fill, size, shape,
+alpha, linewidth) are carried through to D3. Detailed geometry caveats
+live in `vignettes/d3-drawing-diagnostics.md`.
 
 ### Points, lines, and paths
 
@@ -101,6 +110,33 @@ fill, size, shape, alpha, linewidth) are carried through to D3.
   geom_text(size = 3)) |>
   gg2d3()
 ```
+
+### Ordinary polygons
+
+Ordinary
+[`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)
+renders each group as a grouped closed SVG path while preserving
+ggplot2’s built row order. Fill, stroke, alpha, linewidth, linetype,
+facets, zoom/update behavior, and the existing tooltip, hover, brush,
+handler, and linked-view hooks are supported at the polygon path level.
+
+``` r
+
+poly <- data.frame(
+  id = rep(c("a", "b"), each = 4),
+  x = c(0, 1, 1.2, 0, 1.5, 2.6, 2.2, 1.3),
+  y = c(0, 0.2, 1, 0.8, 0.1, 0.4, 1.2, 0.9)
+)
+
+(ggplot(poly, aes(x, y, group = id, fill = id)) +
+  geom_polygon(color = "white", linewidth = 0.4, alpha = 0.8) +
+  coord_fixed()) |>
+  gg2d3()
+```
+
+This is a grouped-path contract, not a GIS topology engine:
+topology/hole repair outside clean ggplot2 built groups is deferred. See
+`vignettes/d3-drawing-diagnostics.md` for detailed caveats.
 
 ### Area and ribbon
 
@@ -177,6 +213,60 @@ rendered by D3. No JavaScript statistics are needed.
   gg2d3()
 #> `geom_smooth()` using formula = 'y ~ x'
 ```
+
+### sf family maps with `geom_sf`
+
+[`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+supports polygon-family (`POLYGON`, `MULTIPOLYGON`), point-family
+(`POINT`, `MULTIPOINT`), and line-family (`LINESTRING`,
+`MULTILINESTRING`) geometries. Polygon-family choropleths and overlays
+render as D3 `path` marks; point-family rows render as `.geom-sf-point`
+marks; and line-family rows render as `.geom-sf-line` paths.
+[`geom_sf_text()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+and
+[`geom_sf_label()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+render labels at projected anchors aligned with those accepted sf
+families. This example uses the `nc` shapefile bundled with `sf` and
+renders county boundaries as D3 `path` marks.
+
+``` r
+
+nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+
+(ggplot(nc, aes(fill = AREA)) +
+  geom_sf(color = "white", linewidth = 0.2) +
+  scale_fill_gradient(low = "#eff3ff", high = "#08519c") +
+  labs(fill = "Area")) |>
+  gg2d3()
+```
+
+The [`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+support contract is intentionally explicit:
+
+- Accepted families are polygon-family (`POLYGON`, `MULTIPOLYGON`),
+  point-family (`POINT`, `MULTIPOINT`), and line-family (`LINESTRING`,
+  `MULTILINESTRING`), including projected-anchor
+  [`geom_sf_text()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+  and
+  [`geom_sf_label()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+  annotations for those families.
+- known CRS inputs are normalized to WGS84 in R before serialization.
+- Missing CRS emits
+  `geom_sf layer has missing CRS; coordinates will be serialized as-is`.
+- Rows that are unsupported, empty, invalid, or missing emit
+  `geom_sf layer skipped %d unsupported, empty, invalid, or missing geometries`
+  and are skipped while accepted rows remain renderable.
+- Optional browser validation is R/testthat/chromote based and may skip
+  cleanly; when available, it covers sf family interactivity, stacked
+  overlays, faceted and empty panels, projected anchor placement,
+  sanitized interactivity payloads, and zoom suppression.
+- gg2d3 does not provide tile basemaps, slippy map controls,
+  JavaScript-side CRS reprojection, true geometry-overlap brushing, or
+  large-map performance guarantees.
+- sf annotations do not provide ggrepel collision avoidance, rich text,
+  rotation parity, or path-following placement. See
+  `vignettes/d3-drawing-diagnostics.md` for the detailed residual-risk
+  list.
 
 ## Scales
 
@@ -586,9 +676,9 @@ outside normal rendering scope:
     each layer with a single R warning per layer. Remaining finite
     points render normally; line/path geoms show a visible gap where the
     non-finite rows were removed.
-2.  **Unsupported geoms** — when a geom type has no D3 renderer, an
-    in-panel message appears (e.g., “unsupported geom: polygon”) rather
-    than producing silently empty output.
+2.  **Unsupported geoms** — when a geom type has no D3 renderer, gg2d3
+    emits a browser-console warning instead of rendering marks for that
+    layer.
 3.  **R-level errors during build** — if
     [`ggplot_build()`](https://ggplot2.tidyverse.org/reference/ggplot_build.html)
     itself errors (e.g., incompatible stat/geom combinations), the error
@@ -613,13 +703,23 @@ df <- data.frame(x = 1:10, y = c(1:4, NA, 6:9, NaN))
 
 ``` r
 
-# Unsupported geom: in-panel message instead of silent blank
-# (eval guarded — `map_data("state")` needs the `maps` package which is
-# not a direct dependency of gg2d3)
-(ggplot(map_data("state"), aes(long, lat, group = group)) +
-  geom_polygon()) |>
+# Ordinary polygons: grouped closed paths with row-order preservation
+poly_edges <- data.frame(
+  group = rep(c("left", "right"), each = 4),
+  x = c(0, 1, 1, 0, 1.4, 2.4, 2.1, 1.2),
+  y = c(0, 0, 1, 0.8, 0.1, 0.2, 1, 0.9)
+)
+
+(ggplot(poly_edges, aes(x, y, group = group, fill = group)) +
+  geom_polygon(color = "grey35", linewidth = 0.4, alpha = 0.75) +
+  coord_fixed()) |>
   gg2d3()
-# Renders an in-panel "unsupported geom: polygon" note rather than empty output.
+```
+
+``` r
+
+# topology/hole repair beyond grouped closed paths remains outside the shipped
+# support contract.
 ```
 
 ## Tips

@@ -34,11 +34,56 @@ gg2d3(p)
 
 | Category | Geoms |
 |----|----|
-| Basic | `geom_point`, `geom_line`, `geom_path`, `geom_bar`, `geom_col`, `geom_rect`, `geom_tile`, `geom_text` |
-| Area/Ribbon | `geom_area`, `geom_ribbon`, `geom_polygon` |
+| Basic | `geom_point`, `geom_line`, `geom_path`, `geom_bar`, `geom_col`, `geom_rect`, `geom_tile`, `geom_text`, `geom_polygon` |
+| Area/Ribbon | `geom_area`, `geom_ribbon` |
 | Intervals | `geom_segment`, `geom_errorbar`, `geom_linerange`, `geom_pointrange` |
 | Annotation | `geom_hline`, `geom_vline`, `geom_abline`, `geom_rug` |
 | Statistical | `geom_boxplot`, `geom_violin`, `geom_density`, `geom_smooth` (loess, gam, lm), `geom_dotplot` |
+
+Ordinary
+[`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)
+renders as grouped closed SVG paths with ggplot2 built row order
+preserved inside each group. The shipped contract covers core
+fill/stroke/alpha/linewidth/linetype styling, facets, zoom/update
+behavior, and the existing tooltip, hover, brush, handler, and
+linked-view hooks. Brush selection is path-bounds based and callback
+payloads use sanitized representative source rows.
+
+[`geom_rect()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
+and
+[`geom_tile()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
+support distinguishes scale-limit censoring from
+[`coord_cartesian()`](https://ggplot2.tidyverse.org/reference/coord_cartesian.html)
+panel clipping: scale limits can remove or censor bounds before gg2d3
+sees them, while coordinate limits keep finite rect/tile bounds and clip
+in the SVG panel. Discrete tile geometry is closed for initial render
+and update paths.
+
+gg2d3 also supports
+[`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html) for
+polygon-family (`POLYGON`, `MULTIPOLYGON`), point-family (`POINT`,
+`MULTIPOINT`), and line-family (`LINESTRING`, `MULTILINESTRING`)
+geometries, plus
+[`geom_sf_text()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+and
+[`geom_sf_label()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+annotations at projected anchors aligned with those accepted sf
+families. Rows that are unsupported, empty, invalid, or missing are
+skipped with warnings while accepted rows render; known CRS inputs are
+normalized in R before serialization, and missing CRS coordinates are
+serialized as-is with a warning. Optional browser validation is
+R/testthat/chromote based and may skip cleanly; when available, it
+covers sf family interactivity, stacked overlays, faceted and empty
+panels, projected anchor placement, sanitized interactivity payloads,
+and zoom suppression.
+
+These support claims are intentionally scoped. gg2d3 does not claim
+complete ggplot2 parity for polygon topology/hole repair beyond grouped
+closed paths, full rect/tile transformed-scale edge parity, tile
+basemaps, slippy controls, JavaScript-side CRS reprojection, ggrepel
+collision avoidance, rich text, rotation parity, or path-following
+annotation placement. See `vignettes/d3-drawing-diagnostics.md` for
+detailed geometry caveats.
 
 ### Scales & Coordinates
 
@@ -140,4 +185,5 @@ devtools::test()
 ------------------------------------------------------------------------
 
 *Note:* `README.md` is generated from `README.Rmd`. Use
-`devtools::build_readme()` to re-render.
+[`devtools::build_readme()`](https://devtools.r-lib.org/reference/build_readme.html)
+to re-render.

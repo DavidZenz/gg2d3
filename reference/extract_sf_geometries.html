@@ -68,6 +68,16 @@ and serializes each geometry as a GeoJSON geometry string via
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Character vector of GeoJSON geometry strings, one per row</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>gg2d3's public sf renderer accepts polygon, point, and line geometry
+families for <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf()</a></code> and projected-anchor annotation support for
+<code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf_text()</a></code> and <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf_label()</a></code>. Missing CRS emits
+"geom_sf layer has missing CRS; coordinates will be serialized as-is".
+Unsupported, empty, invalid, or missing geometries emit
+"geom_sf layer skipped %d unsupported, empty, invalid, or missing geometries"
+and are skipped before rendering.</p>
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

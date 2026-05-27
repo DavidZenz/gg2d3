@@ -53,6 +53,22 @@ d3_brush(
 Modified gg2d3 widget with brush selection enabled. Returns the widget
 to enable pipe chaining.
 
+## Details
+
+Ordinary
+[`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)
+paths brush by SVG path bounds. For
+[`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+polygon-family, point-family, line-family,
+[`geom_sf_text()`](https://ggplot2.tidyverse.org/reference/ggsf.html),
+and
+[`geom_sf_label()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+marks, brushing uses representative projected-anchor selection from
+rendered `data-cx` and `data-cy` coordinates. Brush callbacks receive
+sanitized source-row payloads and do not expose renderer-private fields;
+true geometry-overlap brushing is outside the current map anti-features
+boundary.
+
 ## Examples
 
 ``` r

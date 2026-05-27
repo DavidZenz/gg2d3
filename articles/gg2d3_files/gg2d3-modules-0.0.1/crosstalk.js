@@ -19,21 +19,30 @@
   /**
    * CSS selectors for interactive geom elements (shared with brush.js).
    */
-  const INTERACTIVE_SELECTORS = [
+  const FALLBACK_INTERACTIVE_SELECTORS = [
     'circle.geom-point',
     'rect.geom-bar',
     'rect.geom-rect',
     'path.geom-line',
+    'path.geom-polygon',
     'path.geom-area',
     'path.geom-density',
     'path.geom-smooth',
     'path.geom-ribbon',
     'path.geom-violin',
+    '.geom-sf',                  // geom_sf and sf annotations: path/circle/text/g marks
     'text.geom-text',
     'line.geom-segment',
     'rect.geom-boxplot-box',
     'circle.geom-boxplot-outlier'
   ];
+  const contractCrosstalkSelectors = window.gg2d3.geomContracts &&
+    typeof window.gg2d3.geomContracts.selectorsFor === 'function'
+      ? window.gg2d3.geomContracts.selectorsFor('crosstalk')
+      : [];
+  const INTERACTIVE_SELECTORS = contractCrosstalkSelectors.length
+    ? contractCrosstalkSelectors
+    : FALLBACK_INTERACTIVE_SELECTORS;
 
   /**
    * Store active SelectionHandle instances by element ID.
@@ -115,6 +124,14 @@
     }
   }
 
+  function crosstalkKeyIndex(d, fallbackIndex) {
+    if (d && d._sourceIndex !== null && d._sourceIndex !== undefined) {
+      const sourceIndex = Number(d._sourceIndex);
+      if (Number.isFinite(sourceIndex) && sourceIndex >= 0) return sourceIndex;
+    }
+    return fallbackIndex;
+  }
+
   function bindCrosstalkKeys(svg, keyArray) {
     svg.selectAll('.panel').each(function() {
       const panel = d3.select(this);
@@ -123,7 +140,8 @@
 
       INTERACTIVE_SELECTORS.forEach(function(selector) {
         clippedGroup.selectAll(selector).each(function(d, i) {
-          const key = keyArray && keyArray[i] !== undefined ? keyArray[i] : null;
+          const rowIndex = crosstalkKeyIndex(d, i);
+          const key = keyArray && keyArray[rowIndex] !== undefined ? keyArray[rowIndex] : null;
           d3.select(this).attr('data-crosstalk-key', key == null ? null : String(key));
         });
       });

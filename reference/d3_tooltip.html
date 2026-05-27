@@ -79,6 +79,13 @@ formatting. Function signature: <code>function(field, value) { return formatted_
     <p>Modified gg2d3 widget with tooltip interactivity enabled.
 Returns the widget to enable pipe chaining.</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>For ordinary <code><a href="https://ggplot2.tidyverse.org/reference/geom_polygon.html" class="external-link">geom_polygon()</a></code> paths and <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf()</a></code> polygon-family,
+point-family, line-family, <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf_text()</a></code>, and <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf_label()</a></code> marks,
+tooltips reuse the existing callback path. Tooltip data uses sanitized
+source-row payloads and does not expose renderer-private fields.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

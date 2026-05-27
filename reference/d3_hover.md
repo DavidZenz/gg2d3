@@ -38,6 +38,19 @@ d3_hover(widget, opacity = 0.3, stroke = NULL, stroke_width = NULL)
 Modified gg2d3 widget with hover effects enabled. Returns the widget to
 enable pipe chaining.
 
+## Details
+
+For ordinary
+[`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)
+paths and
+[`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+polygon-family, point-family, line-family,
+[`geom_sf_text()`](https://ggplot2.tidyverse.org/reference/ggsf.html),
+and
+[`geom_sf_label()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+marks, hover uses the existing shared event handling path and exposes
+sanitized source-row payloads without renderer-private fields.
+
 ## Examples
 
 ``` r

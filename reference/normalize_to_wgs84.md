@@ -2,7 +2,11 @@
 
 Transforms any projected or geographic CRS to EPSG:4326. Returns the
 input unchanged if it is not an sfc object. If the CRS is already
-EPSG:4326, no transformation is performed.
+EPSG:4326, no transformation is performed. If an sf geometry has missing
+CRS, the
+[`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html) IR path
+warns "geom_sf layer has missing CRS; coordinates will be serialized
+as-is" and leaves coordinates unchanged.
 
 ## Usage
 

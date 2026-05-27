@@ -94,6 +94,16 @@ Default is 0.15 (heavily dimmed). Selected elements always have opacity 1.0.</p>
     <p>Modified gg2d3 widget with brush selection enabled.
 Returns the widget to enable pipe chaining.</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Ordinary <code><a href="https://ggplot2.tidyverse.org/reference/geom_polygon.html" class="external-link">geom_polygon()</a></code> paths brush by SVG path bounds. For <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf()</a></code>
+polygon-family, point-family, line-family, <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf_text()</a></code>, and
+<code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf_label()</a></code> marks, brushing uses representative projected-anchor
+selection from rendered <code>data-cx</code> and <code>data-cy</code> coordinates. Brush callbacks
+receive sanitized source-row payloads and do not expose renderer-private
+fields; true geometry-overlap brushing is outside the current map
+anti-features boundary.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

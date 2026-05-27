@@ -86,6 +86,13 @@ The minimum value must be &gt;= 1 (no zoom out beyond original view).</p></dd>
     <p>Modified gg2d3 widget with zoom interactivity enabled.
 Returns the widget to enable pipe chaining.</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p><code>d3_zoom()</code> does not currently support widgets containing <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf()</a></code> layers.
+Those widgets are returned unchanged with the warning "d3_zoom() does not
+support geom_sf layers yet; zoom has been suppressed."
+This keeps sf map anti-features explicit until projection-aware zoom exists.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

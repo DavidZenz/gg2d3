@@ -20,16 +20,18 @@
    * Uses class selectors for paths to distinguish geom types.
    * Excludes non-interactive elements like panel backgrounds.
    */
-  const INTERACTIVE_SELECTORS = [
+  const FALLBACK_INTERACTIVE_SELECTORS = [
     'circle.geom-point',         // geom_point
     'rect.geom-bar',             // geom_bar
     'rect.geom-rect',            // geom_rect / geom_tile
     'path.geom-line',            // geom_line
+    'path.geom-polygon',         // geom_polygon
     'path.geom-area',            // geom_area
     'path.geom-density',         // geom_density
     'path.geom-smooth',          // geom_smooth
     'path.geom-ribbon',          // geom_ribbon
     'path.geom-violin',          // geom_violin
+    '.geom-sf',                  // geom_sf: path.geom-sf.geom-sf-polygon, path.geom-sf.geom-sf-line, circle.geom-sf.geom-sf-point
     'text.geom-text',            // geom_text
     'line.geom-segment',         // geom_segment
     'rect.geom-boxplot-box',     // geom_boxplot (IQR box)
@@ -41,6 +43,13 @@
     'line.errorbar-cap-bottom',    // errorbar bottom cap (GEOM-22)
     'circle.pointrange-point'      // pointrange center dot (GEOM-22)
   ];
+  const contractEventSelectors = window.gg2d3.geomContracts &&
+    typeof window.gg2d3.geomContracts.selectorsFor === 'function'
+      ? window.gg2d3.geomContracts.selectorsFor('events')
+      : [];
+  const INTERACTIVE_SELECTORS = contractEventSelectors.length
+    ? contractEventSelectors
+    : FALLBACK_INTERACTIVE_SELECTORS;
 
   // Per-widget legend interaction controllers.
   // WeakMap ensures cleanup when widget DOM nodes are removed.
@@ -50,6 +59,35 @@
   function normalizeLegendValue(value) {
     if (value === null || value === undefined) return '';
     return String(value).trim().toLowerCase();
+  }
+
+  function sanitizeEventDatum(d) {
+    if (window.gg2d3.publicData &&
+        typeof window.gg2d3.publicData.sanitizeDatum === 'function') {
+      return window.gg2d3.publicData.sanitizeDatum(d);
+    }
+    if (!d || typeof d !== 'object' || Array.isArray(d)) return d;
+
+    const sanitized = {};
+    Object.keys(d).forEach(function(key) {
+      if (key.startsWith('_')) return;
+      sanitized[key] = d[key];
+    });
+    return sanitized;
+  }
+
+  function compileEventHandler(handlerSource) {
+    if (!handlerSource) return null;
+    const src = String(handlerSource).trim();
+    const looksLikeFnExpr = /^\s*(function\b|\(?\s*[\w\s,]*\)?\s*=>)/.test(src);
+    if (looksLikeFnExpr) {
+      const fn = (new Function('return (' + src + ');'))();
+      if (typeof fn !== 'function') {
+        throw new Error('handler did not evaluate to a function');
+      }
+      return fn;
+    }
+    return new Function('event', 'd', src);
   }
 
   function getLegendKeyAestheticAliases(aesthetic) {
@@ -655,9 +693,9 @@
     if (!config) return;
     const svg = d3.select(el).select('svg');
 
-    const clickHandler = config.click ? new Function('event', 'd', config.click) : null;
-    const mouseoverHandler = config.mouseover ? new Function('event', 'd', config.mouseover) : null;
-    const mouseoutHandler = config.mouseout ? new Function('event', 'd', config.mouseout) : null;
+    const clickHandler = compileEventHandler(config.click);
+    const mouseoverHandler = compileEventHandler(config.mouseover);
+    const mouseoutHandler = compileEventHandler(config.mouseout);
     const shinyId = config.shiny_id;
 
     INTERACTIVE_SELECTORS.forEach(selector => {
@@ -666,22 +704,23 @@
 
       if (clickHandler || shinyId) {
         selection.on('click.custom', function(event, d) {
-          if (clickHandler) clickHandler.call(this, event, d);
+          const publicDatum = sanitizeEventDatum(d);
+          if (clickHandler) clickHandler.call(this, event, publicDatum);
           if (shinyId && window.Shiny) {
-            window.Shiny.setInputValue(shinyId, d);
+            window.Shiny.setInputValue(shinyId, publicDatum);
           }
         });
       }
 
       if (mouseoverHandler) {
         selection.on('mouseover.custom', function(event, d) {
-          mouseoverHandler.call(this, event, d);
+          mouseoverHandler.call(this, event, sanitizeEventDatum(d));
         });
       }
 
       if (mouseoutHandler) {
         selection.on('mouseout.custom', function(event, d) {
-          mouseoutHandler.call(this, event, d);
+          mouseoutHandler.call(this, event, sanitizeEventDatum(d));
         });
       }
     });

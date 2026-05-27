@@ -44,6 +44,14 @@ d3_zoom(widget, scale_extent = c(1, 8), direction = c("both", "x", "y"))
 Modified gg2d3 widget with zoom interactivity enabled. Returns the
 widget to enable pipe chaining.
 
+## Details
+
+`d3_zoom()` does not currently support widgets containing
+[`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html) layers.
+Those widgets are returned unchanged with the warning "d3_zoom() does
+not support geom_sf layers yet; zoom has been suppressed." This keeps sf
+map anti-features explicit until projection-aware zoom exists.
+
 ## Examples
 
 ``` r
