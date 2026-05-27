@@ -88,6 +88,12 @@ Plan 51-02 classified ordinary polygon topology against ggplot2 built data. ggpl
 
 The supported contract remains one grouped closed SVG path per built `group`, with finite-point filtering and no sorting. Automatic hole inference, compound-path rendering, GIS topology repair, invalid-polygon fixing, and overlap-aware polygon topology are explicit non-goals for ordinary `geom_polygon()` in this phase. Public diagnostics now call out the `subgroup` boundary directly.
 
+### GEOM-03 Ordinary Text/Label Polish Contract
+
+Plan 51-03 classified ordinary `geom_text()` and `geom_label()` behavior. Ordinary text rows already retain `label`, `size`, `colour`, and `alpha`; ordinary `geom_label()` maps to the text renderer and retains `fill`, but does not have a distinct label-box renderer.
+
+The implemented tiny improvement is ordinary text size rendering: `text.js` now maps row/static `size` through the same mm-to-pixel convention used by sf annotations instead of always using `10px`. Full ordinary `geom_label()` boxes, label padding, collision avoidance, path-following text, rotation parity, and `hjust`/`vjust` placement remain explicit deferrals.
+
 ## Validation Sign-Off
 
 - [x] All planned tasks have automated verification commands.

@@ -95,8 +95,11 @@ by Phase 47.
 
 ## Text options
 
-`geom_text` supports position, size, color, and alpha. Rotation (`angle`),
-justification (`hjust`/`vjust`), and font family are not yet translated.
+`geom_text` supports position, size, color, and alpha. Ordinary `geom_label()`
+currently maps to the text renderer, so label boxes, padding, and label-specific
+background styling are not yet translated. Rotation (`angle`), justification
+(`hjust`/`vjust`), font family, collision avoidance, and path-following text are
+not yet translated.
 
 ## Linetype
 
