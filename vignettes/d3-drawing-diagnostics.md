@@ -23,9 +23,12 @@ tooltip, hover, brush, handler, and linked-view hooks are supported at the path
 mark level.
 
 Residual risks remain explicit: topology/hole repair beyond clean grouped
-closed paths is not shipped by Phase 47. The renderer does not infer GIS
-topology, ring containment, or hole winding for arbitrary polygon input; users
-should provide groups that ggplot2 already builds into the intended path order.
+closed paths is not shipped by Phase 51. ggplot2 built data may include a
+`subgroup` column for hole-style polygon input, but gg2d3's ordinary polygon IR
+does not currently preserve `subgroup` or render compound paths. The renderer
+does not infer GIS topology, ring containment, hole winding, or invalid-polygon
+repair for arbitrary polygon input; users should provide groups that ggplot2
+already builds into the intended path order.
 
 ## `geom_sf` support
 

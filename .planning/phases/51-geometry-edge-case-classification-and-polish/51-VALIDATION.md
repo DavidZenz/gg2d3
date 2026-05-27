@@ -82,6 +82,12 @@ Plan 51-01 classified transformed rect/tile bounds as ggplot2-built values alrea
 
 That is a scale factory / axis semantics boundary, not a rect-only renderer fix. Phase 51 records this as an explicit non-goal for local rect/tile code unless a later validation pass identifies a smaller boundary. The source-contract tests in `tests/testthat/test-rect-tile-renderer.R` make this seam visible so future work can address it deliberately.
 
+### GEOM-02 Ordinary Polygon Topology Contract
+
+Plan 51-02 classified ordinary polygon topology against ggplot2 built data. ggplot2 retains `subgroup` for hole-style polygon input, while gg2d3 ordinary polygon IR currently preserves row order and `group` but not `subgroup`.
+
+The supported contract remains one grouped closed SVG path per built `group`, with finite-point filtering and no sorting. Automatic hole inference, compound-path rendering, GIS topology repair, invalid-polygon fixing, and overlap-aware polygon topology are explicit non-goals for ordinary `geom_polygon()` in this phase. Public diagnostics now call out the `subgroup` boundary directly.
+
 ## Validation Sign-Off
 
 - [x] All planned tasks have automated verification commands.
