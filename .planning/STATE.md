@@ -4,12 +4,12 @@ milestone: v1.13
 milestone_name: Regression & Release Polish
 status: Ready to discuss Phase 52
 stopped_at: Phase 52 context gathered
-last_updated: "2026-05-27T14:01:42.609Z"
+last_updated: "2026-05-27T14:11:05.822Z"
 last_activity: 2026-05-27 -- Created v1.13 Regression & Release Polish roadmap
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 3
   completed_plans: 0
   percent: 0
 ---
@@ -99,7 +99,7 @@ Resume file: --resume-file
 
 **Discussed Phase:** 49 (IR Helper Boundary Hardening) -- context ready -- 2026-05-26T07:28:32Z
 
-**Planned Phase:** 49 (IR Helper Boundary Hardening) — 3 plans — 2026-05-26T09:24:25.672Z
+**Planned Phase:** 52 (CI Visual Regression Foundation) — 3 plans — 2026-05-27T14:11:05.814Z
 
 **Planned Phase:** 51 (Geometry Edge-Case Classification And Polish) — 4 plans — 2026-05-26T20:55:08.614Z
 
