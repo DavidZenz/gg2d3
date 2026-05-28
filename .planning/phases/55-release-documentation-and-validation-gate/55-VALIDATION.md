@@ -1,7 +1,7 @@
 ---
 phase: 55
 slug: release-documentation-and-validation-gate
-status: draft
+status: executing
 nyquist_compliant: true
 wave_0_complete: false
 created: 2026-05-28
@@ -41,8 +41,8 @@ created: 2026-05-28
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
 | 55-01-01 | 01 | 1 | REL-01 | T-55-01 | Public docs do not overclaim unsupported parity or leak local artifacts. | docs/source | `rtk rg -n "v1.13|browser visual|geom_label|geom_polygon|rect|tile|geom-contracts|FUT-" README.Rmd README.md vignettes/gg2d3.Rmd vignettes/d3-drawing-diagnostics.md R/gg2d3.R man/gg2d3.Rd NEWS.md` | yes | pending |
 | 55-01-02 | 01 | 1 | REL-01 | T-55-01 | Generated docs derive from source docs. | docs/generated | `rtk Rscript --vanilla -e 'devtools::document(); devtools::build_readme()'` | yes | pending |
-| 55-02-01 | 02 | 2 | REL-02 | T-55-02 | Focused v1.13 source gates pass before release gate. | source/tests | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-renderer-wiring-contracts.R"); testthat::test_file("tests/testthat/test-ir-helper-boundaries.R"); testthat::test_file("tests/testthat/test-text-label-polish.R"); testthat::test_file("tests/testthat/test-polygon-ir.R"); testthat::test_file("tests/testthat/test-polygon-renderer.R"); testthat::test_file("tests/testthat/test-rect-tile-ir.R"); testthat::test_file("tests/testthat/test-rect-tile-renderer.R")'` | yes | pending |
-| 55-02-02 | 02 | 2 | REL-02 | T-55-02 | Full package tests, optional skips, and docs generation are recorded. | package/tests | `rtk Rscript --vanilla -e 'devtools::document(); devtools::build_readme(); devtools::test()'` | yes | pending |
+| 55-02-01 | 02 | 2 | REL-02 | T-55-02 | Focused v1.13 source gates pass before release gate. | source/tests | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-renderer-wiring-contracts.R"); testthat::test_file("tests/testthat/test-ir-helper-boundaries.R"); testthat::test_file("tests/testthat/test-text-label-polish.R"); testthat::test_file("tests/testthat/test-polygon-ir.R"); testthat::test_file("tests/testthat/test-polygon-renderer.R"); testthat::test_file("tests/testthat/test-rect-tile-ir.R"); testthat::test_file("tests/testthat/test-rect-tile-renderer.R")'` | yes | green |
+| 55-02-02 | 02 | 2 | REL-02 | T-55-02 | Full package tests, optional skips, and docs generation are recorded. | package/tests | `rtk Rscript --vanilla -e 'devtools::document(); devtools::build_readme(); devtools::test()'` | yes | green |
 | 55-02-03 | 02 | 2 | REL-02 | T-55-03 | Browser visual smoke pass/skip/CI artifact evidence is explicit. | browser/artifact | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-browser-visual-smoke.R")'` plus CI/artifact evidence when feasible | yes | pending |
 | 55-02-04 | 02 | 2 | REL-02 | T-55-04 | Package build/check evidence is from a source tarball outside the repo root. | release/check | `rtk R CMD build --no-manual /Users/davidzenz/R/gg2d3` and `rtk R CMD check --as-cran gg2d3_0.0.0.9000.tar.gz` from `/private/tmp` | yes | pending |
 | 55-03-01 | 03 | 3 | REL-03 | T-55-01 | `NEWS.md` summarizes support and risks without raw local logs. | docs/source | `rtk rg -n "v1.13|browser visual|R CMD check|test_output/browser-visual-smoke|FUT-01|FUT-06|geom_label|geom_polygon|rect|tile" NEWS.md` | yes | pending |
