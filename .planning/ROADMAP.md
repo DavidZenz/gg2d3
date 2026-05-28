@@ -95,7 +95,7 @@ Plans:
 Plans:
 - [x] 55-01-PLAN.md - Source-first documentation and generated help alignment for the v1.13 support contract.
 - [x] 55-02-PLAN.md - Repeatable release-readiness gate execution and evidence capture.
-- [ ] 55-03-PLAN.md - v1.13 NEWS release notes with validation, artifact, risk, and FUT handoff.
+- [x] 55-03-PLAN.md - v1.13 NEWS release notes with validation, artifact, risk, and FUT handoff.
 - [ ] 55-04-PLAN.md - Final all-requirements validation map and milestone-completion handoff.
 
 ## Progress
@@ -108,7 +108,7 @@ Phases execute in numeric order: 52 → 53 → 54 → 55
 | 52. CI Visual Regression Foundation | CI-01, CI-02, CI-03 | 3/3 | Complete    | 2026-05-28 |
 | 53. Renderer And IR Contract Consolidation | ARCH-01, ARCH-02, ARCH-03 | 3/3 | Complete | 2026-05-28 |
 | 54. Geometry Polish Closure | GEOM-01, GEOM-02, GEOM-03, GEOM-04 | 4/4 | Complete | 2026-05-28 |
-| 55. Release Documentation And Validation Gate | REL-01, REL-02, REL-03 | 2/4 | In progress | - |
+| 55. Release Documentation And Validation Gate | REL-01, REL-02, REL-03 | 3/4 | In progress | - |
 
 ## Archived Milestones
 

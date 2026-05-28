@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: Regression & Release Polish
 status: executing
-stopped_at: Completed 55-02-PLAN.md
-last_updated: "2026-05-28T21:05:10.862Z"
+stopped_at: Completed 55-03-PLAN.md
+last_updated: "2026-05-28T21:10:53.748Z"
 last_activity: 2026-05-28
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 14
-  completed_plans: 12
-  percent: 86
+  completed_plans: 13
+  percent: 93
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-27)
 ## Current Position
 
 Phase: 55
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-05-28
 
-Progress: [█████████░] 86%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [█████████░] 86%
 | Phase 54 P04 | 6min | 2 tasks | 5 files |
 | Phase 55 P01 | 4min | 2 tasks | 7 files |
 | Phase 55 P02 | 15min | 3 tasks | 6 files |
+| Phase 55 P03 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,9 @@ Recent decisions affecting current work:
 - Accepted local browser visual smoke launch as a documented optional skip only because fallback CI artifact evidence reports 9/9 passed rows.
 - Retained the final R CMD check --as-cran 4 NOTEs as classified non-blockers because no ERROR or WARNING remains.
 - Fixed installed-package source tests instead of weakening the release gate.
+- Inserted v1.13 release notes directly below the development heading in NEWS.md.
+- Kept browser, package-check, and release-gate evidence summarized as command/path classes without raw local logs.
+- Kept FUT-01 through FUT-06 explicit as future candidates rather than shipped support.
 
 ### Pending Todos
 
@@ -104,8 +108,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-28T21:05:10.854Z
-Stopped at: Completed 55-02-PLAN.md
+Last session: 2026-05-28T21:10:53.739Z
+Stopped at: Completed 55-03-PLAN.md
 Resume file: None
 
 **Completed Milestone:** v1.11 Geometry Parity -- 2026-05-25
