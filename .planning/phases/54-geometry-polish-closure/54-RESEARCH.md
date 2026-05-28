@@ -412,22 +412,19 @@ This is only acceptable for a fixture-proven subset and must not infer containme
 | A6 | Inward/outward justification may require panel-center logic and carries drift risk. [ASSUMED] | Open Questions | Planner could over-scope text placement if these values are treated as simple anchors. |
 | A7 | Ship numeric and simple character anchors first; explicitly defer inward/outward if not trivial. [ASSUMED] | Open Questions | User may expect fuller ggplot2 justification parity unless docs are precise. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should ordinary `GeomLabel` become `geom = "label"` or remain `geom = "text"` with label metadata?**
    - What we know: current aliasing hides label support from contracts, and label DOM will differ from text DOM. [VERIFIED: R/ir_layer_helpers.R; inst/htmlwidgets/modules/geom-contracts.js]
-   - What's unclear: how much existing downstream code assumes ordinary labels are `"text"` in IR. [VERIFIED: tests/testthat/test-text-label-polish.R]
-   - Recommendation: prefer explicit `geom = "label"` and update contracts; if planner chooses metadata, require explicit render/update selectors and tests. [ASSUMED]
+   - Resolution: Phase 54 planning selects explicit `geom = "label"` for ordinary `GeomLabel`, with `validate_ir()`, renderer contracts, update selectors, and tests updated together. This avoids hidden label behavior under the `"text"` geom while keeping stop/rollback guidance if implementation proves unsafe.
 
 2. **Is a tiny polygon hole subset worth shipping?**
    - What we know: ggplot2 has `subgroup` and `rule`; SVG has `fill-rule`; gg2d3 currently avoids topology semantics. [CITED: https://ggplot2.tidyverse.org/reference/geom_polygon.html; CITED: https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/fill-rule; VERIFIED: tests/testthat/test-polygon-renderer.R]
-   - What's unclear: whether compound subpaths from built row order match ggplot2 enough for ordinary hole fixtures without extra topology inference. [ASSUMED]
-   - Recommendation: plan fixtures first; ship only if one or two source/DOM tests prove the subset is obvious, otherwise document the non-goal. [VERIFIED: 54-CONTEXT.md]
+   - Resolution: Phase 54 planning selects fixture-led non-goal closure for ordinary polygon subgroup/hole topology. It will not preserve `subgroup` in ordinary polygon IR without bounded renderer semantics, and it will not add topology repair, containment inference, winding repair, or invalid-polygon repair.
 
 3. **Should character `hjust`/`vjust` values be supported beyond simple left/middle/right/top/center/bottom?**
    - What we know: ggplot2 supports numeric and character values including inward/outward. [CITED: https://ggplot2.tidyverse.org/reference/geom_text.html]
-   - What's unclear: whether inward/outward can be implemented without panel-center logic and drift risk. [ASSUMED]
-   - Recommendation: ship numeric and simple character anchors first; explicitly defer inward/outward if not trivial. [ASSUMED]
+   - Resolution: Phase 54 planning selects numeric and simple character anchors only. `inward` and `outward` remain deferred unless implementation proves they are trivial within the existing renderer-local placement path.
 
 ## Environment Availability
 
