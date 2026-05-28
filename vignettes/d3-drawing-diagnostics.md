@@ -14,6 +14,36 @@ and projected-anchor `geom_sf_text()` / `geom_sf_label()` annotations.
 Geoms outside this set (for example `geom_contour`) log a warning and do not
 render.
 
+## v1.13 release validation overview
+
+The v1.13 release documentation, validation, and geometry contract is built from
+source docs, source tests, generated help, and summarized validation evidence.
+The primary release validation commands are:
+
+```bash
+Rscript --vanilla -e 'devtools::document(); devtools::build_readme()'
+Rscript --vanilla -e 'devtools::test()'
+R CMD build --no-manual /path/to/gg2d3
+R CMD check --as-cran gg2d3_0.0.0.9000.tar.gz
+```
+
+Focused v1.13 gates cover:
+
+- browser visual smoke behavior and artifacts from Phase 52, including the
+  dedicated `.github/workflows/browser-visual-smoke.yaml` workflow and
+  `GG2D3_BROWSER_VISUAL_CI` mode;
+- renderer contracts from Phase 53 through
+  `inst/htmlwidgets/modules/geom-contracts.js` and
+  `tests/testthat/test-renderer-wiring-contracts.R`;
+- selected IR helper-boundary coverage from Phase 53 through
+  `tests/testthat/test-ir-helper-boundaries.R`;
+- bounded Phase 54 geometry support for ordinary `geom_label()`,
+  `geom_polygon()`, `geom_rect()`, and `geom_tile()`.
+
+Release evidence should summarize command outcomes and artifact paths, not
+paste browser logs, `00check.log` contents, or raw generated artifacts into
+public documentation.
+
 ## Ordinary `geom_polygon()` support
 
 Ordinary `geom_polygon()` renders grouped closed SVG paths from ggplot2 built
@@ -99,6 +129,12 @@ Coverage includes Cartesian geoms, facets, interactivity-facing marks, ordinary
 launch is unavailable, or for sf-dependent rows when `sf` or `geojsonsf` is
 unavailable.
 
+Local skip behavior and CI behavior differ intentionally. Local maintainers can
+run the skip-friendly command to confirm the harness loads without requiring a
+browser. In `GG2D3_BROWSER_VISUAL_CI=true` mode, browser-level unavailability
+is a failure so workflow artifacts either prove a browser-rendered run or expose
+the failure clearly.
+
 If `chromote::find_chrome()` does not find the intended local browser, set
 `CHROMOTE_CHROME=/path/to/chrome` as a troubleshooting override. In the
 dedicated CI workflow, browser-level skips are failures; optional `sf` or
@@ -111,8 +147,8 @@ Map anti-features are explicit: no tile basemaps, no slippy map controls, no
 JavaScript-side CRS reprojection, no true geometry-overlap brushing, no
 `GEOMETRYCOLLECTION` expansion, and no large-map performance guarantees.
 
-Annotation anti-features are also explicit: ggrepel-compatible collision
-avoidance, rich text, and path-following annotation placement are not shipped.
+Annotation anti-features are also explicit: repelled label placement, rich text,
+and path-following annotation placement are not shipped.
 Ordinary text and label layers have bounded `angle` support; sf annotation
 rotation parity remains outside the current projected-anchor contract.
 
@@ -126,7 +162,7 @@ stroke/colour, alpha, size, numeric padding, `hjust`, `vjust`, `angle`, and
 `family`.
 
 These label and text improvements are deliberately bounded. Collision
-avoidance, ggrepel-compatible placement, path-following text, and rich text are
+avoidance, repelled label placement, path-following text, and rich text are
 future work rather than hidden behavior in the renderer. Label text is inserted
 with SVG text APIs, not HTML insertion.
 
@@ -196,9 +232,24 @@ are deferred and not shipped by Phase 54:
 - Ordinary polygon `subgroup` / `rule` compound-path rendering.
 - Tile basemaps and slippy map controls.
 - JavaScript-side CRS reprojection.
-- ggrepel-compatible collision avoidance.
+- Repelled label placement and collision avoidance.
 - Rich text for text and label annotations.
 - Path-following annotation placement.
+
+## v1.13 future-work IDs
+
+- **FUT-01:** committed golden screenshots and pixel-diff thresholds after
+  local and CI artifacts are stable across operating systems.
+- **FUT-02:** public hosted visual reports for pull requests if workflow
+  artifacts are not ergonomic enough for maintainers.
+- **FUT-03:** full `as_d3_ir()` modularization after the high-risk helper
+  boundaries are stable.
+- **FUT-04:** generated renderer documentation from declarative geom contracts
+  if the contract table becomes the long-term source of truth.
+- **FUT-05:** full repelled label placement if demand justifies the dependency
+  and algorithmic complexity.
+- **FUT-06:** broad GIS-style polygon topology repair only if gg2d3 expands
+  beyond ggplot2 rendering parity.
 
 ## Private API dependency
 
