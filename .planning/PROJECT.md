@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.13 Phases 52 through 54 are complete. gg2d3 now has a dedicated GitHub Actions browser visual smoke workflow, CI-mode browser failure behavior, downloadable `index.html`/`index.json` visual artifacts, stable DOM/browser-log metadata checks, approved sf visual smoke fixtures, a source-level renderer contract manifest, stricter renderer drift tests, focused theme/geom-parameter IR helper boundaries, bounded ordinary `geom_label()` box rendering, explicit ordinary polygon topology non-goals, finite rect/tile transformed-bound filtering, and updated geometry diagnostics. v1.12 Quality & Architecture Hardening remains the last shipped milestone; remaining v1.13 work continues with release documentation and validation in Phase 55.
+v1.13 Phases 52 through 55 are complete and ready for milestone closeout. gg2d3 now has a dedicated GitHub Actions browser visual smoke workflow, CI-mode browser failure behavior, downloadable `index.html`/`index.json` visual artifacts, stable DOM/browser-log metadata checks, approved sf visual smoke fixtures, a source-level renderer contract manifest, stricter renderer drift tests, focused theme/geom-parameter IR helper boundaries, bounded ordinary `geom_label()` box rendering, explicit ordinary polygon topology non-goals, finite rect/tile transformed-bound filtering, updated geometry diagnostics, aligned release-facing documentation/generated help, v1.13 NEWS, and repeatable release-gate evidence. v1.12 Quality & Architecture Hardening remains the last shipped milestone until `$gsd-complete-milestone` archives v1.13.
 
 ## Current Milestone: v1.13 Regression & Release Polish
 
@@ -134,10 +134,11 @@ v1.13 Phases 52 through 54 are complete. gg2d3 now has a dedicated GitHub Action
 - ✓ CI-ready browser visual smoke workflow, CI-mode report metadata, validated visual report rows, and downloadable artifact bundles — v1.13 Phase 52
 - ✓ Renderer contract source validation and selected IR helper-boundary consolidation for modules, load order, render/update/interaction selectors, public payload sanitization, theme extraction, and geom parameter routing — v1.13 Phase 53
 - ✓ Geometry polish closure for bounded ordinary `geom_label()` boxes and text placement fields, ordinary polygon topology non-goal fixtures, transformed rect/tile finite-bound filtering, and source-first diagnostics/README alignment — v1.13 Phase 54
+- ✓ Release-facing documentation and generated help alignment, repeatable release-readiness gate evidence, v1.13 NEWS, and final requirement validation map — v1.13 Phase 55
 
 ### Active
 
-- v1.13 release-facing documentation/readiness requirements.
+- None for v1.13; milestone is ready for `$gsd-complete-milestone`.
 
 ### Out of Scope
 
@@ -214,6 +215,7 @@ gg2d3 has a mature three-layer pipeline (R → IR → D3), production polygon/po
 | evidence-driven geometry polish | Rect/tile transforms, polygon topology, and text/label candidates should be classified against ggplot2/source behavior before claiming support or fixing local renderers | ✓ Good — implemented and verified in Phase 51 |
 | bounded ordinary label support | `geom_label()` should ship only the ordinary SVG box/text path with small placement fields, while collision avoidance, rich text, and path-following placement remain explicit non-goals | ✓ Good — implemented and verified in Phase 54 |
 | ordinary polygon topology boundary | Ordinary `geom_polygon()` subgroup/hole behavior should remain fixture-backed and documented as a non-goal unless gg2d3 adds bounded compound-path topology support | ✓ Good — verified in Phase 54 |
+| passed-with-notes release gate | Release readiness can pass with classified non-blocking package-check NOTEs only when final package checks have no ERROR or WARNING outcomes and browser confidence is covered by accepted skip/fallback artifact evidence | ✓ Good — implemented and verified in Phase 55 |
 
 ## Evolution
 
@@ -233,4 +235,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-28 after completing Phase 54 Geometry Polish Closure*
+*Last updated: 2026-05-28 after completing Phase 55 Release Documentation And Validation Gate*
