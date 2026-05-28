@@ -136,6 +136,32 @@ Most theme elements are translated, but some edge cases are not covered:
 - `strip.text` rotation is not supported
 - `plot.margin` is partially supported (outer margins only)
 
+## Renderer and IR contract boundaries
+
+The internal renderer contract manifest is
+`inst/htmlwidgets/modules/geom-contracts.js`. Source-level drift is checked by
+`tests/testthat/test-renderer-wiring-contracts.R`, including renderer module
+paths, htmlwidgets load order, declared render selectors, update selectors,
+interaction selectors, and public payload expectations. Unsupported update or
+interaction surfaces should use explicit exceptions with reason strings rather
+than bare empty arrays.
+
+Public tooltip, event, brush, and linked-view payload paths are expected to pass
+through `window.gg2d3.publicData.sanitizeDatum()` / `publicData.sanitizeDatum`
+so renderer-private underscore fields stay out of public row payloads.
+
+On the R side, `as_d3_ir()` remains the orchestrator for plot building, sf
+payload routing, coordinate metadata, guides, facets, final IR assembly, and
+validation. Focused helpers cover selected scale, layer, facet, theme, and geom
+parameter seams, but full `as_d3_ir()` modularization remains deferred to
+FUT-03. The generated renderer documentation remains deferred to FUT-04; the
+source contract and focused tests are the maintained boundary for now.
+
+These diagnostics do not add committed golden screenshots or pixel thresholds.
+Browser visual smoke artifacts remain downstream inspection evidence, with
+golden screenshots and pixel thresholds still deferred until CI artifacts prove
+stable across environments.
+
 ## Rect/tile edge cases
 
 Phase 45 closed the deferred `geom_rect` and `geom_tile` out-of-bounds item.
