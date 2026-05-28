@@ -1,10 +1,11 @@
 ---
 phase: 54
 slug: geometry-polish-closure
-status: draft
+status: executed
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-05-28
+executed: 2026-05-28
 ---
 
 # Phase 54 — Validation Strategy
@@ -27,6 +28,20 @@ created: 2026-05-28
 
 ---
 
+## Executed Evidence
+
+Final Phase 54 validation was executed on 2026-05-28.
+
+| Gate | Command | Outcome |
+|------|---------|---------|
+| Quick source/IR | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-text-label-polish.R"); testthat::test_file("tests/testthat/test-polygon-ir.R"); testthat::test_file("tests/testthat/test-rect-tile-ir.R")'` | PASS: 0 failures across `test-text-label-polish.R`, `test-polygon-ir.R`, and `test-rect-tile-ir.R`. |
+| Renderer contracts | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-polygon-renderer.R"); testthat::test_file("tests/testthat/test-rect-tile-renderer.R"); testthat::test_file("tests/testthat/test-renderer-wiring-contracts.R")'` | PASS: 0 failures across polygon renderer, rect/tile renderer, and `test-renderer-wiring-contracts.R`. |
+| Diagnostics grep | `rtk rg -n "geom_label|geom_polygon|subgroup|hole|hjust|vjust|angle|collision|path-following|rect|tile|ggrepel|rich text|topology repair" vignettes/d3-drawing-diagnostics.md README.Rmd README.md` plus forbidden-phrase grep | PASS: required geometry boundary terms present; forbidden stale phrases absent. |
+| Optional browser smoke | `rtk env NOT_CRAN=true GG2D3_BROWSER_VISUAL_SMOKE=true Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-browser-visual-smoke.R")'` | SKIPPED: chromote could not launch Chrome; browser smoke remains downstream confidence and was not used as a substitute for source/renderer gates. |
+| Full suite | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); devtools::test()'` | PASS: 0 failures, 6 warnings, 47 expected skips, 2103 passes. |
+
+---
+
 ## Sampling Rate
 
 - **After every task commit:** Run the relevant targeted test file(s) for touched files.
@@ -40,15 +55,15 @@ created: 2026-05-28
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 54-01-01 | 01 | 0 | GEOM-01, GEOM-04 | T-54-01 | Failing-first tests require bounded label boxes and small text placement without HTML insertion | unit/source | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-text-label-polish.R")'` | yes | ⬜ pending |
-| 54-01-02 | 01 | 1 | GEOM-01, GEOM-04 | T-54-01 | R-side IR exposes only bounded label/text support and numeric label padding | unit/source | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-text-label-polish.R")'` | yes | ⬜ pending |
-| 54-01-03 | 01 | 1 | GEOM-01, GEOM-04 | T-54-01 | Labels/text use SVG `.text(...)`, not HTML insertion; renderer contracts cover selectors | unit/source contract | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-text-label-polish.R"); testthat::test_file("tests/testthat/test-renderer-wiring-contracts.R")'` | yes | ⬜ pending |
-| 54-02-01 | 02 | 0 | GEOM-02 | T-54-02 | Subgroup/hole fixtures prove ggplot2 built-data boundary without speculative IR support | unit/source | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-polygon-ir.R")'` | yes | ⬜ pending |
-| 54-02-02 | 02 | 1 | GEOM-02 | T-54-02 | Ordinary polygon renderer does not imply topology repair or unsupported subgroup rendering | source contract | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-polygon-ir.R"); testthat::test_file("tests/testthat/test-polygon-renderer.R")'` | yes | ⬜ pending |
-| 54-03-01 | 03 | 0 | GEOM-03 | T-54-03 | Rect/tile transformed-bound fixtures compare ggplot2 built data, IR rows, and renderer/update source seams | unit/source | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-rect-tile-ir.R"); testthat::test_file("tests/testthat/test-rect-tile-renderer.R")'` | yes | ⬜ pending |
-| 54-03-02 | 03 | 1 | GEOM-03 | T-54-03 | Proven drift is fixed minimally, or no-drift evidence is recorded without broad scale/rect refactor | unit/source | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-rect-tile-ir.R"); testthat::test_file("tests/testthat/test-rect-tile-renderer.R")'` | yes | ⬜ pending |
-| 54-04-01 | 04 | 2 | GEOM-01, GEOM-02, GEOM-03, GEOM-04 | T-54-01/T-54-02/T-54-03 | User-facing diagnostics distinguish shipped support from explicit future work | docs/source | `rtk rg -n "geom_label|geom_polygon|subgroup|hole|hjust|vjust|angle|collision|path-following|rect|tile" vignettes/d3-drawing-diagnostics.md README.Rmd README.md` | yes | ⬜ pending |
-| 54-04-02 | 04 | 2 | GEOM-01, GEOM-02, GEOM-03, GEOM-04 | T-54-01/T-54-02/T-54-03 | Final validation records source/renderer gates and non-primary browser smoke outcome without local artifact leakage | final gate/browser smoke | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-text-label-polish.R"); testthat::test_file("tests/testthat/test-polygon-ir.R"); testthat::test_file("tests/testthat/test-rect-tile-ir.R")'` plus renderer contract command and optional browser smoke from this file | yes | ⬜ pending |
+| 54-01-01 | 01 | 0 | GEOM-01, GEOM-04 | T-54-01 | Failing-first tests require bounded label boxes and small text placement without HTML insertion | unit/source | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-text-label-polish.R")'` | yes | ✅ green |
+| 54-01-02 | 01 | 1 | GEOM-01, GEOM-04 | T-54-01 | R-side IR exposes only bounded label/text support and numeric label padding | unit/source | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-text-label-polish.R")'` | yes | ✅ green |
+| 54-01-03 | 01 | 1 | GEOM-01, GEOM-04 | T-54-01 | Labels/text use SVG `.text(...)`, not HTML insertion; renderer contracts cover selectors | unit/source contract | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-text-label-polish.R"); testthat::test_file("tests/testthat/test-renderer-wiring-contracts.R")'` | yes | ✅ green |
+| 54-02-01 | 02 | 0 | GEOM-02 | T-54-02 | Subgroup/hole fixtures prove ggplot2 built-data boundary without speculative IR support | unit/source | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-polygon-ir.R")'` | yes | ✅ green |
+| 54-02-02 | 02 | 1 | GEOM-02 | T-54-02 | Ordinary polygon renderer does not imply topology repair or unsupported subgroup rendering | source contract | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-polygon-ir.R"); testthat::test_file("tests/testthat/test-polygon-renderer.R")'` | yes | ✅ green |
+| 54-03-01 | 03 | 0 | GEOM-03 | T-54-03 | Rect/tile transformed-bound fixtures compare ggplot2 built data, IR rows, and renderer/update source seams | unit/source | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-rect-tile-ir.R"); testthat::test_file("tests/testthat/test-rect-tile-renderer.R")'` | yes | ✅ green |
+| 54-03-02 | 03 | 1 | GEOM-03 | T-54-03 | Proven drift is fixed minimally, or no-drift evidence is recorded without broad scale/rect refactor | unit/source | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-rect-tile-ir.R"); testthat::test_file("tests/testthat/test-rect-tile-renderer.R")'` | yes | ✅ green |
+| 54-04-01 | 04 | 2 | GEOM-01, GEOM-02, GEOM-03, GEOM-04 | T-54-01/T-54-02/T-54-03 | User-facing diagnostics distinguish shipped support from explicit future work | docs/source | `rtk rg -n "geom_label|geom_polygon|subgroup|hole|hjust|vjust|angle|collision|path-following|rect|tile" vignettes/d3-drawing-diagnostics.md README.Rmd README.md` | yes | ✅ green |
+| 54-04-02 | 04 | 2 | GEOM-01, GEOM-02, GEOM-03, GEOM-04 | T-54-01/T-54-02/T-54-03 | Final validation records source/renderer gates and non-primary browser smoke outcome without local artifact leakage | final gate/browser smoke | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-text-label-polish.R"); testthat::test_file("tests/testthat/test-polygon-ir.R"); testthat::test_file("tests/testthat/test-rect-tile-ir.R")'` plus renderer contract command and optional browser smoke from this file | yes | ⚠️ skipped |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -56,12 +71,12 @@ created: 2026-05-28
 
 ## Wave 0 Requirements
 
-- [ ] `tests/testthat/test-text-label-polish.R` — update label/text characterization from current text-only label behavior to failing-first shipped or explicit-deferral expectations for GEOM-01 and GEOM-04.
-- [ ] `tests/testthat/test-polygon-ir.R` — add focused subgroup/rule fixtures for GEOM-02.
-- [ ] `tests/testthat/test-polygon-renderer.R` — either prove bounded compound-path/fill-rule support or strengthen the non-goal source contract.
-- [ ] `tests/testthat/test-rect-tile-ir.R` and `tests/testthat/test-rect-tile-renderer.R` — add narrower transformed render/update evidence for GEOM-03.
-- [ ] `tests/testthat/test-renderer-wiring-contracts.R` — update if ordinary label selectors, aliases, or private fields change.
-- [ ] `vignettes/d3-drawing-diagnostics.md` — update shipped support and deferral language after implementation decisions.
+- [x] `tests/testthat/test-text-label-polish.R` — updated label/text characterization to shipped bounded label boxes and placement expectations for GEOM-01 and GEOM-04.
+- [x] `tests/testthat/test-polygon-ir.R` — added focused subgroup/rule fixtures for GEOM-02.
+- [x] `tests/testthat/test-polygon-renderer.R` — strengthened the ordinary polygon topology non-goal source contract.
+- [x] `tests/testthat/test-rect-tile-ir.R` and `tests/testthat/test-rect-tile-renderer.R` — added narrower transformed render/update evidence for GEOM-03.
+- [x] `tests/testthat/test-renderer-wiring-contracts.R` — updated ordinary label selectors and aliases.
+- [x] `vignettes/d3-drawing-diagnostics.md` — updated shipped support and deferral language after implementation decisions.
 
 ---
 
@@ -85,11 +100,11 @@ created: 2026-05-28
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify commands or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 60s for targeted source tests
+- [x] All tasks have `<automated>` verify commands or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 60s for targeted source tests
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** executed
