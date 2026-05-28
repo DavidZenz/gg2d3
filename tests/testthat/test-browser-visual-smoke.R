@@ -176,7 +176,7 @@ library(ggplot2)
 
   facet_point <- sf::st_sf(
     facet = factor("A", levels = c("A", "B", "C")),
-    geometry = sf::st_sfc(sf::st_point(c(0, 0)), crs = 4326)
+    geometry = sf::st_sfc(sf::st_point(c(0.75, 0.55)), crs = 4326)
   )
   facet_line <- sf::st_sf(
     facet = factor("B", levels = c("A", "B", "C")),
@@ -241,7 +241,7 @@ library(ggplot2)
         category = "sf",
         widget = gg2d3(
           ggplot() +
-            geom_sf(data = facet_point) +
+            geom_sf(data = facet_point, size = 5, colour = "#D1495B") +
             geom_sf(data = facet_line) +
             geom_sf(data = facet_polygon, fill = "#B3D4FC") +
             facet_wrap(~ facet, drop = FALSE)
