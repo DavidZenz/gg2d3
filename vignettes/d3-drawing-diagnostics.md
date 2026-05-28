@@ -72,10 +72,23 @@ The full artifact command is:
 NOT_CRAN=true GG2D3_BROWSER_VISUAL_SMOKE=true Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-browser-visual-smoke.R")'
 ```
 
+The CI-equivalent local command is:
+
+```bash
+NOT_CRAN=true GG2D3_BROWSER_VISUAL_SMOKE=true GG2D3_BROWSER_VISUAL_CI=true Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); res <- testthat::test_file("tests/testthat/test-browser-visual-smoke.R"); df <- as.data.frame(res); if (any(df$failed > 0 | df$error)) quit(status = 1)'
+```
+
+In CI, the dedicated workflow is `.github/workflows/browser-visual-smoke.yaml`.
+It runs on pull requests and `workflow_dispatch`, sets
+`GG2D3_BROWSER_VISUAL_SMOKE=true` and `GG2D3_BROWSER_VISUAL_CI=true`, and
+uploads the full `test_output/browser-visual-smoke/` directory as a workflow
+artifact on every run.
+
 Generated files live under `test_output/browser-visual-smoke/`, which is ignored
 by git and excluded from package builds. The report files are `index.html` and
-`index.json`; each executable fixture can also produce `<fixture>.html`,
-`<fixture>.png`, `<fixture>-dom-summary.json`, and
+`index.json`. `index.html` is the human-readable report, while `index.json`
+contains structured row and run metadata. Each executable fixture can also
+produce `<fixture>.html`, `<fixture>.png`, `<fixture>-dom-summary.json`, and
 `<fixture>-browser-log.json`.
 
 Coverage includes Cartesian geoms, facets, interactivity-facing marks, ordinary
@@ -84,6 +97,14 @@ Coverage includes Cartesian geoms, facets, interactivity-facing marks, ordinary
 `GG2D3_BROWSER_VISUAL_SMOKE` is not true, when Chrome/Chromium or chromote
 launch is unavailable, or for sf-dependent rows when `sf` or `geojsonsf` is
 unavailable.
+
+If `chromote::find_chrome()` does not find the intended local browser, set
+`CHROMOTE_CHROME=/path/to/chrome` as a troubleshooting override. In the
+dedicated CI workflow, browser-level skips are failures; optional `sf` or
+`geojsonsf` row skips may pass only when the generated report records them
+explicitly. Screenshots are inspection evidence only. The golden screenshots
+are deferred, and pixel thresholds are deferred until CI artifacts prove stable
+across environments.
 
 Map anti-features are explicit: no tile basemaps, no slippy map controls, no
 JavaScript-side CRS reprojection, no true geometry-overlap brushing, no

@@ -63,7 +63,7 @@ browser_visual_ci_mode <- function() {
 
 browser_visual_skip_or_fail <- function(message) {
   if (browser_visual_ci_mode()) {
-    testthat::fail(message)
+    stop(message, call. = FALSE)
   }
   testthat::skip(message)
 }
