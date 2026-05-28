@@ -7,9 +7,9 @@
 
 ### CI Visual Regression
 
-- [ ] **CI-01**: Maintainers can run browser visual smoke coverage in CI or a CI-equivalent local mode with deterministic artifact paths and explicit dependency skip outcomes.
-- [ ] **CI-02**: Browser visual artifacts include enough stable DOM summary, screenshot, browser-log, and report metadata for CI failures to be inspected without committing generated outputs.
-- [ ] **CI-03**: Representative CI/browser assertions validate stable rendered structure and fixture health before any pixel-diff threshold is introduced.
+- [x] **CI-01**: Maintainers can run browser visual smoke coverage in CI or a CI-equivalent local mode with deterministic artifact paths and explicit dependency skip outcomes.
+- [x] **CI-02**: Browser visual artifacts include enough stable DOM summary, screenshot, browser-log, and report metadata for CI failures to be inspected without committing generated outputs.
+- [x] **CI-03**: Representative CI/browser assertions validate stable rendered structure and fixture health before any pixel-diff threshold is introduced.
 
 ### Renderer Architecture
 
@@ -65,9 +65,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CI-01 | Phase 52 | Pending |
-| CI-02 | Phase 52 | Pending |
-| CI-03 | Phase 52 | Pending |
+| CI-01 | Phase 52 | Complete |
+| CI-02 | Phase 52 | Complete |
+| CI-03 | Phase 52 | Complete |
 | ARCH-01 | Phase 53 | Pending |
 | ARCH-02 | Phase 53 | Pending |
 | ARCH-03 | Phase 53 | Pending |

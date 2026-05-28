@@ -28,7 +28,7 @@
 - Integer phases (52, 53, 54, 55): Planned milestone work
 - Decimal phases (52.1, 52.2): Urgent insertions, if needed
 
-- [ ] **Phase 52: CI Visual Regression Foundation** - Maintainers can run CI-safe browser visual smoke coverage with inspectable artifacts and stable non-pixel assertions.
+- [x] **Phase 52: CI Visual Regression Foundation** - Maintainers can run CI-safe browser visual smoke coverage with inspectable artifacts and stable non-pixel assertions.
 - [ ] **Phase 53: Renderer And IR Contract Consolidation** - Renderer wiring and selected IR responsibilities are governed by clearer source-of-truth contracts with actionable drift tests.
 - [ ] **Phase 54: Geometry Polish Closure** - Label, polygon topology, transformed rect/tile, and text-placement candidates are either shipped in bounded form or deferred with implementation-ready evidence.
 - [ ] **Phase 55: Release Documentation And Validation Gate** - v1.13 support, validation commands, release checks, and residual risks are documented and verified from source through generated artifacts.
@@ -91,7 +91,7 @@ Phases execute in numeric order: 52 → 53 → 54 → 55
 
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
-| 52. CI Visual Regression Foundation | CI-01, CI-02, CI-03 | 0/? | Not started | - |
+| 52. CI Visual Regression Foundation | CI-01, CI-02, CI-03 | 3/3 | Complete    | 2026-05-28 |
 | 53. Renderer And IR Contract Consolidation | ARCH-01, ARCH-02, ARCH-03 | 0/? | Not started | - |
 | 54. Geometry Polish Closure | GEOM-01, GEOM-02, GEOM-03, GEOM-04 | 0/? | Not started | - |
 | 55. Release Documentation And Validation Gate | REL-01, REL-02, REL-03 | 0/? | Not started | - |

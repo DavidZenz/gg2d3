@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.12 Quality & Architecture Hardening is complete. gg2d3 now has deterministic opt-in browser visual smoke artifacts, focused IR helper boundaries, renderer/update/interactivity wiring contract coverage, public interaction payload sanitization coverage, transformed rect/tile classification evidence, ordinary polygon topology/subgroup classification, and ordinary text size rendering. Remaining geometry candidates such as full polygon topology repair and ggrepel-style label placement are documented future work rather than implied support.
+v1.13 Phase 52 is complete. gg2d3 now has a dedicated GitHub Actions browser visual smoke workflow, CI-mode browser failure behavior, downloadable `index.html`/`index.json` visual artifacts, stable DOM/browser-log metadata checks, and approved sf visual smoke fixtures. v1.12 Quality & Architecture Hardening remains the last shipped milestone; remaining v1.13 work starts with renderer and IR contract consolidation in Phase 53.
 
 ## Current Milestone: v1.13 Regression & Release Polish
 
