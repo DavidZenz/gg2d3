@@ -434,17 +434,15 @@ This nested helper is a high-value extraction candidate because context names th
 |---|-------|---------|---------------|
 | - | None. All planning-relevant claims are tied to project files, local command output, or phase context. [VERIFIED: sources listed below] | - | - |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **How much diagnostics text is enough?**
+1. **RESOLVED: How much diagnostics text is enough?**
    - What we know: Phase 53 success criteria require diagnostics or architecture notes describing the remaining modularization boundary and future migration path. [VERIFIED: .planning/ROADMAP.md]
-   - What's unclear: The exact amount of new text is left to implementation discretion. [VERIFIED: .planning/phases/53-renderer-and-ir-contract-consolidation/53-CONTEXT.md]
-   - Recommendation: Add a short source-first section to `vignettes/d3-drawing-diagnostics.md` only if code/test changes create a new maintainership boundary that is not already described. [VERIFIED: vignettes/d3-drawing-diagnostics.md; .planning/phases/53-renderer-and-ir-contract-consolidation/53-CONTEXT.md]
+   - Resolution: Add a short source-first section to `vignettes/d3-drawing-diagnostics.md` headed `## Renderer and IR contract boundaries`. The section should describe `geom-contracts.js` as the internal renderer contract manifest, `test-renderer-wiring-contracts.R` as the source-level drift gate, `publicData.sanitizeDatum()` as the public payload boundary, and `as_d3_ir()` as the remaining orchestrator with full modularization deferred. [VERIFIED: .planning/phases/53-renderer-and-ir-contract-consolidation/53-CONTEXT.md; .planning/phases/53-renderer-and-ir-contract-consolidation/53-03-PLAN.md]
 
-2. **Should render selectors be verified by source text or runtime DOM?**
+2. **RESOLVED: Should render selectors be verified by source text or runtime DOM?**
    - What we know: Current contract tests are source-level, and browser smoke validates representative rendered structure downstream. [VERIFIED: tests/testthat/test-renderer-wiring-contracts.R; tests/testthat/test-browser-visual-smoke.R]
-   - What's unclear: Some selectors may be produced dynamically enough that a pure source grep is weaker than DOM smoke. [VERIFIED: inst/htmlwidgets/modules/geoms]
-   - Recommendation: Use source tests for mandatory contract drift and browser smoke only as an optional confidence check. [VERIFIED: .planning/phases/53-renderer-and-ir-contract-consolidation/53-CONTEXT.md]
+   - Resolution: Use source-level render selector tests as the mandatory contract drift gate. For dynamic selector cases, allow targeted source heuristics or explicit contract justifications; keep browser smoke as downstream optional confidence rather than the primary Phase 53 gate. [VERIFIED: .planning/phases/53-renderer-and-ir-contract-consolidation/53-CONTEXT.md; .planning/phases/53-renderer-and-ir-contract-consolidation/53-01-PLAN.md; .planning/phases/53-renderer-and-ir-contract-consolidation/53-03-PLAN.md]
 
 ## Environment Availability
 
