@@ -16,6 +16,7 @@ test_that("SFANN-02 panel renderer filters sf annotation data and geometries tog
   expect_match(gg2d3_js, "isSfLikeLayer")
   expect_match(gg2d3_js, '"sf_text"')
   expect_match(gg2d3_js, '"sf_label"')
+  expect_match(gg2d3_js, "normalizeLayerGeometries")
   expect_match(gg2d3_js, "sfPairs")
   expect_match(gg2d3_js, "filteredPairs")
   expect_match(gg2d3_js, "geometries: filteredPairs\\.map")
@@ -28,7 +29,8 @@ test_that("SFANN-02 panel renderer routes sf_text and sf_label through sf-like f
 
   expect_match(gg2d3_js, 'function isSfLikeLayer\\(layer\\)')
   expect_match(gg2d3_js, '\\["sf", "sf_text", "sf_label"\\]')
-  expect_match(gg2d3_js, "isSfLikeLayer\\(layer\\) && Array\\.isArray\\(layer\\.geometries\\)")
+  expect_match(gg2d3_js, "if \\(isSfLikeLayer\\(layer\\)\\)")
+  expect_match(gg2d3_js, "normalizeLayerGeometries\\(layer\\)")
   expect_match(gg2d3_js, "data: filteredPairs\\.map")
   expect_match(gg2d3_js, "geometries: filteredPairs\\.map")
 })

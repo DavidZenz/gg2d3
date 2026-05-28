@@ -93,7 +93,7 @@ test_that("panel renderer filters sf data and geometries together", {
   gg2d3_js <- read_repo_file("inst/htmlwidgets/gg2d3.js")
 
   expect_match(gg2d3_js, 'layer\\.geom === "sf"')
-  expect_match(gg2d3_js, "Array\\.isArray\\(layer\\.geometries\\)")
+  expect_match(gg2d3_js, "normalizeLayerGeometries")
   expect_match(gg2d3_js, "sfPairs")
   expect_match(gg2d3_js, "pair\\.data\\.PANEL === panelNum")
   expect_match(gg2d3_js, "geometries: filteredPairs\\.map")
@@ -104,9 +104,11 @@ test_that("skipped sf rows cannot become selectable paths", {
   sf_js <- read_repo_file("inst/htmlwidgets/modules/geoms/sf.js")
 
   expect_match(gg2d3_js, "sfPairs")
+  expect_match(gg2d3_js, "normalizeLayerGeometries")
   expect_match(gg2d3_js, "filteredPairs\\.map\\(function\\(pair\\) \\{ return pair\\.data; \\}\\)")
   expect_match(gg2d3_js, "geometries: filteredPairs\\.map\\(function\\(pair\\) \\{ return pair\\.geometry; \\}\\)")
 
+  expect_match(sf_js, "normalizeGeometries")
   expect_match(sf_js, "path\\.geom-sf")
   expect_match(sf_js, "\\.data\\(polygonRows\\)")
   expect_match(sf_js, "data-row-id")
