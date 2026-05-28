@@ -17,6 +17,7 @@ gg2d3_ir_layer_keep_aes <- function() {
   c(
     "PANEL", "x", "y", "xend", "yend", "xmin", "xmax", "ymin", "ymax",
     "colour", "fill", "size", "alpha", "group", "label",
+    "hjust", "vjust", "angle", "family",
     "stroke", "shape", "linewidth", "linetype", "lineend",
     "slope", "intercept", "xintercept", "yintercept",
     "lower", "middle", "upper", "outliers", "notchupper", "notchlower",
@@ -74,7 +75,7 @@ gg2d3_ir_geom_name <- function(layer) {
     GeomBar = "bar",
     GeomArea = "area",
     GeomText = "text",
-    GeomLabel = "text",
+    GeomLabel = "label",
     GeomRect = "rect",
     GeomTile = "rect",
     GeomSegment = "segment",
@@ -216,6 +217,18 @@ gg2d3_ir_layer_params <- function(layer_obj, gcl) {
       params$binaxis <- layer_obj$stat_params$binaxis
     }
     params$stackdir <- layer_obj$geom_params$stackdir
+  } else if (gcl == "GeomLabel") {
+    label_params <- list()
+    padding <- layer_obj$geom_params$label.padding
+    if (!is.null(padding)) {
+      label_params$padding <- tryCatch(
+        as.numeric(grid::convertUnit(padding, "pt", valueOnly = TRUE)) * 96 / 72,
+        error = function(e) NULL
+      )
+    }
+    if (length(label_params) > 0L) {
+      params$label <- label_params
+    }
   }
 
   params

@@ -12,7 +12,7 @@ validate_ir <- function(ir) {
   # List of recognized geom types
   known_geoms <- c(
     "point", "line", "path", "bar", "col", "area",
-    "text", "rect", "segment", "ribbon", "violin", "boxplot",
+    "text", "label", "rect", "segment", "ribbon", "violin", "boxplot",
     "density", "smooth",
     "hline", "vline", "abline", "dotplot", "rug",
     "errorbar", "linerange", "pointrange", "polygon",
