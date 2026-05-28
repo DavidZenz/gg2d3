@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.13 Phases 52 and 53 are complete. gg2d3 now has a dedicated GitHub Actions browser visual smoke workflow, CI-mode browser failure behavior, downloadable `index.html`/`index.json` visual artifacts, stable DOM/browser-log metadata checks, approved sf visual smoke fixtures, a source-level renderer contract manifest, stricter renderer drift tests, and focused theme/geom-parameter IR helper boundaries. v1.12 Quality & Architecture Hardening remains the last shipped milestone; remaining v1.13 work continues with geometry polish closure in Phase 54.
+v1.13 Phases 52 through 54 are complete. gg2d3 now has a dedicated GitHub Actions browser visual smoke workflow, CI-mode browser failure behavior, downloadable `index.html`/`index.json` visual artifacts, stable DOM/browser-log metadata checks, approved sf visual smoke fixtures, a source-level renderer contract manifest, stricter renderer drift tests, focused theme/geom-parameter IR helper boundaries, bounded ordinary `geom_label()` box rendering, explicit ordinary polygon topology non-goals, finite rect/tile transformed-bound filtering, and updated geometry diagnostics. v1.12 Quality & Architecture Hardening remains the last shipped milestone; remaining v1.13 work continues with release documentation and validation in Phase 55.
 
 ## Current Milestone: v1.13 Regression & Release Polish
 
@@ -133,10 +133,11 @@ v1.13 Phases 52 and 53 are complete. gg2d3 now has a dedicated GitHub Actions br
 - ✓ Geometry edge-case classification and polish for transformed rect/tile behavior, ordinary polygon subgroup/topology boundaries, and ordinary text size rendering with explicit label/topology deferrals — v1.12 Phase 51
 - ✓ CI-ready browser visual smoke workflow, CI-mode report metadata, validated visual report rows, and downloadable artifact bundles — v1.13 Phase 52
 - ✓ Renderer contract source validation and selected IR helper-boundary consolidation for modules, load order, render/update/interaction selectors, public payload sanitization, theme extraction, and geom parameter routing — v1.13 Phase 53
+- ✓ Geometry polish closure for bounded ordinary `geom_label()` boxes and text placement fields, ordinary polygon topology non-goal fixtures, transformed rect/tile finite-bound filtering, and source-first diagnostics/README alignment — v1.13 Phase 54
 
 ### Active
 
-- v1.13 requirements for selected geometry polish and release-facing documentation/readiness.
+- v1.13 release-facing documentation/readiness requirements.
 
 ### Out of Scope
 
@@ -150,13 +151,13 @@ v1.13 Phases 52 and 53 are complete. gg2d3 now has a dedicated GitHub Actions br
 
 ## Context
 
-gg2d3 shipped v1.12 with a mature three-layer pipeline (R → IR → D3), production polygon/point/line-family `geom_sf()` support, ordinary polygon rendering, sf text/label annotations, deterministic opt-in browser visual smoke artifacts, and architecture hardening around high-risk IR and renderer/interactivity boundaries. R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, D3 renders SVG through a registry-based geom dispatch system, and htmlwidgets bridges the browser output. The package supports 25 non-sf geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, non-Cartesian coordinates, a composable pipe-based interactivity API, and polygon-first sf rendering with tooltip, hover, handler, centroid brush, stacked-layer alignment, and faceted panel projection behavior.
+gg2d3 has a mature three-layer pipeline (R → IR → D3), production polygon/point/line-family `geom_sf()` support, ordinary polygon rendering, bounded ordinary `geom_label()` boxes, sf text/label annotations, deterministic opt-in and CI-ready browser visual smoke artifacts, and architecture hardening around high-risk IR and renderer/interactivity boundaries. R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, D3 renders SVG through a registry-based geom dispatch system, and htmlwidgets bridges the browser output. The package supports 25 non-sf geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, non-Cartesian coordinates, a composable pipe-based interactivity API, and polygon-first sf rendering with tooltip, hover, handler, centroid brush, stacked-layer alignment, and faceted panel projection behavior.
 
 **Known tech debt:**
 - `as_d3_ir()` now has focused helper boundaries, but broader modularization beyond the high-risk helper slices remains future work.
 - Private ggplot2 theme access remains necessary but is quarantined in `R/ggplot2_compat.R` behind compatibility helpers.
-- Transform-scale rect/tile edge parity is classified at the shared scale factory / axis semantics boundary rather than fixed by a rect-only renderer change.
-- Polygon topology/hole repair beyond grouped closed paths, ggrepel-style collision avoidance, label boxes, and path-following text remain future geometry candidates.
+- Transform-scale rect/tile edge parity remains classified at the shared scale factory / axis semantics boundary; Phase 54 added finite scaled-bound filtering and stronger log/sqrt/reverse evidence without a broad scale rewrite.
+- Polygon topology/hole repair beyond grouped closed paths, ggrepel-style collision avoidance, rich text labels, and path-following text remain future geometry candidates.
 - Browser visual smoke has deterministic local artifacts and explicit skips; live Chrome execution still depends on optional local browser dependencies.
 
 ## Constraints
@@ -211,6 +212,8 @@ gg2d3 shipped v1.12 with a mature three-layer pipeline (R → IR → D3), produc
 | internal geom contracts for wiring | Renderer registration, update handling, and interactivity selectors should be guarded by source contracts so missing wiring fails tests | ✓ Good — implemented and verified in Phase 50 |
 | shared public datum sanitizer | Tooltip, hover, Shiny-style handler, and brush payload paths should share private-field stripping instead of duplicating sanitization | ✓ Good — implemented and verified in Phase 50 |
 | evidence-driven geometry polish | Rect/tile transforms, polygon topology, and text/label candidates should be classified against ggplot2/source behavior before claiming support or fixing local renderers | ✓ Good — implemented and verified in Phase 51 |
+| bounded ordinary label support | `geom_label()` should ship only the ordinary SVG box/text path with small placement fields, while collision avoidance, rich text, and path-following placement remain explicit non-goals | ✓ Good — implemented and verified in Phase 54 |
+| ordinary polygon topology boundary | Ordinary `geom_polygon()` subgroup/hole behavior should remain fixture-backed and documented as a non-goal unless gg2d3 adds bounded compound-path topology support | ✓ Good — verified in Phase 54 |
 
 ## Evolution
 
@@ -230,4 +233,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 after starting v1.13 Regression & Release Polish*
+*Last updated: 2026-05-28 after completing Phase 54 Geometry Polish Closure*
