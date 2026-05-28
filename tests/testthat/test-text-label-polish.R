@@ -3,7 +3,8 @@ if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
 library(ggplot2)
 
 read_repo_file <- function(path) {
-  candidates <- c(path, file.path("..", "..", path))
+  installed_path <- system.file(sub("^inst/", "", path), package = "gg2d3")
+  candidates <- c(path, file.path("..", "..", path), installed_path)
   existing <- candidates[file.exists(candidates)]
   if (length(existing) == 0L) {
     stop("Could not find file: ", path, call. = FALSE)

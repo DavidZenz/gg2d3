@@ -1,5 +1,6 @@
 read_repo_file <- function(path) {
-  candidates <- c(path, file.path("..", "..", path))
+  installed_path <- system.file(sub("^inst/", "", path), package = "gg2d3")
+  candidates <- c(path, file.path("..", "..", path), installed_path)
   existing <- candidates[file.exists(candidates)]
   if (length(existing) == 0L) {
     stop("Could not find file: ", path, call. = FALSE)
@@ -23,7 +24,7 @@ classification_notes <- function() {
     existing <- file.path("..", "..", candidates)[file.exists(file.path("..", "..", candidates))]
   }
   if (length(existing) == 0L) {
-    stop("Could not find Phase 45 rect/tile classification notes", call. = FALSE)
+    testthat::skip("Phase 45 rect/tile classification notes are only available in the source tree")
   }
   paste(readLines(existing[[1]], warn = FALSE), collapse = "\n")
 }

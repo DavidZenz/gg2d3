@@ -1,7 +1,7 @@
 ---
 phase: 55
 slug: release-documentation-and-validation-gate
-status: in-progress
+status: passed-with-notes
 created: 2026-05-28
 release_version: 0.0.0.9000
 ---
@@ -44,6 +44,12 @@ Package version from `DESCRIPTION`: `0.0.0.9000`.
 | Browser visual smoke, opt-in local artifact attempt | `rtk env NOT_CRAN=true GG2D3_BROWSER_VISUAL_SMOKE=true Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-browser-visual-smoke.R")'` | `/Users/davidzenz/R/gg2d3` | 0 | passed with documented local browser launch skip; `[ FAIL 0 | WARN 0 | SKIP 1 | PASS 0 ]` | Expected local browser skip from `skip_browser_visual_smoke()`: `chromote session launch unavailable: Cannot find an available port... Chrome does not appear to be runnable on your system.` This is acceptable locally only because CI/fallback artifact evidence is recorded below. | No fresh local `test_output/browser-visual-smoke/index.json` was produced. |
 | Browser visual smoke, GitHub Actions metadata | `rtk gh auth status` | `/Users/davidzenz/R/gg2d3` | 1 | live refresh unavailable | GitHub CLI auth failed because the default token is invalid for account `DavidZenz`; no fresh workflow run was claimed. | Fallback artifact evidence from Phase 52 is used instead of live `gh` metadata. |
 | Browser visual smoke, fallback artifact summary | `rtk Rscript --vanilla -e 'path <- "test_output/github-run-26575140296/browser-visual-smoke-26575140296/index.json"; if (!file.exists(path)) quit(status=2); x <- jsonlite::read_json(path, simplifyVector=TRUE); cat("artifact_dir", dirname(path), "\n"); cat("generated_at", x$generated_at, "\n"); cat("rows", nrow(x$rows), "\n"); print(table(x$rows$status)); cat("github_run_id", x$metadata$github_run_id, "\n"); cat("browser_visual_ci", x$metadata$browser_visual_ci, "\n")'` | `/Users/davidzenz/R/gg2d3` | 0 | passed; existing downloaded artifact has 9 rows, all `passed`, `github_run_id` 26575140296, and `browser_visual_ci` true | This satisfies D-08 fallback evidence because live `gh` refresh was unavailable and the artifact was previously downloaded from the dedicated browser visual smoke workflow. | Artifact directory summarized only: `test_output/github-run-26575140296/browser-visual-smoke-26575140296/`; contains `index.html`, `index.json`, fixture HTML files, screenshots, DOM summaries, and browser logs, none committed by this plan. |
+| Package build, initial | `rtk R CMD build --no-manual /Users/davidzenz/R/gg2d3` | `/private/tmp` | 0 | passed; built `gg2d3_0.0.0.9000.tar.gz` | None. | `/private/tmp/gg2d3_0.0.0.9000.tar.gz` |
+| Package check, initial | `rtk R CMD check --as-cran gg2d3_0.0.0.9000.tar.gz` | `/private/tmp` | 1 | failed with `1 ERROR, 4 NOTEs`; installed-package tests could not find `inst/htmlwidgets/modules/geoms/text.js` from `test-text-label-polish.R` | Release-blocking installed-package test failure; fixed before final gate. | `/private/tmp/gg2d3.Rcheck/00check.log` |
+| Package build, after installed-source-reader fix | `rtk R CMD build --no-manual /Users/davidzenz/R/gg2d3` | `/private/tmp` | 0 | passed; rebuilt `gg2d3_0.0.0.9000.tar.gz` | None. | `/private/tmp/gg2d3_0.0.0.9000.tar.gz` |
+| Package check, after installed-source-reader fix | `rtk R CMD check --as-cran gg2d3_0.0.0.9000.tar.gz` | `/private/tmp` | 1 | failed with `1 ERROR, 4 NOTEs`; installed-package tests could not find Phase 45 planning notes excluded from the source package | Release-blocking installed-package test failure; fixed before final gate by skipping the source-tree-only planning assertion when notes are absent. | `/private/tmp/gg2d3.Rcheck/00check.log` |
+| Package build, final | `rtk R CMD build --no-manual /Users/davidzenz/R/gg2d3` | `/private/tmp` | 0 | passed; final source tarball built | None. | `/private/tmp/gg2d3_0.0.0.9000.tar.gz` |
+| Package check, final | `rtk R CMD check --as-cran gg2d3_0.0.0.9000.tar.gz` | `/private/tmp` | 0 | passed with `4 NOTEs`; tests ran `[20s/20s] OK`; final status `Status: 4 NOTEs` | No ERROR or WARNING. NOTEs retained and classified below. | Check directory: `/private/tmp/gg2d3.Rcheck`; log path: `/private/tmp/gg2d3.Rcheck/00check.log` |
 
 ## Focused Source Gate Details
 
@@ -77,6 +83,32 @@ Package version from `DESCRIPTION`: `0.0.0.9000`.
 | Downloaded Phase 52 artifact fallback | passed | `test_output/github-run-26575140296/browser-visual-smoke-26575140296/index.json` reports generated time `2026-05-28T12:40:59Z`, run ID `26575140296`, CI mode `true`, and 9/9 rows passed. |
 | Artifact policy | satisfied | Only paths and row-status summaries are recorded. `index.json`, screenshots, fixture HTML, DOM summaries, and browser logs are not copied into planning evidence or staged. |
 
+## Package Build And Check Evidence
+
+| Evidence | Status | Details |
+|---|---|---|
+| Source tarball | passed | `/private/tmp/gg2d3_0.0.0.9000.tar.gz` built from `/Users/davidzenz/R/gg2d3` with `rtk R CMD build --no-manual`. |
+| Check directory | passed | `/private/tmp/gg2d3.Rcheck` created by the final `R CMD check --as-cran` run. |
+| Check log | passed | `/private/tmp/gg2d3.Rcheck/00check.log`; summarized only, raw log not pasted. |
+| Final ERROR/WARNING/NOTE summary | passed with notes | `0 ERRORs, 0 WARNINGs, 4 NOTEs`. ERROR/WARNING would block release readiness; none remain. |
+| Test status inside check | passed | `tests/testthat.R` ran OK in the final installed-package check. |
+
+### Retained NOTE Classification
+
+| NOTE Class | Source | Release Classification |
+|---|---|---|
+| CRAN incoming feasibility | Version/title/new-submission metadata for development version `0.0.0.9000` | Retained as development-package metadata NOTE; not a runtime/test failure. |
+| Dependencies in R code | Unused `jsonlite` import plus private ggplot2 compatibility calls `ggplot2:::calc_element` and `ggplot2:::plot_theme` | Retained as known package hygiene/private-API compatibility NOTE; no ERROR/WARNING. |
+| Rd line widths | Long example line in `d3_tooltip.Rd` | Retained documentation-format NOTE; not a behavior failure. |
+| HTML version of manual | Local HTML Tidy is not recent enough | Retained local toolchain NOTE; not a package test/build failure. |
+
+## Release-Blocking Repairs During Gate
+
+| Repair | Trigger | Files Modified | Verification |
+|---|---|---|---|
+| Installed package source-reader fallback | Initial `R CMD check` failed because `test-text-label-polish.R` could not find bundled JS files from the installed package context. The same repo-relative pattern existed in polygon and rect/tile renderer source tests. | `tests/testthat/test-text-label-polish.R`, `tests/testthat/test-polygon-renderer.R`, `tests/testthat/test-rect-tile-renderer.R` | Focused rerun of the three test files passed; subsequent package check moved past these source-reader failures. |
+| Source-tree-only planning artifact skip | Second `R CMD check` failed because `test-rect-tile-renderer.R` expected Phase 45 `.planning` notes that are intentionally excluded from source packages by `.Rbuildignore`. | `tests/testthat/test-rect-tile-renderer.R` | Focused `test-rect-tile-renderer.R` passed from the source tree; final `R CMD check --as-cran` passed with 4 NOTEs. |
+
 ## Generated Artifact Boundaries
 
 | Artifact Class | Policy | Current Evidence |
@@ -88,8 +120,10 @@ Package version from `DESCRIPTION`: `0.0.0.9000`.
 
 ## Blocker Summary
 
-Current release-readiness status: `in-progress`.
+Current release-readiness status: `passed-with-notes`.
 
 Task 1 source/docs/test status: passed with expected optional skips. No release blocker was found in focused source gates, documentation generation, README generation, or the full package test suite.
 
 Task 2 browser visual status: passed with accepted local skip plus fallback CI artifact evidence. The local browser launch skip is not release-blocking because `test-browser-visual-smoke.R` emitted helper-owned skip behavior and the downloaded dedicated workflow artifact reports 9/9 passed rows.
+
+Task 3 package build/check status: passed after scoped installed-package test repairs. Final `R CMD check --as-cran` has no ERROR/WARNING and retains 4 classified NOTEs.
