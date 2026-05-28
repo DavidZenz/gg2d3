@@ -360,6 +360,21 @@ test_that("events and brush selector contracts cover interactive geoms", {
   expect_match(brush_js, "selectorsFor\\('brush'\\)")
 })
 
+test_that("brush hit testing supports anchored label groups", {
+  contract_js <- read_module("inst/htmlwidgets/modules/geom-contracts.js")
+  brush_js <- read_module("inst/htmlwidgets/modules/brush.js")
+
+  expect_true("g.geom-label" %in% contract_interaction_selectors(contract_js, "brush"))
+  expect_match(brush_js, "var anchoredCx = parseFloat\\(node\\.getAttribute\\('data-cx'\\)\\)")
+  expect_match(brush_js, "var anchoredCy = parseFloat\\(node\\.getAttribute\\('data-cy'\\)\\)")
+  expect_match(brush_js, "isPointInPixelRect\\(anchoredCx, anchoredCy, rect\\)")
+
+  anchor_branch <- regexpr("anchoredCx", brush_js)
+  tag_branch <- regexpr("tagName", brush_js)
+  expect_true(anchor_branch[[1]] > 0)
+  expect_true(tag_branch[[1]] > anchor_branch[[1]])
+})
+
 test_that("crosstalk selector contract preserves intentional differences", {
   contract_js <- read_module("inst/htmlwidgets/modules/geom-contracts.js")
   crosstalk_js <- read_module("inst/htmlwidgets/modules/crosstalk.js")
