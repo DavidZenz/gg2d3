@@ -19,10 +19,10 @@
 
 ### Geometry Polish
 
-- [ ] **GEOM-01**: Ordinary `geom_label()` box, padding, fill, stroke, and text behavior is either implemented for the supported text renderer path or explicitly deferred with source-backed evidence and user-facing diagnostics.
+- [x] **GEOM-01**: Ordinary `geom_label()` box, padding, fill, stroke, and text behavior is either implemented for the supported text renderer path or explicitly deferred with source-backed evidence and user-facing diagnostics.
 - [ ] **GEOM-02**: Ordinary `geom_polygon()` subgroup/hole behavior is either supported for a bounded ggplot2-compatible subset or documented as an explicit non-goal with fixtures proving the boundary.
 - [ ] **GEOM-03**: Transformed-scale rect/tile edge parity is addressed at the shared scale/axis semantics boundary or carried forward with narrower implementation-ready evidence than the v1.12 classification.
-- [ ] **GEOM-04**: Collision avoidance, path-following text, rotation, and justification candidates are triaged into small verified improvements or future requirements without implying unsupported label-placement parity.
+- [x] **GEOM-04**: Collision avoidance, path-following text, rotation, and justification candidates are triaged into small verified improvements or future requirements without implying unsupported label-placement parity.
 
 ### Release And Documentation
 
