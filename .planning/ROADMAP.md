@@ -77,7 +77,7 @@ Plans:
 **Plans**: 4 plans
 Plans:
 - [x] 54-01-PLAN.md - Text/label bounded implementation for ordinary `geom_label()` boxes and small placement fields.
-- [ ] 54-02-PLAN.md - Polygon subgroup/hole fixture boundary and explicit topology non-goal contract.
+- [x] 54-02-PLAN.md - Polygon subgroup/hole fixture boundary and explicit topology non-goal contract.
 - [ ] 54-03-PLAN.md - Rect/tile transformed-bound evidence and minimal drift-fix gate.
 - [ ] 54-04-PLAN.md - Diagnostics alignment and final Phase 54 validation evidence.
 
@@ -102,7 +102,7 @@ Phases execute in numeric order: 52 → 53 → 54 → 55
 |-------|--------------|----------------|--------|-----------|
 | 52. CI Visual Regression Foundation | CI-01, CI-02, CI-03 | 3/3 | Complete    | 2026-05-28 |
 | 53. Renderer And IR Contract Consolidation | ARCH-01, ARCH-02, ARCH-03 | 3/3 | Complete | 2026-05-28 |
-| 54. Geometry Polish Closure | GEOM-01, GEOM-02, GEOM-03, GEOM-04 | 1/4 | In progress | - |
+| 54. Geometry Polish Closure | GEOM-01, GEOM-02, GEOM-03, GEOM-04 | 2/4 | In progress | - |
 | 55. Release Documentation And Validation Gate | REL-01, REL-02, REL-03 | 0/? | Not started | - |
 
 ## Archived Milestones

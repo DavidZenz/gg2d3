@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: Regression & Release Polish
 status: executing
-stopped_at: Phase 54 plan 54-01 completed
-last_updated: "2026-05-28T18:15:27Z"
-last_activity: 2026-05-28 -- Phase 54 plan 54-01 completed
+stopped_at: Completed 54-02-PLAN.md
+last_updated: "2026-05-28T18:23:01.770Z"
+last_activity: 2026-05-28 -- Phase 54 plan 54-02 completed
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 10
-  completed_plans: 7
-  percent: 70
+  completed_plans: 8
+  percent: 80
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-27)
 ## Current Position
 
 Phase: 54 (Geometry Polish Closure) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Executing Phase 54
-Last activity: 2026-05-28 -- Phase 54 plan 54-01 completed
+Last activity: 2026-05-28 -- Phase 54 plan 54-02 completed
 
-Progress: [███████░░░] 70%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -46,11 +46,12 @@ Progress: [███████░░░] 70%
 |-------|-------|-------|----------|
 | 52 | 3 | - | - |
 | 53 | 3/3 | - | - |
-| 54 | 1/4 | - | - |
+| 54 | 2/4 | - | - |
 | 55 | 0/? | - | - |
 
 *Updated after each plan completion*
 | Phase 54 P01 | 31min | 3 tasks | 8 files |
+| Phase 54 P02 | 5min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,9 @@ Recent decisions affecting current work:
 - Visual/browser confidence leads the milestone so later architecture and geometry changes have inspectable rendered artifacts.
 - Architecture hardening is split between R-side IR helper boundaries and JS renderer/interactivity wiring contracts.
 - Geometry polish is evidence-driven: classify against ggplot2 output first, then fix small confirmed gaps or document explicit non-goals.
+- Ordinary geom_polygon subgroup/hole behavior remains an explicit non-goal for Phase 54.
+- ggplot2 built subgroup/rule evidence is fixture-proven, but gg2d3 IR does not preserve subgroup or rule without bounded compound-path rendering.
+- sf fill-rule support remains separate from ordinary polygon subgroup/topology support.
 
 ### Pending Todos
 
@@ -86,9 +90,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: Phase 54 plan 54-01 completed
-Stopped at: Phase 54 plan 54-01 completed
-Resume file: .planning/phases/54-geometry-polish-closure/54-02-PLAN.md
+Last session: 2026-05-28T18:23:01.735Z
+Stopped at: Completed 54-02-PLAN.md
+Resume file: None
 
 **Completed Milestone:** v1.11 Geometry Parity -- 2026-05-25
 **Started Milestone:** v1.12 Quality & Architecture Hardening -- 2026-05-25
@@ -139,3 +143,5 @@ Resume file: .planning/phases/54-geometry-polish-closure/54-02-PLAN.md
 **Planned Phase:** 54 (Geometry Polish Closure) — 4 plans — 2026-05-28T16:57:29Z
 
 **Completed Plan:** 54-01 (Geometry Polish Closure) — bounded ordinary label boxes and text placement — 2026-05-28T18:15:27Z
+
+**Completed Plan:** 54-02 (Geometry Polish Closure) — polygon subgroup/hole fixture boundary and explicit topology non-goal contract — 2026-05-28T18:22:06Z
