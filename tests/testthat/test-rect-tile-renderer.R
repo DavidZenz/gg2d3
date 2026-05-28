@@ -177,6 +177,54 @@ test_that("GEOM-01 rect render and update paths share direct transformed-bound s
   expect_false(grepl("untransform", rect_update_helpers, fixed = TRUE))
 })
 
+test_that("GEOM-03 rect tile render and update paths share transformed-bound scaling", {
+  scales_js <- read_repo_file("inst/htmlwidgets/modules/scales.js")
+  rect_js <- read_repo_file("inst/htmlwidgets/modules/geoms/rect.js")
+  registry_js <- read_repo_file("inst/htmlwidgets/modules/geom-registry.js")
+
+  rect_render <- source_block_after(rect_js, "function rectX")
+  rect_update_helpers <- source_block_after(registry_js, "function rectX")
+  next_section <- regexpr("geom_point", rect_update_helpers)
+  expect_true(next_section[[1]] > 0)
+  rect_update_helpers <- substr(rect_update_helpers, 1, next_section[[1]])
+
+  expect_match(scales_js, "d3\\.scaleLog\\(\\)")
+  expect_match(scales_js, "d3\\.scaleSqrt\\(\\)")
+  expect_match(scales_js, "case \"reverse\"")
+
+  expect_match(rect_render, "Math\\.min\\(xScale")
+  expect_match(rect_render, "Math\\.min\\(yScale")
+  expect_match(rect_render, "Math\\.abs\\(x2 - x1\\)")
+  expect_match(rect_render, "Math\\.abs\\(y2 - y1\\)")
+  expect_match(rect_update_helpers, "Math\\.min\\(xScale")
+  expect_match(rect_update_helpers, "Math\\.min\\(yScale")
+  expect_match(rect_update_helpers, "Math\\.abs\\(xScale\\(num\\(d\\.xmax\\)\\) - xScale\\(num\\(d\\.xmin\\)\\)\\)")
+  expect_match(rect_update_helpers, "Math\\.abs\\(yScale\\(num\\(d\\.ymax\\)\\) - yScale\\(num\\(d\\.ymin\\)\\)\\)")
+
+  expect_false(grepl("untransform", rect_render, fixed = TRUE))
+  expect_false(grepl("untransform", rect_update_helpers, fixed = TRUE))
+  expect_false(grepl("invert(", rect_render, fixed = TRUE))
+  expect_false(grepl("invert(", rect_update_helpers, fixed = TRUE))
+})
+
+test_that("GEOM-03 rect tile transformed bounds avoid malformed DOM attributes", {
+  rect_js <- read_repo_file("inst/htmlwidgets/modules/geoms/rect.js")
+
+  filter_start <- regexpr("const rects = dat\\.filter", rect_js)
+  expect_true(filter_start[[1]] > 0)
+  filter_block <- substr(rect_js, filter_start[[1]], filter_start[[1]] + 520)
+
+  expect_match(filter_block, "validRectBounds")
+  expect_match(filter_block, "scaledRectBoundsAreFinite")
+  expect_match(filter_block, "Number\\.isFinite")
+  expect_match(filter_block, "xScale")
+  expect_match(filter_block, "yScale")
+  expect_match(rect_js, "\\.attr\\(\"x\", d => rectX\\(d\\)\\)")
+  expect_match(rect_js, "\\.attr\\(\"y\", d => rectY\\(d\\)\\)")
+  expect_match(rect_js, "\\.attr\\(\"width\", d => rectWidth\\(d\\)\\)")
+  expect_match(rect_js, "\\.attr\\(\"height\", d => rectHeight\\(d\\)\\)")
+})
+
 test_that("Phase 45 does not require browser smoke for rect/tile closure", {
   notes <- classification_notes()
 

@@ -235,3 +235,30 @@ test_that("GEOM-01 non-positive log rect bounds are censored before IR rendering
   expect_equal(unname(is.na(as.matrix(case$built[, rect_bounds]))), unname(ir_bound_na_matrix(case$layer$data)))
   expect_equal(unname(ir_bound_value_matrix(case$layer$data)), unname(as.matrix(case$built[, rect_bounds])), tolerance = 1e-8)
 })
+
+test_that("GEOM-03 mixed log10 x sqrt y rect bounds mirror ggplot2 built transformed bounds", {
+  plot <- ggplot(
+    data.frame(
+      xmin = c(10, 100),
+      xmax = c(20, 200),
+      ymin = c(4, 16),
+      ymax = c(9, 25)
+    ),
+    aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)
+  ) +
+    geom_rect(fill = "#8ecae6", colour = "#023047") +
+    scale_x_log10() +
+    scale_y_sqrt()
+
+  case <- classify_rect_ir_case(plot)
+
+  expect_equal(case$ir$scales$x$transform, "log10")
+  expect_equal(case$ir$scales$y$transform, "sqrt")
+  expect_true(all(case$built_complete))
+  expect_true(all(case$ir_complete))
+  expect_equal(
+    unname(ir_bound_value_matrix(case$layer$data)),
+    unname(as.matrix(case$built[, rect_bounds])),
+    tolerance = 1e-8
+  )
+})
