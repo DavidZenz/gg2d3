@@ -26,7 +26,7 @@
 
 ### Release And Documentation
 
-- [ ] **REL-01**: README, vignettes, diagnostics docs, roxygen source, and generated help describe the v1.13 validation, architecture, and geometry support contract from source-first documentation.
+- [x] **REL-01**: README, vignettes, diagnostics docs, roxygen source, and generated help describe the v1.13 validation, architecture, and geometry support contract from source-first documentation.
 - [ ] **REL-02**: A repeatable release-readiness gate covers package tests, docs generation, browser visual smoke behavior, optional dependency skips, and package check evidence.
 - [ ] **REL-03**: v1.13 release notes summarize shipped support, validation commands, artifact locations, residual risks, and future candidates without publishing local logs.
 
@@ -75,7 +75,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GEOM-02 | Phase 54 | Complete |
 | GEOM-03 | Phase 54 | Complete |
 | GEOM-04 | Phase 54 | Complete |
-| REL-01 | Phase 55 | Pending |
+| REL-01 | Phase 55 | Complete |
 | REL-02 | Phase 55 | Pending |
 | REL-03 | Phase 55 | Pending |
 
