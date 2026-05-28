@@ -1,10 +1,11 @@
 ---
 phase: 55
 slug: release-documentation-and-validation-gate
-status: executing
+status: executed
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-05-28
+completed: 2026-05-28
 ---
 
 # Phase 55 - Validation Strategy
@@ -39,14 +40,14 @@ created: 2026-05-28
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 55-01-01 | 01 | 1 | REL-01 | T-55-01 | Public docs do not overclaim unsupported parity or leak local artifacts. | docs/source | `rtk rg -n "v1.13|browser visual|geom_label|geom_polygon|rect|tile|geom-contracts|FUT-" README.Rmd README.md vignettes/gg2d3.Rmd vignettes/d3-drawing-diagnostics.md R/gg2d3.R man/gg2d3.Rd NEWS.md` | yes | pending |
-| 55-01-02 | 01 | 1 | REL-01 | T-55-01 | Generated docs derive from source docs. | docs/generated | `rtk Rscript --vanilla -e 'devtools::document(); devtools::build_readme()'` | yes | pending |
+| 55-01-01 | 01 | 1 | REL-01 | T-55-01 | Public docs do not overclaim unsupported parity or leak local artifacts. | docs/source | `rtk rg -n "v1.13|browser visual|geom_label|geom_polygon|rect|tile|geom-contracts|FUT-" README.Rmd README.md vignettes/gg2d3.Rmd vignettes/d3-drawing-diagnostics.md R/gg2d3.R man/gg2d3.Rd NEWS.md` | yes | green |
+| 55-01-02 | 01 | 1 | REL-01 | T-55-01 | Generated docs derive from source docs. | docs/generated | `rtk Rscript --vanilla -e 'devtools::document(); devtools::build_readme()'` | yes | green |
 | 55-02-01 | 02 | 2 | REL-02 | T-55-02 | Focused v1.13 source gates pass before release gate. | source/tests | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-renderer-wiring-contracts.R"); testthat::test_file("tests/testthat/test-ir-helper-boundaries.R"); testthat::test_file("tests/testthat/test-text-label-polish.R"); testthat::test_file("tests/testthat/test-polygon-ir.R"); testthat::test_file("tests/testthat/test-polygon-renderer.R"); testthat::test_file("tests/testthat/test-rect-tile-ir.R"); testthat::test_file("tests/testthat/test-rect-tile-renderer.R")'` | yes | green |
 | 55-02-02 | 02 | 2 | REL-02 | T-55-02 | Full package tests, optional skips, and docs generation are recorded. | package/tests | `rtk Rscript --vanilla -e 'devtools::document(); devtools::build_readme(); devtools::test()'` | yes | green |
 | 55-02-03 | 02 | 2 | REL-02 | T-55-03 | Browser visual smoke pass/skip/CI artifact evidence is explicit. | browser/artifact | `rtk Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-browser-visual-smoke.R")'` plus CI/artifact evidence when feasible | yes | green |
 | 55-02-04 | 02 | 2 | REL-02 | T-55-04 | Package build/check evidence is from a source tarball outside the repo root. | release/check | `rtk R CMD build --no-manual /Users/davidzenz/R/gg2d3` and `rtk R CMD check --as-cran gg2d3_0.0.0.9000.tar.gz` from `/private/tmp` | yes | green |
-| 55-03-01 | 03 | 3 | REL-03 | T-55-01 | `NEWS.md` summarizes support and risks without raw local logs. | docs/source | `rtk rg -n "v1.13|browser visual|R CMD check|test_output/browser-visual-smoke|FUT-01|FUT-06|geom_label|geom_polygon|rect|tile" NEWS.md` | yes | pending |
-| 55-04-01 | 04 | 4 | REL-01, REL-02, REL-03 | T-55-05 | Final evidence maps every v1.13 requirement to source, tests, docs, and gate results. | planning/evidence | `rtk rg -n "CI-01|ARCH-01|GEOM-01|REL-01|REL-02|REL-03" .planning/phases/55-release-documentation-and-validation-gate/55-VERIFICATION.md .planning/phases/55-release-documentation-and-validation-gate/55-GATE-RUN.md` | no W0 | pending |
+| 55-03-01 | 03 | 3 | REL-03 | T-55-01 | `NEWS.md` summarizes support and risks without raw local logs. | docs/source | `rtk rg -n "v1.13|browser visual|R CMD check|test_output/browser-visual-smoke|FUT-01|FUT-06|geom_label|geom_polygon|rect|tile" NEWS.md` | yes | green |
+| 55-04-01 | 04 | 4 | REL-01, REL-02, REL-03 | T-55-05 | Final evidence maps every v1.13 requirement to source, tests, docs, and gate results. | planning/evidence | `rtk rg -n "CI-01|ARCH-01|GEOM-01|REL-01|REL-02|REL-03" .planning/phases/55-release-documentation-and-validation-gate/55-VERIFICATION.md .planning/phases/55-release-documentation-and-validation-gate/55-GATE-RUN.md` | yes | green |
 
 *Status: pending, green, red, skipped*
 
@@ -55,8 +56,17 @@ created: 2026-05-28
 ## Wave 0 Requirements
 
 - Existing testthat, devtools, roxygen2, browser visual, and package-check infrastructure covers Phase 55.
-- `55-GATE-RUN.md` must be created during execution to record release-gate commands, outcomes, generated artifact paths, and optional skip behavior.
-- `55-VERIFICATION.md` must be created during final validation to map all v1.13 requirements to evidence.
+- `55-GATE-RUN.md` was created during execution and records release-gate commands, outcomes, generated artifact paths, and optional skip behavior.
+- `55-VERIFICATION.md` was created during final validation and maps all v1.13 requirements to evidence.
+
+## Final Evidence Status
+
+| Evidence | Status | Details |
+|----------|--------|---------|
+| Release gate | passed-with-notes | `55-GATE-RUN.md` records focused gates, docs/full tests, browser smoke local/fallback evidence, source build, and package check with no ERROR or WARNING. |
+| Requirement verification | passed | `55-VERIFICATION.md` has `status: passed` and maps every v1.13 requirement to source, tests, docs, and gate outcomes. |
+| REL requirement state | complete | `REL-01`, `REL-02`, and `REL-03` remain checked in `.planning/REQUIREMENTS.md` because final verification passed. |
+| Future requirements | preserved | FUT-01 through FUT-06 remain future requirements and are not marked as shipped support. |
 
 ---
 
@@ -78,4 +88,4 @@ created: 2026-05-28
 - [x] Feedback latency target documented.
 - [x] `nyquist_compliant: true` set in frontmatter.
 
-**Approval:** pending
+**Approval:** passed
