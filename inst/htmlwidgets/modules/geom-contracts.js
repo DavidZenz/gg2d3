@@ -258,7 +258,6 @@
         'rect.geom-boxplot-box',
         'line.geom-boxplot-whisker',
         'line.geom-boxplot-median',
-        'line.geom-boxplot-staple',
         'circle.geom-boxplot-outlier'
       ],
       update: {

@@ -38,6 +38,66 @@ contract_aliases <- function(contract_js) {
   }), use.names = FALSE)
 }
 
+contract_modules <- function(contract_js) {
+  entries <- extract_contract_entries(contract_js)
+  lapply(entries, function(entry) {
+    strings <- extract_js_strings(entry)
+    geom <- strings[1]
+    module_start <- regexpr("module:", entry, fixed = TRUE)[[1]]
+    render_start <- regexpr("renderSelectors:", entry, fixed = TRUE)[[1]]
+    expect_true(module_start > 0)
+    expect_true(render_start > module_start)
+    module <- extract_js_strings(substr(entry, module_start, render_start - 1L))[1]
+    list(geom = geom, module = module)
+  })
+}
+
+contract_render_selectors <- function(contract_js) {
+  entries <- extract_contract_entries(contract_js)
+  lapply(entries, function(entry) {
+    strings <- extract_js_strings(entry)
+    geom <- strings[1]
+    render_start <- regexpr("renderSelectors:", entry, fixed = TRUE)[[1]]
+    update_start <- regexpr("update:", entry, fixed = TRUE)[[1]]
+    expect_true(render_start > 0)
+    expect_true(update_start > render_start)
+    selectors <- extract_js_strings(substr(entry, render_start, update_start - 1L))
+    list(geom = geom, selectors = selectors)
+  })
+}
+
+yaml_script_entries <- function(yaml) {
+  lines <- trimws(strsplit(yaml, "\n", fixed = TRUE)[[1]])
+  entries <- sub("^-\\s*", "", lines[grepl("^-\\s*.*\\.js$", lines)])
+  entries[nzchar(entries)]
+}
+
+selector_class_tokens <- function(selector) {
+  matches <- gregexpr("\\.[A-Za-z0-9_-]+", selector, perl = TRUE)[[1]]
+  if (identical(matches, -1L)) {
+    return(character())
+  }
+  tokens <- regmatches(selector, list(matches))[[1]]
+  sub("^\\.", "", tokens)
+}
+
+selector_supported_by_module <- function(selector, module_js) {
+  tokens <- selector_class_tokens(selector)
+  if (!length(tokens)) {
+    return(TRUE)
+  }
+
+  interval_tokens <- tokens[grepl("^geom-interval-", tokens)]
+  if (length(interval_tokens) > 0) {
+    tokens <- setdiff(tokens, interval_tokens)
+    if (!grepl("geom-interval-", module_js, fixed = TRUE)) {
+      return(FALSE)
+    }
+  }
+
+  all(vapply(tokens, function(token) grepl(token, module_js, fixed = TRUE), logical(1)))
+}
+
 registered_aliases <- function() {
   geom_dir <- c(
     "inst/htmlwidgets/modules/geoms",
@@ -113,6 +173,65 @@ test_that("registered renderer aliases are covered by geom contract", {
   aliases <- contract_aliases(contract_js)
   expect_true(all(expected_aliases %in% aliases))
   expect_true(all(registered_aliases() %in% aliases))
+})
+
+test_that("geom contract module paths and htmlwidgets load order are complete", {
+  contract_js <- read_module("inst/htmlwidgets/modules/geom-contracts.js")
+  yaml <- read_module("inst/htmlwidgets/gg2d3.yaml")
+  modules <- contract_modules(contract_js)
+  scripts <- yaml_script_entries(yaml)
+
+  for (module in modules) {
+    path <- file.path("inst/htmlwidgets/modules", module$module)
+    expect_true(
+      file.exists(path) || file.exists(file.path("..", "..", path)) ||
+        nzchar(system.file(sub("^inst/", "", path), package = "gg2d3")),
+      info = paste("Missing contract module:", module$geom, module$module)
+    )
+    expect_true(
+      module$module %in% scripts,
+      info = paste("Missing yaml script:", module$geom, module$module)
+    )
+  }
+
+  ordered_scripts <- c(
+    "geom-contracts.js", "public-data.js", "tooltip.js", "events.js",
+    "brush.js", "crosstalk.js", "geom-registry.js"
+  )
+  for (later in ordered_scripts[-1]) {
+    expect_true(
+      match("geom-contracts.js", scripts) < match(later, scripts),
+      info = paste("Load order drift:", "geom-contracts.js", "before", later)
+    )
+  }
+
+  for (module in unique(vapply(modules, `[[`, character(1), "module"))) {
+    expect_true(
+      match("geom-registry.js", scripts) < match(module, scripts),
+      info = paste("Load order drift:", "geom-registry.js", "before", module)
+    )
+  }
+})
+
+test_that("geom contract render selectors are produced by declared renderer modules", {
+  contract_js <- read_module("inst/htmlwidgets/modules/geom-contracts.js")
+  modules <- contract_modules(contract_js)
+  selectors <- contract_render_selectors(contract_js)
+
+  for (i in seq_along(modules)) {
+    module_js <- read_module(file.path("inst/htmlwidgets/modules", modules[[i]]$module))
+    for (selector in selectors[[i]]$selectors) {
+      expect_true(
+        selector_supported_by_module(selector, module_js),
+        info = paste(
+          "Missing renderer selector:",
+          selectors[[i]]$geom,
+          modules[[i]]$module,
+          selector
+        )
+      )
+    }
+  }
 })
 
 test_that("geom contract update selectors match updateGeoms source", {
