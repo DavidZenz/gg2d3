@@ -188,6 +188,68 @@ test_that("GEOM-02 classifies subgroup holes as built data without IR topology s
   expect_equal(as.numeric(row_values(layer$data, "y")), built$y)
 })
 
+test_that("GEOM-02 polygon subgroup hole fixtures define topology boundary", {
+  hole_data <- data.frame(
+    shape = "donut",
+    subgroup = rep(c("outer", "inner"), each = 5),
+    x = c(0, 4, 4, 0, 0, 1, 1, 3, 3, 1),
+    y = c(0, 0, 4, 4, 0, 1, 3, 3, 1, 1)
+  )
+  hole_plot <- ggplot(hole_data, aes(x, y, group = shape, subgroup = subgroup)) +
+    geom_polygon(rule = "evenodd", fill = "#79A7D3", colour = "#1B365D")
+  hole_built <- ggplot2::ggplot_build(hole_plot)$data[[1]]
+  hole_layer <- expect_polygon_ir(hole_plot)
+
+  expect_true("subgroup" %in% names(hole_built))
+  expect_equal(as.character(hole_built$subgroup), hole_data$subgroup)
+  expect_equal(
+    ggplot2::ggplot_build(hole_plot)$plot$layers[[1]]$geom_params$rule,
+    "evenodd"
+  )
+  expect_false(any(row_has_field(hole_layer$data, "subgroup")))
+  expect_false(any(row_has_field(hole_layer$data, "rule")))
+  expect_equal(as.numeric(row_values(hole_layer$data, "x")), hole_built$x)
+  expect_equal(as.numeric(row_values(hole_layer$data, "y")), hole_built$y)
+
+  reversed_with_repeat <- data.frame(
+    shape = "reversed",
+    vertex = 5:1,
+    x = c(0, 0, 4, 4, 0),
+    y = c(0, 4, 4, 0, 0)
+  )
+  reversed_layer <- expect_polygon_ir(
+    ggplot(reversed_with_repeat, aes(x, y, group = shape)) +
+      geom_polygon(fill = "#b7e4c7", colour = "#1b4332")
+  )
+  expect_equal(as.numeric(row_values(reversed_layer$data, "x")), reversed_with_repeat$x)
+  expect_equal(as.numeric(row_values(reversed_layer$data, "y")), reversed_with_repeat$y)
+
+  self_crossing <- data.frame(
+    shape = "bow",
+    x = c(0, 2, 0, 2),
+    y = c(0, 2, 2, 0)
+  )
+  self_crossing_layer <- expect_polygon_ir(
+    ggplot(self_crossing, aes(x, y, group = shape)) +
+      geom_polygon(fill = "#cdb4db", colour = "#3c096c")
+  )
+  expect_equal(as.numeric(row_values(self_crossing_layer$data, "x")), self_crossing$x)
+  expect_equal(as.numeric(row_values(self_crossing_layer$data, "y")), self_crossing$y)
+
+  too_small <- data.frame(
+    shape = "few",
+    x = c(0, 1),
+    y = c(0, 1)
+  )
+  too_small_layer <- expect_polygon_ir(
+    ggplot(too_small, aes(x, y, group = shape)) +
+      geom_polygon(fill = "#ffc8dd", colour = "#590d22")
+  )
+  expect_equal(length(too_small_layer$data), 2L)
+  expect_equal(as.numeric(row_values(too_small_layer$data, "x")), too_small$x)
+  expect_equal(as.numeric(row_values(too_small_layer$data, "y")), too_small$y)
+})
+
 test_that("GEOM-02 preserves repeated ring vertices and reversed row order as ordinary polygon input", {
   polygon_data <- data.frame(
     vertex = 5:1,
