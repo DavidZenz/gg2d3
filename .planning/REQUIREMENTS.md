@@ -13,9 +13,9 @@
 
 ### Renderer Architecture
 
-- [ ] **ARCH-01**: Renderer registration, update selectors, interaction selectors, and public payload sanitization expectations are driven by a single declarative geom contract or a source-of-truth validation gate.
-- [ ] **ARCH-02**: Additional high-risk `as_d3_ir()` responsibilities are isolated behind focused helpers without changing representative non-sf, sf, facet, scale, and annotation IR output.
-- [ ] **ARCH-03**: Contract tests fail with actionable messages when renderer metadata, module loading, update handling, or interaction payload behavior drifts.
+- [x] **ARCH-01**: Renderer registration, update selectors, interaction selectors, and public payload sanitization expectations are driven by a single declarative geom contract or a source-of-truth validation gate.
+- [x] **ARCH-02**: Additional high-risk `as_d3_ir()` responsibilities are isolated behind focused helpers without changing representative non-sf, sf, facet, scale, and annotation IR output.
+- [x] **ARCH-03**: Contract tests fail with actionable messages when renderer metadata, module loading, update handling, or interaction payload behavior drifts.
 
 ### Geometry Polish
 
@@ -68,9 +68,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CI-01 | Phase 52 | Complete |
 | CI-02 | Phase 52 | Complete |
 | CI-03 | Phase 52 | Complete |
-| ARCH-01 | Phase 53 | Pending |
-| ARCH-02 | Phase 53 | Pending |
-| ARCH-03 | Phase 53 | Pending |
+| ARCH-01 | Phase 53 | Complete |
+| ARCH-02 | Phase 53 | Complete |
+| ARCH-03 | Phase 53 | Complete |
 | GEOM-01 | Phase 54 | Pending |
 | GEOM-02 | Phase 54 | Pending |
 | GEOM-03 | Phase 54 | Pending |
@@ -86,4 +86,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-27*
-*Last updated: 2026-05-27 after creating v1.13 Regression & Release Polish requirements*
+*Last updated: 2026-05-28 after completing Phase 53 renderer and IR contract consolidation*

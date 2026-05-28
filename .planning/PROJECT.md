@@ -10,7 +10,7 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.13 Phase 52 is complete. gg2d3 now has a dedicated GitHub Actions browser visual smoke workflow, CI-mode browser failure behavior, downloadable `index.html`/`index.json` visual artifacts, stable DOM/browser-log metadata checks, and approved sf visual smoke fixtures. v1.12 Quality & Architecture Hardening remains the last shipped milestone; remaining v1.13 work starts with renderer and IR contract consolidation in Phase 53.
+v1.13 Phases 52 and 53 are complete. gg2d3 now has a dedicated GitHub Actions browser visual smoke workflow, CI-mode browser failure behavior, downloadable `index.html`/`index.json` visual artifacts, stable DOM/browser-log metadata checks, approved sf visual smoke fixtures, a source-level renderer contract manifest, stricter renderer drift tests, and focused theme/geom-parameter IR helper boundaries. v1.12 Quality & Architecture Hardening remains the last shipped milestone; remaining v1.13 work continues with geometry polish closure in Phase 54.
 
 ## Current Milestone: v1.13 Regression & Release Polish
 
@@ -131,10 +131,12 @@ v1.13 Phase 52 is complete. gg2d3 now has a dedicated GitHub Actions browser vis
 - ✓ High-risk `as_d3_ir()` helper boundaries isolated with representative IR behavior preserved — v1.12 Phase 49
 - ✓ Renderer registration, update-handler, interactivity-selector, and public payload sanitization contracts covered for registered geoms, ordinary polygons, and sf text/label annotations — v1.12 Phase 50
 - ✓ Geometry edge-case classification and polish for transformed rect/tile behavior, ordinary polygon subgroup/topology boundaries, and ordinary text size rendering with explicit label/topology deferrals — v1.12 Phase 51
+- ✓ CI-ready browser visual smoke workflow, CI-mode report metadata, validated visual report rows, and downloadable artifact bundles — v1.13 Phase 52
+- ✓ Renderer contract source validation and selected IR helper-boundary consolidation for modules, load order, render/update/interaction selectors, public payload sanitization, theme extraction, and geom parameter routing — v1.13 Phase 53
 
 ### Active
 
-- v1.13 requirements for CI/browser regression confidence, renderer/IR architecture consolidation, selected geometry polish, and release-facing documentation/readiness.
+- v1.13 requirements for selected geometry polish and release-facing documentation/readiness.
 
 ### Out of Scope
 
