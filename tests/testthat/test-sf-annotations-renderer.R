@@ -45,6 +45,8 @@ test_that("SFANN-02 sf renderer declares annotation projection and anchor helper
   expect_match(sf_js, "scaledAnnotationAnchor")
   expect_match(sf_js, "projectedCoordinate")
   expect_match(sf_js, "bboxToFeatureCollection")
+  expect_match(sf_js, "xmin === xmax")
+  expect_match(sf_js, "ymin === ymax")
   expect_match(sf_js, "options\\.sfBBox")
   expect_match(sf_js, "data-cx")
   expect_match(sf_js, "data-cy")

@@ -23,6 +23,14 @@
     var xmax = bbox[2];
     var ymax = bbox[3];
     if (![xmin, ymin, xmax, ymax].every(isFiniteNumber)) return null;
+    if (xmin === xmax) {
+      xmin -= 0.5;
+      xmax += 0.5;
+    }
+    if (ymin === ymax) {
+      ymin -= 0.5;
+      ymax += 0.5;
+    }
 
     return {
       type: "FeatureCollection",
