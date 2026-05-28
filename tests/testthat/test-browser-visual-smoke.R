@@ -306,10 +306,17 @@ test_that("BVIS-01 browser visual smoke artifacts are generated for representati
     captured_rows
   }, width = 960, height = 720)
 
+  validate_browser_visual_rows(rows)
   index <- write_browser_visual_index(rows)
   # Report artifacts are test_output/browser-visual-smoke/index.html and index.json.
   expect_true(file.exists(index$html))
   expect_true(file.exists(index$json))
+
+  index_data <- jsonlite::read_json(index$json, simplifyVector = TRUE)
+  expect_true("generated_at" %in% names(index_data))
+  expect_true("metadata" %in% names(index_data))
+  expect_true("rows" %in% names(index_data))
+  expect_equal(index_data$metadata$browser_visual_smoke, "true")
 
   non_skipped <- rows[vapply(rows, function(row) !identical(row$status, "skipped"), logical(1))]
   for (row in non_skipped) {

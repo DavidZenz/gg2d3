@@ -57,6 +57,17 @@ browser_visual_require_opt_in <- function() {
   )
 }
 
+browser_visual_ci_mode <- function() {
+  identical(Sys.getenv("GG2D3_BROWSER_VISUAL_CI"), "true")
+}
+
+browser_visual_skip_or_fail <- function(message) {
+  if (browser_visual_ci_mode()) {
+    testthat::fail(message)
+  }
+  testthat::skip(message)
+}
+
 browser_visual_condition_message <- function(condition) {
   if (!inherits(condition, "condition")) {
     return(as.character(condition))
@@ -76,16 +87,61 @@ browser_visual_condition_message <- function(condition) {
   paste(messages, collapse = " Caused by: ")
 }
 
+browser_visual_browser_metadata <- function() {
+  chrome_path <- NULL
+  chrome_version <- NULL
+  chromote_version <- NULL
+
+  if (requireNamespace("chromote", quietly = TRUE)) {
+    chromote_version <- as.character(utils::packageVersion("chromote"))
+    chrome_path <- tryCatch(chromote::find_chrome(), error = function(e) NULL)
+  }
+
+  if (!is.null(chrome_path) && nzchar(chrome_path)) {
+    chrome_version <- tryCatch(
+      paste(system2(chrome_path, "--version", stdout = TRUE, stderr = TRUE), collapse = "\n"),
+      error = function(e) NULL
+    )
+  }
+
+  list(
+    chrome_path = chrome_path,
+    chrome_version = chrome_version,
+    chromote_version = chromote_version
+  )
+}
+
+browser_visual_report_metadata <- function() {
+  list(
+    ci_mode = browser_visual_ci_mode(),
+    github_actions = identical(Sys.getenv("GITHUB_ACTIONS"), "true"),
+    github_event_name = Sys.getenv("GITHUB_EVENT_NAME", unset = ""),
+    github_sha = Sys.getenv("GITHUB_SHA", unset = ""),
+    github_run_id = Sys.getenv("GITHUB_RUN_ID", unset = ""),
+    github_workflow = Sys.getenv("GITHUB_WORKFLOW", unset = ""),
+    runner_os = Sys.getenv("RUNNER_OS", unset = ""),
+    not_cran = Sys.getenv("NOT_CRAN", unset = ""),
+    browser_visual_smoke = Sys.getenv("GG2D3_BROWSER_VISUAL_SMOKE", unset = ""),
+    browser_visual_ci = Sys.getenv("GG2D3_BROWSER_VISUAL_CI", unset = ""),
+    browser = browser_visual_browser_metadata()
+  )
+}
+
 skip_browser_visual_smoke <- function() {
   browser_visual_require_opt_in()
   testthat::skip_on_cran()
-  testthat::skip_if_not_installed("chromote", "0.5.1")
+
+  if (!requireNamespace("chromote", quietly = TRUE)) {
+    browser_visual_skip_or_fail("chromote package not installed for browser visual smoke tests")
+  }
+  if (utils::packageVersion("chromote") < "0.5.1") {
+    browser_visual_skip_or_fail("chromote package version must be at least 0.5.1 for browser visual smoke tests")
+  }
 
   chrome <- tryCatch(chromote::find_chrome(), error = function(e) NULL)
-  testthat::skip_if(
-    is.null(chrome) || !nzchar(chrome),
-    "Chrome/Chromium not available for chromote browser visual smoke tests"
-  )
+  if (is.null(chrome) || !nzchar(chrome)) {
+    browser_visual_skip_or_fail("Chrome/Chromium not available for chromote browser visual smoke tests")
+  }
 
   launch <- tryCatch(
     {
@@ -100,10 +156,9 @@ skip_browser_visual_smoke <- function() {
   } else {
     as.character(launch)
   }
-  testthat::skip_if(
-    !isTRUE(launch),
-    paste("chromote session launch unavailable:", launch_message)
-  )
+  if (!isTRUE(launch)) {
+    browser_visual_skip_or_fail(paste("chromote session launch unavailable:", launch_message))
+  }
 
   invisible(TRUE)
 }
@@ -416,7 +471,67 @@ capture_browser_visual_fixture <- function(session, fixture) {
   basename(path)
 }
 
-write_browser_visual_index <- function(rows) {
+validate_browser_visual_rows <- function(rows, allow_spatial_skips = TRUE) {
+  if (!is.list(rows) || length(rows) == 0) {
+    testthat::fail("Browser visual report rows must be a non-empty list.")
+  }
+
+  for (idx in seq_along(rows)) {
+    row <- rows[[idx]]
+    id <- row$id %||% ""
+    category <- row$category %||% ""
+    status <- row$status %||% ""
+
+    if (!nzchar(id)) testthat::fail(sprintf("Browser visual row %s has empty id.", idx))
+    if (!nzchar(category)) testthat::fail(sprintf("Browser visual row %s (%s) has empty category.", idx, id))
+    if (!status %in% c("passed", "failed", "skipped")) {
+      testthat::fail(sprintf("Browser visual row %s (%s) has invalid status: %s", idx, id, status))
+    }
+
+    artifact_paths <- c(
+      html = row$html %||% "",
+      screenshot = row$screenshot %||% "",
+      dom_summary = row$dom_summary %||% "",
+      browser_log = row$browser_log %||% ""
+    )
+
+    if (identical(status, "passed")) {
+      missing <- names(artifact_paths)[!nzchar(artifact_paths) | !file.exists(artifact_paths)]
+      if (length(missing) > 0) {
+        testthat::fail(sprintf(
+          "Browser visual row %s (%s) is passed but missing artifacts: %s",
+          idx, id, paste(missing, collapse = ", ")
+        ))
+      }
+    } else if (identical(status, "failed")) {
+      if (!nzchar(row$error %||% "")) {
+        testthat::fail(sprintf("Browser visual row %s (%s) is failed but has no error message.", idx, id))
+      }
+      if (!nzchar(row$browser_log %||% "") || !file.exists(row$browser_log)) {
+        testthat::fail(sprintf("Browser visual row %s (%s) is failed but has no browser log artifact.", idx, id))
+      }
+    } else if (identical(status, "skipped")) {
+      skip_reason <- row$skip_reason %||% ""
+      if (!nzchar(skip_reason)) {
+        testthat::fail(sprintf("Browser visual row %s (%s) is skipped but has no skip reason.", idx, id))
+      }
+      if (browser_visual_ci_mode()) {
+        spatial_skip <- isTRUE(allow_spatial_skips) &&
+          grepl("^sf-", id) &&
+          grepl("Missing optional dependencies:", skip_reason, fixed = TRUE)
+        if (!spatial_skip) {
+          testthat::fail(sprintf("Browser visual row %s (%s) skipped in CI mode: %s", idx, id, skip_reason))
+        }
+      }
+    }
+  }
+
+  invisible(rows)
+}
+
+write_browser_visual_index <- function(rows, metadata = browser_visual_report_metadata()) {
+  validate_browser_visual_rows(rows)
+
   out_dir <- browser_visual_artifact_dir()
   index_json <- file.path(out_dir, "index.json")
   index_html <- file.path(out_dir, "index.html")
@@ -425,6 +540,7 @@ write_browser_visual_index <- function(rows) {
     list(
       generated_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
       artifact_dir = normalizePath(out_dir, mustWork = FALSE),
+      metadata = metadata,
       rows = rows
     ),
     index_json
@@ -452,6 +568,19 @@ write_browser_visual_index <- function(rows) {
     )
   }, character(1))
 
+  browser <- metadata$browser %||% list()
+  metadata_html <- paste0(
+    "<dl>",
+    "<dt>GitHub event</dt><dd>", htmltools::htmlEscape(metadata$github_event_name %||% ""), "</dd>",
+    "<dt>GitHub SHA</dt><dd>", htmltools::htmlEscape(metadata$github_sha %||% ""), "</dd>",
+    "<dt>GitHub run</dt><dd>", htmltools::htmlEscape(metadata$github_run_id %||% ""), "</dd>",
+    "<dt>Runner OS</dt><dd>", htmltools::htmlEscape(metadata$runner_os %||% ""), "</dd>",
+    "<dt>CI mode</dt><dd>", htmltools::htmlEscape(as.character(metadata$ci_mode %||% FALSE)), "</dd>",
+    "<dt>Browser path</dt><dd>", htmltools::htmlEscape(browser$chrome_path %||% ""), "</dd>",
+    "<dt>Browser version</dt><dd>", htmltools::htmlEscape(browser$chrome_version %||% ""), "</dd>",
+    "</dl>"
+  )
+
   html <- paste0(
     "<!doctype html><meta charset=\"utf-8\">",
     "<title>gg2d3 Browser Visual Smoke</title>",
@@ -460,6 +589,8 @@ write_browser_visual_index <- function(rows) {
     "th{background:#f5f5f5}a{margin-right:.6em}</style>",
     "<h1>gg2d3 Browser Visual Smoke</h1>",
     "<p>Generated local artifacts for maintainer inspection. These files live under <code>test_output/browser-visual-smoke/</code>.</p>",
+    "<h2>Run metadata</h2>",
+    metadata_html,
     "<table><thead><tr><th>Fixture</th><th>Category</th><th>Status</th><th>Artifacts</th><th>Skip reason</th></tr></thead><tbody>",
     paste(row_html, collapse = ""),
     "</tbody></table>"
