@@ -74,7 +74,12 @@ Plans:
   3. Transformed rect/tile scale semantics are resolved at a shared boundary or narrowed to an implementation-ready follow-up with stronger evidence than v1.12.
   4. Collision avoidance, path-following text, rotation, and justification candidates are triaged without implying unsupported label-placement parity.
   5. Focused tests and diagnostics distinguish shipped support from future geometry requirements.
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 54-01-PLAN.md - Text/label bounded implementation for ordinary `geom_label()` boxes and small placement fields.
+- [ ] 54-02-PLAN.md - Polygon subgroup/hole fixture boundary and explicit topology non-goal contract.
+- [ ] 54-03-PLAN.md - Rect/tile transformed-bound evidence and minimal drift-fix gate.
+- [ ] 54-04-PLAN.md - Diagnostics alignment and final Phase 54 validation evidence.
 
 ### Phase 55: Release Documentation And Validation Gate
 
@@ -97,7 +102,7 @@ Phases execute in numeric order: 52 → 53 → 54 → 55
 |-------|--------------|----------------|--------|-----------|
 | 52. CI Visual Regression Foundation | CI-01, CI-02, CI-03 | 3/3 | Complete    | 2026-05-28 |
 | 53. Renderer And IR Contract Consolidation | ARCH-01, ARCH-02, ARCH-03 | 3/3 | Complete | 2026-05-28 |
-| 54. Geometry Polish Closure | GEOM-01, GEOM-02, GEOM-03, GEOM-04 | 0/? | Not started | - |
+| 54. Geometry Polish Closure | GEOM-01, GEOM-02, GEOM-03, GEOM-04 | 0/4 | Ready | - |
 | 55. Release Documentation And Validation Gate | REL-01, REL-02, REL-03 | 0/? | Not started | - |
 
 ## Archived Milestones

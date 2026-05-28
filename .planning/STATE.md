@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: Regression & Release Polish
 status: ready
-stopped_at: Phase 54 context gathered
-last_updated: "2026-05-28T16:21:54.439Z"
+stopped_at: Phase 54 plans verified
+last_updated: "2026-05-28T16:57:29Z"
 last_activity: 2026-05-28
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 6
+  total_plans: 10
   completed_plans: 6
   percent: 50
 ---
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-05-27)
 
 ## Current Position
 
-Phase: 54 (Geometry Polish Closure) — READY FOR DISCUSSION
-Plan: Not started
-Status: Phase 53 complete; ready for Phase 54 discussion
-Last activity: 2026-05-28 -- Phase 53 verified and completed
+Phase: 54 (Geometry Polish Closure) — READY TO EXECUTE
+Plan: 0 of 4
+Status: Phase 54 planned and checker-verified; ready for execution
+Last activity: 2026-05-28 -- Phase 54 plans verified
 
 Progress: [█████░░░░░] 50%
 
@@ -46,7 +46,7 @@ Progress: [█████░░░░░] 50%
 |-------|-------|-------|----------|
 | 52 | 3 | - | - |
 | 53 | 3/3 | - | - |
-| 54 | 0/? | - | - |
+| 54 | 0/4 | - | - |
 | 55 | 0/? | - | - |
 
 *Updated after each plan completion*
@@ -85,9 +85,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: Phase 54 context gathered
-Stopped at: Phase 54 context gathered
-Resume file: .planning/phases/54-geometry-polish-closure/54-CONTEXT.md
+Last session: Phase 54 plans verified
+Stopped at: Phase 54 plans verified
+Resume file: .planning/phases/54-geometry-polish-closure/54-01-PLAN.md
 
 **Completed Milestone:** v1.11 Geometry Parity -- 2026-05-25
 **Started Milestone:** v1.12 Quality & Architecture Hardening -- 2026-05-25
@@ -134,3 +134,5 @@ Resume file: .planning/phases/54-geometry-polish-closure/54-CONTEXT.md
 **Completed Plan:** 53-03 (Renderer And IR Contract Consolidation) — diagnostics and validation evidence — 2026-05-28T15:55:00Z
 
 **Completed Phase:** 53 (Renderer And IR Contract Consolidation) — ARCH-01, ARCH-02, and ARCH-03 covered — 2026-05-28T16:02:28Z
+
+**Planned Phase:** 54 (Geometry Polish Closure) — 4 plans — 2026-05-28T16:57:29Z
