@@ -42,6 +42,7 @@ test_that("SFANN-02 sf renderer declares annotation projection and anchor helper
   expect_match(sf_js, "renderSfText")
   expect_match(sf_js, "renderSfLabel")
   expect_match(sf_js, "pathGen\\.centroid")
+  expect_match(sf_js, "scaledAnnotationAnchor")
   expect_match(sf_js, "projectedCoordinate")
   expect_match(sf_js, "bboxToFeatureCollection")
   expect_match(sf_js, "options\\.sfBBox")

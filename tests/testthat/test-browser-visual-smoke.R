@@ -201,8 +201,9 @@ library(ggplot2)
     )
   )
 
-  skipped_widget <- testthat::expect_warning(
-    gg2d3(
+  skipped_widget <- NULL
+  testthat::expect_warning(
+    skipped_widget <- gg2d3(
       ggplot(skipped_annotation, aes(label = label)) +
         geom_sf_text()
     ),
