@@ -30,7 +30,7 @@
 
 - [x] **Phase 52: CI Visual Regression Foundation** - Maintainers can run CI-safe browser visual smoke coverage with inspectable artifacts and stable non-pixel assertions.
 - [x] **Phase 53: Renderer And IR Contract Consolidation** - Renderer wiring and selected IR responsibilities are governed by clearer source-of-truth contracts with actionable drift tests.
-- [ ] **Phase 54: Geometry Polish Closure** - Label, polygon topology, transformed rect/tile, and text-placement candidates are either shipped in bounded form or deferred with implementation-ready evidence.
+- [x] **Phase 54: Geometry Polish Closure** - Label, polygon topology, transformed rect/tile, and text-placement candidates are either shipped in bounded form or deferred with implementation-ready evidence.
 - [ ] **Phase 55: Release Documentation And Validation Gate** - v1.13 support, validation commands, release checks, and residual risks are documented and verified from source through generated artifacts.
 
 ## Phase Details
@@ -79,7 +79,7 @@ Plans:
 - [x] 54-01-PLAN.md - Text/label bounded implementation for ordinary `geom_label()` boxes and small placement fields.
 - [x] 54-02-PLAN.md - Polygon subgroup/hole fixture boundary and explicit topology non-goal contract.
 - [x] 54-03-PLAN.md - Rect/tile transformed-bound evidence and minimal drift-fix gate.
-- [ ] 54-04-PLAN.md - Diagnostics alignment and final Phase 54 validation evidence.
+- [x] 54-04-PLAN.md - Diagnostics alignment and final Phase 54 validation evidence.
 
 ### Phase 55: Release Documentation And Validation Gate
 
@@ -102,7 +102,7 @@ Phases execute in numeric order: 52 → 53 → 54 → 55
 |-------|--------------|----------------|--------|-----------|
 | 52. CI Visual Regression Foundation | CI-01, CI-02, CI-03 | 3/3 | Complete    | 2026-05-28 |
 | 53. Renderer And IR Contract Consolidation | ARCH-01, ARCH-02, ARCH-03 | 3/3 | Complete | 2026-05-28 |
-| 54. Geometry Polish Closure | GEOM-01, GEOM-02, GEOM-03, GEOM-04 | 3/4 | In progress | - |
+| 54. Geometry Polish Closure | GEOM-01, GEOM-02, GEOM-03, GEOM-04 | 4/4 | Complete | 2026-05-28 |
 | 55. Release Documentation And Validation Gate | REL-01, REL-02, REL-03 | 0/? | Not started | - |
 
 ## Archived Milestones
