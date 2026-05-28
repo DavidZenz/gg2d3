@@ -37,6 +37,38 @@ p <- ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) +
 gg2d3(p)
 ```
 
+## v1.13 support and validation contract
+
+The v1.13 release track adds regression confidence and bounded geometry
+polish without broadening gg2d3 into a full ggplot2 or GIS topology
+clone.
+
+- Browser visual validation has a dedicated GitHub Actions workflow and
+  a CI-equivalent local mode. It writes inspectable `index.html`,
+  `index.json`, fixture HTML, screenshot, DOM-summary, and browser-log
+  artifacts under `test_output/browser-visual-smoke/` when enabled,
+  while local runs may skip cleanly if optional browser tooling is
+  unavailable.
+- Renderer wiring is guarded by
+  `inst/htmlwidgets/modules/geom-contracts.js` and source tests for
+  module load order, render/update selectors, interactivity selectors,
+  and public payload sanitization. Selected IR helper-boundary tests
+  cover theme extraction and geom parameter routing while full
+  `as_d3_ir()` modularization remains future work.
+- Geometry support is bounded: ordinary `geom_label()` renders SVG label
+  boxes; ordinary `geom_polygon()` keeps grouped closed-path behavior
+  and explicitly does not infer topology or holes; `geom_rect()` and
+  `geom_tile()` filter non-finite transformed SVG bounds before emitting
+  rect attributes.
+- Deferred work remains explicit in diagnostics, including future
+  pixel-diff thresholds, public hosted visual reports, full IR
+  modularization, generated renderer documentation, repelled label
+  placement, and broad GIS-style topology repair.
+
+See `vignettes/d3-drawing-diagnostics.md` for validation commands,
+artifact paths, CI-mode behavior, architecture boundaries, geometry
+caveats, and future work IDs.
+
 ## Features
 
 ### Geoms
@@ -88,9 +120,9 @@ These support claims are intentionally scoped. gg2d3 does not claim
 complete ggplot2 parity for polygon topology/hole repair beyond grouped
 closed paths, ordinary polygon `subgroup` / `rule` compound-path
 rendering, tile basemaps, slippy controls, JavaScript-side CRS
-reprojection, ggrepel-compatible collision avoidance, rich text, or
-path-following annotation placement. See
-`vignettes/d3-drawing-diagnostics.md` for detailed geometry caveats.
+reprojection, repelled label placement, rich text, or path-following
+annotation placement. See `vignettes/d3-drawing-diagnostics.md` for
+detailed geometry caveats.
 
 ### Scales & Coordinates
 
