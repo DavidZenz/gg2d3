@@ -84,3 +84,40 @@ test_that("GEOM-02 ordinary polygon renderer does not claim topology repair", {
   expect_false(grepl("repair", polygon_js, fixed = TRUE))
   expect_false(grepl("intersect", polygon_js, fixed = TRUE))
 })
+
+test_that("GEOM-02 ordinary polygon topology remains an explicit non-goal", {
+  polygon_js <- read_repo_file("inst/htmlwidgets/modules/geoms/polygon.js")
+
+  # sf fill-rule support is not ordinary polygon subgroup support.
+  expect_match(polygon_js, "const grouped = d3\\.group\\(indexedRows, row =>")
+  expect_match(polygon_js, "row => val\\(get\\(row\\.d, \"group\"\\)\\) \\?\\? 1")
+  expect_match(polygon_js, "g\\.append\\(\"path\"\\)")
+  expect_match(polygon_js, "geom-polygon")
+  expect_match(polygon_js, "publicRow\\._polygonPoints = pts")
+  expect_match(polygon_js, "if \\(pts\\.length < 3\\) return")
+
+  unsupported_topology_terms <- c(
+    "subgroup",
+    "fill-rule",
+    "evenodd",
+    "nonzero",
+    "topology",
+    "topology repair",
+    "containment",
+    "containment inference",
+    "winding",
+    "winding repair",
+    "invalid polygon",
+    "invalid polygon repair",
+    "self-intersection",
+    "self-intersection repair",
+    "selfIntersection",
+    "repair"
+  )
+  for (term in unsupported_topology_terms) {
+    expect_false(
+      grepl(term, polygon_js, fixed = TRUE),
+      info = paste("ordinary polygon renderer must not claim", term)
+    )
+  }
+})
