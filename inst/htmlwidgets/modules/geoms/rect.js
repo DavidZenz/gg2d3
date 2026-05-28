@@ -43,15 +43,37 @@
     // Helper to get column value from row
     const get = (d, k) => (k && d != null) ? d[k] : null;
 
-    // Filter valid rectangles (must have all 4 bounds)
-    const rects = dat.filter(d =>
-      get(d, aes.xmin) != null && get(d, aes.xmax) != null &&
-      get(d, aes.ymin) != null && get(d, aes.ymax) != null
-    );
-
     const isXBand = typeof xScale.bandwidth === "function";
     const isYBand = typeof yScale.bandwidth === "function";
     const flip = !!options.flip;
+
+    function hasBound(d, key) {
+      const v = val(get(d, key));
+      if (v === null || v === undefined || v === "") return false;
+      if (typeof v === "number" && Number.isNaN(v)) return false;
+      return v !== "NA";
+    }
+
+    function validRectBounds(d) {
+      return hasBound(d, aes.xmin) && hasBound(d, aes.xmax) &&
+        hasBound(d, aes.ymin) && hasBound(d, aes.ymax);
+    }
+
+    function scaledRectBoundsAreFinite(d) {
+      const xValues = isXBand
+        ? [xScale(bandValue(d, aes.x, aes.xmin)), xScale.bandwidth()]
+        : [xScale(num(get(d, aes.xmin))), xScale(num(get(d, aes.xmax)))];
+      const yValues = isYBand
+        ? [yScale(bandValue(d, aes.y, aes.ymin)), yScale.bandwidth()]
+        : [yScale(num(get(d, aes.ymin))), yScale(num(get(d, aes.ymax)))];
+
+      return xValues.concat(yValues).every(Number.isFinite);
+    }
+
+    // Filter valid rectangles before SVG x/y/width/height attributes are emitted.
+    const rects = dat.filter(d =>
+      validRectBounds(d) && scaledRectBoundsAreFinite(d)
+    );
 
     function isMissingAesthetic(value) {
       const v = val(value);

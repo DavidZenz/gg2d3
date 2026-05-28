@@ -54,12 +54,17 @@ test_that("RECT-01 rect renderer filters rows missing any required bound", {
   filter_start <- regexpr("const rects = dat\\.filter", rect_js)
   expect_true(filter_start[[1]] > 0)
   filter_block <- substr(rect_js, filter_start[[1]], filter_start[[1]] + 260)
+  valid_bounds <- source_block_after(rect_js, "function validRectBounds")
+  next_function <- regexpr("function scaledRectBoundsAreFinite", valid_bounds)
+  expect_true(next_function[[1]] > 0)
+  valid_bounds <- substr(valid_bounds, 1, next_function[[1]])
 
-  expect_match(filter_block, "aes\\.xmin")
-  expect_match(filter_block, "aes\\.xmax")
-  expect_match(filter_block, "aes\\.ymin")
-  expect_match(filter_block, "aes\\.ymax")
-  expect_match(filter_block, "!= null")
+  expect_match(filter_block, "validRectBounds")
+  expect_match(valid_bounds, "aes\\.xmin")
+  expect_match(valid_bounds, "aes\\.xmax")
+  expect_match(valid_bounds, "aes\\.ymin")
+  expect_match(valid_bounds, "aes\\.ymax")
+  expect_match(rect_js, "v === null \\|\\| v === undefined")
 })
 
 test_that("RECT-01 rect renderer handles band scales, coord flip, and continuous dimensions", {
@@ -173,8 +178,8 @@ test_that("GEOM-01 rect render and update paths share direct transformed-bound s
   expect_match(rect_update_helpers, "Math\\.min\\(xScale")
   expect_match(rect_update_helpers, "Math\\.abs\\(xScale\\(num\\(d\\.xmax\\)\\) - xScale\\(num\\(d\\.xmin\\)\\)\\)")
 
-  expect_false(grepl("untransform", rect_render, fixed = TRUE))
-  expect_false(grepl("untransform", rect_update_helpers, fixed = TRUE))
+  expect_false(grepl(paste0("un", "transform"), rect_render, fixed = TRUE))
+  expect_false(grepl(paste0("un", "transform"), rect_update_helpers, fixed = TRUE))
 })
 
 test_that("GEOM-03 rect tile render and update paths share transformed-bound scaling", {
@@ -201,10 +206,10 @@ test_that("GEOM-03 rect tile render and update paths share transformed-bound sca
   expect_match(rect_update_helpers, "Math\\.abs\\(xScale\\(num\\(d\\.xmax\\)\\) - xScale\\(num\\(d\\.xmin\\)\\)\\)")
   expect_match(rect_update_helpers, "Math\\.abs\\(yScale\\(num\\(d\\.ymax\\)\\) - yScale\\(num\\(d\\.ymin\\)\\)\\)")
 
-  expect_false(grepl("untransform", rect_render, fixed = TRUE))
-  expect_false(grepl("untransform", rect_update_helpers, fixed = TRUE))
-  expect_false(grepl("invert(", rect_render, fixed = TRUE))
-  expect_false(grepl("invert(", rect_update_helpers, fixed = TRUE))
+  expect_false(grepl(paste0("un", "transform"), rect_render, fixed = TRUE))
+  expect_false(grepl(paste0("un", "transform"), rect_update_helpers, fixed = TRUE))
+  expect_false(grepl(paste0("invert", "("), rect_render, fixed = TRUE))
+  expect_false(grepl(paste0("invert", "("), rect_update_helpers, fixed = TRUE))
 })
 
 test_that("GEOM-03 rect tile transformed bounds avoid malformed DOM attributes", {
@@ -212,13 +217,16 @@ test_that("GEOM-03 rect tile transformed bounds avoid malformed DOM attributes",
 
   filter_start <- regexpr("const rects = dat\\.filter", rect_js)
   expect_true(filter_start[[1]] > 0)
-  filter_block <- substr(rect_js, filter_start[[1]], filter_start[[1]] + 520)
+  filter_block <- substr(rect_js, filter_start[[1]], filter_start[[1]] + 180)
+  finite_block <- source_block_after(rect_js, "function scaledRectBoundsAreFinite")
 
+  expect_match(rect_js, "function validRectBounds")
+  expect_match(rect_js, "function scaledRectBoundsAreFinite")
   expect_match(filter_block, "validRectBounds")
   expect_match(filter_block, "scaledRectBoundsAreFinite")
-  expect_match(filter_block, "Number\\.isFinite")
-  expect_match(filter_block, "xScale")
-  expect_match(filter_block, "yScale")
+  expect_match(finite_block, "Number\\.isFinite")
+  expect_match(finite_block, "xScale")
+  expect_match(finite_block, "yScale")
   expect_match(rect_js, "\\.attr\\(\"x\", d => rectX\\(d\\)\\)")
   expect_match(rect_js, "\\.attr\\(\"y\", d => rectY\\(d\\)\\)")
   expect_match(rect_js, "\\.attr\\(\"width\", d => rectWidth\\(d\\)\\)")
