@@ -182,21 +182,29 @@ library(ggplot2)
     facet = factor("B", levels = c("A", "B", "C")),
     geometry = sf::st_sfc(sf::st_linestring(matrix(c(1, 0, 2, 1), ncol = 2, byrow = TRUE)), crs = 4326)
   )
+  facet_polygon <- sf::st_sf(
+    facet = factor("C", levels = c("A", "B", "C")),
+    geometry = sf::st_sfc(sf::st_polygon(list(matrix(
+      c(0.25, 0.2, 1.25, 0.2, 1.25, 0.8, 0.25, 0.8, 0.25, 0.2),
+      ncol = 2,
+      byrow = TRUE
+    ))), crs = 4326)
+  )
 
   annotation_text <- sf::st_sf(
     label = "text",
-    geometry = sf::st_sfc(sf::st_point(c(0, 0)), crs = 4326)
+    geometry = sf::st_sfc(sf::st_point(c(0.4, 0.35)), crs = 4326)
   )
   annotation_label <- sf::st_sf(
     label = "label",
-    geometry = sf::st_sfc(sf::st_linestring(matrix(c(1, 0, 2, 1, 3, 0), ncol = 2, byrow = TRUE)), crs = 4326)
+    geometry = sf::st_sfc(sf::st_point(c(1.6, 0.75)), crs = 4326)
   )
   skipped_annotation <- sf::st_sf(
     label = c("ok", "skip"),
     # GEOMETRYCOLLECTION is intentionally unsupported and should produce a skipped-row warning.
     geometry = sf::st_sfc(
-      sf::st_point(c(0, 0)),
-      sf::st_geometrycollection(list(sf::st_point(c(10, 10)))),
+      sf::st_point(c(0.4, 0.35)),
+      sf::st_geometrycollection(list(sf::st_point(c(1.6, 0.75)))),
       crs = 4326
     )
   )
@@ -205,7 +213,7 @@ library(ggplot2)
   testthat::expect_warning(
     skipped_widget <- gg2d3(
       ggplot(skipped_annotation, aes(label = label)) +
-        geom_sf_text()
+        geom_sf_text(size = 5, colour = "#D1495B")
     ),
     regexp = "skipped"
   )
@@ -235,11 +243,15 @@ library(ggplot2)
           ggplot() +
             geom_sf(data = facet_point) +
             geom_sf(data = facet_line) +
+            geom_sf(data = facet_polygon, fill = "#B3D4FC") +
             facet_wrap(~ facet, drop = FALSE)
         ),
         expected = .browser_visual_expected(
           ".panel" = 3,
-          ".geom-sf" = 2
+          ".geom-sf" = 3,
+          ".geom-sf-point" = 1,
+          ".geom-sf-line" = 1,
+          ".geom-sf-polygon" = 1
         )
       ),
       list(
@@ -247,8 +259,8 @@ library(ggplot2)
         category = "sf-annotations",
         widget = gg2d3(
           ggplot() +
-            geom_sf_text(data = annotation_text, aes(label = label)) +
-            geom_sf_label(data = annotation_label, aes(label = label), fill = "white")
+            geom_sf_text(data = annotation_text, aes(label = label), size = 5, colour = "#D1495B") +
+            geom_sf_label(data = annotation_label, aes(label = label), size = 5, fill = "white", colour = "#4062BB")
         ),
         expected = .browser_visual_expected(
           "text.geom-sf.geom-sf-text" = 1,
