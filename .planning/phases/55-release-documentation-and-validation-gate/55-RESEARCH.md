@@ -344,17 +344,13 @@ Source: `gh` help output, workflow artifact naming, and downloaded Phase 52 arti
 - Release gate commands and artifact paths without raw local logs. [VERIFIED: 55-CONTEXT.md; 42-GATE-RUN.md]
 - Future candidates `FUT-01` through `FUT-06`. [VERIFIED: .planning/REQUIREMENTS.md]
 
-## Open Questions
+## Resolved Questions
 
-1. **How should CI artifact evidence be refreshed if `gh` auth remains invalid?**  
-   What we know: `gh` 2.93.0 is installed, but `gh auth status` reports an invalid token. [VERIFIED: local command probes]  
-   What's unclear: whether the executor will have reauthenticated GitHub access during Phase 55. [VERIFIED: local command probe limitation]  
-   Recommendation: plan `gh` artifact download as preferred evidence, with fallback to the existing downloaded Phase 52 artifact path `test_output/github-run-26575140296/browser-visual-smoke-26575140296/` if live refresh is unavailable. [VERIFIED: 52-VERIFICATION.md; test_output audit]
+1. **RESOLVED: How should CI artifact evidence be refreshed if `gh` auth remains invalid?**
+   Accepted resolution: `gh` artifact download remains preferred when authentication is valid; if `gh auth status` is invalid during execution, the GitHub artifact fallback is accepted. The executor should record the auth limitation and use the existing downloaded Phase 52 artifact path `test_output/github-run-26575140296/browser-visual-smoke-26575140296/` when live refresh is unavailable. [VERIFIED: 52-VERIFICATION.md; test_output audit; checker revision decision]
 
-2. **What package-check NOTEs will remain after current v1.13 changes?**  
-   What we know: Phase 42 previously passed with 4 NOTEs and no ERROR/WARNING. [VERIFIED: 42-GATE-RUN.md]  
-   What's unclear: current Phase 55 `R CMD check --as-cran` output has not been executed during research. [VERIFIED: this research did not run full check]  
-   Recommendation: treat ERROR/WARNING as blockers, summarize retained NOTEs only after execution, and avoid broad metadata cleanup unless the gate exposes a release-blocking issue. [VERIFIED: 55-CONTEXT.md; 42-GATE-RUN.md]
+2. **RESOLVED: How should package-check ERROR/WARNING/NOTE outcomes be classified?**
+   Accepted resolution: package-check ERROR or WARNING outcomes block release readiness. NOTEs are not pre-classified during planning; they must be classified after execution with the exact NOTE class, summary, and rationale in gate evidence. Broad metadata cleanup should not be planned unless the executed gate exposes a release-blocking ERROR/WARNING or a NOTE the maintainer chooses to treat as blocking. [VERIFIED: 55-CONTEXT.md; 42-GATE-RUN.md; checker revision decision]
 
 ## Environment Availability
 
