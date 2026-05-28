@@ -86,14 +86,19 @@
     },
     {
       geom: 'text',
-      aliases: ['text'],
+      aliases: ['text', 'label'],
       module: 'geoms/text.js',
-      renderSelectors: ['text.geom-text'],
-      update: { type: 'selectors', selectors: ['text.geom-text'] },
+      renderSelectors: [
+        'text.geom-text',
+        'g.geom-label',
+        'rect.geom-label-box',
+        'text.geom-label-text'
+      ],
+      update: { type: 'selectors', selectors: ['text.geom-text', 'g.geom-label'] },
       interactions: {
-        events: ['text.geom-text'],
-        brush: ['text.geom-text'],
-        crosstalk: ['text.geom-text']
+        events: ['text.geom-text', 'g.geom-label'],
+        brush: ['text.geom-text', 'g.geom-label'],
+        crosstalk: ['text.geom-text', 'g.geom-label']
       },
       privateFields: [],
       publicPayload: true

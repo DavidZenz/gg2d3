@@ -244,7 +244,7 @@ test_that("registered renderer aliases are covered by geom contract", {
   contract_js <- read_module("inst/htmlwidgets/modules/geom-contracts.js")
   expected_aliases <- c(
     "point", "line", "path", "polygon", "bar", "col", "rect", "tile",
-    "text", "area", "ribbon", "segment", "hline", "vline", "abline",
+    "text", "label", "area", "ribbon", "segment", "hline", "vline", "abline",
     "dotplot", "rug", "errorbar", "linerange", "pointrange", "boxplot",
     "violin", "density", "smooth", "sf", "sf_text", "sf_label"
   )
@@ -347,7 +347,7 @@ test_that("events and brush selector contracts cover interactive geoms", {
     "circle.geom-point", "rect.geom-bar", "rect.geom-rect",
     "path.geom-line", "path.geom-polygon", "path.geom-area",
     "path.geom-density", "path.geom-smooth", "path.geom-ribbon",
-    "path.geom-violin", ".geom-sf", "text.geom-text",
+    "path.geom-violin", ".geom-sf", "text.geom-text", "g.geom-label",
     "line.geom-segment", "rect.geom-boxplot-box",
     "circle.geom-boxplot-outlier", "circle.geom-dotplot",
     "line.geom-rug", "line.interval-line", "line.errorbar-cap-top",
@@ -367,7 +367,7 @@ test_that("crosstalk selector contract preserves intentional differences", {
     "circle.geom-point", "rect.geom-bar", "rect.geom-rect",
     "path.geom-line", "path.geom-polygon", "path.geom-area",
     "path.geom-density", "path.geom-smooth", "path.geom-ribbon",
-    "path.geom-violin", ".geom-sf", "text.geom-text",
+    "path.geom-violin", ".geom-sf", "text.geom-text", "g.geom-label",
     "line.geom-segment", "rect.geom-boxplot-box",
     "circle.geom-boxplot-outlier"
   )
