@@ -63,8 +63,13 @@
     return row;
   }
 
+  function normalizeGeometries(geometries) {
+    if (geometries == null) return [];
+    return Array.isArray(geometries) ? geometries : [geometries];
+  }
+
   function parseGeometries(layer) {
-    return (layer.geometries || []).map(function(s) {
+    return normalizeGeometries(layer.geometries).map(function(s) {
       try { return s ? JSON.parse(s) : null; } catch(e) { return null; }
     });
   }

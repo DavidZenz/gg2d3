@@ -12,6 +12,11 @@ HTMLWidgets.widget({
       return layer && ["sf", "sf_text", "sf_label"].indexOf(layer.geom) >= 0;
     }
 
+    function normalizeLayerGeometries(layer) {
+      if (!layer || layer.geometries == null) return [];
+      return Array.isArray(layer.geometries) ? layer.geometries : [layer.geometries];
+    }
+
     // ---------- renderPanel helper ----------
     function renderPanel(root, parentGroup, panelBox, panelData, ir, theme, convertColor, flip, panelNum, isFaceted) {
       const w = panelBox.w;
@@ -99,9 +104,10 @@ HTMLWidgets.widget({
 
         // sf layers keep data and geometries as parallel arrays, so facet
         // filtering must preserve the original data/geometry index pairs.
-        if (isSfLikeLayer(layer) && Array.isArray(layer.geometries)) {
+        if (isSfLikeLayer(layer)) {
+          const layerGeometries = normalizeLayerGeometries(layer);
           const sfPairs = indexedLayerData.map(function(d, i) {
-            return { data: d, geometry: layer.geometries[i] };
+            return { data: d, geometry: layerGeometries[i] };
           });
           const filteredPairs = isFaceted
             ? sfPairs.filter(function(pair) {
