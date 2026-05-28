@@ -45,11 +45,7 @@
   2. Browser visual outputs include deterministic paths for HTML, screenshot, DOM summary, browser log, JSON index, and human-readable report artifacts.
   3. Stable DOM/metadata assertions catch missing marks, empty fixtures, selector drift, and runtime browser errors without requiring committed golden screenshots.
   4. Documentation explains how to inspect CI/local artifacts and why pixel thresholds remain deferred.
-**Plans**: 3 plans
-Plans:
-- [ ] 53-01-PLAN.md - Renderer contract hardening for modules, selectors, exceptions, and public payload drift.
-- [ ] 53-02-PLAN.md - IR helper boundary hardening for theme extraction and geom parameter routing.
-- [ ] 53-03-PLAN.md - Diagnostics and consolidated Phase 53 validation evidence.
+**Plans**: TBD
 
 ### Phase 53: Renderer And IR Contract Consolidation
 
@@ -61,7 +57,11 @@ Plans:
   2. Additional high-risk `as_d3_ir()` responsibilities are isolated behind focused helpers while representative IR fixtures remain unchanged.
   3. Contract tests fail with clear messages when a supported geom lacks renderer metadata, module loading, update handling, or interaction payload sanitization coverage.
   4. Diagnostics or architecture notes describe the remaining modularization boundary and future migration path.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 53-01-PLAN.md - Renderer contract hardening for modules, selectors, exceptions, and public payload drift.
+- [ ] 53-02-PLAN.md - IR helper boundary hardening for theme extraction and geom parameter routing.
+- [ ] 53-03-PLAN.md - Diagnostics and consolidated Phase 53 validation evidence.
 
 ### Phase 54: Geometry Polish Closure
 
