@@ -2,23 +2,30 @@
 phase: 52
 slug: ci-visual-regression-foundation
 created: 2026-05-28T06:44:35Z
-status: pending
-pending_count: 2
+completed: 2026-05-28T12:57:46Z
+status: passed
+pending_count: 0
+approved_run: 26575140296
 ---
 
 # Phase 52 Human UAT
 
-## Pending Checks
+## Completed Checks
 
 1. Trigger `.github/workflows/browser-visual-smoke.yaml` from GitHub Actions using `workflow_dispatch` or by opening/updating a pull request.
-   - Expected: the workflow opts into `GG2D3_BROWSER_VISUAL_SMOKE=true` and `GG2D3_BROWSER_VISUAL_CI=true`.
-   - Expected when Chrome/chromote is available: the browser visual smoke test runs and uploads a `browser-visual-smoke-${run_id}` artifact.
-   - Expected when Chrome/chromote is unavailable: the workflow fails rather than silently skipping browser-level setup.
+   - Result: workflow run `26575140296` passed on commit `4d77eada2a35a4edcfd8bfba0784647e8e48d0f2`.
+   - Result: the workflow opted into `GG2D3_BROWSER_VISUAL_SMOKE=true` and `GG2D3_BROWSER_VISUAL_CI=true`.
+   - Result: Chrome/chromote was available on the runner and the browser visual smoke test completed.
 
 2. Download/open the uploaded artifact.
-   - Expected files: `index.html`, `index.json`, fixture HTML files, PNG screenshots, DOM captures, and browser log files under `test_output/browser-visual-smoke/`.
-   - Expected report content: metadata includes CI/run fields and browser metadata; rows include screenshot, DOM, HTML, browser log paths, and explicit skip reasons only for optional spatial dependencies.
+   - Result: artifact downloaded to `test_output/github-run-26575140296/browser-visual-smoke-26575140296/`.
+   - Result: artifact includes `index.html`, `index.json`, fixture HTML files, PNG screenshots, DOM summaries, and browser log files.
+   - Result: `index.json` reports all 9 fixtures passed.
 
-## Approval Prompt
+## Visual Approval
 
-Reply `approved` if the GitHub Actions artifact behavior matches the expectations above, or describe the mismatch and Phase 52 should reopen a gap-fix task.
+Approved after inspecting the regenerated `sf` fixtures:
+
+- `sf-facet-wrap`: red point in A, black line in B, blue polygon/rectangle in C.
+- `sf-annotations-text-label`: red text bottom-left, blue text in a white rectangle top-right.
+- `sf-annotations-skipped-row`: red `ok` text bottom-left; unsupported row is intentionally skipped.

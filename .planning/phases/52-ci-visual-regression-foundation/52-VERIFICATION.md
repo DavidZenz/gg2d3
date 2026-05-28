@@ -1,9 +1,9 @@
 ---
 phase: 52
 slug: ci-visual-regression-foundation
-verified: 2026-05-28T06:44:35Z
-status: human_needed
-score: "4/4 requirements source-verified; 2 artifact UI checks pending"
+verified: 2026-05-28T12:57:46Z
+status: passed
+score: "4/4 requirements verified; GitHub artifact UI approved"
 review: clean
 ---
 
@@ -11,14 +11,14 @@ review: clean
 
 ## Result
 
-Phase 52 implementation is source-verified and code-reviewed clean. The remaining gate is human verification of the live GitHub Actions artifact UI, because this local environment cannot launch Chromium through chromote.
+Phase 52 implementation is source-verified, code-reviewed clean, and human-approved against the live GitHub Actions artifact UI.
 
 ## Requirement Verification
 
 | Requirement | Status | Evidence |
 |-------------|--------|----------|
 | CI-01: Dedicated CI/local command opts into browser visual smoke and fails browser-level skips in CI mode | VERIFIED | `.github/workflows/browser-visual-smoke.yaml` sets `GG2D3_BROWSER_VISUAL_SMOKE=true` and `GG2D3_BROWSER_VISUAL_CI=true`; `browser_visual_skip_or_fail()` hard-errors in CI mode. The local CI-equivalent command exited status 1 when Chromium/chromote could not launch. |
-| CI-02: Outputs deterministic browser visual artifacts and report metadata | SOURCE VERIFIED, HUMAN ARTIFACT CHECK PENDING | `write_browser_visual_index()` validates rows and writes `index.html` plus `index.json` metadata; the workflow uploads `test_output/browser-visual-smoke/`. Live uploaded artifact contents still need GitHub Actions confirmation. |
+| CI-02: Outputs deterministic browser visual artifacts and report metadata | VERIFIED | `write_browser_visual_index()` validates rows and writes `index.html` plus `index.json` metadata; the workflow uploads `test_output/browser-visual-smoke/`. GitHub run `26575140296` uploaded a 6.8M artifact with all expected fixture HTML, PNG screenshots, DOM summaries, browser logs, `index.html`, and `index.json`. |
 | CI-03: DOM/metadata assertions catch selector drift, empty fixtures, browser errors, and missing artifacts without pixel thresholds | VERIFIED | `test-browser-visual-smoke.R` asserts expected marks, browser errors, screenshot paths, DOM paths, and structured index metadata; the workflow command exits nonzero on failed/error testthat rows. |
 | Pixel/golden scope stays deferred | VERIFIED | Docs state screenshots are inspection evidence only and golden screenshots/pixel thresholds are deferred; source scan found no Playwright, Puppeteer, Selenium, webshot2, pixel-diff implementation, or committed goldens. |
 
@@ -42,6 +42,9 @@ Phase 52 implementation is source-verified and code-reviewed clean. The remainin
 - Forbidden browser stack and golden/pixel-diff source scan - passed.
 - `rg -n "^test_output/|^test_output$|test_output" .gitignore .Rbuildignore` - passed.
 - `rtk gsd-sdk query verify.schema-drift 52` - passed.
+- GitHub Actions workflow run `26575140296` on commit `4d77eada2a35a4edcfd8bfba0784647e8e48d0f2` - passed.
+- Downloaded artifact `test_output/github-run-26575140296/browser-visual-smoke-26575140296/index.json` - all 9 fixture rows passed.
+- Human visual inspection of downloaded `index.html` - approved. Expected sf visuals: red point in facet A, black line in facet B, blue polygon in facet C; red text and blue label for annotation fixture; red `ok` text only for skipped-row fixture.
 
 ## Local Browser Limitation
 
@@ -53,14 +56,14 @@ CHROMOTE_CHROME="/Applications/Chromium.app/Contents/MacOS/Chromium" NOT_CRAN=tr
 
 It exited status 1 because local Chrome/chromote launch is unavailable (`Cannot find an available port` / Chrome not runnable). This verifies the CI failure behavior for browser-level unavailability, but does not verify a browser-available artifact upload.
 
-## Human Verification Required
+## Human Verification
 
-1. Trigger `.github/workflows/browser-visual-smoke.yaml` via `workflow_dispatch` or a pull request.
-2. Confirm the run uploads `browser-visual-smoke-${run_id}` containing `index.html`, `index.json`, fixture HTML, PNG screenshots, DOM captures, and browser logs when a browser is available.
-3. Inspect `index.html` and `index.json`; expected metadata includes CI/run fields, browser metadata, and explicit optional `sf`/`geojsonsf` row skips if those dependencies are absent.
+Completed on 2026-05-28 via GitHub Actions run `26575140296` and downloaded artifact `test_output/github-run-26575140296/browser-visual-smoke-26575140296/`.
+
+The artifact contains `index.html`, `index.json`, fixture HTML files, PNG screenshots, DOM captures, and browser log files. Human inspection approved the visible sf fixtures after follow-up fixes for scalar sf geometry normalization, annotation anchors, clearer fixture marks, and degenerate sf bbox projection padding.
 
 ## Gate
 
-Status: `human_needed`
+Status: `passed`
 
-Implementation is complete. Phase completion should wait for the GitHub Actions artifact check or an explicit user approval to accept that pending live-artifact risk.
+Implementation is complete and the live-artifact UAT gate is approved.
