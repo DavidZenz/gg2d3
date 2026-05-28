@@ -45,7 +45,11 @@
   2. Browser visual outputs include deterministic paths for HTML, screenshot, DOM summary, browser log, JSON index, and human-readable report artifacts.
   3. Stable DOM/metadata assertions catch missing marks, empty fixtures, selector drift, and runtime browser errors without requiring committed golden screenshots.
   4. Documentation explains how to inspect CI/local artifacts and why pixel thresholds remain deferred.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 53-01-PLAN.md - Renderer contract hardening for modules, selectors, exceptions, and public payload drift.
+- [ ] 53-02-PLAN.md - IR helper boundary hardening for theme extraction and geom parameter routing.
+- [ ] 53-03-PLAN.md - Diagnostics and consolidated Phase 53 validation evidence.
 
 ### Phase 53: Renderer And IR Contract Consolidation
 
