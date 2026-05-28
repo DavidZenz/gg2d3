@@ -201,6 +201,27 @@ gg2d3_ir_var_names <- function(plot_mapping, layer_mapping) {
 }
 
 
+gg2d3_ir_layer_params <- function(layer_obj, gcl) {
+  params <- layer_obj$aes_params
+
+  if (gcl == "GeomRug") {
+    params$sides <- layer_obj$geom_params$sides
+  } else if (gcl == "GeomDotplot") {
+    params$method <- layer_obj$geom_params$method
+    if (is.null(params$method)) {
+      params$method <- layer_obj$stat_params$method
+    }
+    params$binaxis <- layer_obj$geom_params$binaxis
+    if (is.null(params$binaxis)) {
+      params$binaxis <- layer_obj$stat_params$binaxis
+    }
+    params$stackdir <- layer_obj$geom_params$stackdir
+  }
+
+  params
+}
+
+
 gg2d3_ir_non_sf_layer <- function(gname, df, aes, params, var_names) {
   list(
     geom = gname,

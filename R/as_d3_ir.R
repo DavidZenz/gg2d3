@@ -29,94 +29,6 @@ as_d3_ir <- function(p, width = 640, height = 400,
   xscale_obj <- b$layout$panel_scales_x[[1]]
   yscale_obj <- b$layout$panel_scales_y[[1]]
 
-  # Extract a single theme element as a plain list for JSON serialization
-  extract_theme_element <- function(element_name, theme) {
-    calc <- gg2d3_calc_element(element_name, theme)
-
-    if (is.null(calc)) {
-      return(NULL)
-    }
-
-    if (inherits(calc, "element_blank")) {
-      return(list(type = "blank"))
-    }
-
-    if (inherits(calc, "element_rect")) {
-      # Convert linewidth from mm to pixels (1mm = 96/25.4 px at 96 DPI)
-      linewidth_px <- if (!is.null(calc$linewidth)) calc$linewidth * 3.7795275591 else NULL
-
-      return(list(
-        type = "rect",
-        fill = if (length(calc$fill) > 0 && !is.na(calc$fill)) calc$fill else NULL,
-        colour = if (length(calc$colour) > 0 && !is.na(calc$colour)) calc$colour else NULL,
-        linewidth = linewidth_px,
-        linetype = calc$linetype
-      ))
-    }
-
-    if (inherits(calc, "element_line")) {
-      # Convert linewidth from mm to pixels (1mm = 96/25.4 px at 96 DPI)
-      linewidth_px <- if (!is.null(calc$linewidth)) calc$linewidth * 3.7795275591 else NULL
-
-      return(list(
-        type = "line",
-        colour = if (length(calc$colour) > 0 && !is.na(calc$colour)) calc$colour else NULL,
-        linewidth = linewidth_px,
-        linetype = calc$linetype,
-        lineend = calc$lineend
-      ))
-    }
-
-    if (inherits(calc, "element_text")) {
-      # Extract margin if present
-      margin_info <- if (!is.null(calc$margin)) {
-        inches <- grid::convertUnit(calc$margin, "inches", valueOnly = TRUE)
-        pixels <- inches * 96
-        list(top = pixels[1], right = pixels[2], bottom = pixels[3], left = pixels[4])
-      } else {
-        NULL
-      }
-
-      return(list(
-        type = "text",
-        colour = if (length(calc$colour) > 0 && !is.na(calc$colour)) calc$colour else NULL,
-        size = calc$size,
-        face = calc$face,
-        family = calc$family,
-        hjust = calc$hjust,
-        vjust = calc$vjust,
-        angle = calc$angle,
-        lineheight = calc$lineheight,
-        margin = margin_info
-      ))
-    }
-
-    # Handle margin elements (plot.margin, legend.margin). ggplot2 4.x uses
-    # the namespaced class "ggplot2::margin".
-    if (inherits(calc, "margin") || "ggplot2::margin" %in% class(calc)) {
-      # Convert margin to pixels using grid::convertUnit
-      # First convert to inches, then to pixels (96 DPI web standard)
-      inches <- grid::convertUnit(calc, "inches", valueOnly = TRUE)
-      pixels <- inches * 96
-
-      return(list(
-        type = "margin",
-        top = pixels[1],
-        right = pixels[2],
-        bottom = pixels[3],
-        left = pixels[4]
-      ))
-    }
-
-    # Handle unit elements (legend.spacing, etc.)
-    if (inherits(calc, "unit")) {
-      inches <- grid::convertUnit(calc, "inches", valueOnly = TRUE)
-      return(inches * 96)
-    }
-
-    return(NULL)
-  }
-
   sf_coord_geometries <- list()
   sf_panel_geometries <- list()
 
@@ -157,15 +69,7 @@ as_d3_ir <- function(p, width = 640, height = 400,
     df <- gg2d3_ir_apply_temporal_layer_columns(df, x_tn, y_tn)
     var_names <- gg2d3_ir_var_names(b$plot$mapping, layer_obj$mapping)
 
-    # Extract geom-specific parameters
-    g_params <- layer_obj$aes_params
-    if (gcl == "GeomRug") {
-      g_params$sides <- layer_obj$geom_params$sides
-    } else if (gcl == "GeomDotplot") {
-      g_params$method <- layer_obj$geom_params$method
-      g_params$binaxis <- layer_obj$geom_params$binaxis
-      g_params$stackdir <- layer_obj$geom_params$stackdir
-    }
+    g_params <- gg2d3_ir_layer_params(layer_obj, gcl)
 
     if (gname == "sf") {
       payload <- sf_layer_ir_payload(df, aes, g_params, var_names)
@@ -245,62 +149,8 @@ as_d3_ir <- function(p, width = 640, height = 400,
     )
   }
 
-  # Extract theme information
-  theme_ir <- NULL
   th <- gg2d3_plot_theme(b$plot)
-  if (!is.null(th)) {
-    theme_ir <- list(
-      panel = list(
-        background = extract_theme_element("panel.background", th),
-        border = extract_theme_element("panel.border", th)
-      ),
-      plot = list(
-        background = extract_theme_element("plot.background", th),
-        margin = extract_theme_element("plot.margin", th),
-        title = extract_theme_element("plot.title", th),
-        subtitle = extract_theme_element("plot.subtitle", th),
-        caption = extract_theme_element("plot.caption", th)
-      ),
-      grid = list(
-        major = extract_theme_element("panel.grid.major", th),
-        minor = extract_theme_element("panel.grid.minor", th)
-      ),
-      axis = list(
-        line = extract_theme_element("axis.line", th),
-        line.x = extract_theme_element("axis.line.x", th),
-        line.y = extract_theme_element("axis.line.y", th),
-        text = extract_theme_element("axis.text", th),
-        text.x = extract_theme_element("axis.text.x", th),
-        text.y = extract_theme_element("axis.text.y", th),
-        title = extract_theme_element("axis.title", th),
-        title.x = extract_theme_element("axis.title.x", th),
-        title.y = extract_theme_element("axis.title.y", th),
-        ticks = extract_theme_element("axis.ticks", th),
-        ticks.x = extract_theme_element("axis.ticks.x", th),
-        ticks.y = extract_theme_element("axis.ticks.y", th)
-      ),
-      global_text = extract_theme_element("text", th),
-      legend = list(
-        background = extract_theme_element("legend.background", th),
-        key = extract_theme_element("legend.key", th),
-        text = extract_theme_element("legend.text", th),
-        title = extract_theme_element("legend.title", th),
-        margin = extract_theme_element("legend.margin", th),
-        spacing = extract_theme_element("legend.spacing", th),
-        key.size = tryCatch({
-          size <- gg2d3_calc_element("legend.key.size", th)
-          inches <- grid::convertUnit(size, "inches", valueOnly = TRUE)
-          inches * 96
-        }, error = function(e) 23)
-      ),
-      strip = list(
-        background = extract_theme_element("strip.background", th),
-        text = extract_theme_element("strip.text", th),
-        text.x = extract_theme_element("strip.text.x", th),
-        text.y = extract_theme_element("strip.text.y", th)
-      )
-    )
-  }
+  theme_ir <- gg2d3_ir_theme(th)
 
   is_fixed    <- inherits(b$plot$coordinates, "CoordFixed") ||
     (!is.null(b$plot$coordinates$ratio))

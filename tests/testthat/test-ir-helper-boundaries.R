@@ -112,6 +112,54 @@ test_that("layer helper preserves aesthetic variable maps", {
   expect_equal(ir$aes_by_var[["factor(cyl)"]], "colour", info = "layer helper aes_by_var colour")
 })
 
+test_that("theme helper preserves translated theme elements", {
+  p <- ggplot(mtcars, aes(wt, mpg, colour = factor(cyl))) +
+    geom_point() +
+    theme(
+      panel.background = element_rect(fill = "grey95", colour = "black", linewidth = 0.5),
+      panel.grid.major = element_line(colour = "grey70", linewidth = 0.25),
+      axis.text.x = element_text(colour = "red", size = 11, angle = 35, margin = margin(t = 4)),
+      plot.margin = margin(5, 6, 7, 8),
+      legend.key.size = grid::unit(0.25, "in")
+    )
+  ir <- as_d3_ir(p)
+
+  expect_equal(ir$theme$panel$background$type, "rect", info = "theme helper panel.background type")
+  expect_equal(ir$theme$panel$background$fill, "grey95", info = "theme helper panel.background fill")
+  expect_equal(ir$theme$panel$background$colour, "black", info = "theme helper panel.background colour")
+  expect_equal(ir$theme$grid$major$type, "line", info = "theme helper panel.grid.major type")
+  expect_equal(ir$theme$grid$major$colour, "grey70", info = "theme helper panel.grid.major colour")
+  expect_equal(ir$theme$axis$text.x$type, "text", info = "theme helper axis.text.x type")
+  expect_equal(ir$theme$axis$text.x$colour, "red", info = "theme helper axis.text.x colour")
+  expect_equal(ir$theme$axis$text.x$size, 11, info = "theme helper axis.text.x size")
+  expect_equal(ir$theme$axis$text.x$angle, 35, info = "theme helper axis.text.x angle")
+  expect_true(ir$theme$axis$text.x$margin$top > 0, info = "theme helper axis.text.x margin")
+  expect_equal(ir$theme$plot$margin$type, "margin", info = "theme helper plot.margin type")
+  expect_true(ir$theme$plot$margin$top > 0, info = "theme helper plot.margin top")
+  expect_true(ir$theme$plot$margin$right > ir$theme$plot$margin$top, info = "theme helper plot.margin right")
+  expect_equal(ir$theme$legend$key.size, 24, tolerance = 1e-6, info = "theme helper legend.key.size")
+})
+
+test_that("geom parameter helper preserves routed geom params", {
+  rug_ir <- as_d3_ir(
+    ggplot(mtcars, aes(wt, mpg)) +
+      geom_rug(sides = "b")
+  )
+  rug_params <- rug_ir$layers[[1]]$params
+
+  expect_equal(rug_params$sides, "b", info = "geom parameter helper geom_rug sides")
+
+  dot_ir <- as_d3_ir(
+    ggplot(mtcars, aes(wt)) +
+      geom_dotplot(method = "histodot", binaxis = "x", stackdir = "center")
+  )
+  dot_params <- dot_ir$layers[[1]]$params
+
+  expect_equal(dot_params$method, "histodot", info = "geom parameter helper geom_dotplot method")
+  expect_equal(dot_params$binaxis, "x", info = "geom parameter helper geom_dotplot binaxis")
+  expect_equal(dot_params$stackdir, "center", info = "geom parameter helper geom_dotplot stackdir")
+})
+
 test_that("layer helper preserves sf annotation layer contracts", {
   testthat::skip_if_not_installed("sf")
   testthat::skip_if_not_installed("geojsonsf")
