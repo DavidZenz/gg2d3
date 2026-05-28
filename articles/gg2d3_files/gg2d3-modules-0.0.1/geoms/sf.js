@@ -175,12 +175,22 @@
     return pathGen.centroid(asFeature(geom));
   }
 
-  function buildAnnotationRows(layer, geoms, pathGen, proj, val) {
+  function scaledAnnotationAnchor(row, xScale, yScale) {
+    var x = +row.x;
+    var y = +row.y;
+    if (!isFiniteNumber(x) || !isFiniteNumber(y)) return null;
+    var sx = xScale(x);
+    var sy = yScale(y);
+    if (!isFiniteNumber(sx) || !isFiniteNumber(sy)) return null;
+    return [sx, sy];
+  }
+
+  function buildAnnotationRows(layer, geoms, pathGen, proj, val, xScale, yScale) {
     var data = layer.data || [];
     return data.map(function(d, i) {
       var row = copyRow(d);
       row._geom = geoms[i] || null;
-      row._centroid = annotationAnchor(row._geom, pathGen, proj);
+      row._centroid = scaledAnnotationAnchor(row, xScale, yScale) || annotationAnchor(row._geom, pathGen, proj);
       row._sfAnchor = row._centroid;
       row._sfFamily = geometryFamily(row._geom);
       return row;
@@ -392,7 +402,7 @@
     var projection = buildProjection(layer, options);
     if (!projection) return 0;
 
-    var rows = buildAnnotationRows(layer, projection.geoms, projection.pathGen, projection.proj, val);
+    var rows = buildAnnotationRows(layer, projection.geoms, projection.pathGen, projection.proj, val, xScale, yScale);
     var group = g.append("g").attr("class", "geom-sf-annotation-group geom-sf-" + annotationType + "-group");
 
     if (annotationType === "text") {
