@@ -91,7 +91,12 @@ Plans:
   2. A repeatable release-readiness gate records package tests, documentation generation, browser visual smoke behavior, optional dependency skips, and package check evidence.
   3. v1.13 release notes summarize shipped support, validation commands, artifact locations, residual risks, and future candidates without publishing local logs.
   4. Final validation evidence maps every v1.13 requirement to source, tests, docs, and release-gate outcomes.
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 55-01-PLAN.md - Source-first documentation and generated help alignment for the v1.13 support contract.
+- [ ] 55-02-PLAN.md - Repeatable release-readiness gate execution and evidence capture.
+- [ ] 55-03-PLAN.md - v1.13 NEWS release notes with validation, artifact, risk, and FUT handoff.
+- [ ] 55-04-PLAN.md - Final all-requirements validation map and milestone-completion handoff.
 
 ## Progress
 
@@ -103,7 +108,7 @@ Phases execute in numeric order: 52 → 53 → 54 → 55
 | 52. CI Visual Regression Foundation | CI-01, CI-02, CI-03 | 3/3 | Complete    | 2026-05-28 |
 | 53. Renderer And IR Contract Consolidation | ARCH-01, ARCH-02, ARCH-03 | 3/3 | Complete | 2026-05-28 |
 | 54. Geometry Polish Closure | GEOM-01, GEOM-02, GEOM-03, GEOM-04 | 4/4 | Complete | 2026-05-28 |
-| 55. Release Documentation And Validation Gate | REL-01, REL-02, REL-03 | 0/? | Not started | - |
+| 55. Release Documentation And Validation Gate | REL-01, REL-02, REL-03 | 0/4 | Not started | - |
 
 ## Archived Milestones
 
