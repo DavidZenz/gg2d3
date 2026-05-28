@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: Regression & Release Polish
 status: executing
-stopped_at: Completed 55-01-PLAN.md
-last_updated: "2026-05-28T20:45:39.294Z"
+stopped_at: Completed 55-02-PLAN.md
+last_updated: "2026-05-28T21:05:10.862Z"
 last_activity: 2026-05-28
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 14
-  completed_plans: 11
-  percent: 79
+  completed_plans: 12
+  percent: 86
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-27)
 ## Current Position
 
 Phase: 55
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-05-28
 
-Progress: [████████░░] 79%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [████████░░] 79%
 | Phase 54 P03 | 5min | 2 tasks | 4 files |
 | Phase 54 P04 | 6min | 2 tasks | 5 files |
 | Phase 55 P01 | 4min | 2 tasks | 7 files |
+| Phase 55 P02 | 15min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,9 @@ Recent decisions affecting current work:
 - Kept generated README and help source-backed by regenerating them instead of hand-editing.
 - Used bounded support language for browser validation, renderer contracts, IR helper boundaries, labels, polygons, and rect/tile behavior.
 - Removed exact overclaim trigger wording while preserving explicit future-work deferrals.
+- Accepted local browser visual smoke launch as a documented optional skip only because fallback CI artifact evidence reports 9/9 passed rows.
+- Retained the final R CMD check --as-cran 4 NOTEs as classified non-blockers because no ERROR or WARNING remains.
+- Fixed installed-package source tests instead of weakening the release gate.
 
 ### Pending Todos
 
@@ -100,8 +104,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-28T20:45:39.287Z
-Stopped at: Completed 55-01-PLAN.md
+Last session: 2026-05-28T21:05:10.854Z
+Stopped at: Completed 55-02-PLAN.md
 Resume file: None
 
 **Completed Milestone:** v1.11 Geometry Parity -- 2026-05-25
