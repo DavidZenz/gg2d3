@@ -43,7 +43,7 @@ gg2d3(p)
 
 | Category | Geoms |
 |----|----|
-| Basic | `geom_point`, `geom_line`, `geom_path`, `geom_bar`, `geom_col`, `geom_rect`, `geom_tile`, `geom_text`, `geom_polygon` |
+| Basic | `geom_point`, `geom_line`, `geom_path`, `geom_bar`, `geom_col`, `geom_rect`, `geom_tile`, `geom_text`, `geom_label`, `geom_polygon` |
 | Area/Ribbon | `geom_area`, `geom_ribbon` |
 | Intervals | `geom_segment`, `geom_errorbar`, `geom_linerange`, `geom_pointrange` |
 | Annotation | `geom_hline`, `geom_vline`, `geom_abline`, `geom_rug` |
@@ -60,7 +60,16 @@ callback payloads use sanitized representative source rows.
 censoring from `coord_cartesian()` panel clipping: scale limits can
 remove or censor bounds before gg2d3 sees them, while coordinate limits
 keep finite rect/tile bounds and clip in the SVG panel. Discrete tile
-geometry is closed for initial render and update paths.
+geometry is closed for initial render and update paths. Log, sqrt, and
+reverse transformed rect/tile bounds use ggplot2 built values directly,
+and non-finite scaled SVG bounds are filtered before rect attributes are
+emitted.
+
+Ordinary `geom_label()` renders bounded SVG label groups with a backing
+rect and text, including useful support for fill, stroke/colour, alpha,
+size, numeric padding, `hjust`, `vjust`, `angle`, and `family`. Ordinary
+`geom_text()` shares the small placement support for `hjust`, `vjust`,
+`angle`, and `family`.
 
 gg2d3 also supports `geom_sf()` for polygon-family (`POLYGON`,
 `MULTIPOLYGON`), point-family (`POINT`, `MULTIPOINT`), and line-family
@@ -77,11 +86,11 @@ payloads, and zoom suppression.
 
 These support claims are intentionally scoped. gg2d3 does not claim
 complete ggplot2 parity for polygon topology/hole repair beyond grouped
-closed paths, full rect/tile transformed-scale edge parity, tile
-basemaps, slippy controls, JavaScript-side CRS reprojection, ggrepel
-collision avoidance, rich text, rotation parity, or path-following
-annotation placement. See `vignettes/d3-drawing-diagnostics.md` for
-detailed geometry caveats.
+closed paths, ordinary polygon `subgroup` / `rule` compound-path
+rendering, tile basemaps, slippy controls, JavaScript-side CRS
+reprojection, ggrepel-compatible collision avoidance, rich text, or
+path-following annotation placement. See
+`vignettes/d3-drawing-diagnostics.md` for detailed geometry caveats.
 
 ### Scales & Coordinates
 

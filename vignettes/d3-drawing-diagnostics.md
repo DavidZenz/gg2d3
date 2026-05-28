@@ -7,7 +7,7 @@ from what ggplot2 produces.
 ## Geom coverage
 
 gg2d3 supports core Cartesian geoms (point, line, path, bar, col, rect, tile,
-text, polygon, area, ribbon, segment, hline/vline/abline, boxplot, violin,
+text, label, polygon, area, ribbon, segment, hline/vline/abline, boxplot, violin,
 density, smooth) plus polygon-family, point-family, and line-family `geom_sf`
 and projected-anchor `geom_sf_text()` / `geom_sf_label()` annotations.
 
@@ -22,13 +22,14 @@ linewidth/linetype styling is carried through, and facets plus existing
 tooltip, hover, brush, handler, and linked-view hooks are supported at the path
 mark level.
 
-Residual risks remain explicit: topology/hole repair beyond clean grouped
-closed paths is not shipped by Phase 51. ggplot2 built data may include a
-`subgroup` column for hole-style polygon input, but gg2d3's ordinary polygon IR
-does not currently preserve `subgroup` or render compound paths. The renderer
-does not infer GIS topology, ring containment, hole winding, or invalid-polygon
-repair for arbitrary polygon input; users should provide groups that ggplot2
-already builds into the intended path order.
+Residual risks remain explicit: topology and hole behavior beyond clean grouped
+closed paths is not shipped by Phase 54. Focused fixtures prove that ggplot2
+built data may include `subgroup` and `rule` values for hole-style polygon
+input, but gg2d3's ordinary polygon IR does not currently preserve `subgroup`
+or render compound paths. The ordinary polygon renderer does not infer GIS
+topology, ring containment, hole winding, self-intersection handling, or
+invalid-polygon repair; users should provide groups that ggplot2 already builds
+into the intended path order.
 
 ## `geom_sf` support
 
@@ -102,25 +103,32 @@ If `chromote::find_chrome()` does not find the intended local browser, set
 `CHROMOTE_CHROME=/path/to/chrome` as a troubleshooting override. In the
 dedicated CI workflow, browser-level skips are failures; optional `sf` or
 `geojsonsf` row skips may pass only when the generated report records them
-explicitly. Screenshots are inspection evidence only. The golden screenshots
-are deferred, and pixel thresholds are deferred until CI artifacts prove stable
-across environments.
+explicitly. Screenshots are inspection evidence only. Committed baseline image
+comparisons and automated image-difference tolerances are deferred until CI
+artifacts prove stable across environments.
 
 Map anti-features are explicit: no tile basemaps, no slippy map controls, no
 JavaScript-side CRS reprojection, no true geometry-overlap brushing, no
 `GEOMETRYCOLLECTION` expansion, and no large-map performance guarantees.
 
-Annotation anti-features are also explicit: ggrepel collision avoidance, rich
-text, rotation parity, and path-following annotation placement are not shipped
-by Phase 47.
+Annotation anti-features are also explicit: ggrepel-compatible collision
+avoidance, rich text, and path-following annotation placement are not shipped.
+Ordinary text and label layers have bounded `angle` support; sf annotation
+rotation parity remains outside the current projected-anchor contract.
 
 ## Text options
 
-`geom_text` supports position, size, color, and alpha. Ordinary `geom_label()`
-currently maps to the text renderer, so label boxes, padding, and label-specific
-background styling are not yet translated. Rotation (`angle`), justification
-(`hjust`/`vjust`), font family, collision avoidance, and path-following text are
-not yet translated.
+`geom_text()` supports position, size, color, alpha, `hjust`, `vjust`, `angle`,
+and `family` for ordinary Cartesian text layers. Ordinary `geom_label()` is a
+distinct renderer path that emits SVG label groups with `rect.geom-label-box`
+and `text.geom-label-text`; bounded label boxes carry text content, fill,
+stroke/colour, alpha, size, numeric padding, `hjust`, `vjust`, `angle`, and
+`family`.
+
+These label and text improvements are deliberately bounded. Collision
+avoidance, ggrepel-compatible placement, path-following text, and rich text are
+future work rather than hidden behavior in the renderer. Label text is inserted
+with SVG text APIs, not HTML insertion.
 
 ## Linetype
 
@@ -157,10 +165,10 @@ parameter seams, but full `as_d3_ir()` modularization remains deferred to
 FUT-03. The generated renderer documentation remains deferred to FUT-04; the
 source contract and focused tests are the maintained boundary for now.
 
-These diagnostics do not add committed golden screenshots or pixel thresholds.
-Browser visual smoke artifacts remain downstream inspection evidence, with
-golden screenshots and pixel thresholds still deferred until CI artifacts prove
-stable across environments.
+These diagnostics do not add committed baseline images or image-difference
+gates. Browser visual smoke artifacts remain downstream inspection evidence,
+with baseline image comparisons and automated image-difference tolerances still
+deferred until CI artifacts prove stable across environments.
 
 ## Rect/tile edge cases
 
@@ -173,23 +181,23 @@ Confirmed renderer/update mismatches were fixed at the D3 boundary. Categorical
 tile positioning now uses band-scale center values with `bandwidth()` dimensions,
 rect borders use the registry stroke/linewidth accessors, and the
 `rect.geom-rect` update path mirrors band-scale and `coord_flip()` geometry.
-The remaining scale-limit, reversed-scale, coordinate-limit, and facet cases are
-closed as tested non-issues in the Phase 45 classification notes. Full
-rect/tile transformed-scale edge parity remains out of scope for this closure
-and is not shipped by Phase 47.
+Phase 54 added mixed log10/sqrt/reverse transformed-bound evidence and kept the
+release boundary at direct scaling of ggplot2-built transformed bounds. The
+initial rect/tile renderer now filters non-finite scaled SVG bounds before
+emitting `x`, `y`, `width`, or `height`; no inverse-transform math, custom
+log/sqrt rect math, or broad scale factory rewrite is shipped.
 
-## Phase 47 residual-risk list
+## Phase 54 residual-risk list
 
-The v1.11 geometry parity contract is deliberately bounded. The following items
-are deferred and not shipped by Phase 47:
+The v1.13 geometry polish contract is deliberately bounded. The following items
+are deferred and not shipped by Phase 54:
 
-- Polygon topology/hole repair beyond grouped closed paths.
-- Full rect/tile transformed-scale edge parity.
+- Ordinary polygon topology and hole repair beyond grouped closed paths.
+- Ordinary polygon `subgroup` / `rule` compound-path rendering.
 - Tile basemaps and slippy map controls.
 - JavaScript-side CRS reprojection.
-- ggrepel collision avoidance.
+- ggrepel-compatible collision avoidance.
 - Rich text for text and label annotations.
-- Rotation parity for text and label annotations.
 - Path-following annotation placement.
 
 ## Private API dependency
