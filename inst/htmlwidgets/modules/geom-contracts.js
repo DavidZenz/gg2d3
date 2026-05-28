@@ -146,7 +146,20 @@
       module: 'geoms/reference.js',
       renderSelectors: ['line.geom-hline'],
       update: { type: 'selectors', selectors: ['line.geom-hline'] },
-      interactions: { events: [], brush: [], crosstalk: [] },
+      interactions: {
+        events: {
+          selectors: [],
+          reason: 'events.js does not currently bind geom_hline reference marks.'
+        },
+        brush: {
+          selectors: [],
+          reason: 'brush.js does not currently bind geom_hline reference marks.'
+        },
+        crosstalk: {
+          selectors: [],
+          reason: 'crosstalk.js does not currently bind geom_hline reference marks.'
+        }
+      },
       privateFields: [],
       publicPayload: true
     },
@@ -156,7 +169,20 @@
       module: 'geoms/reference.js',
       renderSelectors: ['line.geom-vline'],
       update: { type: 'selectors', selectors: ['line.geom-vline'] },
-      interactions: { events: [], brush: [], crosstalk: [] },
+      interactions: {
+        events: {
+          selectors: [],
+          reason: 'events.js does not currently bind geom_vline reference marks.'
+        },
+        brush: {
+          selectors: [],
+          reason: 'brush.js does not currently bind geom_vline reference marks.'
+        },
+        crosstalk: {
+          selectors: [],
+          reason: 'crosstalk.js does not currently bind geom_vline reference marks.'
+        }
+      },
       privateFields: [],
       publicPayload: true
     },
@@ -170,7 +196,20 @@
         selectors: [],
         reason: 'geom_abline is rendered from scale domains and currently has no updateGeoms branch.'
       },
-      interactions: { events: [], brush: [], crosstalk: [] },
+      interactions: {
+        events: {
+          selectors: [],
+          reason: 'events.js does not currently bind geom_abline reference marks.'
+        },
+        brush: {
+          selectors: [],
+          reason: 'brush.js does not currently bind geom_abline reference marks.'
+        },
+        crosstalk: {
+          selectors: [],
+          reason: 'crosstalk.js does not currently bind geom_abline reference marks.'
+        }
+      },
       privateFields: [],
       publicPayload: true
     },

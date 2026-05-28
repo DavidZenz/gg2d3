@@ -155,6 +155,85 @@ contract_interaction_selectors <- function(contract_js, surface) {
   sort(unique(selectors))
 }
 
+contract_update_exceptions <- function(contract_js) {
+  entries <- extract_contract_entries(contract_js)
+  lapply(entries, function(entry) {
+    strings <- extract_js_strings(entry)
+    geom <- strings[1]
+    update_start <- regexpr("update:", entry, fixed = TRUE)[[1]]
+    interactions_start <- regexpr("interactions:", entry, fixed = TRUE)[[1]]
+    expect_true(update_start > 0)
+    expect_true(interactions_start > update_start)
+    update_block <- substr(entry, update_start, interactions_start - 1L)
+    list(
+      geom = geom,
+      empty = grepl("selectors:\\s*\\[\\s*\\]", update_block),
+      explicit_none = grepl("type:\\s*['\"]explicit-none['\"]", update_block),
+      reason = grepl("reason:\\s*['\"][^'\"]+['\"]", update_block)
+    )
+  })
+}
+
+interaction_surface_block <- function(entry, surface) {
+  lines <- strsplit(entry, "\n", fixed = TRUE)[[1]]
+  start <- grep(paste0("^        ", surface, ":"), lines)
+  if (length(start) == 0L) {
+    return("")
+  }
+  starts <- grep("^        (events|brush|crosstalk):", lines)
+  private_start <- grep("^      privateFields:", lines)
+  end_candidates <- c(starts[starts > start[1]], private_start[private_start > start[1]])
+  end <- if (length(end_candidates)) min(end_candidates) - 1L else length(lines)
+  paste(lines[start[1]:end], collapse = "\n")
+}
+
+contract_interaction_exceptions <- function(contract_js) {
+  entries <- extract_contract_entries(contract_js)
+  unlist(lapply(entries, function(entry) {
+    geom <- extract_js_strings(entry)[1]
+    lapply(c("events", "brush", "crosstalk"), function(surface) {
+      block <- interaction_surface_block(entry, surface)
+      list(
+        geom = geom,
+        surface = surface,
+        empty = grepl(":\\s*\\[\\s*\\]|selectors:\\s*\\[\\s*\\]", block),
+        bare_empty = grepl(
+          paste0("^\\s*", surface, ":\\s*\\[\\s*\\]"),
+          block,
+          perl = TRUE
+        ),
+        reason = grepl("reason:\\s*['\"][^'\"]+['\"]", block)
+      )
+    })
+  }), recursive = FALSE)
+}
+
+contract_public_payloads <- function(contract_js) {
+  entries <- extract_contract_entries(contract_js)
+  lapply(entries, function(entry) {
+    strings <- extract_js_strings(entry)
+    geom <- strings[1]
+    payload_match <- regexpr("publicPayload:\\s*(true|false)", entry, perl = TRUE)
+    payload <- if (payload_match[[1]] > 0) {
+      regmatches(entry, payload_match) == "publicPayload: true"
+    } else {
+      NA
+    }
+    list(geom = geom, publicPayload = payload)
+  })
+}
+
+contract_private_fields <- function(contract_js) {
+  entries <- extract_contract_entries(contract_js)
+  sort(unique(unlist(lapply(entries, function(entry) {
+    private_start <- regexpr("privateFields:", entry, fixed = TRUE)[[1]]
+    payload_start <- regexpr("publicPayload:", entry, fixed = TRUE)[[1]]
+    expect_true(private_start > 0)
+    expect_true(payload_start > private_start)
+    extract_js_strings(substr(entry, private_start, payload_start - 1L))
+  }), use.names = FALSE)))
+}
+
 test_that("geom contract lists every registered renderer alias", {
   contract_js <- read_module("inst/htmlwidgets/modules/geom-contracts.js")
 
@@ -300,6 +379,36 @@ test_that("crosstalk selector contract preserves intentional differences", {
   expect_match(contract_js, "crosstalk.js does not currently bind interval component marks", fixed = TRUE)
 })
 
+test_that("geom contract exceptions are explicit and reason-bearing", {
+  contract_js <- read_module("inst/htmlwidgets/modules/geom-contracts.js")
+
+  for (exception in contract_update_exceptions(contract_js)) {
+    if (exception$empty) {
+      expect_true(
+        exception$explicit_none,
+        info = paste("Missing explicit update exception:", exception$geom)
+      )
+      expect_true(
+        exception$reason,
+        info = paste("Missing update exception reason:", exception$geom)
+      )
+    }
+  }
+
+  for (exception in contract_interaction_exceptions(contract_js)) {
+    if (exception$empty) {
+      expect_false(
+        exception$bare_empty,
+        info = paste("Bare empty interaction exception:", exception$geom, exception$surface)
+      )
+      expect_true(
+        exception$reason,
+        info = paste("Missing interaction exception reason:", exception$geom, exception$surface)
+      )
+    }
+  }
+})
+
 test_that("public data sanitizer strips underscore-prefixed fields", {
   public_data_js <- read_module("inst/htmlwidgets/modules/public-data.js")
   yaml <- read_module("inst/htmlwidgets/gg2d3.yaml")
@@ -312,6 +421,30 @@ test_that("public data sanitizer strips underscore-prefixed fields", {
     regexpr("public-data\\.js", yaml)[[1]],
     regexpr("tooltip\\.js", yaml)[[1]]
   )
+})
+
+test_that("geom contract public payload expectations are sanitizer-covered", {
+  contract_js <- read_module("inst/htmlwidgets/modules/geom-contracts.js")
+  public_data_js <- read_module("inst/htmlwidgets/modules/public-data.js")
+  payloads <- contract_public_payloads(contract_js)
+  private_fields <- contract_private_fields(contract_js)
+
+  for (payload in payloads) {
+    expect_false(
+      is.na(payload$publicPayload),
+      info = paste("Missing publicPayload expectation:", payload$geom)
+    )
+  }
+
+  for (field in private_fields) {
+    expect_true(
+      startsWith(field, "_"),
+      info = paste("Private field is not underscore-prefixed:", field)
+    )
+  }
+
+  expect_match(public_data_js, "sanitizeDatum", fixed = TRUE)
+  expect_match(public_data_js, "String\\(key\\)\\.startsWith\\('_'\\)|key\\.startsWith\\('_'\\)")
 })
 
 test_that("tooltip events and brush delegate to public sanitizer", {
