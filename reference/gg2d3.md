@@ -2,7 +2,9 @@
 
 gg2d3 supports ordinary
 [`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)
-as grouped closed SVG paths,
+as grouped closed SVG paths, ordinary
+[`geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)
+as bounded SVG label groups,
 [`geom_rect()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
 and
 [`geom_tile()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
@@ -44,8 +46,8 @@ gg2d3(x, width = NULL, height = NULL, elementId = NULL)
 ## Details
 
 Detailed caveats for polygon topology, rect/tile transformed-scale
-behavior, sf annotation placement, ggrepel-style collision avoidance,
+behavior, ordinary label placement, sf annotation placement,
 path-following text, and map anti-features are tracked in
-`vignettes/d3-drawing-diagnostics.md`. Optional browser validation for
-sf behavior is R/testthat/chromote based and may skip cleanly when
-optional local tooling is unavailable.
+`vignettes/d3-drawing-diagnostics.md`. v1.13 browser validation is
+R/testthat/chromote based and may skip cleanly when optional local
+tooling is unavailable.

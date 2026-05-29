@@ -28,13 +28,52 @@ p <- ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) +
 gg2d3(p)
 ```
 
+## v1.13 support and validation contract
+
+The v1.13 release track adds regression confidence and bounded geometry
+polish without broadening gg2d3 into a full ggplot2 or GIS topology
+clone.
+
+- Browser visual validation has a dedicated GitHub Actions workflow and
+  a CI-equivalent local mode. It writes inspectable `index.html`,
+  `index.json`, fixture HTML, screenshot, DOM-summary, and browser-log
+  artifacts under `test_output/browser-visual-smoke/` when enabled,
+  while local runs may skip cleanly if optional browser tooling is
+  unavailable.
+- Renderer wiring is guarded by
+  `inst/htmlwidgets/modules/geom-contracts.js` and source tests for
+  module load order, render/update selectors, interactivity selectors,
+  and public payload sanitization. Selected IR helper-boundary tests
+  cover theme extraction and geom parameter routing while full
+  [`as_d3_ir()`](https://davidzenz.github.io/gg2d3/reference/as_d3_ir.md)
+  modularization remains future work.
+- Geometry support is bounded: ordinary
+  [`geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)
+  renders SVG label boxes; ordinary
+  [`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)
+  keeps grouped closed-path behavior and explicitly does not infer
+  topology or holes;
+  [`geom_rect()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
+  and
+  [`geom_tile()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
+  filter non-finite transformed SVG bounds before emitting rect
+  attributes.
+- Deferred work remains explicit in diagnostics, including future
+  pixel-diff thresholds, public hosted visual reports, full IR
+  modularization, generated renderer documentation, repelled label
+  placement, and broad GIS-style topology repair.
+
+See `vignettes/d3-drawing-diagnostics.md` for validation commands,
+artifact paths, CI-mode behavior, architecture boundaries, geometry
+caveats, and future work IDs.
+
 ## Features
 
 ### Geoms
 
 | Category | Geoms |
 |----|----|
-| Basic | `geom_point`, `geom_line`, `geom_path`, `geom_bar`, `geom_col`, `geom_rect`, `geom_tile`, `geom_text`, `geom_polygon` |
+| Basic | `geom_point`, `geom_line`, `geom_path`, `geom_bar`, `geom_col`, `geom_rect`, `geom_tile`, `geom_text`, `geom_label`, `geom_polygon` |
 | Area/Ribbon | `geom_area`, `geom_ribbon` |
 | Intervals | `geom_segment`, `geom_errorbar`, `geom_linerange`, `geom_pointrange` |
 | Annotation | `geom_hline`, `geom_vline`, `geom_abline`, `geom_rug` |
@@ -57,7 +96,18 @@ support distinguishes scale-limit censoring from
 panel clipping: scale limits can remove or censor bounds before gg2d3
 sees them, while coordinate limits keep finite rect/tile bounds and clip
 in the SVG panel. Discrete tile geometry is closed for initial render
-and update paths.
+and update paths. Log, sqrt, and reverse transformed rect/tile bounds
+use ggplot2 built values directly, and non-finite scaled SVG bounds are
+filtered before rect attributes are emitted.
+
+Ordinary
+[`geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)
+renders bounded SVG label groups with a backing rect and text, including
+useful support for fill, stroke/colour, alpha, size, numeric padding,
+`hjust`, `vjust`, `angle`, and `family`. Ordinary
+[`geom_text()`](https://ggplot2.tidyverse.org/reference/geom_text.html)
+shares the small placement support for `hjust`, `vjust`, `angle`, and
+`family`.
 
 gg2d3 also supports
 [`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html) for
@@ -79,9 +129,9 @@ and zoom suppression.
 
 These support claims are intentionally scoped. gg2d3 does not claim
 complete ggplot2 parity for polygon topology/hole repair beyond grouped
-closed paths, full rect/tile transformed-scale edge parity, tile
-basemaps, slippy controls, JavaScript-side CRS reprojection, ggrepel
-collision avoidance, rich text, rotation parity, or path-following
+closed paths, ordinary polygon `subgroup` / `rule` compound-path
+rendering, tile basemaps, slippy controls, JavaScript-side CRS
+reprojection, repelled label placement, rich text, or path-following
 annotation placement. See `vignettes/d3-drawing-diagnostics.md` for
 detailed geometry caveats.
 

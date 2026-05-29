@@ -272,6 +272,12 @@
   }
 
   function isElementInPixelRect(node, rect) {
+    var anchoredCx = parseFloat(node.getAttribute('data-cx'));
+    var anchoredCy = parseFloat(node.getAttribute('data-cy'));
+    if (Number.isFinite(anchoredCx) && Number.isFinite(anchoredCy)) {
+      return isPointInPixelRect(anchoredCx, anchoredCy, rect);
+    }
+
     var tagName = node.tagName.toLowerCase();
 
     if (node.classList && node.classList.contains('geom-sf')) {

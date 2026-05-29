@@ -86,14 +86,19 @@
     },
     {
       geom: 'text',
-      aliases: ['text'],
+      aliases: ['text', 'label'],
       module: 'geoms/text.js',
-      renderSelectors: ['text.geom-text'],
-      update: { type: 'selectors', selectors: ['text.geom-text'] },
+      renderSelectors: [
+        'text.geom-text',
+        'g.geom-label',
+        'rect.geom-label-box',
+        'text.geom-label-text'
+      ],
+      update: { type: 'selectors', selectors: ['text.geom-text', 'g.geom-label'] },
       interactions: {
-        events: ['text.geom-text'],
-        brush: ['text.geom-text'],
-        crosstalk: ['text.geom-text']
+        events: ['text.geom-text', 'g.geom-label'],
+        brush: ['text.geom-text', 'g.geom-label'],
+        crosstalk: ['text.geom-text', 'g.geom-label']
       },
       privateFields: [],
       publicPayload: true
@@ -146,7 +151,20 @@
       module: 'geoms/reference.js',
       renderSelectors: ['line.geom-hline'],
       update: { type: 'selectors', selectors: ['line.geom-hline'] },
-      interactions: { events: [], brush: [], crosstalk: [] },
+      interactions: {
+        events: {
+          selectors: [],
+          reason: 'events.js does not currently bind geom_hline reference marks.'
+        },
+        brush: {
+          selectors: [],
+          reason: 'brush.js does not currently bind geom_hline reference marks.'
+        },
+        crosstalk: {
+          selectors: [],
+          reason: 'crosstalk.js does not currently bind geom_hline reference marks.'
+        }
+      },
       privateFields: [],
       publicPayload: true
     },
@@ -156,7 +174,20 @@
       module: 'geoms/reference.js',
       renderSelectors: ['line.geom-vline'],
       update: { type: 'selectors', selectors: ['line.geom-vline'] },
-      interactions: { events: [], brush: [], crosstalk: [] },
+      interactions: {
+        events: {
+          selectors: [],
+          reason: 'events.js does not currently bind geom_vline reference marks.'
+        },
+        brush: {
+          selectors: [],
+          reason: 'brush.js does not currently bind geom_vline reference marks.'
+        },
+        crosstalk: {
+          selectors: [],
+          reason: 'crosstalk.js does not currently bind geom_vline reference marks.'
+        }
+      },
       privateFields: [],
       publicPayload: true
     },
@@ -170,7 +201,20 @@
         selectors: [],
         reason: 'geom_abline is rendered from scale domains and currently has no updateGeoms branch.'
       },
-      interactions: { events: [], brush: [], crosstalk: [] },
+      interactions: {
+        events: {
+          selectors: [],
+          reason: 'events.js does not currently bind geom_abline reference marks.'
+        },
+        brush: {
+          selectors: [],
+          reason: 'brush.js does not currently bind geom_abline reference marks.'
+        },
+        crosstalk: {
+          selectors: [],
+          reason: 'crosstalk.js does not currently bind geom_abline reference marks.'
+        }
+      },
       privateFields: [],
       publicPayload: true
     },
@@ -258,7 +302,6 @@
         'rect.geom-boxplot-box',
         'line.geom-boxplot-whisker',
         'line.geom-boxplot-median',
-        'line.geom-boxplot-staple',
         'circle.geom-boxplot-outlier'
       ],
       update: {

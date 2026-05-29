@@ -40,6 +40,19 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="gg2d3-development-version">gg2d3 (development version)<a class="anchor" aria-label="anchor" href="#gg2d3-development-version"></a></h2>
 <div class="section level3">
+<h3 id="v113-release-notes-development-version">v1.13 release notes<a class="anchor" aria-label="anchor" href="#v113-release-notes-development-version"></a></h3>
+<ul><li>
+<strong>CI/browser visual smoke validation</strong>: Added a dedicated browser visual smoke workflow with CI-mode behavior, stable DOM/report metadata checks, and downloadable artifact bundles. Browser visual artifacts remain inspection evidence under ignored paths such as <code>test_output/browser-visual-smoke/</code> and downloaded GitHub run artifact directories; screenshots, DOM summaries, browser logs, and report JSON are not committed as release notes.</li>
+<li>
+<strong>Renderer and IR contract consolidation</strong>: Hardened renderer wiring around <code>geom-contracts.js</code>, source gates for module load order, render/update/interaction selectors, and shared public-payload sanitization. High-risk R-side IR responsibilities now have focused helper-boundary tests while full <code><a href="../reference/as_d3_ir.html">as_d3_ir()</a></code> modularization remains future work.</li>
+<li>
+<strong>Geometry polish closure</strong>: Shipped bounded ordinary <code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_label()</a></code> SVG boxes with text placement fields, kept ordinary <code><a href="https://ggplot2.tidyverse.org/reference/geom_polygon.html" class="external-link">geom_polygon()</a></code> subgroup/hole topology as an explicit fixture-backed non-goal, and added finite transformed-bound filtering for <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect()</a></code> and <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile()</a></code> before invalid SVG attributes are emitted. Collision avoidance, rich text, and path-following text remain deferred.</li>
+<li>
+<strong>Release-readiness gate</strong>: Phase 55 evidence records focused renderer/IR/geometry source gates, documentation generation, <code><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">devtools::test()</a></code>, browser visual smoke behavior, source package build, and <code>R CMD check --as-cran</code> command classes. Optional spatial and browser skips are documented as evidence classifications, not release success by themselves; package-check ERROR or WARNING outcomes remain release blockers. Package-check artifacts live in uncommitted package-check directories and raw local command output, browser logs, <code>00check.log</code> excerpts, DOM dumps, and report JSON contents are not published in <code>NEWS.md</code>.</li>
+<li>
+<strong>Residual risks and future candidates</strong>: FUT-01 committed golden screenshots and pixel-diff thresholds, FUT-02 hosted pull-request visual reports, FUT-03 full <code><a href="../reference/as_d3_ir.html">as_d3_ir()</a></code> modularization, FUT-04 generated renderer documentation from contracts, FUT-05 full ggrepel-compatible label placement, and FUT-06 broad GIS-style polygon topology repair remain future candidates rather than shipped v1.13 support.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="gg2d3-development-version-1">gg2d3 0.6.0 (2026-03-31)<a class="anchor" aria-label="anchor" href="#gg2d3-development-version-1"></a></h3>
 <ul><li>
 <strong>Specialized Geoms</strong>: Added support for <code>geom_dotplot</code>, <code>geom_rug</code>, <code>geom_errorbar</code>, <code>geom_linerange</code>, and <code>geom_pointrange</code>.</li>

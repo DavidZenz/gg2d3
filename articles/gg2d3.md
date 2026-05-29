@@ -42,6 +42,37 @@ annotations. All aesthetics that ggplot2 maps (color, fill, size, shape,
 alpha, linewidth) are carried through to D3. Detailed geometry caveats
 live in `vignettes/d3-drawing-diagnostics.md`.
 
+## v1.13 validation and caveat summary
+
+The v1.13 support contract is source-first and intentionally bounded.
+Browser visual validation uses the dedicated browser visual smoke
+workflow and the same `test_output/browser-visual-smoke/` artifact
+layout documented in diagnostics; local runs may skip cleanly when
+optional browser tooling is unavailable, while CI mode treats
+browser-level skips as failures. Renderer and interactivity wiring are
+guarded by `geom-contracts.js`, and representative IR helper-boundary
+tests cover the selected theme and geom-parameter helper boundaries
+without claiming full
+[`as_d3_ir()`](https://davidzenz.github.io/gg2d3/reference/as_d3_ir.md)
+modularization.
+
+Geometry caveats are also explicit. Ordinary
+[`geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)
+support covers bounded SVG label boxes and small placement fields.
+Ordinary
+[`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)
+support remains a grouped closed-path renderer, not topology or hole
+repair.
+[`geom_rect()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
+and
+[`geom_tile()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
+use ggplot2-built transformed bounds and filter non-finite transformed
+SVG bounds before drawing. Collision avoidance, rich text,
+path-following text, broad GIS-style topology repair, committed pixel
+thresholds, and generated renderer reference docs remain future work.
+See `vignettes/d3-drawing-diagnostics.md` for the detailed v1.13 release
+validation commands and FUT deferrals.
+
 ### Points, lines, and paths
 
 ``` r

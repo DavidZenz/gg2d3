@@ -83,6 +83,18 @@
 <span><span class="fu"><a href="reference/gg2d3.html">gg2d3</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="v113-support-and-validation-contract">v1.13 support and validation contract<a class="anchor" aria-label="anchor" href="#v113-support-and-validation-contract"></a>
+</h2>
+<p>The v1.13 release track adds regression confidence and bounded geometry polish without broadening gg2d3 into a full ggplot2 or GIS topology clone.</p>
+<ul>
+<li>Browser visual validation has a dedicated GitHub Actions workflow and a CI-equivalent local mode. It writes inspectable <code>index.html</code>, <code>index.json</code>, fixture HTML, screenshot, DOM-summary, and browser-log artifacts under <code>test_output/browser-visual-smoke/</code> when enabled, while local runs may skip cleanly if optional browser tooling is unavailable.</li>
+<li>Renderer wiring is guarded by <code>inst/htmlwidgets/modules/geom-contracts.js</code> and source tests for module load order, render/update selectors, interactivity selectors, and public payload sanitization. Selected IR helper-boundary tests cover theme extraction and geom parameter routing while full <code><a href="reference/as_d3_ir.html">as_d3_ir()</a></code> modularization remains future work.</li>
+<li>Geometry support is bounded: ordinary <code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_label()</a></code> renders SVG label boxes; ordinary <code><a href="https://ggplot2.tidyverse.org/reference/geom_polygon.html" class="external-link">geom_polygon()</a></code> keeps grouped closed-path behavior and explicitly does not infer topology or holes; <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect()</a></code> and <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile()</a></code> filter non-finite transformed SVG bounds before emitting rect attributes.</li>
+<li>Deferred work remains explicit in diagnostics, including future pixel-diff thresholds, public hosted visual reports, full IR modularization, generated renderer documentation, repelled label placement, and broad GIS-style topology repair.</li>
+</ul>
+<p>See <code>vignettes/d3-drawing-diagnostics.md</code> for validation commands, artifact paths, CI-mode behavior, architecture boundaries, geometry caveats, and future work IDs.</p>
+</div>
+<div class="section level2">
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
 </h2>
 <div class="section level3">
@@ -101,7 +113,7 @@
 <tr>
 <td>Basic</td>
 <td>
-<code>geom_point</code>, <code>geom_line</code>, <code>geom_path</code>, <code>geom_bar</code>, <code>geom_col</code>, <code>geom_rect</code>, <code>geom_tile</code>, <code>geom_text</code>, <code>geom_polygon</code>
+<code>geom_point</code>, <code>geom_line</code>, <code>geom_path</code>, <code>geom_bar</code>, <code>geom_col</code>, <code>geom_rect</code>, <code>geom_tile</code>, <code>geom_text</code>, <code>geom_label</code>, <code>geom_polygon</code>
 </td>
 </tr>
 <tr>
@@ -131,9 +143,10 @@
 </tbody>
 </table>
 <p>Ordinary <code><a href="https://ggplot2.tidyverse.org/reference/geom_polygon.html" class="external-link">geom_polygon()</a></code> renders as grouped closed SVG paths with ggplot2 built row order preserved inside each group. The shipped contract covers core fill/stroke/alpha/linewidth/linetype styling, facets, zoom/update behavior, and the existing tooltip, hover, brush, handler, and linked-view hooks. Brush selection is path-bounds based and callback payloads use sanitized representative source rows.</p>
-<p><code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect()</a></code> and <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile()</a></code> support distinguishes scale-limit censoring from <code><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian()</a></code> panel clipping: scale limits can remove or censor bounds before gg2d3 sees them, while coordinate limits keep finite rect/tile bounds and clip in the SVG panel. Discrete tile geometry is closed for initial render and update paths.</p>
+<p><code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect()</a></code> and <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile()</a></code> support distinguishes scale-limit censoring from <code><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian()</a></code> panel clipping: scale limits can remove or censor bounds before gg2d3 sees them, while coordinate limits keep finite rect/tile bounds and clip in the SVG panel. Discrete tile geometry is closed for initial render and update paths. Log, sqrt, and reverse transformed rect/tile bounds use ggplot2 built values directly, and non-finite scaled SVG bounds are filtered before rect attributes are emitted.</p>
+<p>Ordinary <code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_label()</a></code> renders bounded SVG label groups with a backing rect and text, including useful support for fill, stroke/colour, alpha, size, numeric padding, <code>hjust</code>, <code>vjust</code>, <code>angle</code>, and <code>family</code>. Ordinary <code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text()</a></code> shares the small placement support for <code>hjust</code>, <code>vjust</code>, <code>angle</code>, and <code>family</code>.</p>
 <p>gg2d3 also supports <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf()</a></code> for polygon-family (<code>POLYGON</code>, <code>MULTIPOLYGON</code>), point-family (<code>POINT</code>, <code>MULTIPOINT</code>), and line-family (<code>LINESTRING</code>, <code>MULTILINESTRING</code>) geometries, plus <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf_text()</a></code> and <code><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf_label()</a></code> annotations at projected anchors aligned with those accepted sf families. Rows that are unsupported, empty, invalid, or missing are skipped with warnings while accepted rows render; known CRS inputs are normalized in R before serialization, and missing CRS coordinates are serialized as-is with a warning. Optional browser validation is R/testthat/chromote based and may skip cleanly; when available, it covers sf family interactivity, stacked overlays, faceted and empty panels, projected anchor placement, sanitized interactivity payloads, and zoom suppression.</p>
-<p>These support claims are intentionally scoped. gg2d3 does not claim complete ggplot2 parity for polygon topology/hole repair beyond grouped closed paths, full rect/tile transformed-scale edge parity, tile basemaps, slippy controls, JavaScript-side CRS reprojection, ggrepel collision avoidance, rich text, rotation parity, or path-following annotation placement. See <code>vignettes/d3-drawing-diagnostics.md</code> for detailed geometry caveats.</p>
+<p>These support claims are intentionally scoped. gg2d3 does not claim complete ggplot2 parity for polygon topology/hole repair beyond grouped closed paths, ordinary polygon <code>subgroup</code> / <code>rule</code> compound-path rendering, tile basemaps, slippy controls, JavaScript-side CRS reprojection, repelled label placement, rich text, or path-following annotation placement. See <code>vignettes/d3-drawing-diagnostics.md</code> for detailed geometry caveats.</p>
 </div>
 <div class="section level3">
 <h3 id="scales--coordinates">Scales &amp; Coordinates<a class="anchor" aria-label="anchor" href="#scales--coordinates"></a>

@@ -216,6 +216,32 @@
       return val(d && d[boundKey]);
     }
 
+    function scalePos(scale, v) {
+      return typeof scale.bandwidth === "function" ? scale(v) + scale.bandwidth() / 2 : scale(v);
+    }
+
+    function textX(d) {
+      return flip ? scalePos(yScale, d.y) : scalePos(xScale, d.x);
+    }
+
+    function textY(d) {
+      return flip ? scalePos(xScale, d.x) : scalePos(yScale, d.y);
+    }
+
+    function textRotation(d, x, y) {
+      const angle = num(d && d.angle);
+      if (!Number.isFinite(angle) || angle === 0) return null;
+      return 'rotate(' + angle + ' ' + x + ' ' + y + ')';
+    }
+
+    function labelTransform(d) {
+      const x = textX(d);
+      const y = textY(d);
+      const angle = num(d && d.angle);
+      const rotate = Number.isFinite(angle) && angle !== 0 ? ' rotate(' + angle + ')' : '';
+      return 'translate(' + x + ',' + y + ')' + rotate;
+    }
+
     function rectX(d) {
       if (isXBand) return xScale(bandValue(d, 'x', 'xmin'));
       return Math.min(xScale(num(d.xmin)), xScale(num(d.xmax)));
@@ -313,8 +339,16 @@
     // geom_text
     container.selectAll('text.geom-text')
       .transition(t)
-      .attr('x', d => xScaleFunc(d.x))
-      .attr('y', d => yScaleFunc(d.y));
+      .attr('x', textX)
+      .attr('y', textY)
+      .attr('transform', d => textRotation(d, textX(d), textY(d)));
+
+    // geom_label
+    container.selectAll('g.geom-label')
+      .transition(t)
+      .attr('transform', labelTransform)
+      .attr('data-cx', textX)
+      .attr('data-cy', textY);
 
     // geom_segment
     container.selectAll('line.geom-segment')
