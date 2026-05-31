@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.13
 milestone_name: Regression & Release Polish
-status: milestone_complete
-stopped_at: Phase 55 complete; v1.13 ready for milestone closeout
-last_updated: "2026-05-28T21:29:52Z"
-last_activity: 2026-05-28
+status: completed
+stopped_at: v1.13 archived; ready to define next milestone
+last_updated: "2026-05-31T17:39:20.193Z"
+last_activity: 2026-05-31
 progress:
   total_phases: 4
   completed_phases: 4
@@ -18,17 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-27)
+See: .planning/PROJECT.md (updated 2026-05-31)
 
 **Core value:** Any ggplot2 plot should render identically in D3 -- same visual output, but now interactive and web-native.
-**Current focus:** v1.13 Regression & Release Polish — ready for milestone closeout
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 55
-Plan: 4 of 4
-Status: Milestone complete — ready for closeout
-Last activity: 2026-05-28
+Phase: None
+Plan: Not started
+Status: v1.13 archived — ready for next milestone
+Last activity: 2026-05-31
 
 Progress: [██████████] 100%
 
@@ -97,7 +97,7 @@ None active.
 
 ### Blockers/Concerns
 
-None active. Optional browser/spatial dependencies remain expected skip candidates and are part of Phase 48 scope.
+None active. Optional browser/spatial dependencies remain expected skip candidates for browser validation.
 
 ## Deferred Items
 
@@ -109,14 +109,15 @@ Items acknowledged and carried forward from previous milestone close:
 | Architecture | Broader `as_d3_ir()` modularization beyond sf helper boundaries | Completed in Phase 49 | v1.11 |
 | Architecture | Duplication around geom registration, update handlers, and interaction selectors | Completed in Phase 50 | v1.11 |
 | Geometry | Transformed-scale rect/tile behavior, polygon topology, and text/label placement polish | Completed in Phase 51 | v1.11 |
+| UAT | Phase 52 52-HUMAN-UAT.md | Acknowledged at close; status passed with 0 pending scenarios | v1.13 |
 
 ## Session Continuity
 
-Last session: 2026-05-28T21:19:15.251Z
-Stopped at: Completed 55-04-PLAN.md
+Last session: 2026-05-31T17:39:20.193Z
+Stopped at: v1.13 archived; ready to define next milestone
 Resume file: None
 
-**Next Step:** Run `$gsd-complete-milestone` or `$gsd-new-milestone`
+**Next Step:** Run `$gsd-new-milestone`
 
 **Completed Milestone:** v1.12 Quality & Architecture Hardening -- 2026-05-27
 
@@ -131,3 +132,5 @@ Resume file: None
 **Planned Phase:** 55 (Release Documentation And Validation Gate) — 4 plans — 2026-05-28T20:00:08.496Z
 
 **Completed Phase:** 55 (Release Documentation And Validation Gate) — REL-01, REL-02, and REL-03 covered — 2026-05-28T21:19:15Z
+
+**Completed Milestone:** v1.13 Regression & Release Polish -- 2026-05-31

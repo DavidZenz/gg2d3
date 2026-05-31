@@ -1,5 +1,33 @@
 # Milestones
 
+## v1.13 Regression & Release Polish (Shipped: 2026-05-31)
+
+**Phases completed:** 4 phases, 14 plans, 30 tasks
+
+**Delivered:** Release-ready regression confidence for browser visual smoke, renderer/IR contracts, bounded geometry polish, and source-first v1.13 documentation with repeatable release-gate evidence.
+
+**Key accomplishments:**
+
+- CI-aware browser visual smoke helper and GitHub Actions workflow now produce deterministic report metadata and always-uploaded artifacts.
+- Renderer contract and IR helper-boundary tests guard module reachability, load order, selector drift, public payload sanitization, theme extraction, and geom parameter routing.
+- Ordinary `geom_label()` boxes, text placement fields, polygon topology non-goals, and transformed rect/tile finite-bound filtering are covered by focused source and diagnostic evidence.
+- README, vignette, diagnostics, roxygen source, generated help, and NEWS now describe the same bounded v1.13 support contract.
+- Repeatable release-readiness evidence records source/docs tests, browser smoke behavior, optional skips, package build, and `R CMD check --as-cran`.
+- Final verification maps all 13 v1.13 requirements to source, tests, docs, release-gate outcomes, and residual-risk handoff.
+
+**Stats:**
+
+- 84 files changed across code, tests, docs, workflow, and planning artifacts in the milestone diff
+- 10,790 insertions / 448 deletions in the milestone diff
+- 4 phases, 14 plans, 30 tasks
+- 4 days from first v1.13 phase execution to archive
+
+**Git range:** `ed4028e` → `29f69ba`
+
+**Known deferred items at close:** 1 passed UAT artifact acknowledged by the pre-close open-artifact audit: Phase 52 `52-HUMAN-UAT.md` was `status: passed` with 0 pending scenarios. No formal `v1.13-MILESTONE-AUDIT.md` was present; closeout relied on the open-artifact audit, phase verification reports, clean code review, and final 13/13 requirement verification.
+
+---
+
 ## v1.12 Quality & Architecture Hardening (Shipped: 2026-05-27)
 
 **Phases completed:** 4 phases, 13 plans, 31 tasks

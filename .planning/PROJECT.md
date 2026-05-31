@@ -10,19 +10,23 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.13 Phases 52 through 55 are complete and ready for milestone closeout. gg2d3 now has a dedicated GitHub Actions browser visual smoke workflow, CI-mode browser failure behavior, downloadable `index.html`/`index.json` visual artifacts, stable DOM/browser-log metadata checks, approved sf visual smoke fixtures, a source-level renderer contract manifest, stricter renderer drift tests, focused theme/geom-parameter IR helper boundaries, bounded ordinary `geom_label()` box rendering, explicit ordinary polygon topology non-goals, finite rect/tile transformed-bound filtering, updated geometry diagnostics, aligned release-facing documentation/generated help, v1.13 NEWS, and repeatable release-gate evidence. v1.12 Quality & Architecture Hardening remains the last shipped milestone until `$gsd-complete-milestone` archives v1.13.
+v1.13 Regression & Release Polish is shipped and archived. gg2d3 now has a dedicated GitHub Actions browser visual smoke workflow, CI-mode browser failure behavior, downloadable `index.html`/`index.json` visual artifacts, stable DOM/browser-log metadata checks, approved sf visual smoke fixtures, a source-level renderer contract manifest, stricter renderer drift tests, focused theme/geom-parameter IR helper boundaries, bounded ordinary `geom_label()` box rendering, explicit ordinary polygon topology non-goals, finite rect/tile transformed-bound filtering, updated geometry diagnostics, aligned release-facing documentation/generated help, v1.13 NEWS, and repeatable release-gate evidence. The next milestone has not been defined yet.
 
-## Current Milestone: v1.13 Regression & Release Polish
+## Current Milestone
+
+None active. Start the next milestone with `$gsd-new-milestone`.
+
+## Last Shipped Milestone: v1.13 Regression & Release Polish
 
 **Goal:** Turn the new validation and architecture foundations into release-ready regression confidence while closing the next practical geometry polish gaps.
 
-**Target features:**
-- CI-ready visual and DOM regression coverage built on the v1.12 browser smoke artifact contract.
-- Deeper renderer and IR architecture consolidation around declarative geom contracts and remaining high-risk helper boundaries.
-- Focused geometry polish for label boxes, transformed rect/tile scale semantics, ordinary polygon subgroup/hole behavior, and text placement deferrals.
-- Release-facing documentation, validation gates, and package-site/readiness polish that describe the v1.13 support contract without overclaiming.
+**Shipped features:**
+- CI-ready browser visual smoke workflow with deterministic artifacts, CI-mode row validation, and optional dependency skip semantics.
+- Renderer and IR contract hardening around declarative geom metadata, source-level drift tests, theme extraction, and geom parameter routing.
+- Geometry polish for bounded ordinary `geom_label()` boxes, text placement fields, ordinary polygon topology boundaries, and transformed rect/tile finite-bound filtering.
+- Release-facing documentation, generated help, v1.13 NEWS, repeatable release-readiness gate evidence, and final 13/13 requirement validation.
 
-## Last Shipped Milestone: v1.12 Quality & Architecture Hardening
+## Previous Shipped Milestone: v1.12 Quality & Architecture Hardening
 
 **Goal:** Make gg2d3 easier to trust and extend by adding visual/browser regression coverage, reducing renderer/IR maintenance burden, and closing high-value geometry polish gaps.
 
@@ -138,7 +142,7 @@ v1.13 Phases 52 through 55 are complete and ready for milestone closeout. gg2d3 
 
 ### Active
 
-- None for v1.13; milestone is ready for `$gsd-complete-milestone`.
+- None. The next milestone requirements will be defined by `$gsd-new-milestone`.
 
 ### Out of Scope
 
@@ -235,4 +239,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-28 after completing Phase 55 Release Documentation And Validation Gate*
+*Last updated: 2026-05-31 after archiving v1.13 Regression & Release Polish*

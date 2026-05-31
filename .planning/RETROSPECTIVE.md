@@ -2,6 +2,44 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.13 — Regression & Release Polish
+
+**Shipped:** 2026-05-31
+**Phases:** 4 | **Plans:** 14
+
+### What Was Built
+- CI-ready browser visual smoke coverage now has GitHub Actions wiring, deterministic report metadata, always-uploaded artifacts, and stable row validation for local and CI inspection.
+- Renderer and IR contracts now guard geom modules, load order, update/interaction selectors, public payload sanitization, theme extraction, and geom parameter routing.
+- Geometry polish closed bounded ordinary `geom_label()` boxes and text placement fields, clarified ordinary polygon topology non-goals, and added transformed rect/tile finite-bound filtering.
+- Release-facing documentation, generated help, v1.13 NEWS, release-gate evidence, and final verification now agree on the shipped support contract and future deferrals.
+
+### What Worked
+- CI/browser confidence came first, so later renderer and geometry work had inspectable artifacts instead of relying only on source greps.
+- Source-contract tests were again the right tool for JavaScript renderer wiring and IR helper boundaries that do not require live browser execution.
+- The final release gate was useful because it forced installed-package test behavior, documentation generation, browser skip classification, and `R CMD check` evidence into one auditable record.
+
+### What Was Inefficient
+- Local browser execution still depends on Chrome/chromote behavior; the milestone had to rely on accepted local skips plus fallback CI artifact evidence.
+- `gsd-sdk query milestone.complete` misrouted milestone arguments, requiring direct `gsd-tools.cjs` fallback for archive creation.
+- The open-artifact audit reported a passed UAT file with 0 pending scenarios as requiring a closeout decision, which needed manual interpretation.
+
+### Patterns Established
+- Release gates should summarize command outcomes, artifact classes, skip classifications, and NOTE classes without committing raw logs or generated browser/package-check artifacts.
+- Renderer support claims should be source-first across README, vignette, diagnostics, roxygen, generated help, NEWS, and verification evidence.
+- Future work should remain explicit as FUT requirements when a milestone deliberately stops short of pixel thresholds, full IR modularization, generated renderer docs, repelled labels, or broad topology repair.
+
+### Key Lessons
+1. Installed-package checks catch source-tree assumptions that ordinary `devtools::test()` can miss; tests that read `inst/` files need `system.file()` fallbacks.
+2. A browser local skip can be acceptable release evidence only when paired with clear skip semantics and a known-good CI artifact.
+3. Milestone closeout is still a hybrid: SDK helpers move archives, but ROADMAP collapse, PROJECT evolution, MILESTONES polish, and retrospective writing need deliberate review.
+
+### Cost Observations
+- Model mix: not tracked.
+- Sessions: one concentrated GSD run across Phase 52-55 execution, release validation, and closeout from 2026-05-28 to 2026-05-31.
+- Notable: Most rework came from local browser/tooling and milestone archive quirks rather than feature uncertainty.
+
+---
+
 ## Milestone: v1.12 — Quality & Architecture Hardening
 
 **Shipped:** 2026-05-27
