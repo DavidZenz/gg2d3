@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 ## Current Position
 
 Phase: 56
-Plan: Not started
-Status: Phase 56 context gathered — ready for planning
+Plan: 3 plans ready
+Status: Phase 56 planned — ready to execute
 Last activity: 2026-05-31
 
 Progress: [----------] 0%
@@ -86,10 +86,10 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-05-31T18:30:41.627Z
-Stopped at: Phase 56 context gathered
-Resume file: .planning/phases/56-pkgdown-content-and-widget-build-contract/56-CONTEXT.md
+Stopped at: Phase 56 planned
+Resume file: .planning/phases/56-pkgdown-content-and-widget-build-contract/56-01-PLAN.md
 
-**Next Step:** Run `$gsd-plan-phase 56`
+**Next Step:** Run `$gsd-execute-phase 56`
 
 **Completed Milestone:** v1.13 Regression & Release Polish -- 2026-05-31
 
