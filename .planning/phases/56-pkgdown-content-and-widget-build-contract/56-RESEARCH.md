@@ -344,17 +344,15 @@ stopifnot(dir.exists("docs/articles/gg2d3_files/gg2d3-modules-0.0.1"))
 |---|-------|---------|---------------|
 | A1 | Website CI may not install optional spatial dependencies even though `DESCRIPTION` lists them in `Suggests`. | Common Pitfalls | Planner may over-invest in dependency diagnostics if CI already reliably installs `sf`; still low-risk because visible classification is required either way. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should local Phase 56 execution install `sf` or accept a classified local skip?** [VERIFIED: local R probe; 56-CONTEXT.md]
    - What we know: `geojsonsf` is installed locally and `sf` is not installed locally. [VERIFIED: local R probe]
-   - What's unclear: Whether the executor should request/install `sf` locally or treat local output as an optional skip while relying on CI for rendered sf evidence. [ASSUMED]
-   - Recommendation: Plan both paths: visible local skip is acceptable only if the generated article classifies it; rendered sf widget evidence requires an environment where both packages are available. [VERIFIED: .planning/REQUIREMENTS.md; 56-CONTEXT.md]
+   - RESOLVED: Do not require installing `sf` locally during Phase 56 execution. Accept a visible classified local skip only when generated article output contains `PKGDOWN_SF_OPTIONAL_SKIP`; rendered sf widget evidence remains available in any environment where both `sf` and `geojsonsf` are installed. [VERIFIED: .planning/REQUIREMENTS.md; 56-CONTEXT.md; 56-01-PLAN.md; 56-03-PLAN.md]
 
 2. **Will Phase 56 commit regenerated `docs/` immediately?** [VERIFIED: 56-CONTEXT.md]
    - What we know: D-01 treats generated `docs/` as release surface, and D-02 requires source-first regeneration. [VERIFIED: 56-CONTEXT.md]
-   - What's unclear: The context allows the planner to choose timing, provided final phase evidence includes generated output. [VERIFIED: 56-CONTEXT.md]
-   - Recommendation: Commit regenerated `docs/` in Phase 56 after source docs and build behavior are correct. [VERIFIED: 56-CONTEXT.md]
+   - RESOLVED: Commit source-derived generated `docs/`, generated README, and generated help during Phase 56 after source docs and build behavior are correct. Do not hand-edit generated files; Plan 56-03 owns regeneration and final evidence. [VERIFIED: 56-CONTEXT.md; 56-03-PLAN.md]
 
 ## Environment Availability
 
