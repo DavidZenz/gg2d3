@@ -45,7 +45,11 @@
   2. Local pkgdown build produces generated article pages with `gg2d3` htmlwidget scaffolding and dependencies for representative examples.
   3. The sf article chunk renders when `sf` and `geojsonsf` are available, or emits an explicit classified skip/failure that maintainers can see.
   4. Documentation explains which artifacts are source docs, generated `docs/`, GitHub Pages output, and browser visual smoke reports.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 56-01-PLAN.md — Make sf article optional-dependency classification visible and create focused pkgdown marker tests.
+- [ ] 56-02-PLAN.md — Document artifact taxonomy and add visible website dependency evidence to the pkgdown workflow.
+- [ ] 56-03-PLAN.md — Regenerate README/help/pkgdown outputs and record final Phase 56 validation evidence.
 
 ### Phase 57: Generated Site Validation Gate
 
@@ -78,7 +82,7 @@ Phases execute in numeric order: 56 → 57 → 58
 
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
-| 56. Pkgdown Content And Widget Build Contract | DOCS-01, DOCS-02, DOCS-03, BUILD-01, BUILD-02, BUILD-03 | 0/0 | Not started | - |
+| 56. Pkgdown Content And Widget Build Contract | DOCS-01, DOCS-02, DOCS-03, BUILD-01, BUILD-02, BUILD-03 | 0/3 | Not started | - |
 | 57. Generated Site Validation Gate | SITE-01 | 0/0 | Not started | - |
 | 58. Publication Evidence And Release Handoff | SITE-02, SITE-03 | 0/0 | Not started | - |
 
