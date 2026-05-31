@@ -1,8 +1,13 @@
 read_text_file <- function(path) {
-  if (!file.exists(path)) {
+  candidates <- c(
+    path,
+    file.path("..", "..", path)
+  )
+  resolved <- candidates[file.exists(candidates)][1]
+  if (is.na(resolved)) {
     stop("Cannot find text file: ", path, call. = FALSE)
   }
-  paste(readLines(path, warn = FALSE), collapse = "\n")
+  paste(readLines(resolved, warn = FALSE), collapse = "\n")
 }
 
 expect_text_contains <- function(path, markers) {
@@ -17,7 +22,9 @@ expect_text_contains <- function(path, markers) {
 
 expect_existing_path <- function(path) {
   expect_true(
-    file.exists(path) || dir.exists(path),
+    file.exists(path) || dir.exists(path) ||
+      file.exists(file.path("..", "..", path)) ||
+      dir.exists(file.path("..", "..", path)),
     info = paste0("Expected generated pkgdown path to exist: ", path)
   )
 }
