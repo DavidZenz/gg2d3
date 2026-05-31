@@ -7,15 +7,21 @@
 
 ### Pkgdown Content
 
-- [ ] **DOCS-01**: Maintainers can build a generated pkgdown site whose articles, reference pages, NEWS, and support-contract text reflect the current v1.13/v1.14 source documentation.
-- [ ] **DOCS-02**: Users can find the current `geom_sf()` polygon, point, line, and sf annotation support contract in the generated pkgdown site, not only in source files.
-- [ ] **DOCS-03**: Maintainers can distinguish source documentation, generated `docs/`, GitHub Pages output, and browser visual smoke artifacts when checking release readiness.
+- [x] **DOCS-01
+**: Maintainers can build a generated pkgdown site whose articles, reference pages, NEWS, and support-contract text reflect the current v1.13/v1.14 source documentation.
+- [x] **DOCS-02
+**: Users can find the current `geom_sf()` polygon, point, line, and sf annotation support contract in the generated pkgdown site, not only in source files.
+- [x] **DOCS-03
+**: Maintainers can distinguish source documentation, generated `docs/`, GitHub Pages output, and browser visual smoke artifacts when checking release readiness.
 
 ### Pkgdown Build And Rendering
 
-- [ ] **BUILD-01**: Maintainers can run the pkgdown build locally and in GitHub Actions with website dependencies configured so representative `gg2d3` article chunks render consistently.
-- [ ] **BUILD-02**: Pkgdown articles include rendered `gg2d3` htmlwidget scaffolding, dependencies, and assets for representative examples rather than static or missing placeholders.
-- [ ] **BUILD-03**: The `geom_sf()` pkgdown example renders when `sf` and `geojsonsf` are available, and any dependency-based non-rendering is surfaced as an explicit classified outcome.
+- [x] **BUILD-01
+**: Maintainers can run the pkgdown build locally and in GitHub Actions with website dependencies configured so representative `gg2d3` article chunks render consistently.
+- [x] **BUILD-02
+**: Pkgdown articles include rendered `gg2d3` htmlwidget scaffolding, dependencies, and assets for representative examples rather than static or missing placeholders.
+- [x] **BUILD-03
+**: The `geom_sf()` pkgdown example renders when `sf` and `geojsonsf` are available, and any dependency-based non-rendering is surfaced as an explicit classified outcome.
 
 ### Site Validation And Publication
 
@@ -48,12 +54,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DOCS-01 | Phase 56 | Pending |
-| DOCS-02 | Phase 56 | Pending |
-| DOCS-03 | Phase 56 | Pending |
-| BUILD-01 | Phase 56 | Pending |
-| BUILD-02 | Phase 56 | Pending |
-| BUILD-03 | Phase 56 | Pending |
+| DOCS-01 | Phase 56 | Complete |
+| DOCS-02 | Phase 56 | Complete |
+| DOCS-03 | Phase 56 | Complete |
+| BUILD-01 | Phase 56 | Complete |
+| BUILD-02 | Phase 56 | Complete |
+| BUILD-03 | Phase 56 | Complete |
 | SITE-01 | Phase 57 | Pending |
 | SITE-02 | Phase 58 | Pending |
 | SITE-03 | Phase 58 | Pending |
@@ -65,4 +71,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-31*
-*Last updated: 2026-05-31 after initial roadmap creation*
+*Last updated: 2026-05-31 after Phase 56 execution*

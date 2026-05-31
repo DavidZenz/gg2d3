@@ -29,7 +29,7 @@
 - Integer phases (56, 57, 58): Planned milestone work
 - Decimal phases (56.1, 56.2): Urgent insertions, if needed
 
-- [ ] **Phase 56: Pkgdown Content And Widget Build Contract** - Generated pkgdown content and build configuration expose the current sf/widget support contract with representative rendered widgets.
+- [x] **Phase 56: Pkgdown Content And Widget Build Contract** - Generated pkgdown content and build configuration expose the current sf/widget support contract with representative rendered widgets.
 - [ ] **Phase 57: Generated Site Validation Gate** - A repeatable validation command detects stale generated-site content, missing sf sections, missing widget scaffolding, and missing widget assets.
 - [ ] **Phase 58: Publication Evidence And Release Handoff** - GitHub Pages/pkgdown artifacts are inspectable, current, and folded into the release-readiness evidence path.
 
@@ -47,9 +47,9 @@
   4. Documentation explains which artifacts are source docs, generated `docs/`, GitHub Pages output, and browser visual smoke reports.
 **Plans**: 3 plans
 Plans:
-- [ ] 56-01-PLAN.md — Make sf article optional-dependency classification visible and create focused pkgdown marker tests.
-- [ ] 56-02-PLAN.md — Document artifact taxonomy and add visible website dependency evidence to the pkgdown workflow.
-- [ ] 56-03-PLAN.md — Regenerate README/help/pkgdown outputs and record final Phase 56 validation evidence.
+- [x] 56-01-PLAN.md — Make sf article optional-dependency classification visible and create focused pkgdown marker tests.
+- [x] 56-02-PLAN.md — Document artifact taxonomy and add visible website dependency evidence to the pkgdown workflow.
+- [x] 56-03-PLAN.md — Regenerate README/help/pkgdown outputs and record final Phase 56 validation evidence.
 
 ### Phase 57: Generated Site Validation Gate
 
@@ -82,7 +82,7 @@ Phases execute in numeric order: 56 → 57 → 58
 
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
-| 56. Pkgdown Content And Widget Build Contract | DOCS-01, DOCS-02, DOCS-03, BUILD-01, BUILD-02, BUILD-03 | 0/3 | Not started | - |
+| 56. Pkgdown Content And Widget Build Contract | DOCS-01, DOCS-02, DOCS-03, BUILD-01, BUILD-02, BUILD-03 | 3/3 | Complete | 2026-05-31 |
 | 57. Generated Site Validation Gate | SITE-01 | 0/0 | Not started | - |
 | 58. Publication Evidence And Release Handoff | SITE-02, SITE-03 | 0/0 | Not started | - |
 
