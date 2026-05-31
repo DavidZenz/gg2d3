@@ -10,11 +10,19 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.13 Regression & Release Polish is shipped and archived. gg2d3 now has a dedicated GitHub Actions browser visual smoke workflow, CI-mode browser failure behavior, downloadable `index.html`/`index.json` visual artifacts, stable DOM/browser-log metadata checks, approved sf visual smoke fixtures, a source-level renderer contract manifest, stricter renderer drift tests, focused theme/geom-parameter IR helper boundaries, bounded ordinary `geom_label()` box rendering, explicit ordinary polygon topology non-goals, finite rect/tile transformed-bound filtering, updated geometry diagnostics, aligned release-facing documentation/generated help, v1.13 NEWS, and repeatable release-gate evidence. The next milestone has not been defined yet.
+v1.14 Pkgdown Site Verification is active. v1.13 shipped and archived the source-first sf, geometry, browser visual smoke, and release-gate documentation, but follow-up inspection showed the generated local `docs/` pkgdown site is stale and does not yet expose the current sf functionality. The next work is to make the published pkgdown/GitHub Pages surface truthful, reproducible, and verifiable: rebuild/configure pkgdown so the sf support contract appears in the generated site, ensure representative gg2d3 htmlwidgets render in site articles, and add a site validation/deploy evidence gate alongside the existing browser visual smoke and package-check evidence.
 
 ## Current Milestone
 
-None active. Start the next milestone with `$gsd-new-milestone`.
+### v1.14 Pkgdown Site Verification
+
+**Goal:** Make the generated and published pkgdown site reflect the current gg2d3 sf/widget support contract, with repeatable evidence that site articles render representative widgets and do not silently go stale after source documentation changes.
+
+**Target outcomes:**
+- Generated `docs/` and the GitHub Pages/pkgdown artifact include the current sf article content, NEWS/help updates, and support-contract language from source documentation.
+- Representative pkgdown article widgets render as htmlwidgets, including the `geom_sf()` example when `sf` and `geojsonsf` are available.
+- Optional spatial dependency behavior is explicit: the sf article chunk renders in the website build when dependencies are installed, or reports a visible, classified skip instead of disappearing silently.
+- A repeatable local/CI validation gate checks generated-site freshness, htmlwidget scaffolding/assets, sf content presence, and deploy artifact evidence.
 
 ## Last Shipped Milestone: v1.13 Regression & Release Polish
 
@@ -142,7 +150,9 @@ None active. Start the next milestone with `$gsd-new-milestone`.
 
 ### Active
 
-- None. The next milestone requirements will be defined by `$gsd-new-milestone`.
+- Pkgdown source and generated site content must describe the same current sf/widget support contract.
+- Pkgdown article builds must render representative `gg2d3` htmlwidgets, with sf examples rendered or visibly classified based on optional spatial dependencies.
+- Generated-site and GitHub Pages/deploy evidence must be repeatably checkable so stale `docs/` output does not masquerade as release-ready documentation.
 
 ### Out of Scope
 
@@ -164,6 +174,7 @@ gg2d3 has a mature three-layer pipeline (R → IR → D3), production polygon/po
 - Transform-scale rect/tile edge parity remains classified at the shared scale factory / axis semantics boundary; Phase 54 added finite scaled-bound filtering and stronger log/sqrt/reverse evidence without a broad scale rewrite.
 - Polygon topology/hole repair beyond grouped closed paths, ggrepel-style collision avoidance, rich text labels, and path-following text remain future geometry candidates.
 - Browser visual smoke has deterministic local artifacts and explicit skips; live Chrome execution still depends on optional local browser dependencies.
+- The local generated pkgdown site under `docs/` can become stale relative to source vignettes, README, help, and NEWS; v1.14 should close this publication-surface gap.
 
 ## Constraints
 
@@ -220,6 +231,7 @@ gg2d3 has a mature three-layer pipeline (R → IR → D3), production polygon/po
 | bounded ordinary label support | `geom_label()` should ship only the ordinary SVG box/text path with small placement fields, while collision avoidance, rich text, and path-following placement remain explicit non-goals | ✓ Good — implemented and verified in Phase 54 |
 | ordinary polygon topology boundary | Ordinary `geom_polygon()` subgroup/hole behavior should remain fixture-backed and documented as a non-goal unless gg2d3 adds bounded compound-path topology support | ✓ Good — verified in Phase 54 |
 | passed-with-notes release gate | Release readiness can pass with classified non-blocking package-check NOTEs only when final package checks have no ERROR or WARNING outcomes and browser confidence is covered by accepted skip/fallback artifact evidence | ✓ Good — implemented and verified in Phase 55 |
+| published site as release surface | Source-first docs are not enough once pkgdown/GitHub Pages is the public package surface; generated site freshness, widget rendering, sf optional dependency behavior, and deploy artifacts need their own validation gate | Active — v1.14 will implement and verify |
 
 ## Evolution
 
@@ -239,4 +251,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-31 after archiving v1.13 Regression & Release Polish*
+*Last updated: 2026-05-31 after starting v1.14 Pkgdown Site Verification*
