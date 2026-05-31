@@ -44,6 +44,25 @@ Release evidence should summarize command outcomes and artifact paths, not
 paste browser logs, `00check.log` contents, or raw generated artifacts into
 public documentation.
 
+## Pkgdown site evidence
+
+Pkgdown evidence answers a different release-readiness question than browser
+visual smoke. Use these artifact classes consistently:
+
+- source docs (`README.Rmd`, `vignettes/`, roxygen comments, and `NEWS.md`)
+  define the intended public support contract;
+- generated `docs/` proves the local/pkgdown rendering path and is the
+  committed publication surface for articles, reference pages, and NEWS;
+- GitHub Pages or deploy output proves that the generated site was published
+  from the workflow target; and
+- browser visual smoke artifacts under `test_output/browser-visual-smoke/`
+  prove representative browser behavior for selected rendered fixtures.
+
+The generated pkgdown site should show current support text and real
+htmlwidget scaffolding before release claims rely on it. Browser visual smoke
+remains downstream inspection evidence for rendered behavior, not a substitute
+for source-to-site freshness.
+
 ## Ordinary `geom_polygon()` support
 
 Ordinary `geom_polygon()` renders grouped closed SVG paths from ggplot2 built

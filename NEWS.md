@@ -1,5 +1,8 @@
 # gg2d3 (development version)
 
+## v1.14 development notes
+* **Pkgdown publication-surface evidence**: Repaired the documentation evidence contract so source docs, generated `docs/`, GitHub Pages output, and browser visual smoke artifacts have distinct release-readiness roles. This clarifies how the generated site proves current pkgdown content and widget embedding without implying new rendering support.
+
 ## v1.13 release notes
 * **CI/browser visual smoke validation**: Added a dedicated browser visual smoke workflow with CI-mode behavior, stable DOM/report metadata checks, and downloadable artifact bundles. Browser visual artifacts remain inspection evidence under ignored paths such as `test_output/browser-visual-smoke/` and downloaded GitHub run artifact directories; screenshots, DOM summaries, browser logs, and report JSON are not committed as release notes.
 * **Renderer and IR contract consolidation**: Hardened renderer wiring around `geom-contracts.js`, source gates for module load order, render/update/interaction selectors, and shared public-payload sanitization. High-risk R-side IR responsibilities now have focused helper-boundary tests while full `as_d3_ir()` modularization remains future work.
