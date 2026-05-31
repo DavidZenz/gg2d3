@@ -49,6 +49,10 @@ clone.
   artifacts under `test_output/browser-visual-smoke/` when enabled,
   while local runs may skip cleanly if optional browser tooling is
   unavailable.
+- Pkgdown site evidence has a separate release role: source docs define
+  the intended public support contract, generated `docs/` proves
+  local/pkgdown rendering, GitHub Pages output proves publication, and
+  browser visual smoke artifacts prove representative browser behavior.
 - Renderer wiring is guarded by
   `inst/htmlwidgets/modules/geom-contracts.js` and source tests for
   module load order, render/update selectors, interactivity selectors,
@@ -66,8 +70,8 @@ clone.
   placement, and broad GIS-style topology repair.
 
 See `vignettes/d3-drawing-diagnostics.md` for validation commands,
-artifact paths, CI-mode behavior, architecture boundaries, geometry
-caveats, and future work IDs.
+pkgdown artifact taxonomy, artifact paths, CI-mode behavior,
+architecture boundaries, geometry caveats, and future work IDs.
 
 ## Features
 

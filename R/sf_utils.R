@@ -390,7 +390,7 @@ normalize_to_wgs84 <- function(geom_col) {
 #' Detect the dominant geometry type in an sf layer
 #'
 #' Returns the summary geometry type for the sfc column in the data.frame.
-#' When the column contains mixed types, `sf::st_geometry_type()` with
+#' When the column contains mixed types, `st_geometry_type()` with
 #' `by_geometry = FALSE` returns the shared type or "GEOMETRY". gg2d3 renders
 #' polygon, point, and line `geom_sf()` families.
 #'

@@ -1,27 +1,15 @@
----
-title: "Getting started with gg2d3"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Getting started with gg2d3}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
+# Getting started with gg2d3
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  eval = TRUE
-)
-```
-
-gg2d3 renders ggplot2 plots as interactive D3.js SVG widgets in the browser.
-Pass any ggplot object to `gg2d3()` and get an htmlwidget you can view in
-RStudio, R Markdown, Shiny, or any web page.
+gg2d3 renders ggplot2 plots as interactive D3.js SVG widgets in the
+browser. Pass any ggplot object to
+[`gg2d3()`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md) and
+get an htmlwidget you can view in RStudio, R Markdown, Shiny, or any web
+page.
 
 ## Basic usage
 
-```{r}
+``` r
+
 library(ggplot2)
 library(gg2d3)
 
@@ -32,55 +20,80 @@ p <- ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) +
 gg2d3(p)
 ```
 
-The widget size defaults to the viewer/container size. Override with `width`
-and `height` (in pixels or CSS units):
+The widget size defaults to the viewer/container size. Override with
+`width` and `height` (in pixels or CSS units):
 
-```{r}
+``` r
+
 gg2d3(p, width = 800, height = 500)
 ```
 
 ## Supported geoms
 
-gg2d3 supports the core Cartesian geoms below, ordinary `geom_polygon()`,
-polygon-family, point-family, and line-family `geom_sf()`, plus projected-anchor
-`geom_sf_text()` and `geom_sf_label()` annotations.
-All aesthetics that ggplot2 maps (color, fill, size, shape, alpha, linewidth)
-are carried through to D3.
-Detailed geometry caveats live in `vignettes/d3-drawing-diagnostics.md`.
+gg2d3 supports the core Cartesian geoms below, ordinary
+[`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html),
+polygon-family, point-family, and line-family
+[`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html), plus
+projected-anchor
+[`geom_sf_text()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+and
+[`geom_sf_label()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+annotations. All aesthetics that ggplot2 maps (color, fill, size, shape,
+alpha, linewidth) are carried through to D3. Detailed geometry caveats
+live in `vignettes/d3-drawing-diagnostics.md`.
 
 ## v1.13 validation and caveat summary
 
-The v1.13 support contract is source-first and intentionally bounded. Browser
-visual validation uses the dedicated browser visual smoke workflow and the same
-`test_output/browser-visual-smoke/` artifact layout documented in diagnostics;
-local runs may skip cleanly when optional browser tooling is unavailable, while
-CI mode treats browser-level skips as failures. Renderer and interactivity
-wiring are guarded by `geom-contracts.js`, and representative IR
-helper-boundary tests cover the selected theme and geom-parameter helper
-boundaries without claiming full `as_d3_ir()` modularization.
+The v1.13 support contract is source-first and intentionally bounded.
+Browser visual validation uses the dedicated browser visual smoke
+workflow and the same `test_output/browser-visual-smoke/` artifact
+layout documented in diagnostics; local runs may skip cleanly when
+optional browser tooling is unavailable, while CI mode treats
+browser-level skips as failures. Renderer and interactivity wiring are
+guarded by `geom-contracts.js`, and representative IR helper-boundary
+tests cover the selected theme and geom-parameter helper boundaries
+without claiming full
+[`as_d3_ir()`](https://davidzenz.github.io/gg2d3/reference/as_d3_ir.md)
+modularization.
 
-Geometry caveats are also explicit. Ordinary `geom_label()` support covers
-bounded SVG label boxes and small placement fields. Ordinary `geom_polygon()`
-support remains a grouped closed-path renderer, not topology or hole repair.
-`geom_rect()` and `geom_tile()` use ggplot2-built transformed bounds and filter
-non-finite transformed SVG bounds before drawing. Collision avoidance, rich
-text, path-following text, broad GIS-style topology repair, committed pixel
-thresholds, and generated renderer reference docs remain future work. See
-`vignettes/d3-drawing-diagnostics.md` for the detailed v1.13 release validation
-commands and FUT deferrals.
+Geometry caveats are also explicit. Ordinary
+[`geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)
+support covers bounded SVG label boxes and small placement fields.
+Ordinary
+[`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)
+support remains a grouped closed-path renderer, not topology or hole
+repair.
+[`geom_rect()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
+and
+[`geom_tile()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
+use ggplot2-built transformed bounds and filter non-finite transformed
+SVG bounds before drawing. Collision avoidance, rich text,
+path-following text, broad GIS-style topology repair, committed pixel
+thresholds, and generated renderer reference docs remain future work.
+See `vignettes/d3-drawing-diagnostics.md` for the detailed v1.13 release
+validation commands and FUT deferrals.
 
 ### Points, lines, and paths
 
-```{r}
+``` r
+
 # Scatter plot
 (ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
   geom_point(size = 3)) |>
   gg2d3()
+```
+
+``` r
+
 
 # Line chart (connects points in x order)
 (ggplot(economics, aes(date, unemploy)) +
   geom_line()) |>
   gg2d3()
+```
+
+``` r
+
 
 # Path (connects points in data order)
 (ggplot(data.frame(x = cos(seq(0, 2 * pi, length.out = 60)),
@@ -93,11 +106,16 @@ commands and FUT deferrals.
 
 ### Bars and columns
 
-```{r}
+``` r
+
 # geom_bar (counts)
 (ggplot(mpg, aes(class, fill = class)) +
   geom_bar()) |>
   gg2d3()
+```
+
+``` r
+
 
 # geom_col (values) with stacking
 (ggplot(mpg, aes(class, fill = drv)) +
@@ -107,11 +125,16 @@ commands and FUT deferrals.
 
 ### Rectangles, tiles, and text
 
-```{r}
+``` r
+
 # Heatmap with geom_tile
 (ggplot(faithfuld, aes(waiting, eruptions, fill = density)) +
   geom_tile()) |>
   gg2d3()
+```
+
+``` r
+
 
 # Text labels
 (ggplot(mtcars, aes(wt, mpg, label = rownames(mtcars))) +
@@ -121,12 +144,15 @@ commands and FUT deferrals.
 
 ### Ordinary polygons
 
-Ordinary `geom_polygon()` renders each group as a grouped closed SVG path while
-preserving ggplot2's built row order. Fill, stroke, alpha, linewidth, linetype,
-facets, zoom/update behavior, and the existing tooltip, hover, brush, handler,
-and linked-view hooks are supported at the polygon path level.
+Ordinary
+[`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)
+renders each group as a grouped closed SVG path while preserving
+ggplot2’s built row order. Fill, stroke, alpha, linewidth, linetype,
+facets, zoom/update behavior, and the existing tooltip, hover, brush,
+handler, and linked-view hooks are supported at the polygon path level.
 
-```{r}
+``` r
+
 poly <- data.frame(
   id = rep(c("a", "b"), each = 4),
   x = c(0, 1, 1.2, 0, 1.5, 2.6, 2.2, 1.3),
@@ -139,17 +165,22 @@ poly <- data.frame(
   gg2d3()
 ```
 
-This is a grouped-path contract, not a GIS topology engine: topology/hole repair
-outside clean ggplot2 built groups is deferred. See
+This is a grouped-path contract, not a GIS topology engine:
+topology/hole repair outside clean ggplot2 built groups is deferred. See
 `vignettes/d3-drawing-diagnostics.md` for detailed caveats.
 
 ### Area and ribbon
 
-```{r}
+``` r
+
 # Area chart
 (ggplot(economics, aes(date, unemploy)) +
   geom_area(fill = "steelblue", alpha = 0.5)) |>
   gg2d3()
+```
+
+``` r
+
 
 # Ribbon (confidence band)
 (ggplot(economics, aes(date, unemploy)) +
@@ -161,7 +192,8 @@ outside clean ggplot2 built groups is deferred. See
 
 ### Segments and reference lines
 
-```{r}
+``` r
+
 (ggplot(mtcars, aes(wt, mpg)) +
   geom_point() +
   geom_hline(yintercept = 20, linetype = "dashed", color = "red") +
@@ -173,44 +205,62 @@ outside clean ggplot2 built groups is deferred. See
 
 ### Statistical geoms
 
-These geoms are pre-computed in R (via ggplot2's stat system) and rendered
-by D3. No JavaScript statistics are needed.
+These geoms are pre-computed in R (via ggplot2’s stat system) and
+rendered by D3. No JavaScript statistics are needed.
 
-```{r}
+``` r
+
 # Boxplot
 (ggplot(mpg, aes(class, hwy)) +
   geom_boxplot()) |>
   gg2d3()
+```
+
+``` r
+
 
 # Violin
 (ggplot(mpg, aes(class, hwy, fill = class)) +
   geom_violin()) |>
   gg2d3()
+```
+
+``` r
+
 
 # Density
 (ggplot(diamonds, aes(price, fill = cut)) +
   geom_density(alpha = 0.5)) |>
   gg2d3()
+```
+
+``` r
+
 
 # Smooth (loess or lm)
 (ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
   geom_smooth(method = "loess")) |>
   gg2d3()
+#> `geom_smooth()` using formula = 'y ~ x'
 ```
 
 ### sf family maps with `geom_sf`
 
-geom_sf() supports polygon-family (`POLYGON`, `MULTIPOLYGON`), point-family
-(`POINT`, `MULTIPOINT`), and line-family (`LINESTRING`, `MULTILINESTRING`)
-geometries. Polygon-family choropleths and overlays render as D3 `path` marks;
-point-family rows render as `.geom-sf-point` marks; and line-family rows render
-as `.geom-sf-line` paths. `geom_sf_text()` and `geom_sf_label()` render labels
-at projected anchors aligned with those accepted sf families. This example uses
-the `nc` shapefile bundled with `sf` and renders county boundaries as D3 `path`
-marks.
+geom_sf() supports polygon-family (`POLYGON`, `MULTIPOLYGON`),
+point-family (`POINT`, `MULTIPOINT`), and line-family (`LINESTRING`,
+`MULTILINESTRING`) geometries. Polygon-family choropleths and overlays
+render as D3 `path` marks; point-family rows render as `.geom-sf-point`
+marks; and line-family rows render as `.geom-sf-line` paths.
+[`geom_sf_text()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+and
+[`geom_sf_label()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+render labels at projected anchors aligned with those accepted sf
+families. This example uses the `nc` shapefile bundled with `sf` and
+renders county boundaries as D3 `path` marks.
 
-```{r}
+``` r
+
 has_sf <- requireNamespace("sf", quietly = TRUE)
 has_geojsonsf <- requireNamespace("geojsonsf", quietly = TRUE)
 missing_sf_packages <- c(
@@ -235,29 +285,36 @@ if (length(missing_sf_packages) > 0) {
     labs(fill = "Area")) |>
     gg2d3()
 }
+#> PKGDOWN_SF_OPTIONAL_SKIP: sf example not rendered; missing sf.
 ```
 
-The `geom_sf()` support contract is intentionally explicit:
+The [`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+support contract is intentionally explicit:
 
 - Accepted families are polygon-family (`POLYGON`, `MULTIPOLYGON`),
   point-family (`POINT`, `MULTIPOINT`), and line-family (`LINESTRING`,
-  `MULTILINESTRING`), including projected-anchor `geom_sf_text()` and
-  `geom_sf_label()` annotations for those families.
+  `MULTILINESTRING`), including projected-anchor
+  [`geom_sf_text()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+  and
+  [`geom_sf_label()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
+  annotations for those families.
 - known CRS inputs are normalized to WGS84 in R before serialization.
-- Missing CRS emits `geom_sf layer has missing CRS; coordinates will be serialized as-is`.
+- Missing CRS emits
+  `geom_sf layer has missing CRS; coordinates will be serialized as-is`.
 - Rows that are unsupported, empty, invalid, or missing emit
   `geom_sf layer skipped %d unsupported, empty, invalid, or missing geometries`
   and are skipped while accepted rows remain renderable.
-- Optional browser validation is R/testthat/chromote based and may skip cleanly;
-  when available, it covers sf family interactivity, stacked overlays, faceted
-  and empty panels, projected anchor placement, sanitized interactivity
-  payloads, and zoom suppression.
-- gg2d3 does not provide tile basemaps, slippy map controls, JavaScript-side
-  CRS reprojection, true geometry-overlap brushing, or large-map performance
-  guarantees.
-- sf annotations do not provide ggrepel collision avoidance, rich text, rotation
-  parity, or path-following placement. See
-  `vignettes/d3-drawing-diagnostics.md` for the detailed residual-risk list.
+- Optional browser validation is R/testthat/chromote based and may skip
+  cleanly; when available, it covers sf family interactivity, stacked
+  overlays, faceted and empty panels, projected anchor placement,
+  sanitized interactivity payloads, and zoom suppression.
+- gg2d3 does not provide tile basemaps, slippy map controls,
+  JavaScript-side CRS reprojection, true geometry-overlap brushing, or
+  large-map performance guarantees.
+- sf annotations do not provide ggrepel collision avoidance, rich text,
+  rotation parity, or path-following placement. See
+  `vignettes/d3-drawing-diagnostics.md` for the detailed residual-risk
+  list.
 
 ## Scales
 
@@ -265,7 +322,8 @@ The `geom_sf()` support contract is intentionally explicit:
 
 Log, sqrt, and reverse transforms work as expected:
 
-```{r}
+``` r
+
 (ggplot(diamonds, aes(carat, price)) +
   geom_point(alpha = 0.1) +
   scale_y_log10()) |>
@@ -275,10 +333,11 @@ Log, sqrt, and reverse transforms work as expected:
 ### Date and datetime scales
 
 Date and POSIXct columns are automatically detected and rendered with
-temporal D3 scales. Axis tick labels use the format from ggplot2's
+temporal D3 scales. Axis tick labels use the format from ggplot2’s
 `date_labels` argument:
 
-```{r}
+``` r
+
 df <- data.frame(
   date = seq(as.Date("2024-01-01"), as.Date("2024-12-31"), by = "month"),
   value = cumsum(rnorm(12))
@@ -293,7 +352,8 @@ df <- data.frame(
 
 POSIXct (datetime) works the same way:
 
-```{r}
+``` r
+
 df <- data.frame(
   time = as.POSIXct("2024-01-01") + (0:23) * 3600,
   temp = 15 + 5 * sin(seq(0, 2 * pi, length.out = 24)) + rnorm(24, sd = 0.5)
@@ -305,15 +365,18 @@ df <- data.frame(
   gg2d3()
 ```
 
-Timezone information from `scale_x_datetime(timezone = ...)` is preserved in
-tooltips.
+Timezone information from `scale_x_datetime(timezone = ...)` is
+preserved in tooltips.
 
 ### Secondary axes
 
-Secondary axes are fully rendered — ticks, labels, and the axis title from
-`sec_axis()` all appear on the opposite side of the panel.
+Secondary axes are fully rendered — ticks, labels, and the axis title
+from
+[`sec_axis()`](https://ggplot2.tidyverse.org/reference/sec_axis.html)
+all appear on the opposite side of the panel.
 
-```{r}
+``` r
+
 # Secondary axis showing unemployment in millions
 (ggplot(economics, aes(date, unemploy)) +
   geom_line() +
@@ -327,10 +390,12 @@ Secondary axes are fully rendered — ticks, labels, and the axis title from
 ## Color scales
 
 Continuous color and fill aesthetics render as a true colorbar legend (a
-gradient with axis ticks), not a stack of discrete keys. Discrete palettes —
-viridis, brewer, manual — produce identical hex codes to ggplot2's own output.
+gradient with axis ticks), not a stack of discrete keys. Discrete
+palettes — viridis, brewer, manual — produce identical hex codes to
+ggplot2’s own output.
 
-```{r}
+``` r
+
 # Viridis continuous → colorbar legend
 (ggplot(faithfuld, aes(waiting, eruptions, fill = density)) +
   geom_tile() +
@@ -338,7 +403,8 @@ viridis, brewer, manual — produce identical hex codes to ggplot2's own output.
   gg2d3()
 ```
 
-```{r}
+``` r
+
 # Brewer discrete
 (ggplot(mpg, aes(displ, hwy, color = class)) +
   geom_point() +
@@ -346,7 +412,8 @@ viridis, brewer, manual — produce identical hex codes to ggplot2's own output.
   gg2d3()
 ```
 
-```{r}
+``` r
+
 # Manual
 (ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) +
   geom_point(size = 3) +
@@ -360,7 +427,8 @@ viridis, brewer, manual — produce identical hex codes to ggplot2's own output.
 
 Swaps x and y axes. All geoms and scales adapt automatically:
 
-```{r}
+``` r
+
 (ggplot(mpg, aes(class, hwy)) +
   geom_boxplot() +
   coord_flip()) |>
@@ -371,7 +439,8 @@ Swaps x and y axes. All geoms and scales adapt automatically:
 
 Enforces a fixed aspect ratio between x and y units:
 
-```{r}
+``` r
+
 (ggplot(mtcars, aes(wt, mpg)) +
   geom_point() +
   coord_fixed(ratio = 1)) |>
@@ -384,7 +453,8 @@ Enforces a fixed aspect ratio between x and y units:
 
 Wraps panels into rows by one or more variables:
 
-```{r}
+``` r
+
 (ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
   facet_wrap(~class)) |>
@@ -393,7 +463,8 @@ Wraps panels into rows by one or more variables:
 
 With free scales:
 
-```{r}
+``` r
+
 (ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
   facet_wrap(~class, scales = "free")) |>
@@ -404,7 +475,8 @@ With free scales:
 
 Lays out panels in a grid defined by row and column variables:
 
-```{r}
+``` r
+
 (ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
   facet_grid(drv ~ cyl)) |>
@@ -413,7 +485,8 @@ Lays out panels in a grid defined by row and column variables:
 
 Free scales work per-row (`"free_y"`) or per-column (`"free_x"`):
 
-```{r}
+``` r
+
 (ggplot(mpg, aes(displ, hwy)) +
   geom_point() +
   facet_grid(drv ~ cyl, scales = "free")) |>
@@ -426,14 +499,16 @@ Legends are generated automatically from mapped aesthetics. All standard
 legend types are supported:
 
 - **Discrete color/fill** — color swatches with labels
-- **Continuous colorbar** — gradient bar for continuous color/fill scales
+- **Continuous colorbar** — gradient bar for continuous color/fill
+  scales
 - **Size** — graduated circles
 - **Shape** — different point shapes
 - **Alpha** — opacity levels
 
 Legends can be positioned with `theme(legend.position = ...)`:
 
-```{r}
+``` r
+
 (ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
   geom_point() +
   theme(legend.position = "bottom")) |>
@@ -442,14 +517,15 @@ Legends can be positioned with `theme(legend.position = ...)`:
 
 Use `theme(legend.position = "none")` to hide legends entirely.
 
-When multiple aesthetics share the same variable, guides are merged into a
-single legend automatically.
+When multiple aesthetics share the same variable, guides are merged into
+a single legend automatically.
 
 ## Theming
 
 gg2d3 translates ggplot2 theme elements to SVG styling:
 
-```{r}
+``` r
+
 (ggplot(mtcars, aes(wt, mpg)) +
   geom_point() +
   theme_minimal() +
@@ -469,9 +545,11 @@ Theme elements that are translated include:
 ## Interactivity
 
 gg2d3 provides a composable pipe-based API for adding interactivity.
-Each function takes a widget and returns a widget, so they chain naturally:
+Each function takes a widget and returns a widget, so they chain
+naturally:
 
-```{r}
+``` r
+
 (ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
   geom_point(size = 3)) |>
   gg2d3() |>
@@ -485,29 +563,46 @@ You can use any combination — they are all optional and independent.
 
 ### Tooltips
 
-`d3_tooltip()` shows data values on hover. By default it displays all mapped
+[`d3_tooltip()`](https://davidzenz.github.io/gg2d3/reference/d3_tooltip.md)
+shows data values on hover. By default it displays all mapped
 aesthetics.
 
-```{r}
+``` r
+
 # Default: show all aesthetics
 gg2d3(p) |> d3_tooltip()
+```
+
+``` r
+
 
 # Show specific fields only
 gg2d3(p) |> d3_tooltip(fields = c("wt", "mpg"))
+```
+
+``` r
+
 
 # Custom JavaScript formatter
 gg2d3(p) |> d3_tooltip(formatter = "function(d) { return d.mpg + ' mpg'; }")
 ```
 
-Tooltips automatically format date/datetime values using the browser's locale.
+Tooltips automatically format date/datetime values using the browser’s
+locale.
 
 ### Hover highlighting
 
-`d3_hover()` dims non-hovered elements so the hovered group stands out.
+[`d3_hover()`](https://davidzenz.github.io/gg2d3/reference/d3_hover.md)
+dims non-hovered elements so the hovered group stands out.
 
-```{r}
+``` r
+
 # Default: dim others to 30% opacity
 gg2d3(p) |> d3_hover()
+```
+
+``` r
+
 
 # Softer dimming + highlight stroke
 gg2d3(p) |> d3_hover(opacity = 0.5, stroke = "black", stroke_width = 2)
@@ -518,12 +613,18 @@ disabled to avoid visual conflicts.
 
 ### Zoom and pan
 
-`d3_zoom()` enables scroll-to-zoom and drag-to-pan. Double-click resets
-to the original view.
+[`d3_zoom()`](https://davidzenz.github.io/gg2d3/reference/d3_zoom.md)
+enables scroll-to-zoom and drag-to-pan. Double-click resets to the
+original view.
 
-```{r}
+``` r
+
 # Default: zoom both axes, 1x to 8x
 gg2d3(p) |> d3_zoom()
+```
+
+``` r
+
 
 # Zoom x-axis only, up to 20x
 gg2d3(p) |> d3_zoom(direction = "x", scale_extent = c(1, 20))
@@ -534,15 +635,25 @@ formatting.
 
 ### Brush selection
 
-`d3_brush()` lets users drag to select a rectangular region. Selected
-elements stay at full opacity while others dim.
+[`d3_brush()`](https://davidzenz.github.io/gg2d3/reference/d3_brush.md)
+lets users drag to select a rectangular region. Selected elements stay
+at full opacity while others dim.
 
-```{r}
+``` r
+
 # Default: 2D brush with blue overlay
 gg2d3(p) |> d3_brush()
+```
+
+``` r
+
 
 # Horizontal brush only
 gg2d3(p) |> d3_brush(direction = "x")
+```
+
+``` r
+
 
 # Custom callback receiving selected data
 gg2d3(p) |> d3_brush(
@@ -558,7 +669,8 @@ gg2d3 supports [crosstalk](https://rstudio.github.io/crosstalk/) for
 linking multiple widgets. Brushing in one widget highlights the same
 observations in all linked widgets.
 
-```{r, eval = FALSE}
+``` r
+
 library(crosstalk)
 
 shared <- SharedData$new(iris)
@@ -580,7 +692,8 @@ Crosstalk works in static HTML documents — no Shiny server required.
 
 A realistic example combining multiple features:
 
-```{r warning = FALSE, message = FALSE}
+``` r
+
 # warning = FALSE: loess emits "neighborhood too small" / "pseudoinverse"
 # notes when fit per (class × year) — some classes have <4 points per
 # facet. The fit still renders; the messages are expected for this demo.
@@ -604,19 +717,23 @@ A realistic example combining multiple features:
 
 ## Error handling and edge cases
 
-gg2d3 provides three observable guarantees when data or geoms fall outside
-normal rendering scope:
+gg2d3 provides three observable guarantees when data or geoms fall
+outside normal rendering scope:
 
-1. **Non-finite values** — `NA`, `NaN`, and `Inf` are filtered from each layer
-   with a single R warning per layer. Remaining finite points render normally;
-   line/path geoms show a visible gap where the non-finite rows were removed.
-2. **Unsupported geoms** — when a geom type has no D3 renderer, gg2d3 emits a
-   browser-console warning instead of rendering marks for that layer.
-3. **R-level errors during build** — if `ggplot_build()` itself errors (e.g.,
-   incompatible stat/geom combinations), the error is surfaced as an R
-   condition before any D3 rendering is attempted.
+1.  **Non-finite values** — `NA`, `NaN`, and `Inf` are filtered from
+    each layer with a single R warning per layer. Remaining finite
+    points render normally; line/path geoms show a visible gap where the
+    non-finite rows were removed.
+2.  **Unsupported geoms** — when a geom type has no D3 renderer, gg2d3
+    emits a browser-console warning instead of rendering marks for that
+    layer.
+3.  **R-level errors during build** — if
+    [`ggplot_build()`](https://ggplot2.tidyverse.org/reference/ggplot_build.html)
+    itself errors (e.g., incompatible stat/geom combinations), the error
+    is surfaced as an R condition before any D3 rendering is attempted.
 
-```{r}
+``` r
+
 # Non-finite values: filtered with a single warning per layer;
 # remaining points render with visible gaps
 df <- data.frame(x = 1:10, y = c(1:4, NA, 6:9, NaN))
@@ -624,11 +741,16 @@ df <- data.frame(x = 1:10, y = c(1:4, NA, 6:9, NaN))
   geom_point() +
   geom_line()) |>
   gg2d3()
+```
+
+``` r
+
 # Warning: Removed 2 rows containing non-finite values (geom_point).
 # The geom_line connects the finite segments and shows a visible gap.
 ```
 
-```{r}
+``` r
+
 # Ordinary polygons: grouped closed paths with row-order preservation
 poly_edges <- data.frame(
   group = rep(c("left", "right"), each = 4),
@@ -640,21 +762,28 @@ poly_edges <- data.frame(
   geom_polygon(color = "grey35", linewidth = 0.4, alpha = 0.75) +
   coord_fixed()) |>
   gg2d3()
+```
+
+``` r
+
 # topology/hole repair beyond grouped closed paths remains outside the shipped
 # support contract.
 ```
 
 ## Tips
 
-- **Pipe from ggplot directly:** wrap the ggplot expression in parentheses so
-  `+` resolves before `|>`:
-  `(ggplot(...) + geom_point()) |> gg2d3()`. Without the parens, `|>` binds
-  tighter than `+` and `gg2d3()` receives only the last geom — not the plot.
-  The cleaner alternative is to assign first: `p <- ggplot(...) + geom_point(); gg2d3(p)`.
+- **Pipe from ggplot directly:** wrap the ggplot expression in
+  parentheses so `+` resolves before `|>`:
+  `(ggplot(...) + geom_point()) |> gg2d3()`. Without the parens, `|>`
+  binds tighter than `+` and
+  [`gg2d3()`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)
+  receives only the last geom — not the plot. The cleaner alternative is
+  to assign first: `p <- ggplot(...) + geom_point(); gg2d3(p)`.
 - **Inspect the IR:** Use `gg2d3:::as_d3_ir(p)` to see exactly what data
   is sent to D3. Useful for debugging unexpected rendering.
 - **Widget sizing:** In R Markdown, set chunk options `fig.width` and
-  `fig.height` or pass `width`/`height` to `gg2d3()`.
-- **Performance:** For large datasets (>10k points), consider using
+  `fig.height` or pass `width`/`height` to
+  [`gg2d3()`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md).
+- **Performance:** For large datasets (\>10k points), consider using
   `alpha` to reduce overdraw and limit interactivity features to what
   you need.
