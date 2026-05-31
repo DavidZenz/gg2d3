@@ -33,6 +33,37 @@ jobs:
           extra-packages: any::pkgdown, local::.
           needs: website
 
+      - name: Verify website dependencies
+        run: |
+          required <- c("pkgdown", "rmarkdown", "knitr", "htmlwidgets")
+          optional_spatial <- c("sf", "geojsonsf")
+          packages <- c(required, optional_spatial)
+
+          available <- vapply(packages, requireNamespace, logical(1), quietly = TRUE)
+          missing_required <- required[!available[required]]
+          if (length(missing_required) > 0) {
+            stop(
+              "Missing required website dependencies: ",
+              paste(missing_required, collapse = ", "),
+              call. = FALSE
+            )
+          }
+
+          for (package in packages[available]) {
+            cat(package, as.character(utils::packageVersion(package)), "\n")
+          }
+
+          missing_spatial <- optional_spatial[!available[optional_spatial]]
+          if (length(missing_spatial) > 0) {
+            cat(
+              "PKGDOWN_SF_OPTIONAL_SKIP: GitHub Actions website environment missing ",
+              paste(missing_spatial, collapse = ", "),
+              "\n",
+              sep = ""
+            )
+          }
+        shell: Rscript {0}
+
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
