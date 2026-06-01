@@ -2,6 +2,44 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.14 — Pkgdown Site Verification
+
+**Shipped:** 2026-06-01
+**Phases:** 3 | **Plans:** 9
+
+### What Was Built
+- The source and generated pkgdown site now describe the same sf/widget support contract, with visible optional spatial dependency classification instead of silent disappearance.
+- The generated-site validation gate and publication inspector now check stale content, htmlwidget scaffolding, widget dependencies/assets, sf outcomes, and Crosstalk evidence across local and downloaded site roots.
+- The pkgdown GitHub Actions workflow now uploads a validated site artifact before Pages deploy, so release evidence can inspect the exact public-site payload.
+- The main articles now include rendered sf and linked Crosstalk examples; final follow-up fixes made Crosstalk linked brushing update both panels and preserved sf source fields for `NAME`/`AREA` tooltips.
+
+### What Worked
+- Treating pkgdown as a release surface, not disposable output, made stale docs and missing widget payloads visible as testable failures.
+- Artifact inspection was a strong complement to local docs validation because local `sf` remains broken while CI can render the spatial example.
+- User browser UAT found two publication-quality issues that static markers missed: linked Crosstalk behavior and sf tooltip source-field fidelity.
+
+### What Was Inefficient
+- Local `sf` cannot load because its GDAL dynamic library is missing, so CI artifacts had to carry the rendered sf proof.
+- The first closeout evidence was stale after follow-up Crosstalk and tooltip fixes, requiring a final ledger refresh before archive.
+- `gsd-sdk query milestone.complete` still misroutes arguments; the direct `gsd-tools.cjs` fallback remains necessary for archive creation.
+
+### Patterns Established
+- Pkgdown validation should check both source/generation freshness and actual widget payload/asset presence.
+- Publication evidence should include downloaded artifact inspection, not only local generated `docs/`.
+- Browser UAT should be used for interactive docs examples whose behavior cannot be proven by payload markers alone.
+
+### Key Lessons
+1. A rendered widget in pkgdown is not enough; linked-view examples need behavioral browser checks.
+2. Tooltip fields for sf layers must preserve source attributes separately from rendered aesthetics, especially when users request original field names.
+3. Optional dependency skips are acceptable locally only when CI artifact inspection proves the fully rendered path.
+
+### Cost Observations
+- Model mix: not tracked.
+- Sessions: one concentrated GSD run across Phase 56-58 execution, publication artifact inspection, user browser UAT, and closeout from 2026-05-31 to 2026-06-01.
+- Notable: Most rework came from publication-surface truthfulness and environment differences, not from the core validation architecture.
+
+---
+
 ## Milestone: v1.13 — Regression & Release Polish
 
 **Shipped:** 2026-05-31

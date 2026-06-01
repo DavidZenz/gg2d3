@@ -1,5 +1,33 @@
 # Milestones
 
+## v1.14 Pkgdown Site Verification (Shipped: 2026-06-01)
+
+**Delivered:** A truthful, validation-backed pkgdown/GitHub Pages publication surface for gg2d3’s current sf, widget, and Crosstalk support, including rendered artifact evidence and final sf tooltip source-field correction.
+
+**Phases completed:** 3 phases, 9 plans, 21 tasks
+
+**Key accomplishments:**
+
+- The main pkgdown article source now names the sf support contract and visibly classifies missing optional spatial dependencies.
+- Maintainers now have explicit docs and CI output separating pkgdown site evidence from browser visual smoke evidence.
+- The rebuilt pkgdown article, reference pages, NEWS page, and widget module assets now prove the current sf support contract and htmlwidget embedding.
+- The generated pkgdown validation gate and publication inspector check stale content, widget scaffolding/assets, sf outcomes, and Crosstalk rendering in local or downloaded site roots.
+- GitHub Actions pkgdown run `26750918812` passed for `c4a21e0`, uploaded `pkgdown-site-26750918812`, deployed GitHub Pages, and passed rendered sf plus rendered Crosstalk artifact inspection.
+- The pkgdown Crosstalk example now links both panels under brush selection, and `geom_sf()` tooltip rows preserve source `NAME` and numeric `AREA` alongside rendered fill colors.
+
+**Stats:**
+
+- 49 files changed across workflow, R/JS source, tests, vignettes, generated pkgdown docs, and planning evidence in the late milestone diff
+- 4,009 insertions / 422 deletions in the late milestone diff
+- 3 phases, 9 plans, 21 tasks
+- 2 days from first v1.14 phase context to archive
+
+**Git range:** `10e3a58` -> `c4a21e0`
+
+**Known deferred items at close:** No open artifact types. No formal `v1.14-MILESTONE-AUDIT.md` was present; closeout relied on the clear open-artifact audit, 9/9 complete requirements, phase verification ledgers, local/browser UAT, and rendered GitHub Actions artifact inspection. The only carried-forward risks are the local `sf`/GDAL dynamic-library skip and GitHub's non-blocking Node.js 20 deprecation advisory for `actions/upload-artifact@v4`.
+
+---
+
 ## v1.13 Regression & Release Polish (Shipped: 2026-05-31)
 
 **Phases completed:** 4 phases, 14 plans, 30 tasks

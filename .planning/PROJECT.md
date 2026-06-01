@@ -10,21 +10,24 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 ## Current State
 
-v1.14 Pkgdown Site Verification is active. v1.13 shipped and archived the source-first sf, geometry, browser visual smoke, and release-gate documentation, but follow-up inspection showed the generated local `docs/` pkgdown site is stale and does not yet expose the current sf functionality. The next work is to make the published pkgdown/GitHub Pages surface truthful, reproducible, and verifiable: rebuild/configure pkgdown so the sf support contract appears in the generated site, ensure representative gg2d3 htmlwidgets render in site articles, and add a site validation/deploy evidence gate alongside the existing browser visual smoke and package-check evidence.
+v1.14 Pkgdown Site Verification shipped on 2026-06-01. The generated local `docs/` site, GitHub Actions pkgdown artifact, and GitHub Pages deploy path now have repeatable validation for current sf/widget documentation, representative htmlwidget scaffolding/assets, rendered sf evidence when spatial dependencies are available, and linked Crosstalk examples. The final publication evidence includes pkgdown workflow run `26750918812` for `c4a21e0`, downloaded artifact inspection with `sf outcome: rendered` and `crosstalk outcome: rendered`, browser-observed linked Crosstalk behavior, and source-field preservation for `geom_sf()` tooltips (`NAME` and numeric `AREA` separate from rendered fill colors).
 
-## Current Milestone
+## Planning State
 
-### v1.14 Pkgdown Site Verification
+No active milestone is defined. The next step is `$gsd-new-milestone` to define fresh requirements and phases.
+
+## Last Shipped Milestone: v1.14 Pkgdown Site Verification
 
 **Goal:** Make the generated and published pkgdown site reflect the current gg2d3 sf/widget support contract, with repeatable evidence that site articles render representative widgets and do not silently go stale after source documentation changes.
 
-**Target outcomes:**
+**Shipped features:**
 - Generated `docs/` and the GitHub Pages/pkgdown artifact include the current sf article content, NEWS/help updates, and support-contract language from source documentation.
-- Representative pkgdown article widgets render as htmlwidgets, including the `geom_sf()` example when `sf` and `geojsonsf` are available.
+- Representative pkgdown article widgets render as htmlwidgets, including the `geom_sf()` example when `sf` and `geojsonsf` are available and rendered linked Crosstalk examples.
 - Optional spatial dependency behavior is explicit: the sf article chunk renders in the website build when dependencies are installed, or reports a visible, classified skip instead of disappearing silently.
-- A repeatable local/CI validation gate checks generated-site freshness, htmlwidget scaffolding/assets, sf content presence, and deploy artifact evidence.
+- A repeatable local/CI validation gate checks generated-site freshness, htmlwidget scaffolding/assets, sf content presence, Crosstalk payload/assets, and deploy artifact evidence.
+- Final follow-up fixes ensure generated Crosstalk examples link under brush selection and sf tooltips show source fields rather than rendered aesthetic values.
 
-## Last Shipped Milestone: v1.13 Regression & Release Polish
+## Previous Shipped Milestone: v1.13 Regression & Release Polish
 
 **Goal:** Turn the new validation and architecture foundations into release-ready regression confidence while closing the next practical geometry polish gaps.
 
@@ -147,12 +150,16 @@ v1.14 Pkgdown Site Verification is active. v1.13 shipped and archived the source
 - ✓ Renderer contract source validation and selected IR helper-boundary consolidation for modules, load order, render/update/interaction selectors, public payload sanitization, theme extraction, and geom parameter routing — v1.13 Phase 53
 - ✓ Geometry polish closure for bounded ordinary `geom_label()` boxes and text placement fields, ordinary polygon topology non-goal fixtures, transformed rect/tile finite-bound filtering, and source-first diagnostics/README alignment — v1.13 Phase 54
 - ✓ Release-facing documentation and generated help alignment, repeatable release-readiness gate evidence, v1.13 NEWS, and final requirement validation map — v1.13 Phase 55
+- ✓ Pkgdown source and generated site content describe the same current sf/widget support contract — v1.14 Phase 56
+- ✓ Pkgdown article builds render representative `gg2d3` htmlwidgets, with sf examples rendered in CI artifacts or visibly classified when optional spatial dependencies are unavailable — v1.14 Phase 56
+- ✓ Generated-site validation detects stale content, missing sf support text, missing htmlwidget outputs, and missing widget dependencies/assets — v1.14 Phase 57
+- ✓ GitHub Pages/pkgdown artifacts can be downloaded and inspected for current sf/widget evidence — v1.14 Phase 58
+- ✓ Release-readiness evidence includes pkgdown source/build/deploy validation alongside package tests, generated help, browser visual smoke, and package check outcomes — v1.14 Phase 58
+- ✓ Pkgdown linked Crosstalk examples render and link under brush selection, and sf tooltip rows preserve source `NAME`/`AREA` fields separately from rendered aesthetics — v1.14 closeout
 
 ### Active
 
-- Pkgdown source and generated site content must describe the same current sf/widget support contract.
-- Pkgdown article builds must render representative `gg2d3` htmlwidgets, with sf examples rendered or visibly classified based on optional spatial dependencies.
-- Generated-site and GitHub Pages/deploy evidence must be repeatably checkable so stale `docs/` output does not masquerade as release-ready documentation.
+- None yet. Next milestone requirements should be defined with `$gsd-new-milestone`.
 
 ### Out of Scope
 
@@ -166,7 +173,7 @@ v1.14 Pkgdown Site Verification is active. v1.13 shipped and archived the source
 
 ## Context
 
-gg2d3 has a mature three-layer pipeline (R → IR → D3), production polygon/point/line-family `geom_sf()` support, ordinary polygon rendering, bounded ordinary `geom_label()` boxes, sf text/label annotations, deterministic opt-in and CI-ready browser visual smoke artifacts, and architecture hardening around high-risk IR and renderer/interactivity boundaries. R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, D3 renders SVG through a registry-based geom dispatch system, and htmlwidgets bridges the browser output. The package supports 25 non-sf geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, non-Cartesian coordinates, a composable pipe-based interactivity API, and polygon-first sf rendering with tooltip, hover, handler, centroid brush, stacked-layer alignment, and faceted panel projection behavior.
+gg2d3 has a mature three-layer pipeline (R → IR → D3), production polygon/point/line-family `geom_sf()` support, ordinary polygon rendering, bounded ordinary `geom_label()` boxes, sf text/label annotations, deterministic opt-in and CI-ready browser visual smoke artifacts, generated/pkgdown publication validation, and architecture hardening around high-risk IR and renderer/interactivity boundaries. R extracts ggplot2 objects via `ggplot_build()` into a JSON intermediate representation, D3 renders SVG through a registry-based geom dispatch system, and htmlwidgets bridges the browser output. The package supports 25 non-sf geom types, full scale system (continuous, discrete, log, sqrt, reverse, date/time), layout engine with legend and facet support, non-Cartesian coordinates, a composable pipe-based interactivity API, linked Crosstalk views, and polygon-first sf rendering with tooltip, hover, handler, centroid brush, stacked-layer alignment, and faceted panel projection behavior.
 
 **Known tech debt:**
 - `as_d3_ir()` now has focused helper boundaries, but broader modularization beyond the high-risk helper slices remains future work.
@@ -174,7 +181,8 @@ gg2d3 has a mature three-layer pipeline (R → IR → D3), production polygon/po
 - Transform-scale rect/tile edge parity remains classified at the shared scale factory / axis semantics boundary; Phase 54 added finite scaled-bound filtering and stronger log/sqrt/reverse evidence without a broad scale rewrite.
 - Polygon topology/hole repair beyond grouped closed paths, ggrepel-style collision avoidance, rich text labels, and path-following text remain future geometry candidates.
 - Browser visual smoke has deterministic local artifacts and explicit skips; live Chrome execution still depends on optional local browser dependencies.
-- The local generated pkgdown site under `docs/` can become stale relative to source vignettes, README, help, and NEWS; v1.14 should close this publication-surface gap.
+- Local `sf` is installed but not loadable on this machine because its GDAL dynamic library is unavailable; local pkgdown validation classifies sf as skipped while CI artifacts prove rendered sf output.
+- GitHub Actions reports a non-blocking Node.js 20 deprecation advisory for `actions/upload-artifact@v4`.
 
 ## Constraints
 
@@ -231,7 +239,10 @@ gg2d3 has a mature three-layer pipeline (R → IR → D3), production polygon/po
 | bounded ordinary label support | `geom_label()` should ship only the ordinary SVG box/text path with small placement fields, while collision avoidance, rich text, and path-following placement remain explicit non-goals | ✓ Good — implemented and verified in Phase 54 |
 | ordinary polygon topology boundary | Ordinary `geom_polygon()` subgroup/hole behavior should remain fixture-backed and documented as a non-goal unless gg2d3 adds bounded compound-path topology support | ✓ Good — verified in Phase 54 |
 | passed-with-notes release gate | Release readiness can pass with classified non-blocking package-check NOTEs only when final package checks have no ERROR or WARNING outcomes and browser confidence is covered by accepted skip/fallback artifact evidence | ✓ Good — implemented and verified in Phase 55 |
-| published site as release surface | Source-first docs are not enough once pkgdown/GitHub Pages is the public package surface; generated site freshness, widget rendering, sf optional dependency behavior, and deploy artifacts need their own validation gate | Active — v1.14 will implement and verify |
+| published site as release surface | Source-first docs are not enough once pkgdown/GitHub Pages is the public package surface; generated site freshness, widget rendering, sf optional dependency behavior, and deploy artifacts need their own validation gate | ✓ Good — implemented and verified in v1.14 |
+| publication artifact before deploy | The pkgdown workflow should upload a validation-backed site artifact before Pages deploy so release evidence can inspect the exact generated site payload | ✓ Good — implemented and verified in Phase 58 |
+| pkgdown crosstalk behavioral UAT | Rendered Crosstalk widgets in documentation need browser-observed linked selection checks, because payload markers alone do not prove panel-to-panel behavior | ✓ Good — closeout fix and verification in v1.14 |
+| sf tooltip source fields | sf rows must preserve non-geometry source fields separately from rendered aesthetics so tooltip requests like `NAME` and `AREA` show source data rather than `undefined` or hex colors | ✓ Good — closeout fix and artifact verification in v1.14 |
 
 ## Evolution
 
@@ -251,4 +262,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-31 after starting v1.14 Pkgdown Site Verification*
+*Last updated: 2026-06-01 after completing v1.14 Pkgdown Site Verification*

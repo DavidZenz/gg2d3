@@ -2,7 +2,7 @@
 
 ## Milestones
 
-- ✅ **v1.14 Pkgdown Site Verification** — Phases 56-58 (ready to archive)
+- ✅ **v1.14 Pkgdown Site Verification** — Phases 56-58 (shipped 2026-06-01)
 - ✅ **v1.13 Regression & Release Polish** — Phases 52-55 (shipped 2026-05-31)
 - ✅ **v1.12 Quality & Architecture Hardening** — Phases 48-51 (shipped 2026-05-27)
 - ✅ **v1.11 Geometry Parity** — Phases 44-47 (shipped 2026-05-25)
@@ -13,88 +13,16 @@
 - ✅ **Distribution: pkgdown and GH Pages Publishing** — Phase 31 (shipped 2026-05-17)
 - ✅ **v1.0-v1.6 Previous Milestones** — Phases 1-26 (shipped 2026-02-16 to 2026-04-04)
 
-## Active Milestone
-
-### ✅ v1.14 Pkgdown Site Verification
-
-**Milestone Goal:** Make the generated and published pkgdown site reflect the current gg2d3 sf/widget support contract, with repeatable evidence that site articles render representative widgets and do not silently go stale after source documentation changes.
-
-**Requirements:** 9 total, 9 mapped
-**Phases:** 3
-**Starting phase:** 56
-
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (56, 57, 58): Planned milestone work
-- Decimal phases (56.1, 56.2): Urgent insertions, if needed
+<details>
+<summary>✅ v1.14 Pkgdown Site Verification (Phases 56-58) — SHIPPED 2026-06-01</summary>
 
-- [x] **Phase 56: Pkgdown Content And Widget Build Contract** - Generated pkgdown content and build configuration expose the current sf/widget support contract with representative rendered widgets.
-- [x] **Phase 57: Generated Site Validation Gate** - A repeatable validation command detects stale generated-site content, missing sf sections, missing widget scaffolding, and missing widget assets.
-- [x] **Phase 58: Publication Evidence And Release Handoff** - GitHub Pages/pkgdown artifacts are inspectable, current, and folded into the release-readiness evidence path.
+See `.planning/milestones/v1.14-ROADMAP.md`, `.planning/milestones/v1.14-REQUIREMENTS.md`, and `.planning/milestones/v1.14-phases/` for full details.
 
-## Phase Details
+Delivered generated/pkgdown site freshness checks, representative widget scaffolding and asset validation, rendered sf and rendered Crosstalk artifact inspection, GitHub Pages publication evidence, linked Crosstalk browser UAT, and final sf tooltip source-field preservation.
 
-### Phase 56: Pkgdown Content And Widget Build Contract
-
-**Goal**: Generated pkgdown content and build configuration expose the current sf/widget support contract with representative rendered widgets.
-**Depends on**: v1.13 archive
-**Requirements**: DOCS-01, DOCS-02, DOCS-03, BUILD-01, BUILD-02, BUILD-03
-**Success Criteria** (what must be TRUE):
-  1. Source vignette, README, roxygen/generated help, NEWS, and generated pkgdown article/reference pages describe the same current sf/widget support contract.
-  2. Local pkgdown build produces generated article pages with `gg2d3` htmlwidget scaffolding and dependencies for representative examples.
-  3. The sf article chunk renders when `sf` and `geojsonsf` are available, or emits an explicit classified skip/failure that maintainers can see.
-  4. Documentation explains which artifacts are source docs, generated `docs/`, GitHub Pages output, and browser visual smoke reports.
-**Plans**: 3 plans
-Plans:
-- [x] 56-01-PLAN.md — Make sf article optional-dependency classification visible and create focused pkgdown marker tests.
-- [x] 56-02-PLAN.md — Document artifact taxonomy and add visible website dependency evidence to the pkgdown workflow.
-- [x] 56-03-PLAN.md — Regenerate README/help/pkgdown outputs and record final Phase 56 validation evidence.
-
-### Phase 57: Generated Site Validation Gate
-
-**Goal**: A repeatable validation command detects stale generated-site content, missing sf sections, missing widget scaffolding, and missing widget assets.
-**Depends on**: Phase 56
-**Requirements**: SITE-01
-**Success Criteria** (what must be TRUE):
-  1. A local or CI-suitable validation command checks generated pkgdown pages for current support-contract text, sf content, widget containers, and widget dependency assets.
-  2. The validation gate fails with actionable messages when `docs/` is stale relative to source docs or when representative widget output is missing.
-  3. Optional spatial dependency outcomes are classified separately from true site-generation failures.
-  4. Maintainer diagnostics document how to run, interpret, and repair the generated-site validation gate.
-**Plans**: 3 plans
-Plans:
-- [x] 57-01-PLAN.md — Extract the generated-site validation core into reusable helper functions and keep focused testthat checks canonical.
-- [x] 57-02-PLAN.md — Add the maintainer/CI validation command and run it after pkgdown build before deploy.
-- [x] 57-03-PLAN.md — Document the gate and record final SITE-01 validation evidence.
-
-### Phase 58: Publication Evidence And Release Handoff
-
-**Goal**: GitHub Pages/pkgdown artifacts are inspectable, current, and folded into the release-readiness evidence path.
-**Depends on**: Phase 57
-**Requirements**: SITE-02, SITE-03
-**Success Criteria** (what must be TRUE):
-  1. The pkgdown/GitHub Pages workflow can be triggered or inspected and its artifact/deployed output can be downloaded or checked for current sf/widget evidence.
-  2. Release-readiness evidence records pkgdown source/build/deploy validation alongside tests, generated help, browser visual smoke, optional skips, and package check outcomes.
-  3. NEWS or maintainer handoff notes describe the v1.14 publication-surface fix without implying new rendering support.
-  4. Final validation maps every v1.14 requirement to source, generated site, workflow/artifact evidence, and residual-risk handoff.
-**Plans**: 3 plans
-Plans:
-- [x] 58-01-PLAN.md - Make pkgdown workflow output downloadable and add publication-root inspection.
-- [x] 58-02-PLAN.md - Document publication artifact inspection and release messaging boundaries.
-- [x] 58-03-PLAN.md - Record final publication evidence and close release-readiness handoff.
-
-## Progress
-
-**Execution Order:**
-Phases execute in numeric order: 56 → 57 → 58
-
-| Phase | Requirements | Plans Complete | Status | Completed |
-|-------|--------------|----------------|--------|-----------|
-| 56. Pkgdown Content And Widget Build Contract | DOCS-01, DOCS-02, DOCS-03, BUILD-01, BUILD-02, BUILD-03 | 3/3 | Complete | 2026-05-31 |
-| 57. Generated Site Validation Gate | SITE-01 | 3/3 | Complete | 2026-06-01 |
-| 58. Publication Evidence And Release Handoff | SITE-02, SITE-03 | 3/3 | Complete | 2026-06-01 |
-
-## Archived Milestones
+</details>
 
 <details>
 <summary>✅ v1.13 Regression & Release Polish (Phases 52-55) — SHIPPED 2026-05-31</summary>
@@ -139,5 +67,15 @@ See `.planning/MILESTONES.md` and `.planning/milestones/` for full details.
 
 </details>
 
+## Progress
+
+No active milestone is currently planned. Start the next milestone with `$gsd-new-milestone`.
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 56. Pkgdown Content And Widget Build Contract | v1.14 | 3/3 | Complete | 2026-05-31 |
+| 57. Generated Site Validation Gate | v1.14 | 3/3 | Complete | 2026-06-01 |
+| 58. Publication Evidence And Release Handoff | v1.14 | 3/3 | Complete | 2026-06-01 |
+
 ---
-*Roadmap updated: 2026-06-01 after completing Phase 58 publication evidence*
+*Roadmap updated: 2026-06-01 after archiving v1.14 Pkgdown Site Verification*

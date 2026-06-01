@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.14
 milestone_name: Pkgdown Site Verification
-status: ready_to_complete_milestone
-stopped_at: Phase 58 complete; v1.14 ready to archive
-last_updated: "2026-06-01T09:30:00.000Z"
-last_activity: 2026-06-01 -- Phase 58 publication artifact/deploy evidence passed
+status: completed
+stopped_at: v1.14 archived; ready for new milestone planning
+last_updated: "2026-06-01T11:16:24.917Z"
+last_activity: 2026-06-01
 progress:
   total_phases: 3
   completed_phases: 3
@@ -18,17 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-31)
+See: .planning/PROJECT.md (updated 2026-06-01)
 
 **Core value:** Any ggplot2 plot should render identically in D3 -- same visual output, but now interactive and web-native.
-**Current focus:** Phase 58 — Publication Evidence And Release Handoff
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 58 (Publication Evidence And Release Handoff) — COMPLETE
-Plan: 3 of 3 plans complete
-Status: v1.14 ready to complete — publication artifact and deploy evidence passed for pkgdown run 26746146558
-Last activity: 2026-06-01 -- Phase 58 publication artifact/deploy evidence passed
+Phase: none — v1.14 archived
+Plan: next milestone not started
+Status: v1.14 Pkgdown Site Verification milestone complete
+Last activity: 2026-06-01
 
 Progress: [██████████] 100%
 
@@ -63,7 +63,7 @@ Recent decisions affecting current work:
 - Source-first documentation remains the authoring model, but generated `docs/` and GitHub Pages output must be validated against source docs before release claims are considered complete.
 - `sf` and `geojsonsf` remain optional package dependencies; pkgdown should render sf examples when website dependencies are available and classify any skip/failure visibly.
 - Browser visual smoke artifacts and pkgdown site artifacts serve different purposes: smoke reports validate representative rendering behavior, while pkgdown validates public documentation and embedded widget rendering.
-- Phase 58 added a validation-backed pkgdown site workflow artifact, a publication-root inspector, maintainer `gh`/manual fallback documentation, and final release-readiness evidence.
+- Phase 58 added a validation-backed pkgdown site workflow artifact, a publication-root inspector, maintainer `gh`/manual fallback documentation, evaluated linked Crosstalk examples, sf tooltip source-field preservation, and final release-readiness evidence.
 
 ### Pending Todos
 
@@ -81,25 +81,26 @@ Items acknowledged and carried forward from previous milestone close:
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
 | Website | Generated pkgdown site does not yet reflect current sf functionality and source documentation | Completed in Phase 56 | v1.13 closeout |
-| Website | Verify whether pkgdown renders representative `gg2d3` widgets and sf chunks in the published site/artifact | Completed in Phase 58 with run 26746146558 artifact inspection | v1.13 closeout |
+| Website | Verify whether pkgdown renders representative `gg2d3` widgets and sf chunks in the published site/artifact | Completed in Phase 58 with run 26750918812 artifact inspection | v1.13 closeout |
 | UAT | Phase 52 52-HUMAN-UAT.md | Acknowledged at close; status passed with 0 pending scenarios | v1.13 |
 
 ## Session Continuity
 
-Last session: 2026-06-01 -- Phase 58 publication artifact/deploy evidence passed
-Stopped at: Phase 58 complete; v1.14 ready to archive
-Resume file: .planning/phases/58-publication-evidence-and-release-handoff/58-VERIFICATION.md
+Last session: 2026-06-01 -- v1.14 archived after final pkgdown Crosstalk and sf tooltip artifact evidence
+Stopped at: v1.14 complete; ready to start next milestone
+Resume file: .planning/milestones/v1.14-phases/58-publication-evidence-and-release-handoff/58-VERIFICATION.md
 
-**Next Step:** `$gsd-complete-milestone`
+**Next Step:** `$gsd-new-milestone`
 
 **Completed Milestone:** v1.13 Regression & Release Polish -- 2026-05-31
+**Completed Milestone:** v1.14 Pkgdown Site Verification -- 2026-06-01
 
 **Started Milestone:** v1.14 Pkgdown Site Verification -- 2026-05-31
 
 **Planned Milestone:** v1.14 Pkgdown Site Verification -- 3 phases -- 2026-05-31
 
 **Completed Plan:** 58-03 (publication evidence and release-readiness handoff) — 2026-06-01T09:30:00Z
-**Remote Evidence:** pkgdown workflow run 26746146558 passed for `d5f77c6`; artifact `pkgdown-site-26746146558` inspected with `sf outcome: rendered`; `gh-pages` deployed at `f19ac66` — 2026-06-01T09:21:44Z
+**Remote Evidence:** pkgdown workflow run 26750918812 passed for `c4a21e0`; artifact `pkgdown-site-26750918812` inspected with `sf outcome: rendered` and `crosstalk outcome: rendered`; sf tooltip payload preserved source `NAME`/`AREA`; GitHub Pages deploy completed — 2026-06-01T11:05:55Z
 **Completed Phase:** 58 (Publication Evidence And Release Handoff) — 3/3 plans — 2026-06-01T09:30:00Z
 **Completed Plan:** 58-02 (publication inspection docs) — 2026-06-01T08:26:23Z
 **Completed Plan:** 58-01 (publication artifact inspection) — 2026-06-01T08:23:26Z
