@@ -1,4 +1,5 @@
 test_that("source pkgdown article exposes the sf support and skip contract", {
+  pkgdown_site_skip_if_source_docs_unavailable()
   pkgdown_site_validate_source_contract()
 })
 

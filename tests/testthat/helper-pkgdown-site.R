@@ -63,6 +63,13 @@ pkgdown_site_skip_if_generated_docs_unavailable <- function(root = ".") {
   )
 }
 
+pkgdown_site_skip_if_source_docs_unavailable <- function(root = ".") {
+  testthat::skip_if_not(
+    pkgdown_site_has_path("vignettes/gg2d3.Rmd", root = root),
+    "source docs are not available"
+  )
+}
+
 pkgdown_site_read_text <- function(path, root = ".", site_root = NULL) {
   resolved <- pkgdown_site_resolve_path(path, root = root, site_root = site_root)
   paste(readLines(resolved, warn = FALSE), collapse = "\n")
