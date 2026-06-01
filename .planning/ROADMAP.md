@@ -77,7 +77,11 @@ Plans:
   2. Release-readiness evidence records pkgdown source/build/deploy validation alongside tests, generated help, browser visual smoke, optional skips, and package check outcomes.
   3. NEWS or maintainer handoff notes describe the v1.14 publication-surface fix without implying new rendering support.
   4. Final validation maps every v1.14 requirement to source, generated site, workflow/artifact evidence, and residual-risk handoff.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 58-01-PLAN.md - Make pkgdown workflow output downloadable and add publication-root inspection.
+- [ ] 58-02-PLAN.md - Document publication artifact inspection and release messaging boundaries.
+- [ ] 58-03-PLAN.md - Record final publication evidence and close release-readiness handoff.
 
 ## Progress
 
@@ -88,7 +92,7 @@ Phases execute in numeric order: 56 → 57 → 58
 |-------|--------------|----------------|--------|-----------|
 | 56. Pkgdown Content And Widget Build Contract | DOCS-01, DOCS-02, DOCS-03, BUILD-01, BUILD-02, BUILD-03 | 3/3 | Complete | 2026-05-31 |
 | 57. Generated Site Validation Gate | SITE-01 | 3/3 | Complete | 2026-06-01 |
-| 58. Publication Evidence And Release Handoff | SITE-02, SITE-03 | 0/0 | Not started | - |
+| 58. Publication Evidence And Release Handoff | SITE-02, SITE-03 | 0/3 | Planned | - |
 
 ## Archived Milestones
 
