@@ -208,24 +208,52 @@ brushing across multiple widgets. Wrap your data frame in
 shared data to each widget. Brushing in one widget automatically
 cross-highlights the corresponding observations in all linked widgets.
 
-```{r, eval = FALSE}
-library(crosstalk)
+```{r}
+has_crosstalk <- requireNamespace("crosstalk", quietly = TRUE)
+has_htmltools <- requireNamespace("htmltools", quietly = TRUE)
 
-# Wrap dataset in SharedData — both plots share the same group
-shared_iris <- SharedData$new(iris)
+if (!has_crosstalk || !has_htmltools) {
+  missing_crosstalk_packages <- c(
+    if (!has_crosstalk) "crosstalk",
+    if (!has_htmltools) "htmltools"
+  )
+  cat(
+    "PKGDOWN_CROSSTALK_OPTIONAL_SKIP: linked-view example not rendered; missing ",
+    paste(missing_crosstalk_packages, collapse = ", "),
+    ".\n",
+    sep = ""
+  )
+} else {
+  # Wrap dataset in SharedData; both plots share explicit stable keys/group.
+  shared_iris <- crosstalk::SharedData$new(
+    iris,
+    key = rownames(iris),
+    group = "pkgdown_crosstalk_iris"
+  )
 
-p1 <- ggplot(shared_iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
-  geom_point(size = 2)
+  p1 <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
+    geom_point(size = 2)
+  p1$data <- shared_iris
 
-p2 <- ggplot(shared_iris, aes(Petal.Length, Petal.Width, color = Species)) +
-  geom_point(size = 2)
+  p2 <- ggplot(iris, aes(Petal.Length, Petal.Width, color = Species)) +
+    geom_point(size = 2)
+  p2$data <- shared_iris
 
-# Each widget gets its own brush; brushing either highlights both
-w1 <- gg2d3(p1) |> d3_tooltip() |> d3_brush()
-w2 <- gg2d3(p2) |> d3_tooltip() |> d3_brush()
+  w1 <- gg2d3(p1) |> d3_tooltip() |> d3_brush()
+  w2 <- gg2d3(p2) |> d3_tooltip() |> d3_brush()
 
-# Display side by side in R Markdown or Shiny
-htmltools::browsable(htmltools::tagList(w1, w2))
+  htmltools::tagList(
+    htmltools::div(
+      style = paste(
+        "display: grid;",
+        "grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));",
+        "gap: 1rem;"
+      ),
+      w1,
+      w2
+    )
+  )
+}
 ```
 
 Crosstalk behavior:

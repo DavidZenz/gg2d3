@@ -35,7 +35,7 @@ jobs:
 
       - name: Verify website dependencies
         run: |
-          required <- c("pkgdown", "rmarkdown", "knitr", "htmlwidgets")
+          required <- c("pkgdown", "rmarkdown", "knitr", "htmlwidgets", "htmltools", "crosstalk")
           optional_spatial <- c("sf", "geojsonsf")
           packages <- c(required, optional_spatial)
 

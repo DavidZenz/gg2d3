@@ -78,6 +78,37 @@ test_that("Crosstalk dependencies attached", {
   expect_true("crosstalk" %in% dep_names)
 })
 
+test_that("brush selections publish crosstalk keys", {
+  brush_js <- paste(
+    readLines(test_path("../../inst/htmlwidgets/modules/brush.js"), warn = FALSE),
+    collapse = "\n"
+  )
+
+  expect_match(brush_js, "syncCrosstalkSelection\\(containerEl, panelGroup, pixelRect\\)")
+  expect_match(brush_js, "collectSelectedCrosstalkKeys")
+  expect_match(brush_js, "window\\.gg2d3\\.crosstalk\\.selectByKeys\\(containerEl, selectedKeys\\)")
+  expect_match(brush_js, "clearCrosstalkSelection\\(containerEl\\)")
+})
+
+test_that("renderer initializes crosstalk through module availability guard", {
+  binding_js <- paste(
+    readLines(test_path("../../inst/htmlwidgets/gg2d3.js"), warn = FALSE),
+    collapse = "\n"
+  )
+  crosstalk_js <- paste(
+    readLines(test_path("../../inst/htmlwidgets/modules/crosstalk.js"), warn = FALSE),
+    collapse = "\n"
+  )
+
+  expect_match(binding_js, "window\\.gg2d3\\.crosstalk\\.isAvailable\\(\\)")
+  expect_match(binding_js, "window\\.gg2d3\\.crosstalk\\.bind\\(el, x\\.crosstalk_key, x\\.crosstalk_group\\)")
+  expect_match(crosstalk_js, "function getCrosstalkLib\\(\\)")
+  expect_match(crosstalk_js, "function applyLocalGroupSelection\\(crosstalkGroup, selectedKeys\\)")
+  expect_match(crosstalk_js, "globalThis\\.crosstalk")
+  expect_match(crosstalk_js, "new crosstalkLib\\.SelectionHandle\\(crosstalkGroup\\)")
+  expect_match(crosstalk_js, "data-gg2d3-crosstalk-group")
+})
+
 test_that("Regular plots have no crosstalk dependencies", {
   library(ggplot2)
 

@@ -233,7 +233,10 @@ if (length(missing_sf_packages) > 0) {
     geom_sf(color = "white", linewidth = 0.2) +
     scale_fill_gradient(low = "#eff3ff", high = "#08519c") +
     labs(fill = "Area")) |>
-    gg2d3()
+    gg2d3() |>
+    d3_tooltip(fields = c("NAME", "AREA")) |>
+    d3_hover(opacity = 0.35, stroke = "#111827", stroke_width = 1.5) |>
+    d3_brush(fill = "#f59e0b", opacity = 0.2)
 }
 ```
 
@@ -558,20 +561,51 @@ gg2d3 supports [crosstalk](https://rstudio.github.io/crosstalk/) for
 linking multiple widgets. Brushing in one widget highlights the same
 observations in all linked widgets.
 
-```{r, eval = FALSE}
-library(crosstalk)
+```{r}
+has_crosstalk <- requireNamespace("crosstalk", quietly = TRUE)
+has_htmltools <- requireNamespace("htmltools", quietly = TRUE)
 
-shared <- SharedData$new(iris)
+if (!has_crosstalk || !has_htmltools) {
+  missing_crosstalk_packages <- c(
+    if (!has_crosstalk) "crosstalk",
+    if (!has_htmltools) "htmltools"
+  )
+  cat(
+    "PKGDOWN_CROSSTALK_OPTIONAL_SKIP: linked-view example not rendered; missing ",
+    paste(missing_crosstalk_packages, collapse = ", "),
+    ".\n",
+    sep = ""
+  )
+} else {
+  shared <- crosstalk::SharedData$new(
+    iris,
+    key = rownames(iris),
+    group = "pkgdown_crosstalk_iris"
+  )
 
-p1 <- ggplot(shared, aes(Sepal.Length, Sepal.Width, color = Species)) +
-  geom_point()
+  p1 <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
+    geom_point(size = 2)
+  p1$data <- shared
 
-p2 <- ggplot(shared, aes(Petal.Length, Petal.Width, color = Species)) +
-  geom_point()
+  p2 <- ggplot(iris, aes(Petal.Length, Petal.Width, color = Species)) +
+    geom_point(size = 2)
+  p2$data <- shared
 
-# Display side by side (e.g. in R Markdown or Shiny)
-w1 <- gg2d3(p1) |> d3_tooltip() |> d3_brush()
-w2 <- gg2d3(p2) |> d3_tooltip() |> d3_brush()
+  w1 <- gg2d3(p1) |> d3_tooltip() |> d3_brush()
+  w2 <- gg2d3(p2) |> d3_tooltip() |> d3_brush()
+
+  htmltools::tagList(
+    htmltools::div(
+      style = paste(
+        "display: grid;",
+        "grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));",
+        "gap: 1rem;"
+      ),
+      w1,
+      w2
+    )
+  )
+}
 ```
 
 Crosstalk works in static HTML documents — no Shiny server required.

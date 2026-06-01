@@ -202,9 +202,85 @@
   function updateGeoms(container, xScale, yScale, options) {
     const flip = !!options.flip;
     const t = options.transition || d3.transition().duration(0);
+    const val = window.gg2d3.helpers.val;
+    const num = window.gg2d3.helpers.num;
 
     const xScaleFunc = flip ? yScale : xScale;
     const yScaleFunc = flip ? xScale : yScale;
+    const isXBand = typeof xScale.bandwidth === "function";
+    const isYBand = typeof yScale.bandwidth === "function";
+
+    function bandValue(d, centerKey, boundKey) {
+      const center = val(d && d[centerKey]);
+      if (center !== null && center !== undefined) return center;
+      return val(d && d[boundKey]);
+    }
+
+    function scalePos(scale, v) {
+      return typeof scale.bandwidth === "function" ? scale(v) + scale.bandwidth() / 2 : scale(v);
+    }
+
+    function textX(d) {
+      return flip ? scalePos(yScale, d.y) : scalePos(xScale, d.x);
+    }
+
+    function textY(d) {
+      return flip ? scalePos(xScale, d.x) : scalePos(yScale, d.y);
+    }
+
+    function textRotation(d, x, y) {
+      const angle = num(d && d.angle);
+      if (!Number.isFinite(angle) || angle === 0) return null;
+      return 'rotate(' + angle + ' ' + x + ' ' + y + ')';
+    }
+
+    function labelTransform(d) {
+      const x = textX(d);
+      const y = textY(d);
+      const angle = num(d && d.angle);
+      const rotate = Number.isFinite(angle) && angle !== 0 ? ' rotate(' + angle + ')' : '';
+      return 'translate(' + x + ',' + y + ')' + rotate;
+    }
+
+    function rectX(d) {
+      if (isXBand) return xScale(bandValue(d, 'x', 'xmin'));
+      return Math.min(xScale(num(d.xmin)), xScale(num(d.xmax)));
+    }
+
+    function rectY(d) {
+      if (isYBand) return yScale(bandValue(d, 'y', 'ymin'));
+      return Math.min(yScale(num(d.ymin)), yScale(num(d.ymax)));
+    }
+
+    function rectWidth(d) {
+      if (isXBand) return xScale.bandwidth();
+      return Math.abs(xScale(num(d.xmax)) - xScale(num(d.xmin)));
+    }
+
+    function rectHeight(d) {
+      if (isYBand) return yScale.bandwidth();
+      return Math.abs(yScale(num(d.ymax)) - yScale(num(d.ymin)));
+    }
+
+    function flippedRectX(d) {
+      if (isYBand) return yScale(bandValue(d, 'y', 'ymin'));
+      return Math.min(yScale(num(d.ymin)), yScale(num(d.ymax)));
+    }
+
+    function flippedRectY(d) {
+      if (isXBand) return xScale(bandValue(d, 'x', 'xmin'));
+      return Math.min(xScale(num(d.xmin)), xScale(num(d.xmax)));
+    }
+
+    function flippedRectWidth(d) {
+      if (isYBand) return yScale.bandwidth();
+      return Math.abs(yScale(num(d.ymax)) - yScale(num(d.ymin)));
+    }
+
+    function flippedRectHeight(d) {
+      if (isXBand) return xScale.bandwidth();
+      return Math.abs(xScale(num(d.xmax)) - xScale(num(d.xmin)));
+    }
 
     // geom_point
     container.selectAll('circle.geom-point')
@@ -243,16 +319,36 @@
     // geom_rect / geom_tile
     container.selectAll('rect.geom-rect')
       .transition(t)
-      .attr('x', d => Math.min(xScaleFunc(d.xmin), xScaleFunc(d.xmax)))
-      .attr('y', d => Math.min(yScaleFunc(d.ymin), yScaleFunc(d.ymax)))
-      .attr('width', d => Math.abs(xScaleFunc(d.xmax) - xScaleFunc(d.xmin)))
-      .attr('height', d => Math.abs(yScaleFunc(d.ymax) - yScaleFunc(d.ymin)));
+      .attr('x', d => {
+        if (flip) return flippedRectX(d);
+        return rectX(d);
+      })
+      .attr('y', d => {
+        if (flip) return flippedRectY(d);
+        return rectY(d);
+      })
+      .attr('width', d => {
+        if (flip) return flippedRectWidth(d);
+        return rectWidth(d);
+      })
+      .attr('height', d => {
+        if (flip) return flippedRectHeight(d);
+        return rectHeight(d);
+      });
 
     // geom_text
     container.selectAll('text.geom-text')
       .transition(t)
-      .attr('x', d => xScaleFunc(d.x))
-      .attr('y', d => yScaleFunc(d.y));
+      .attr('x', textX)
+      .attr('y', textY)
+      .attr('transform', d => textRotation(d, textX(d), textY(d)));
+
+    // geom_label
+    container.selectAll('g.geom-label')
+      .transition(t)
+      .attr('transform', labelTransform)
+      .attr('data-cx', textX)
+      .attr('data-cy', textY);
 
     // geom_segment
     container.selectAll('line.geom-segment')
@@ -280,6 +376,16 @@
     container.selectAll('path.geom-line, path.geom-path, path.geom-smooth, path.geom-density-outline')
       .transition(t)
       .attr('d', d => line(d));
+
+    // Closed path geoms (polygon)
+    const closedLine = d3.line()
+      .curve(d3.curveLinearClosed)
+      .x(pt => xScaleFunc(pt.x))
+      .y(pt => yScaleFunc(pt.y));
+
+    container.selectAll('path.geom-polygon')
+      .transition(t)
+      .attr('d', d => closedLine(d && d._polygonPoints ? d._polygonPoints : []));
 
     // geom_area & geom_density
     // ggplot2 density uses ymin for stacking, else it fills to baseline (usually 0)

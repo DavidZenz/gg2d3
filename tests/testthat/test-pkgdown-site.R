@@ -59,7 +59,13 @@ test_that("publication site-root paths take precedence over local docs", {
     file.path(root, "docs", "articles", "gg2d3.md")
   )
   writeLines(
-    c("sf family maps with", '<script>{"layers":[{"geom":"sf"}]}</script>'),
+    c(
+      "sf family maps with",
+      paste0(
+        '<script>{"layers":[{"geom":"sf","sf_family":"polygon",',
+        '"sf_diagnostics":{}}]}</script>'
+      )
+    ),
     file.path(site_root, "articles", "gg2d3.html")
   )
   writeLines(

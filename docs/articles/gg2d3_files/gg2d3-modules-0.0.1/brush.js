@@ -26,16 +26,18 @@
   /**
    * CSS selectors for interactive geom elements.
    */
-  var INTERACTIVE_SELECTORS = [
+  var FALLBACK_INTERACTIVE_SELECTORS = [
     'circle.geom-point',
     'rect.geom-bar',
     'rect.geom-rect',
     'path.geom-line',
+    'path.geom-polygon',
     'path.geom-area',
     'path.geom-density',
     'path.geom-smooth',
     'path.geom-ribbon',
     'path.geom-violin',
+    '.geom-sf',                    // geom_sf: path.geom-sf.geom-sf-polygon, path.geom-sf.geom-sf-line, circle.geom-sf.geom-sf-point
     'text.geom-text',
     'line.geom-segment',
     'rect.geom-boxplot-box',
@@ -47,6 +49,13 @@
     'line.errorbar-cap-bottom',    // errorbar bottom cap (GEOM-22)
     'circle.pointrange-point'      // pointrange center dot (GEOM-22)
   ];
+  var contractBrushSelectors = window.gg2d3.geomContracts &&
+    typeof window.gg2d3.geomContracts.selectorsFor === 'function'
+      ? window.gg2d3.geomContracts.selectorsFor('brush')
+      : [];
+  var INTERACTIVE_SELECTORS = contractBrushSelectors.length
+    ? contractBrushSelectors
+    : FALLBACK_INTERACTIVE_SELECTORS;
 
   /**
    * Attach brush behavior to a gg2d3 widget.
@@ -161,6 +170,7 @@
       if (!selection) {
         restoreAllElements(panelGroup);
         panelGroup.attr('data-brush-active', null);
+        clearCrosstalkSelection(containerEl);
 
         if (typeof HTMLWidgets !== 'undefined' && HTMLWidgets.shinyMode) {
           Shiny.onInputChange(containerEl.id + '_brush', null);
@@ -178,6 +188,7 @@
 
       // Highlight elements within selection using pixel positions
       highlightSelection(panelGroup, pixelRect, config.opacity);
+      syncCrosstalkSelection(containerEl, panelGroup, pixelRect);
 
       // Invert to data domain for Shiny/callback output
       if ((typeof HTMLWidgets !== 'undefined' && HTMLWidgets.shinyMode) || config.on_brush) {
@@ -214,6 +225,31 @@
     brushGroup.on('dblclick.brush', function() {
       brushGroup.call(brushType.move, null);
     });
+  }
+
+  function clearCrosstalkSelection(containerEl) {
+    if (!containerEl._gg2d3_crosstalk ||
+        !window.gg2d3.crosstalk ||
+        typeof window.gg2d3.crosstalk.clearSelection !== 'function') {
+      return;
+    }
+
+    window.gg2d3.crosstalk.clearSelection(containerEl);
+  }
+
+  function syncCrosstalkSelection(containerEl, panelGroup, pixelRect) {
+    if (!containerEl._gg2d3_crosstalk ||
+        !window.gg2d3.crosstalk ||
+        typeof window.gg2d3.crosstalk.selectByKeys !== 'function') {
+      return;
+    }
+
+    var selectedKeys = collectSelectedCrosstalkKeys(panelGroup, pixelRect);
+    if (selectedKeys.length) {
+      window.gg2d3.crosstalk.selectByKeys(containerEl, selectedKeys);
+    } else {
+      window.gg2d3.crosstalk.clearSelection(containerEl);
+    }
   }
 
   /**
@@ -256,15 +292,32 @@
    * Check if an SVG element's position falls within the pixel rectangle.
    * Uses element attributes directly — no data-domain conversion needed.
    */
+  function isPointInPixelRect(x, y, rect) {
+    return Number.isFinite(x) && Number.isFinite(y) &&
+           x >= rect.px0 && x <= rect.px1 &&
+           y >= rect.py0 && y <= rect.py1;
+  }
+
   function isElementInPixelRect(node, rect) {
+    var anchoredCx = parseFloat(node.getAttribute('data-cx'));
+    var anchoredCy = parseFloat(node.getAttribute('data-cy'));
+    if (Number.isFinite(anchoredCx) && Number.isFinite(anchoredCy)) {
+      return isPointInPixelRect(anchoredCx, anchoredCy, rect);
+    }
+
     var tagName = node.tagName.toLowerCase();
+
+    if (node.classList && node.classList.contains('geom-sf')) {
+      var sfCx = parseFloat(node.getAttribute('data-cx'));
+      var sfCy = parseFloat(node.getAttribute('data-cy'));
+      return isPointInPixelRect(sfCx, sfCy, rect);
+    }
 
     if (tagName === 'circle') {
       // Point-in-rect check for circles (use center)
       var cx = parseFloat(node.getAttribute('cx'));
       var cy = parseFloat(node.getAttribute('cy'));
-      return cx >= rect.px0 && cx <= rect.px1 &&
-             cy >= rect.py0 && cy <= rect.py1;
+      return isPointInPixelRect(cx, cy, rect);
     }
 
     if (tagName === 'rect') {
@@ -281,8 +334,7 @@
       // Point-in-rect check for text (use anchor position)
       var tx = parseFloat(node.getAttribute('x'));
       var ty = parseFloat(node.getAttribute('y'));
-      return tx >= rect.px0 && tx <= rect.px1 &&
-             ty >= rect.py0 && ty <= rect.py1;
+      return isPointInPixelRect(tx, ty, rect);
     }
 
     if (tagName === 'line') {
@@ -384,6 +436,35 @@
   }
 
   /**
+   * Remove renderer-private fields before exposing selected rows to callbacks.
+   */
+  function sanitizeSelectedDatum(d) {
+    if (window.gg2d3.publicData &&
+        typeof window.gg2d3.publicData.sanitizeDatum === 'function') {
+      return window.gg2d3.publicData.sanitizeDatum(d);
+    }
+    if (!d || typeof d !== 'object' || Array.isArray(d)) return d;
+
+    var sanitized = {};
+    Object.keys(d).forEach(function(key) {
+      if (key.startsWith('_')) return;
+      sanitized[key] = d[key];
+    });
+    return sanitized;
+  }
+
+  function dedupeSelectedDataByRowId(selectedData) {
+    var seenRowIds = {};
+    return selectedData.filter(function(d) {
+      if (!d || d.row_id == null) return true;
+      var key = String(d.row_id);
+      if (seenRowIds[key]) return false;
+      seenRowIds[key] = true;
+      return true;
+    });
+  }
+
+  /**
    * Collect data from selected elements (for on_brush callback).
    */
   function collectSelectedData(panelGroup, pixelRect) {
@@ -396,12 +477,34 @@
       clippedGroup.selectAll(selector).each(function(d) {
         if (!d) return;
         if (isElementInPixelRect(this, pixelRect)) {
-          selectedData.push(d);
+          selectedData.push(sanitizeSelectedDatum(d));
         }
       });
     });
 
-    return selectedData;
+    return dedupeSelectedDataByRowId(selectedData);
+  }
+
+  function collectSelectedCrosstalkKeys(panelGroup, pixelRect) {
+    var clippedGroup = panelGroup.select('g[clip-path]');
+    if (clippedGroup.empty()) return [];
+
+    var seen = {};
+    var selectedKeys = [];
+
+    INTERACTIVE_SELECTORS.forEach(function(selector) {
+      clippedGroup.selectAll(selector).each(function() {
+        if (!isElementInPixelRect(this, pixelRect)) return;
+
+        var key = this.getAttribute('data-crosstalk-key');
+        if (key === null || key === '' || seen[key]) return;
+
+        seen[key] = true;
+        selectedKeys.push(key);
+      });
+    });
+
+    return selectedKeys;
   }
 
   /**

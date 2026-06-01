@@ -49,6 +49,48 @@
    */
   const selectionHandles = {};
 
+  function getCrosstalkLib() {
+    if (typeof window !== 'undefined' && window.crosstalk) {
+      return window.crosstalk;
+    }
+    if (typeof globalThis !== 'undefined' && globalThis.crosstalk) {
+      return globalThis.crosstalk;
+    }
+    if (typeof self !== 'undefined' && self.crosstalk) {
+      return self.crosstalk;
+    }
+    if (typeof global !== 'undefined' && global.crosstalk) {
+      return global.crosstalk;
+    }
+    if (typeof crosstalk !== 'undefined') {
+      return crosstalk;
+    }
+    return null;
+  }
+
+  function isAvailable() {
+    const crosstalkLib = getCrosstalkLib();
+    return !!(crosstalkLib && crosstalkLib.SelectionHandle);
+  }
+
+  function bind(el, crosstalkKey, crosstalkGroup) {
+    const svg = d3.select(el).select('svg');
+    if (svg.empty()) {
+      console.warn('gg2d3.crosstalk: SVG element not found');
+      return false;
+    }
+
+    el.setAttribute('data-gg2d3-crosstalk-group', crosstalkGroup);
+    el._gg2d3_crosstalk = Object.assign(el._gg2d3_crosstalk || {}, {
+      crosstalkKey: crosstalkKey,
+      crosstalkGroup: crosstalkGroup,
+      syncLock: false
+    });
+
+    bindCrosstalkKeys(svg, crosstalkKey);
+    return true;
+  }
+
   function isLegendKeyVisible(state, key) {
     if (!key) return true;
     if (state && state.persistent && state.persistent.solo !== null) {
@@ -148,6 +190,19 @@
     });
   }
 
+  function applyLocalGroupSelection(crosstalkGroup, selectedKeys) {
+    if (!crosstalkGroup || typeof document === 'undefined') return;
+
+    const keys = Array.isArray(selectedKeys)
+      ? selectedKeys.filter(k => k !== null && k !== undefined).map(String)
+      : [];
+
+    document.querySelectorAll('.gg2d3.html-widget').forEach(function(widgetEl) {
+      if (widgetEl.getAttribute('data-gg2d3-crosstalk-group') !== crosstalkGroup) return;
+      applyCrosstalkSelection(widgetEl, keys);
+    });
+  }
+
   /**
    * Initialize Crosstalk for a gg2d3 widget.
    *
@@ -159,20 +214,22 @@
    * @param {string} crosstalkGroup - Crosstalk group name for linked widgets
    */
   function init(el, crosstalkKey, crosstalkGroup) {
-    // Guard against missing crosstalk library
-    if (typeof crosstalk === 'undefined') {
-      console.warn('gg2d3.crosstalk: crosstalk library not loaded');
+    if (!bind(el, crosstalkKey, crosstalkGroup)) {
       return;
     }
 
-    const svg = d3.select(el).select('svg');
-    if (svg.empty()) {
-      console.warn('gg2d3.crosstalk: SVG element not found');
+    // Guard against missing crosstalk library
+    const crosstalkLib = getCrosstalkLib();
+    if (!crosstalkLib || !crosstalkLib.SelectionHandle) {
       return;
+    }
+
+    if (el._gg2d3_crosstalk.sel && typeof el._gg2d3_crosstalk.sel.close === 'function') {
+      el._gg2d3_crosstalk.sel.close();
     }
 
     // Create SelectionHandle for this group
-    const sel = new crosstalk.SelectionHandle(crosstalkGroup);
+    const sel = new crosstalkLib.SelectionHandle(crosstalkGroup);
     selectionHandles[el.id] = sel;
 
     // Listen for selection changes from other widgets.
@@ -194,14 +251,12 @@
     });
 
     // Store references for later use
-    el._gg2d3_crosstalk = {
+    el._gg2d3_crosstalk = Object.assign(el._gg2d3_crosstalk || {}, {
       sel: sel,
       crosstalkKey: crosstalkKey,
       crosstalkGroup: crosstalkGroup,
       syncLock: false
-    };
-
-    bindCrosstalkKeys(svg, crosstalkKey);
+    });
 
     if (window.gg2d3.events && window.gg2d3.events.applyLegendState) {
       window.gg2d3.events.applyLegendState(el);
@@ -287,16 +342,19 @@
       return;
     }
 
-    const { sel, crosstalkKey } = el._gg2d3_crosstalk;
+    const { sel, crosstalkKey, crosstalkGroup } = el._gg2d3_crosstalk;
 
     // Map indices to keys
     const selectedKeys = selectedIndices.map(i => crosstalkKey[i]).filter(k => k !== undefined);
 
-    if (selectedKeys.length > 0) {
-      sel.set(selectedKeys);
-    } else {
-      sel.clear();
+    if (sel) {
+      if (selectedKeys.length > 0) {
+        sel.set(selectedKeys);
+      } else {
+        sel.clear();
+      }
     }
+    applyLocalGroupSelection(crosstalkGroup, selectedKeys);
   }
 
   /**
@@ -307,8 +365,11 @@
   function clearSelection(el) {
     if (!el._gg2d3_crosstalk) return;
 
-    const { sel } = el._gg2d3_crosstalk;
-    sel.clear();
+    const { sel, crosstalkGroup } = el._gg2d3_crosstalk;
+    if (sel) {
+      sel.clear();
+    }
+    applyLocalGroupSelection(crosstalkGroup, []);
   }
 
   /**
@@ -338,8 +399,14 @@
       return;
     }
 
-    const { sel } = el._gg2d3_crosstalk;
-    sel.set(keys);
+    const selectedKeys = Array.isArray(keys)
+      ? keys.filter(k => k !== null && k !== undefined).map(String)
+      : [];
+    const { sel, crosstalkGroup } = el._gg2d3_crosstalk;
+    if (sel) {
+      sel.set(selectedKeys);
+    }
+    applyLocalGroupSelection(crosstalkGroup, selectedKeys);
   }
 
   /**
@@ -381,6 +448,8 @@
    * Export crosstalk module API
    */
   window.gg2d3.crosstalk = {
+    isAvailable: isAvailable,
+    bind: bind,
     init: init,
     broadcastSelection: broadcastSelection,
     clearSelection: clearSelection,

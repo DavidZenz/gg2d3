@@ -32,24 +32,125 @@
     const val = window.gg2d3.helpers.val;
     const num = window.gg2d3.helpers.num;
     const asRows = window.gg2d3.helpers.asRows;
-    const { fillColor, opacity } =
+    const mmToPxLinewidth = window.gg2d3.constants.mmToPxLinewidth;
+    const { fillColor, strokeColor, opacity } =
       window.gg2d3.geomRegistry.makeColorAccessors(layer, options);
 
     const aes = layer.aes || {};
+    const params = layer.params || {};
     const dat = asRows(layer.data);
 
     // Helper to get column value from row
     const get = (d, k) => (k && d != null) ? d[k] : null;
 
-    // Filter valid rectangles (must have all 4 bounds)
-    const rects = dat.filter(d =>
-      get(d, aes.xmin) != null && get(d, aes.xmax) != null &&
-      get(d, aes.ymin) != null && get(d, aes.ymax) != null
-    );
-
     const isXBand = typeof xScale.bandwidth === "function";
     const isYBand = typeof yScale.bandwidth === "function";
     const flip = !!options.flip;
+
+    function hasBound(d, key) {
+      const v = val(get(d, key));
+      if (v === null || v === undefined || v === "") return false;
+      if (typeof v === "number" && Number.isNaN(v)) return false;
+      return v !== "NA";
+    }
+
+    function validRectBounds(d) {
+      return hasBound(d, aes.xmin) && hasBound(d, aes.xmax) &&
+        hasBound(d, aes.ymin) && hasBound(d, aes.ymax);
+    }
+
+    function scaledRectBoundsAreFinite(d) {
+      const xValues = isXBand
+        ? [xScale(bandValue(d, aes.x, aes.xmin)), xScale.bandwidth()]
+        : [xScale(num(get(d, aes.xmin))), xScale(num(get(d, aes.xmax)))];
+      const yValues = isYBand
+        ? [yScale(bandValue(d, aes.y, aes.ymin)), yScale.bandwidth()]
+        : [yScale(num(get(d, aes.ymin))), yScale(num(get(d, aes.ymax)))];
+
+      return xValues.concat(yValues).every(Number.isFinite);
+    }
+
+    // Filter valid rectangles before SVG x/y/width/height attributes are emitted.
+    const rects = dat.filter(d =>
+      validRectBounds(d) && scaledRectBoundsAreFinite(d)
+    );
+
+    function isMissingAesthetic(value) {
+      const v = val(value);
+      if (v === null || v === undefined) return true;
+      if (typeof v === "number" && Number.isNaN(v)) return true;
+      return v === "NA";
+    }
+
+    function bandValue(d, centerKey, boundKey) {
+      const center = val(get(d, centerKey));
+      if (center !== null && center !== undefined) return center;
+      return val(get(d, boundKey));
+    }
+
+    function rectStroke(d) {
+      const rowStroke = get(d, "colour");
+      if (rowStroke !== null && rowStroke !== undefined) {
+        return isMissingAesthetic(rowStroke) ? "none" : strokeColor(d);
+      }
+      if (isMissingAesthetic(params.colour)) return "none";
+      return strokeColor(d);
+    }
+
+    function rectLinewidth(d) {
+      const linewidth = val(get(d, "linewidth"));
+      const fallback = val(params.linewidth);
+      const source = linewidth !== null && linewidth !== undefined ? linewidth : fallback;
+      return source !== null && source !== undefined ? mmToPxLinewidth(source) : mmToPxLinewidth(0.5);
+    }
+
+    function rectX(d) {
+      if (isXBand) return xScale(bandValue(d, aes.x, aes.xmin));
+      return Math.min(xScale(num(get(d, aes.xmin))), xScale(num(get(d, aes.xmax))));
+    }
+
+    function rectY(d) {
+      if (isYBand) return yScale(bandValue(d, aes.y, aes.ymin));
+      return Math.min(yScale(num(get(d, aes.ymin))), yScale(num(get(d, aes.ymax))));
+    }
+
+    function rectWidth(d) {
+      if (isXBand) return xScale.bandwidth();
+      const x1 = xScale(num(get(d, aes.xmin)));
+      const x2 = xScale(num(get(d, aes.xmax)));
+      return Math.abs(x2 - x1);
+    }
+
+    function rectHeight(d) {
+      if (isYBand) return yScale.bandwidth();
+      const y1 = yScale(num(get(d, aes.ymin)));
+      const y2 = yScale(num(get(d, aes.ymax)));
+      return Math.abs(y2 - y1);
+    }
+
+    function flippedRectX(d) {
+      if (isYBand) return yScale(bandValue(d, aes.y, aes.ymin));
+      return Math.min(yScale(num(get(d, aes.ymin))), yScale(num(get(d, aes.ymax))));
+    }
+
+    function flippedRectY(d) {
+      if (isXBand) return xScale(bandValue(d, aes.x, aes.xmin));
+      return Math.min(xScale(num(get(d, aes.xmin))), xScale(num(get(d, aes.xmax))));
+    }
+
+    function flippedRectWidth(d) {
+      if (isYBand) return yScale.bandwidth();
+      const y1 = yScale(num(get(d, aes.ymin)));
+      const y2 = yScale(num(get(d, aes.ymax)));
+      return Math.abs(y2 - y1);
+    }
+
+    function flippedRectHeight(d) {
+      if (isXBand) return xScale.bandwidth();
+      const x1 = xScale(num(get(d, aes.xmin)));
+      const x2 = xScale(num(get(d, aes.xmax)));
+      return Math.abs(x2 - x1);
+    }
 
     function getLegendIdentity(datum) {
       const candidates = [
@@ -88,29 +189,13 @@
     if (flip) {
       sel.enter().append("rect")
         .attr("class", "geom-rect")
-        .attr("x", d => {
-          const ymax = isYBand ? val(get(d, aes.ymax)) : num(get(d, aes.ymax));
-          const ymin = isYBand ? val(get(d, aes.ymin)) : num(get(d, aes.ymin));
-          return Math.min(yScale(ymax), yScale(ymin));
-        })
-        .attr("y", d => {
-          const xmin = isXBand ? val(get(d, aes.xmin)) : num(get(d, aes.xmin));
-          const xmax = isXBand ? val(get(d, aes.xmax)) : num(get(d, aes.xmax));
-          return Math.min(xScale(xmin), xScale(xmax));
-        })
-        .attr("width", d => {
-          if (isYBand) return yScale.bandwidth();
-          const y1 = yScale(num(get(d, aes.ymin)));
-          const y2 = yScale(num(get(d, aes.ymax)));
-          return Math.abs(y2 - y1);
-        })
-        .attr("height", d => {
-          if (isXBand) return xScale.bandwidth();
-          const x1 = xScale(num(get(d, aes.xmin)));
-          const x2 = xScale(num(get(d, aes.xmax)));
-          return Math.abs(x2 - x1);
-        })
+        .attr("x", d => flippedRectX(d))
+        .attr("y", d => flippedRectY(d))
+        .attr("width", d => flippedRectWidth(d))
+        .attr("height", d => flippedRectHeight(d))
         .attr("fill", d => fillColor(d))
+        .attr("stroke", d => rectStroke(d))
+        .attr("stroke-width", d => rectLinewidth(d))
         .attr("opacity", d => opacity(d))
         .attr("data-legend-key", d => {
           const identity = getLegendIdentity(d);
@@ -127,27 +212,13 @@
     } else {
       sel.enter().append("rect")
         .attr("class", "geom-rect")
-        .attr("x", d => {
-          const xmin = isXBand ? val(get(d, aes.xmin)) : num(get(d, aes.xmin));
-          return xScale(xmin);
-        })
-        .attr("y", d => {
-          const ymax = isYBand ? val(get(d, aes.ymax)) : num(get(d, aes.ymax));
-          return yScale(ymax);
-        })
-        .attr("width", d => {
-          if (isXBand) return xScale.bandwidth();
-          const x1 = xScale(num(get(d, aes.xmin)));
-          const x2 = xScale(num(get(d, aes.xmax)));
-          return Math.abs(x2 - x1);
-        })
-        .attr("height", d => {
-          if (isYBand) return yScale.bandwidth();
-          const y1 = yScale(num(get(d, aes.ymin)));
-          const y2 = yScale(num(get(d, aes.ymax)));
-          return Math.abs(y2 - y1);
-        })
+        .attr("x", d => rectX(d))
+        .attr("y", d => rectY(d))
+        .attr("width", d => rectWidth(d))
+        .attr("height", d => rectHeight(d))
       .attr("fill", d => fillColor(d))
+      .attr("stroke", d => rectStroke(d))
+      .attr("stroke-width", d => rectLinewidth(d))
       .attr("opacity", d => opacity(d))
       .attr("data-legend-key", d => {
         const identity = getLegendIdentity(d);

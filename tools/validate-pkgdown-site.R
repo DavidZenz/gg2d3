@@ -48,19 +48,25 @@ if (identical(mode, "release")) {
 
 require_rendered_sf <- identical(mode, "ci") || identical(mode, "release")
 require_rendered_sf <- require_rendered_sf && pkgdown_site_spatial_loadable()
+require_rendered_crosstalk <- identical(mode, "ci") || identical(mode, "release")
+require_rendered_crosstalk <- require_rendered_crosstalk && pkgdown_site_crosstalk_loadable()
 
 pkgdown_site_validate_source_contract(root = root)
 pkgdown_site_validate_quick(
   root = root,
-  require_rendered_sf = require_rendered_sf
+  require_rendered_sf = require_rendered_sf,
+  require_rendered_crosstalk = require_rendered_crosstalk
 )
 
 sf_outcome <- pkgdown_site_sf_outcome(root = root)
+crosstalk_outcome <- pkgdown_site_crosstalk_outcome(root = root)
 cat(
   "Generated pkgdown site validation passed (mode: ",
   mode,
   ", sf outcome: ",
   sf_outcome,
+  ", crosstalk outcome: ",
+  crosstalk_outcome,
   ")\n",
   sep = ""
 )
