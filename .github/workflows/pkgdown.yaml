@@ -71,6 +71,14 @@ jobs:
       - name: Validate generated pkgdown site
         run: Rscript tools/validate-pkgdown-site.R --mode ci
 
+      - name: Upload pkgdown site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pkgdown-site-${{ github.run_id }}
+          path: docs/
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4.8.0
