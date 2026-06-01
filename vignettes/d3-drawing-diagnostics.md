@@ -63,6 +63,59 @@ htmlwidget scaffolding before release claims rely on it. Browser visual smoke
 remains downstream inspection evidence for rendered behavior, not a substitute
 for source-to-site freshness.
 
+### Generated-site validation gate
+
+Use the generated-site gate whenever source documentation, widget dependencies,
+or pkgdown workflow behavior changes.
+
+Quick local validation inspects the committed generated `docs/` output without
+rebuilding:
+
+```sh
+rtk Rscript --vanilla tools/validate-pkgdown-site.R --mode quick
+```
+
+Release validation rebuilds source-derived README/help/pkgdown output before
+checking the same generated-site markers:
+
+```sh
+rtk Rscript --vanilla tools/validate-pkgdown-site.R --mode release
+```
+
+The focused `testthat` entrypoint uses the same validation helper and remains
+the canonical test-suite integration:
+
+```sh
+rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-pkgdown-site.R")'
+```
+
+CI mode is run by the pkgdown workflow after `Build site` and before deploy:
+
+```sh
+Rscript tools/validate-pkgdown-site.R --mode ci
+```
+
+Failure classes are intentionally narrow:
+
+- stale generated content: source markers exist but generated article/reference
+  pages no longer contain the current support contract;
+- missing widget scaffolding/assets: generated article HTML lacks
+  `gg2d3 html-widget`, `d3.v7.min.js`, `gg2d3-modules`, or the
+  `docs/articles/gg2d3_files/gg2d3-modules-0.0.1` asset path;
+- pkgdown build failure: release mode cannot regenerate source-derived docs or
+  site output; and
+- optional spatial dependency classification: local quick mode may pass with
+  `PKGDOWN_SF_OPTIONAL_SKIP` when `sf` or `geojsonsf` cannot load, while
+  release and CI mode require rendered sf evidence when both packages are
+  loadable.
+
+Repair stale generated-site evidence by editing the source docs first, running
+release validation or the documented rebuild commands, inspecting the generated
+`docs/` diff, rerunning quick validation, and committing the required
+source/generated evidence together. Downloaded GitHub Pages artifact inspection
+is a Phase 58 release-evidence step, not part of this Phase 57 local generated
+site gate.
+
 ## Ordinary `geom_polygon()` support
 
 Ordinary `geom_polygon()` renders grouped closed SVG paths from ggplot2 built
