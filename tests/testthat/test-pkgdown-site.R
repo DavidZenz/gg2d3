@@ -43,3 +43,32 @@ test_that("publication site-root validator accepts generated docs as a site root
   }
   pkgdown_site_validate_publication(site_root = site_root, require_rendered_sf = FALSE)
 })
+
+test_that("publication site-root paths take precedence over local docs", {
+  root <- tempfile("pkgdown-local-")
+  site_root <- tempfile("pkgdown-artifact-")
+  dir.create(file.path(root, "docs", "articles"), recursive = TRUE)
+  dir.create(file.path(site_root, "articles"), recursive = TRUE)
+
+  writeLines(
+    c("sf family maps with", "PKGDOWN_SF_OPTIONAL_SKIP"),
+    file.path(root, "docs", "articles", "gg2d3.html")
+  )
+  writeLines(
+    "PKGDOWN_SF_OPTIONAL_SKIP",
+    file.path(root, "docs", "articles", "gg2d3.md")
+  )
+  writeLines(
+    c("sf family maps with", '<script>{"layers":[{"geom":"sf"}]}</script>'),
+    file.path(site_root, "articles", "gg2d3.html")
+  )
+  writeLines(
+    "sf family maps with",
+    file.path(site_root, "articles", "gg2d3.md")
+  )
+
+  testthat::expect_identical(
+    pkgdown_site_sf_outcome(root = root, site_root = site_root),
+    "rendered"
+  )
+})

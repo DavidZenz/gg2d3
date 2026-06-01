@@ -37,10 +37,10 @@ pkgdown_site_resolve_path <- function(path, root = ".", site_root = NULL) {
     )
   }
   candidates <- c(
+    site_candidates,
     file.path(root, path),
     path,
-    file.path("..", "..", path),
-    site_candidates
+    file.path("..", "..", path)
   )
   resolved <- candidates[file.exists(candidates) | dir.exists(candidates)][1]
   if (is.na(resolved)) {
@@ -119,15 +119,16 @@ pkgdown_site_sf_outcome <- function(root = ".", site_root = NULL) {
     return("missing")
   }
 
-  next_heading <- regexpr("<h3", substring(html, heading + 1), fixed = TRUE)[[1]]
-  sf_section <- if (next_heading > 0) {
-    substring(html, heading, heading + next_heading - 1)
-  } else {
-    substring(html, heading)
-  }
-
-  widget_positions <- gregexpr("gg2d3 html-widget", sf_section, fixed = TRUE)[[1]]
-  if (any(widget_positions > 0)) {
+  rendered_sf_markers <- c(
+    '"geom":"sf"',
+    '"sf_family":"',
+    '"sf_diagnostics"'
+  )
+  if (any(vapply(
+    rendered_sf_markers,
+    function(marker) grepl(marker, html, fixed = TRUE),
+    logical(1)
+  ))) {
     return("rendered")
   }
 
@@ -148,7 +149,7 @@ pkgdown_site_expect_sf_outcome <- function(root = ".", require_rendered_sf = FAL
       "rendered",
       info = paste0(
         "Expected docs/articles/gg2d3.html to contain a gg2d3 html-widget ",
-        "inside the sf section because rendered sf evidence is required; outcome: ",
+        "with rendered sf payload evidence because rendered sf evidence is required; outcome: ",
         outcome
       )
     )
@@ -159,7 +160,7 @@ pkgdown_site_expect_sf_outcome <- function(root = ".", require_rendered_sf = FAL
     outcome %in% c("rendered", "classified_skip"),
     info = paste0(
       "Expected docs/articles/gg2d3.html and docs/articles/gg2d3.md to contain ",
-      "PKGDOWN_SF_OPTIONAL_SKIP or a gg2d3 html-widget inside the sf section; outcome: ",
+      "PKGDOWN_SF_OPTIONAL_SKIP or rendered sf payload evidence; outcome: ",
       outcome
     )
   )
