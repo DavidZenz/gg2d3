@@ -30,7 +30,7 @@
 - Decimal phases (56.1, 56.2): Urgent insertions, if needed
 
 - [x] **Phase 56: Pkgdown Content And Widget Build Contract** - Generated pkgdown content and build configuration expose the current sf/widget support contract with representative rendered widgets.
-- [ ] **Phase 57: Generated Site Validation Gate** - A repeatable validation command detects stale generated-site content, missing sf sections, missing widget scaffolding, and missing widget assets.
+- [x] **Phase 57: Generated Site Validation Gate** - A repeatable validation command detects stale generated-site content, missing sf sections, missing widget scaffolding, and missing widget assets.
 - [ ] **Phase 58: Publication Evidence And Release Handoff** - GitHub Pages/pkgdown artifacts are inspectable, current, and folded into the release-readiness evidence path.
 
 ## Phase Details
@@ -64,8 +64,8 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 57-01-PLAN.md — Extract the generated-site validation core into reusable helper functions and keep focused testthat checks canonical.
-- [ ] 57-02-PLAN.md — Add the maintainer/CI validation command and run it after pkgdown build before deploy.
-- [ ] 57-03-PLAN.md — Document the gate and record final SITE-01 validation evidence.
+- [x] 57-02-PLAN.md — Add the maintainer/CI validation command and run it after pkgdown build before deploy.
+- [x] 57-03-PLAN.md — Document the gate and record final SITE-01 validation evidence.
 
 ### Phase 58: Publication Evidence And Release Handoff
 
@@ -87,7 +87,7 @@ Phases execute in numeric order: 56 → 57 → 58
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
 | 56. Pkgdown Content And Widget Build Contract | DOCS-01, DOCS-02, DOCS-03, BUILD-01, BUILD-02, BUILD-03 | 3/3 | Complete | 2026-05-31 |
-| 57. Generated Site Validation Gate | SITE-01 | 1/3 | In Progress | - |
+| 57. Generated Site Validation Gate | SITE-01 | 3/3 | Complete | 2026-06-01 |
 | 58. Publication Evidence And Release Handoff | SITE-02, SITE-03 | 0/0 | Not started | - |
 
 ## Archived Milestones
