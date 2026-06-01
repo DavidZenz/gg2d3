@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.14
 milestone_name: Pkgdown Site Verification
 status: planned
-stopped_at: Phase 58 context gathered
-last_updated: "2026-06-01T07:47:19.749Z"
-last_activity: 2026-06-01 -- Phase 58 context gathered
+stopped_at: Phase 58 planned
+last_updated: "2026-06-01T08:24:00.000Z"
+last_activity: 2026-06-01 -- Phase 58 planned
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 6
+  total_plans: 9
   completed_plans: 6
-  percent: 100
+  percent: 67
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 ## Current Position
 
 Phase: 58 (Publication Evidence And Release Handoff) — READY
-Plan: not planned
-Status: Phase 58 context gathered — ready to plan Phase 58
-Last activity: 2026-06-01 -- Phase 58 context gathered
+Plan: 3 plans ready
+Status: Phase 58 planned — ready to execute Phase 58
+Last activity: 2026-06-01 -- Phase 58 planned
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Recent decisions affecting current work:
 - Source-first documentation remains the authoring model, but generated `docs/` and GitHub Pages output must be validated against source docs before release claims are considered complete.
 - `sf` and `geojsonsf` remain optional package dependencies; pkgdown should render sf examples when website dependencies are available and classify any skip/failure visibly.
 - Browser visual smoke artifacts and pkgdown site artifacts serve different purposes: smoke reports validate representative rendering behavior, while pkgdown validates public documentation and embedded widget rendering.
+- Phase 58 will add a validation-backed pkgdown site workflow artifact, a publication-root inspector, maintainer `gh`/manual fallback documentation, and final release-readiness evidence.
 
 ### Pending Todos
 
@@ -70,7 +71,7 @@ None active.
 
 ### Blockers/Concerns
 
-- Phase 58 should decide the exact artifact/deploy inspection implementation path during planning.
+- Local `gh` is installed, but `gh auth status` reports an invalid default token. Phase 58 remote artifact evidence may need re-authentication or GitHub Actions UI fallback.
 - Local `sf` is installed but not loadable because its GDAL dynamic library is unavailable; Phase 56 generated evidence records the classified local skip path.
 
 ## Deferred Items
@@ -85,11 +86,11 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-01 -- Phase 58 context gathered
-Stopped at: Phase 58 context gathered
-Resume file: .planning/phases/58-publication-evidence-and-release-handoff/58-CONTEXT.md
+Last session: 2026-06-01 -- Phase 58 planned
+Stopped at: Phase 58 planned
+Resume file: .planning/phases/58-publication-evidence-and-release-handoff/58-03-PLAN.md
 
-**Next Step:** Run `$gsd-plan-phase 58`
+**Next Step:** Run `$gsd-execute-phase 58`
 
 **Completed Milestone:** v1.13 Regression & Release Polish -- 2026-05-31
 
@@ -98,5 +99,6 @@ Resume file: .planning/phases/58-publication-evidence-and-release-handoff/58-CON
 **Planned Milestone:** v1.14 Pkgdown Site Verification -- 3 phases -- 2026-05-31
 
 **Planned Phase:** 57 (generated-site-validation-gate) — 3 plans — 2026-06-01T06:50:40.840Z
+**Planned Phase:** 58 (publication-evidence-and-release-handoff) — 3 plans — 2026-06-01T08:24:00Z
 **Completed Phase:** 57 (Generated Site Validation Gate) — 3/3 plans — 2026-06-01T07:14:43Z
 **Completed Phase:** 56 (Pkgdown Content And Widget Build Contract) — 3/3 plans — 2026-05-31T19:46:01Z
