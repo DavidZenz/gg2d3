@@ -116,6 +116,49 @@ source/generated evidence together. Downloaded GitHub Pages artifact inspection
 is a Phase 58 release-evidence step, not part of this Phase 57 local generated
 site gate.
 
+### Publication artifact inspection
+
+The generated-site validation gate proves the local `docs/` contents. The
+publication inspection step proves that a workflow artifact or deployed site root
+exposes the same current sf/widget evidence outside the repository layout.
+
+Trigger the pkgdown workflow when remote evidence is needed:
+
+```sh
+gh workflow run pkgdown.yaml --ref master
+```
+
+Find the run ID, status, source commit, and run URL:
+
+```sh
+gh run list --workflow pkgdown.yaml --branch master --limit 5 --json databaseId,status,conclusion,headSha,url
+```
+
+Download the validation-backed pkgdown site artifact for a concrete run:
+
+```sh
+gh run download <run-id> --pattern "pkgdown-site-*" --dir test_output/github-run-<run-id>
+```
+
+Inspect the downloaded publication root:
+
+```sh
+rtk Rscript --vanilla tools/inspect-pkgdown-publication.R --site-root test_output/github-run-<run-id>/pkgdown-site-<run-id>
+```
+
+If `gh auth status` reports an authentication problem, use the GitHub Actions UI
+to download `pkgdown-site-<run-id>` from the run artifacts, or inspect a fetched
+`origin/gh-pages` checkout with the same `--site-root` command:
+
+```sh
+git fetch origin gh-pages
+rtk Rscript --vanilla tools/inspect-pkgdown-publication.R --site-root <gh-pages-checkout>
+```
+
+Downloaded artifacts under `test_output/github-run-*` are local inspection
+artifacts. Do not commit them; record only the run ID, source SHA, inspected
+site root, and command outcome in release evidence.
+
 ## Ordinary `geom_polygon()` support
 
 Ordinary `geom_polygon()` renders grouped closed SVG paths from ggplot2 built
