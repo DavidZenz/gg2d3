@@ -114,11 +114,6 @@ pkgdown_site_sf_outcome <- function(root = ".", site_root = NULL) {
   html <- pkgdown_site_read_text("docs/articles/gg2d3.html", root = root, site_root = site_root)
   md <- pkgdown_site_read_text("docs/articles/gg2d3.md", root = root, site_root = site_root)
 
-  if (grepl("PKGDOWN_SF_OPTIONAL_SKIP", html, fixed = TRUE) ||
-      grepl("PKGDOWN_SF_OPTIONAL_SKIP", md, fixed = TRUE)) {
-    return("classified_skip")
-  }
-
   heading <- pkgdown_site_marker_position(html, "sf family maps with")
   if (heading <= 0) {
     return("missing")
@@ -134,6 +129,11 @@ pkgdown_site_sf_outcome <- function(root = ".", site_root = NULL) {
   widget_positions <- gregexpr("gg2d3 html-widget", sf_section, fixed = TRUE)[[1]]
   if (any(widget_positions > 0)) {
     return("rendered")
+  }
+
+  if (grepl("PKGDOWN_SF_OPTIONAL_SKIP", html, fixed = TRUE) ||
+      grepl("PKGDOWN_SF_OPTIONAL_SKIP", md, fixed = TRUE)) {
+    return("classified_skip")
   }
 
   "missing"
