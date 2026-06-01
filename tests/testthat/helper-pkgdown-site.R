@@ -19,11 +19,28 @@ pkgdown_site_generated_optional_sf_markers <- c(
   "PKGDOWN_SF_OPTIONAL_SKIP"
 )
 
-pkgdown_site_resolve_path <- function(path, root = ".") {
+pkgdown_site_publication_path <- function(path, site_root = NULL) {
+  if (is.null(site_root)) {
+    return(path)
+  }
+  sub("^docs/", "", path)
+}
+
+pkgdown_site_resolve_path <- function(path, root = ".", site_root = NULL) {
+  publication_path <- pkgdown_site_publication_path(path, site_root = site_root)
+  site_candidates <- character()
+  if (!is.null(site_root)) {
+    site_candidates <- c(
+      file.path(site_root, publication_path),
+      file.path(root, site_root, publication_path),
+      file.path("..", "..", site_root, publication_path)
+    )
+  }
   candidates <- c(
     file.path(root, path),
     path,
-    file.path("..", "..", path)
+    file.path("..", "..", path),
+    site_candidates
   )
   resolved <- candidates[file.exists(candidates) | dir.exists(candidates)][1]
   if (is.na(resolved)) {
@@ -32,13 +49,13 @@ pkgdown_site_resolve_path <- function(path, root = ".") {
   resolved
 }
 
-pkgdown_site_read_text <- function(path, root = ".") {
-  resolved <- pkgdown_site_resolve_path(path, root = root)
+pkgdown_site_read_text <- function(path, root = ".", site_root = NULL) {
+  resolved <- pkgdown_site_resolve_path(path, root = root, site_root = site_root)
   paste(readLines(resolved, warn = FALSE), collapse = "\n")
 }
 
-pkgdown_site_expect_text_contains <- function(path, markers, root = ".") {
-  text <- pkgdown_site_read_text(path, root = root)
+pkgdown_site_expect_text_contains <- function(path, markers, root = ".", site_root = NULL) {
+  text <- pkgdown_site_read_text(path, root = root, site_root = site_root)
   for (marker in markers) {
     testthat::expect_true(
       grepl(marker, text, fixed = TRUE),
@@ -47,9 +64,9 @@ pkgdown_site_expect_text_contains <- function(path, markers, root = ".") {
   }
 }
 
-pkgdown_site_expect_existing_path <- function(path, root = ".") {
+pkgdown_site_expect_existing_path <- function(path, root = ".", site_root = NULL) {
   resolved <- tryCatch(
-    pkgdown_site_resolve_path(path, root = root),
+    pkgdown_site_resolve_path(path, root = root, site_root = site_root),
     error = function(error) NA_character_
   )
   testthat::expect_true(
@@ -72,9 +89,9 @@ pkgdown_site_spatial_loadable <- function() {
   ))
 }
 
-pkgdown_site_sf_outcome <- function(root = ".") {
-  html <- pkgdown_site_read_text("docs/articles/gg2d3.html", root = root)
-  md <- pkgdown_site_read_text("docs/articles/gg2d3.md", root = root)
+pkgdown_site_sf_outcome <- function(root = ".", site_root = NULL) {
+  html <- pkgdown_site_read_text("docs/articles/gg2d3.html", root = root, site_root = site_root)
+  md <- pkgdown_site_read_text("docs/articles/gg2d3.md", root = root, site_root = site_root)
 
   if (grepl("PKGDOWN_SF_OPTIONAL_SKIP", html, fixed = TRUE) ||
       grepl("PKGDOWN_SF_OPTIONAL_SKIP", md, fixed = TRUE)) {
@@ -101,8 +118,8 @@ pkgdown_site_sf_outcome <- function(root = ".") {
   "missing"
 }
 
-pkgdown_site_expect_sf_outcome <- function(root = ".", require_rendered_sf = FALSE) {
-  outcome <- pkgdown_site_sf_outcome(root = root)
+pkgdown_site_expect_sf_outcome <- function(root = ".", require_rendered_sf = FALSE, site_root = NULL) {
+  outcome <- pkgdown_site_sf_outcome(root = root, site_root = site_root)
 
   if (isTRUE(require_rendered_sf)) {
     testthat::expect_identical(
@@ -143,55 +160,71 @@ pkgdown_site_validate_marker_contract <- function() {
   testthat::expect_true(length(pkgdown_site_generated_optional_sf_markers) > 0)
 }
 
-pkgdown_site_validate_generated_article_text <- function(root = ".") {
+pkgdown_site_validate_generated_article_text <- function(root = ".", site_root = NULL) {
   pkgdown_site_expect_text_contains(
     "docs/articles/gg2d3.html",
     pkgdown_site_generated_article_text_markers,
-    root = root
+    root = root,
+    site_root = site_root
   )
   pkgdown_site_expect_text_contains(
     "docs/articles/gg2d3.md",
     pkgdown_site_generated_article_text_markers,
-    root = root
+    root = root,
+    site_root = site_root
   )
 }
 
-pkgdown_site_validate_widget_dependencies <- function(root = ".") {
+pkgdown_site_validate_widget_dependencies <- function(root = ".", site_root = NULL) {
   pkgdown_site_expect_text_contains(
     "docs/articles/gg2d3.html",
     pkgdown_site_generated_widget_markers,
-    root = root
+    root = root,
+    site_root = site_root
   )
   pkgdown_site_expect_existing_path(
     "docs/articles/gg2d3_files/gg2d3-modules-0.0.1",
-    root = root
+    root = root,
+    site_root = site_root
   )
 }
 
-pkgdown_site_validate_news_and_reference <- function(root = ".") {
+pkgdown_site_validate_news_and_reference <- function(root = ".", site_root = NULL) {
   pkgdown_site_expect_text_contains(
     "docs/news/index.html",
     c("Pkgdown publication-surface evidence", "generated site"),
-    root = root
+    root = root,
+    site_root = site_root
   )
   pkgdown_site_expect_text_contains(
     "docs/reference/gg2d3.html",
     c("geom_sf()", "geom_sf_text()", "geom_sf_label()"),
-    root = root
+    root = root,
+    site_root = site_root
   )
   pkgdown_site_expect_text_contains(
     "docs/reference/extract_sf_geometries.html",
     c("polygon", "point", "line", "geom_sf()"),
-    root = root
+    root = root,
+    site_root = site_root
   )
 }
 
-pkgdown_site_validate_quick <- function(root = ".", require_rendered_sf = FALSE) {
-  pkgdown_site_validate_generated_article_text(root = root)
-  pkgdown_site_validate_widget_dependencies(root = root)
+pkgdown_site_validate_quick <- function(root = ".", require_rendered_sf = FALSE, site_root = NULL) {
+  pkgdown_site_validate_generated_article_text(root = root, site_root = site_root)
+  pkgdown_site_validate_widget_dependencies(root = root, site_root = site_root)
   pkgdown_site_expect_sf_outcome(
     root = root,
-    require_rendered_sf = require_rendered_sf
+    require_rendered_sf = require_rendered_sf,
+    site_root = site_root
   )
-  pkgdown_site_validate_news_and_reference(root = root)
+  pkgdown_site_validate_news_and_reference(root = root, site_root = site_root)
+}
+
+pkgdown_site_validate_publication <- function(site_root, require_rendered_sf = FALSE, root = ".") {
+  pkgdown_site_validate_quick(
+    root = root,
+    require_rendered_sf = require_rendered_sf,
+    site_root = site_root
+  )
 }

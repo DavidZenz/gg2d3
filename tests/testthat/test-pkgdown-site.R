@@ -25,3 +25,7 @@ test_that("generated pkgdown NEWS and reference pages reflect current support", 
 test_that("generated pkgdown quick gate validates current site evidence", {
   pkgdown_site_validate_quick(require_rendered_sf = FALSE)
 })
+
+test_that("publication site-root validator accepts generated docs as a site root", {
+  pkgdown_site_validate_publication(site_root = "docs", require_rendered_sf = FALSE)
+})
