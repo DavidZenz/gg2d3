@@ -56,6 +56,10 @@ clone.
 - Generated-site validation is available with
   `rtk Rscript --vanilla tools/validate-pkgdown-site.R --mode quick`;
   use release mode before shipping when source docs may have changed.
+  Publication artifacts or `gh-pages` checkouts can be inspected with
+  `rtk Rscript --vanilla tools/inspect-pkgdown-publication.R --site-root <site-root>`;
+  see `vignettes/d3-drawing-diagnostics.md` for the `gh workflow run`,
+  artifact download, and `gh-pages` fallback flow.
 - Renderer wiring is guarded by
   `inst/htmlwidgets/modules/geom-contracts.js` and source tests for
   module load order, render/update selectors, interactivity selectors,
