@@ -247,9 +247,8 @@ rendered by D3. No JavaScript statistics are needed.
 
 ### sf family maps with `geom_sf`
 
-[`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
-supports polygon-family (`POLYGON`, `MULTIPOLYGON`), point-family
-(`POINT`, `MULTIPOINT`), and line-family (`LINESTRING`,
+geom_sf() supports polygon-family (`POLYGON`, `MULTIPOLYGON`),
+point-family (`POINT`, `MULTIPOINT`), and line-family (`LINESTRING`,
 `MULTILINESTRING`) geometries. Polygon-family choropleths and overlays
 render as D3 `path` marks; point-family rows render as `.geom-sf-point`
 marks; and line-family rows render as `.geom-sf-line` paths.
@@ -262,13 +261,30 @@ renders county boundaries as D3 `path` marks.
 
 ``` r
 
-nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+has_sf <- requireNamespace("sf", quietly = TRUE)
+has_geojsonsf <- requireNamespace("geojsonsf", quietly = TRUE)
+missing_sf_packages <- c(
+  if (!has_sf) "sf",
+  if (!has_geojsonsf) "geojsonsf"
+)
 
-(ggplot(nc, aes(fill = AREA)) +
-  geom_sf(color = "white", linewidth = 0.2) +
-  scale_fill_gradient(low = "#eff3ff", high = "#08519c") +
-  labs(fill = "Area")) |>
-  gg2d3()
+if (length(missing_sf_packages) > 0) {
+  cat(
+    "PKGDOWN_SF_OPTIONAL_SKIP: sf example not rendered; missing ",
+    paste(missing_sf_packages, collapse = ", "),
+    ".\n",
+    sep = ""
+  )
+} else {
+  sf_pkg <- asNamespace("sf")
+  nc <- sf_pkg$st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+
+  (ggplot(nc, aes(fill = AREA)) +
+    geom_sf(color = "white", linewidth = 0.2) +
+    scale_fill_gradient(low = "#eff3ff", high = "#08519c") +
+    labs(fill = "Area")) |>
+    gg2d3()
+}
 ```
 
 The [`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html)

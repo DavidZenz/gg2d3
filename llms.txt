@@ -40,6 +40,17 @@ clone.
   artifacts under `test_output/browser-visual-smoke/` when enabled,
   while local runs may skip cleanly if optional browser tooling is
   unavailable.
+- Pkgdown site evidence has a separate release role: source docs define
+  the intended public support contract, generated `docs/` proves
+  local/pkgdown rendering, GitHub Pages output proves publication, and
+  browser visual smoke artifacts prove representative browser behavior.
+- Generated-site validation is available with
+  `rtk Rscript --vanilla tools/validate-pkgdown-site.R --mode quick`;
+  use release mode before shipping when source docs may have changed.
+  Publication artifacts or `gh-pages` checkouts can be inspected with
+  `rtk Rscript --vanilla tools/inspect-pkgdown-publication.R --site-root <site-root>`;
+  see `vignettes/d3-drawing-diagnostics.md` for the `gh workflow run`,
+  artifact download, and `gh-pages` fallback flow.
 - Renderer wiring is guarded by
   `inst/htmlwidgets/modules/geom-contracts.js` and source tests for
   module load order, render/update selectors, interactivity selectors,
@@ -64,8 +75,8 @@ clone.
   placement, and broad GIS-style topology repair.
 
 See `vignettes/d3-drawing-diagnostics.md` for validation commands,
-artifact paths, CI-mode behavior, architecture boundaries, geometry
-caveats, and future work IDs.
+pkgdown artifact taxonomy, artifact paths, CI-mode behavior,
+architecture boundaries, geometry caveats, and future work IDs.
 
 ## Features
 

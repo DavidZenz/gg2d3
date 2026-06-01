@@ -1,9 +1,8 @@
 # Detect the dominant geometry type in an sf layer
 
 Returns the summary geometry type for the sfc column in the data.frame.
-When the column contains mixed types,
-[`sf::st_geometry_type()`](https://r-spatial.github.io/sf/reference/st_geometry_type.html)
-with `by_geometry = FALSE` returns the shared type or "GEOMETRY". gg2d3
+When the column contains mixed types, `st_geometry_type()` with
+`by_geometry = FALSE` returns the shared type or "GEOMETRY". gg2d3
 renders polygon, point, and line
 [`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
 families.

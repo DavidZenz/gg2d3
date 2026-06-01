@@ -2,6 +2,15 @@
 
 ## gg2d3 (development version)
 
+### v1.14 development notes
+
+- **Pkgdown publication-surface evidence**: Repaired the documentation
+  evidence contract so source docs, generated `docs/`, GitHub Pages
+  output, and browser visual smoke artifacts have distinct
+  release-readiness roles. This clarifies how the generated site proves
+  current pkgdown content and widget embedding without implying new
+  rendering support.
+
 ### v1.13 release notes
 
 - **CI/browser visual smoke validation**: Added a dedicated browser
