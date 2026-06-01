@@ -170,6 +170,7 @@
       if (!selection) {
         restoreAllElements(panelGroup);
         panelGroup.attr('data-brush-active', null);
+        clearCrosstalkSelection(containerEl);
 
         if (typeof HTMLWidgets !== 'undefined' && HTMLWidgets.shinyMode) {
           Shiny.onInputChange(containerEl.id + '_brush', null);
@@ -187,6 +188,7 @@
 
       // Highlight elements within selection using pixel positions
       highlightSelection(panelGroup, pixelRect, config.opacity);
+      syncCrosstalkSelection(containerEl, panelGroup, pixelRect);
 
       // Invert to data domain for Shiny/callback output
       if ((typeof HTMLWidgets !== 'undefined' && HTMLWidgets.shinyMode) || config.on_brush) {
@@ -223,6 +225,31 @@
     brushGroup.on('dblclick.brush', function() {
       brushGroup.call(brushType.move, null);
     });
+  }
+
+  function clearCrosstalkSelection(containerEl) {
+    if (!containerEl._gg2d3_crosstalk ||
+        !window.gg2d3.crosstalk ||
+        typeof window.gg2d3.crosstalk.clearSelection !== 'function') {
+      return;
+    }
+
+    window.gg2d3.crosstalk.clearSelection(containerEl);
+  }
+
+  function syncCrosstalkSelection(containerEl, panelGroup, pixelRect) {
+    if (!containerEl._gg2d3_crosstalk ||
+        !window.gg2d3.crosstalk ||
+        typeof window.gg2d3.crosstalk.selectByKeys !== 'function') {
+      return;
+    }
+
+    var selectedKeys = collectSelectedCrosstalkKeys(panelGroup, pixelRect);
+    if (selectedKeys.length) {
+      window.gg2d3.crosstalk.selectByKeys(containerEl, selectedKeys);
+    } else {
+      window.gg2d3.crosstalk.clearSelection(containerEl);
+    }
   }
 
   /**
@@ -456,6 +483,28 @@
     });
 
     return dedupeSelectedDataByRowId(selectedData);
+  }
+
+  function collectSelectedCrosstalkKeys(panelGroup, pixelRect) {
+    var clippedGroup = panelGroup.select('g[clip-path]');
+    if (clippedGroup.empty()) return [];
+
+    var seen = {};
+    var selectedKeys = [];
+
+    INTERACTIVE_SELECTORS.forEach(function(selector) {
+      clippedGroup.selectAll(selector).each(function() {
+        if (!isElementInPixelRect(this, pixelRect)) return;
+
+        var key = this.getAttribute('data-crosstalk-key');
+        if (key === null || key === '' || seen[key]) return;
+
+        seen[key] = true;
+        selectedKeys.push(key);
+      });
+    });
+
+    return selectedKeys;
   }
 
   /**

@@ -794,8 +794,12 @@ HTMLWidgets.widget({
         previousIR = ir;
 
         // Initialize crosstalk if metadata present
-        if (typeof crosstalk !== 'undefined' && x.crosstalk_key && x.crosstalk_group) {
-          if (window.gg2d3.crosstalk) {
+        if (x.crosstalk_key && x.crosstalk_group && window.gg2d3.crosstalk) {
+          if (window.gg2d3.crosstalk.bind) {
+            window.gg2d3.crosstalk.bind(el, x.crosstalk_key, x.crosstalk_group);
+          }
+          if (window.gg2d3.crosstalk.isAvailable &&
+              window.gg2d3.crosstalk.isAvailable()) {
             window.gg2d3.crosstalk.init(el, x.crosstalk_key, x.crosstalk_group);
           }
         }
