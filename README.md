@@ -53,6 +53,9 @@ clone.
   the intended public support contract, generated `docs/` proves
   local/pkgdown rendering, GitHub Pages output proves publication, and
   browser visual smoke artifacts prove representative browser behavior.
+- Generated-site validation is available with
+  `rtk Rscript --vanilla tools/validate-pkgdown-site.R --mode quick`;
+  use release mode before shipping when source docs may have changed.
 - Renderer wiring is guarded by
   `inst/htmlwidgets/modules/geom-contracts.js` and source tests for
   module load order, render/update selectors, interactivity selectors,
