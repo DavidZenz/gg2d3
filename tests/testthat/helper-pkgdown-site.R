@@ -49,6 +49,20 @@ pkgdown_site_resolve_path <- function(path, root = ".", site_root = NULL) {
   resolved
 }
 
+pkgdown_site_has_path <- function(path, root = ".", site_root = NULL) {
+  !is.na(tryCatch(
+    pkgdown_site_resolve_path(path, root = root, site_root = site_root),
+    error = function(error) NA_character_
+  ))
+}
+
+pkgdown_site_skip_if_generated_docs_unavailable <- function(root = ".") {
+  testthat::skip_if_not(
+    pkgdown_site_has_path("docs/articles/gg2d3.html", root = root),
+    "generated docs site is not available"
+  )
+}
+
 pkgdown_site_read_text <- function(path, root = ".", site_root = NULL) {
   resolved <- pkgdown_site_resolve_path(path, root = root, site_root = site_root)
   paste(readLines(resolved, warn = FALSE), collapse = "\n")
