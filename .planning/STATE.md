@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.14
 milestone_name: Pkgdown Site Verification
 status: in_progress
-stopped_at: Phase 58 plan 58-02 complete
-last_updated: "2026-06-01T08:26:23.000Z"
-last_activity: 2026-06-01 -- Phase 58 plan 58-02 complete
+stopped_at: Phase 58 plan 58-03 remote publication evidence gate
+last_updated: "2026-06-01T08:47:00.000Z"
+last_activity: 2026-06-01 -- Phase 58 local evidence complete; remote publication currentness blocked
 progress:
   total_phases: 3
   completed_phases: 2
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 ## Current Position
 
 Phase: 58 (Publication Evidence And Release Handoff) — IN PROGRESS
-Plan: 2 of 3 plans complete
-Status: Phase 58 executing — ready to continue Plan 58-03
-Last activity: 2026-06-01 -- Phase 58 plan 58-02 complete
+Plan: 2 of 3 plans complete; 58-03 partial
+Status: Phase 58 executing — remote publication currentness evidence is gated on GitHub auth or a downloaded artifact
+Last activity: 2026-06-01 -- Phase 58 local evidence complete; remote publication currentness blocked
 
 Progress: [█████████░] 89%
 
@@ -71,7 +71,8 @@ None active.
 
 ### Blockers/Concerns
 
-- Local `gh` is installed, but `gh auth status` reports an invalid default token. Phase 58 remote artifact evidence may need re-authentication or GitHub Actions UI fallback.
+- Local `gh` is installed, but `gh auth status` reports an invalid default token. Phase 58 remote artifact evidence needs re-authentication or a GitHub Actions UI-downloaded `pkgdown-site-<run-id>` artifact path.
+- `origin/gh-pages` deploy output inspected structurally but is stale relative to local Phase 58 commits (`origin/gh-pages` deploy source `29f69bade0c274126e1a60fd7638f61440f6cfe1`; local evidence head `79d675dd35c0a19432f5c3ff9a88445b6374f1dc`).
 - Local `sf` is installed but not loadable because its GDAL dynamic library is unavailable; Phase 56 generated evidence records the classified local skip path.
 
 ## Deferred Items
@@ -86,11 +87,11 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-01 -- Phase 58 plan 58-02 complete
-Stopped at: Phase 58 plan 58-02 complete
+Last session: 2026-06-01 -- Phase 58 local evidence complete; remote publication currentness blocked
+Stopped at: Phase 58 plan 58-03 remote publication evidence gate
 Resume file: .planning/phases/58-publication-evidence-and-release-handoff/58-03-PLAN.md
 
-**Next Step:** Continue `$gsd-execute-phase 58` with 58-03
+**Next Step:** Repair `gh auth status` or provide a downloaded `pkgdown-site-<run-id>` artifact path, then continue `$gsd-execute-phase 58`
 
 **Completed Milestone:** v1.13 Regression & Release Polish -- 2026-05-31
 
@@ -98,6 +99,7 @@ Resume file: .planning/phases/58-publication-evidence-and-release-handoff/58-03-
 
 **Planned Milestone:** v1.14 Pkgdown Site Verification -- 3 phases -- 2026-05-31
 
+**Partial Verification:** 58-03 local evidence passed; remote publication currentness blocked by invalid `gh` auth and stale `origin/gh-pages` — 2026-06-01T08:47:00Z
 **Completed Plan:** 58-02 (publication inspection docs) — 2026-06-01T08:26:23Z
 **Completed Plan:** 58-01 (publication artifact inspection) — 2026-06-01T08:23:26Z
 **Planned Phase:** 57 (generated-site-validation-gate) — 3 plans — 2026-06-01T06:50:40.840Z
