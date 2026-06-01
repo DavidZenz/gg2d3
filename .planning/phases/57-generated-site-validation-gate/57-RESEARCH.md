@@ -106,8 +106,7 @@ The existing `.github/workflows/pkgdown.yaml` already builds the site. Phase 57 
 
 ```yaml
 - name: Validate generated pkgdown site
-  run: tools/validate-pkgdown-site.R --mode ci
-  shell: Rscript {0}
+  run: Rscript tools/validate-pkgdown-site.R --mode ci
 ```
 
 This keeps CI from deploying a stale or asset-incomplete site.
