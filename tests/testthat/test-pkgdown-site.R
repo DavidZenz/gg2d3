@@ -27,5 +27,12 @@ test_that("generated pkgdown quick gate validates current site evidence", {
 })
 
 test_that("publication site-root validator accepts generated docs as a site root", {
-  pkgdown_site_validate_publication(site_root = "docs", require_rendered_sf = FALSE)
+  site_root <- if (dir.exists("docs")) {
+    "docs"
+  } else if (dir.exists(file.path("..", "..", "docs"))) {
+    file.path("..", "..", "docs")
+  } else {
+    testthat::skip("generated docs site is not available")
+  }
+  pkgdown_site_validate_publication(site_root = site_root, require_rendered_sf = FALSE)
 })
