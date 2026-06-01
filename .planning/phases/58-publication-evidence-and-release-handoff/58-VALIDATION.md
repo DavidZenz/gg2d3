@@ -1,7 +1,7 @@
 ---
 phase: 58
 slug: publication-evidence-and-release-handoff
-status: draft
+status: passed
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-06-01
@@ -44,7 +44,7 @@ created: 2026-06-01
 | 58-01-03 | 01 | 1 | SITE-02 | T-58-02 | Focused tests cover publication inspector/helper behavior | unit | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-pkgdown-site.R")'` | W0 | green |
 | 58-02-01 | 02 | 2 | SITE-02 | T-58-03 | Maintainer docs contain CLI trigger/download and manual fallback | docs | `rtk rg -n "gh workflow run pkgdown.yaml|gh run list --workflow pkgdown.yaml|gh run download <run-id>|inspect-pkgdown-publication|origin/gh-pages" vignettes/d3-drawing-diagnostics.md README.Rmd README.md` | W0 | green |
 | 58-02-02 | 02 | 2 | SITE-03 | T-58-04 | Release messaging does not imply new renderer support | docs | `rtk rg -n "publication-surface|without implying new rendering support|not.*new rendering support" NEWS.md vignettes/d3-drawing-diagnostics.md README.Rmd` | W0 | green |
-| 58-03-01 | 03 | 3 | SITE-02, SITE-03 | T-58-05 | Final evidence maps source/build/artifact/deploy/browser/package-check outcomes without raw logs | docs | `rtk rg -n "SITE-02|SITE-03|DOCS-01|BUILD-03|workflow run|artifact|gh-pages|browser visual smoke|R CMD check|residual" .planning/phases/58-publication-evidence-and-release-handoff/58-VERIFICATION.md` | W0 | partial: local evidence passed; current remote artifact/deploy evidence blocked by invalid `gh` auth and stale `origin/gh-pages` |
+| 58-03-01 | 03 | 3 | SITE-02, SITE-03 | T-58-05 | Final evidence maps source/build/artifact/deploy/browser/package-check outcomes without raw logs | docs | `rtk rg -n "SITE-02|SITE-03|DOCS-01|BUILD-03|workflow run|artifact|gh-pages|browser visual smoke|R CMD check|residual" .planning/phases/58-publication-evidence-and-release-handoff/58-VERIFICATION.md` | W0 | green |
 
 *Status: pending | green | red | flaky*
 
@@ -60,8 +60,8 @@ Existing infrastructure covers all phase requirements.
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Authenticated `gh` workflow trigger/download | SITE-02 | Local `gh auth status` currently reports an invalid token, and remote workflow timing depends on GitHub Actions | If auth is fixed, run the documented `gh workflow run`, `gh run list`, and `gh run download` flow. If auth remains invalid, record the blocker and use `origin/gh-pages` deploy inspection fallback. |
-| Published GitHub Pages URL visual/currentness spot-check | SITE-02 | Network/publication timing can lag workflow completion | Inspect the configured URL or `origin/gh-pages` checkout and record commit SHA, site root, and inspector outcome in `58-VERIFICATION.md`. |
+| Authenticated `gh` workflow trigger/download | SITE-02 | Requires GitHub Actions and keyring-backed `gh` auth | Completed for run `26746146558`; artifact `pkgdown-site-26746146558` downloaded and inspected with rendered sf required. |
+| Published GitHub Pages URL visual/currentness spot-check | SITE-02 | Network/publication timing can lag workflow completion | Completed through deploy log evidence: `gh-pages` updated to `f19ac66` from source `d5f77c6`. |
 
 ---
 

@@ -1,95 +1,88 @@
 ---
 phase: 58-publication-evidence-and-release-handoff
-status: partial
+status: passed
 verified: 2026-06-01
-local_head: 79d675dd35c0a19432f5c3ff9a88445b6374f1dc
-sf_outcome: classified_skip
+publication_head: d5f77c6bced901248695a0fcc1e44d373acf3950
+workflow_run: 26746146558
+artifact: pkgdown-site-26746146558
+sf_outcome_local: classified_skip
+sf_outcome_artifact: rendered
 ---
 
 # Phase 58 Verification
 
-Phase 58 has complete local source/generated-site/package evidence and complete maintainer documentation for publication inspection. It is **partial** overall because authenticated `gh` artifact evidence is blocked by an invalid local GitHub CLI token, and the fallback `origin/gh-pages` deploy checkout is structurally valid but stale relative to the current local v1.14 commits.
+Phase 58 passed. The generated pkgdown site, the GitHub Actions pkgdown artifact, and the deployed `gh-pages` output are current for publication-affecting head `d5f77c6bced901248695a0fcc1e44d373acf3950`. `gh` authentication is healthy when Codex runs auth-dependent commands with keyring access; the earlier auth blocker was a sandbox/keyring visibility issue, not a project or maintainer setup failure.
 
 ## Commands Run
 
 | Command | Outcome |
 |---------|---------|
-| `rtk Rscript --vanilla tools/inspect-pkgdown-publication.R --site-root docs` | Passed; local publication-root inspection reported `sf outcome: classified_skip`. |
-| `rtk Rscript --vanilla tools/validate-pkgdown-site.R --mode quick` | Passed; generated-site validation reported `sf outcome: classified_skip`. |
-| `rtk Rscript --vanilla tools/validate-pkgdown-site.R --mode release` | Passed; rebuilt README/help/pkgdown output and left no tracked `README.md`, `docs/`, or `man/` drift. |
-| `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-pkgdown-site.R")'` | Passed with 60 expectations after package-check-aware skip guards were added. |
-| `rtk Rscript --vanilla -e 'devtools::test()'` | Passed with `[ FAIL 0 | WARN 6 | SKIP 47 | PASS 2169 ]`; skips are expected local browser/sf/interactive classifications. |
-| `rtk R CMD build --no-manual .` | Passed; built `gg2d3_0.0.0.9000.tar.gz` for package check and removed the local tarball afterward. |
-| `rtk R CMD check --as-cran --output=/tmp/gg2d3-phase58-check gg2d3_0.0.0.9000.tar.gz` | Passed with 0 ERRORs, 0 WARNINGs, and 4 NOTEs. |
-| `gh auth status` | Blocked: the default `DavidZenz` token is invalid. |
-| `git fetch origin gh-pages` | Passed. |
-| `git worktree add /tmp/gg2d3-gh-pages-phase58 origin/gh-pages` | Passed; temporary checkout removed after inspection. |
-| `rtk Rscript --vanilla tools/inspect-pkgdown-publication.R --site-root /tmp/gg2d3-gh-pages-phase58` | Passed structurally with `sf outcome: classified_skip`, but currentness is stale. |
+| `gh auth status` | Passed for account `DavidZenz`; token scopes include `repo` and `workflow`. |
+| `gh run watch 26746146558 --interval 10 --exit-status` | Passed; `pkgdown.yaml` completed successfully in 3m44s. |
+| `gh run download 26746146558 --pattern 'pkgdown-site-*' --dir test_output/github-run-26746146558` | Passed; downloaded `pkgdown-site-26746146558`. |
+| `rtk Rscript --vanilla tools/inspect-pkgdown-publication.R --site-root test_output/github-run-26746146558/pkgdown-site-26746146558 --require-rendered-sf true` | Passed; artifact inspection reported `sf outcome: rendered`. |
+| `rtk Rscript --vanilla tools/inspect-pkgdown-publication.R --site-root docs` | Passed; local generated-site inspection reported `sf outcome: classified_skip`. |
+| `rtk Rscript --vanilla tools/validate-pkgdown-site.R --mode quick` | Passed; local validation reported `sf outcome: classified_skip`. |
+| `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-pkgdown-site.R")'` | Passed with 61 expectations, including downloaded-site-root precedence coverage. |
+| `rtk Rscript --vanilla -e 'devtools::test()'` | Passed earlier in Phase 58 with `[ FAIL 0 | WARN 6 | SKIP 47 | PASS 2169 ]`; skips are expected local browser/sf/interactive classifications. |
+| `rtk R CMD check --as-cran --output=/tmp/gg2d3-phase58-check gg2d3_0.0.0.9000.tar.gz` | Passed earlier in Phase 58 with 0 ERRORs, 0 WARNINGs, and 4 NOTEs. |
 
 ## Publication Evidence
 
 | Surface | Evidence | Status |
 |---------|----------|--------|
-| Source docs | `README.Rmd`, `vignettes/d3-drawing-diagnostics.md`, and `NEWS.md` describe source/generated/deploy/browser roles and publication inspection. | Current locally. |
-| Generated `docs/` | `tools/validate-pkgdown-site.R --mode quick` and `--mode release` passed; `tools/inspect-pkgdown-publication.R --site-root docs` passed. | Current locally. |
-| Workflow artifact | `.github/workflows/pkgdown.yaml` uploads `pkgdown-site-${{ github.run_id }}` after `Validate generated pkgdown site`. | Configured, but not proven by a current downloaded run because `gh auth status` is blocked. |
-| Deployed `gh-pages` output | `origin/gh-pages` at `e8bdd423bd550586365e7e7773cf6547f6d3197f`, deployed from source `29f69bade0c274126e1a60fd7638f61440f6cfe1`, passes the publication inspector structurally. | Stale relative to local `79d675dd35c0a19432f5c3ff9a88445b6374f1dc`; it does not contain the Phase 58 publication-surface/news inspection wording. |
-| Browser visual smoke | Phase 55 evidence records the dedicated browser visual smoke workflow/artifact path and CI fallback evidence; current local `devtools::test()` keeps the default browser-smoke skip classification. | Carried forward; not rerun as a remote artifact in Phase 58. |
-| Optional sf classification | Local generated site and publication inspector report `classified_skip` because `sf` cannot load locally; CI/release validation requires rendered sf automatically when `sf` and `geojsonsf` are loadable. | Classified, not hidden. |
-| Package tests | Current `devtools::test()` passed with 2169 expectations, 6 warnings, and 47 expected skips. | Passed. |
-| Generated help | `tools/validate-pkgdown-site.R --mode release` regenerated source-derived README/help/pkgdown outputs with no tracked drift. | Passed. |
-| Package check | Current tarball `R CMD check --as-cran` passed with 4 NOTEs and no ERROR/WARNING. | Passed with notes. |
+| Source docs | `README.Rmd`, `vignettes/d3-drawing-diagnostics.md`, `NEWS.md`, and generated help describe publication inspection and the sf/widget support contract without claiming new renderer support. | Passed. |
+| Generated `docs/` | `tools/inspect-pkgdown-publication.R --site-root docs` and `tools/validate-pkgdown-site.R --mode quick` pass locally. | Passed with local `classified_skip`. |
+| Workflow run | [`pkgdown.yaml` run 26746146558](https://github.com/DavidZenz/gg2d3/actions/runs/26746146558) completed successfully for head `d5f77c6bced901248695a0fcc1e44d373acf3950`. | Passed. |
+| Workflow validation | CI log reports `Generated pkgdown site validation passed (mode: ci, sf outcome: rendered)`. | Passed. |
+| Workflow artifact | Artifact `pkgdown-site-26746146558`, ID `7327800756`, size `2430347` bytes, download URL `https://github.com/DavidZenz/gg2d3/actions/runs/26746146558/artifacts/7327800756`. Downloaded copy at `test_output/github-run-26746146558/pkgdown-site-26746146558`. | Passed; artifact is ignored and uncommitted. |
+| Deployed `gh-pages` output | Deploy step force-pushed `gh-pages` from `b249c85` to `f19ac66` with commit message source `DavidZenz/gg2d3@d5f77c6bced901248695a0fcc1e44d373acf3950`. | Passed. |
+| Browser visual smoke | Phase 55 evidence records the dedicated browser visual smoke workflow/artifact path and CI fallback evidence; Phase 58 package tests preserve the expected local browser-smoke skip classification. | Carried forward. |
+| Optional sf classification | Local generated docs classify sf as `classified_skip` because the local spatial stack cannot load; the workflow artifact renders sf and passes `--require-rendered-sf true`. | Passed. |
+| Package tests | Phase 58 `devtools::test()` passed with no failures; focused pkgdown tests now include 61 expectations. | Passed. |
+| Generated help | Release validation earlier in Phase 58 regenerated README/help/pkgdown output without tracked drift beyond intentional generated-site marker work. | Passed. |
+| Package check | `R CMD check --as-cran` passed with 4 NOTEs and no ERROR/WARNING. | Passed with notes. |
 
 ## Requirement Coverage
 
 | Requirement | Status | Evidence |
 |-------------|--------|----------|
-| SITE-02 | Partial | Local artifact/deploy inspector exists, workflow artifact upload is configured, documentation contains trigger/download/fallback commands, and `origin/gh-pages` can be inspected structurally. Current downloaded workflow artifact evidence remains blocked by invalid `gh` auth, and fallback deploy output is stale. |
-| SITE-03 | Partial | Release-readiness evidence now includes local pkgdown source/build validation, package tests, generated help, browser visual smoke classification, optional sf classification, and package-check outcome. It cannot yet close the deploy/currentness portion until current workflow artifact or deploy evidence is obtained. |
+| SITE-02 | Complete | Current artifact `pkgdown-site-26746146558` was downloaded and inspected with `--require-rendered-sf true`; deploy step updated `gh-pages` to `f19ac66` from source `d5f77c6`. |
+| SITE-03 | Complete | Release-readiness evidence now includes source docs, generated `docs/`, workflow artifact/deploy validation, browser visual smoke carry-forward, optional sf classification, package tests, generated help, and package-check outcomes. |
 
 ## v1.14 Requirement Map
 
 | Requirement | Evidence Path | Status |
 |-------------|---------------|--------|
-| DOCS-01 | Phase 56 verification; current `tools/validate-pkgdown-site.R --mode release`; `README.Rmd`, `vignettes/`, `NEWS.md`, `docs/` | Passed. |
-| DOCS-02 | `docs/articles/gg2d3.html`, `docs/articles/gg2d3.md`, `docs/reference/gg2d3.html`, `docs/reference/extract_sf_geometries.html` | Passed locally. |
-| DOCS-03 | `README.Rmd`, `README.md`, `vignettes/d3-drawing-diagnostics.md`, Phase 58 publication inspection runbook | Passed locally. |
-| BUILD-01 | `.github/workflows/pkgdown.yaml`, `tools/validate-pkgdown-site.R --mode release`, Phase 56 workflow dependency evidence | Passed locally/configured. |
-| BUILD-02 | `docs/articles/gg2d3.html`, widget dependency markers, `docs/articles/gg2d3_files/gg2d3-modules-0.0.1` | Passed locally. |
-| BUILD-03 | Local `classified_skip`; Phase 56/57 validation notes; release/CI mode requires rendered sf when optional packages are loadable | Passed as classified local skip. |
-| SITE-01 | Phase 57 verification; `tools/validate-pkgdown-site.R`; CI gate before deploy | Passed. |
-| SITE-02 | `tools/inspect-pkgdown-publication.R`, workflow artifact upload config, diagnostics `gh` runbook, fallback `gh-pages` structural inspection | Partial until current artifact/deploy evidence is obtained. |
-| SITE-03 | This verification ledger; package tests; generated help; browser visual smoke and package-check outcomes | Partial until current publication output is proven. |
+| DOCS-01 | Phase 56 verification; `README.Rmd`, `vignettes/d3-drawing-diagnostics.md`, `NEWS.md`, generated `docs/` | Passed. |
+| DOCS-02 | `docs/articles/gg2d3.html`, `docs/articles/gg2d3.md`, `docs/reference/gg2d3.html`, artifact `pkgdown-site-26746146558` | Passed. |
+| DOCS-03 | Artifact taxonomy and publication inspection docs in `README.Rmd`, `README.md`, and `vignettes/d3-drawing-diagnostics.md` | Passed. |
+| BUILD-01 | `.github/workflows/pkgdown.yaml`, run `26746146558`, `tools/validate-pkgdown-site.R --mode quick` | Passed. |
+| BUILD-02 | Local and artifact `articles/gg2d3.html` include widget containers, D3 dependency markers, and `gg2d3-modules` assets | Passed. |
+| BUILD-03 | Local `classified_skip`; CI/artifact `rendered` sf outcome with `--require-rendered-sf true` | Passed. |
+| SITE-01 | Phase 57 generated-site validation gate and Phase 58 CI validation line | Passed. |
+| SITE-02 | Downloaded artifact path, artifact ID `7327800756`, run `26746146558`, deploy commit `f19ac66` | Passed. |
+| SITE-03 | This verification ledger plus package tests, generated help, browser visual smoke evidence, and package-check outcome | Passed. |
 
 ## Release Messaging
 
-`NEWS.md` says v1.14 repairs pkgdown publication-surface evidence and explicitly avoids implying new rendering support. The negative scan for `new (geom_sf|geom_sf_text|geom_sf_label|renderer|htmlwidget) support` across `NEWS.md`, diagnostics, and README files passed.
+`NEWS.md` frames v1.14 as a publication-surface and release-readiness fix. It does not imply new `geom_sf`, renderer, or htmlwidget capabilities beyond the support already delivered in prior milestones.
 
 ## Threat Mitigation
 
 | Threat | Status | Mitigation Evidence |
 |--------|--------|---------------------|
-| T-58-05 | Partial | Local commands, SHAs, paths, and outcomes are recorded without raw logs. Current remote workflow run ID/artifact path is blocked by `gh` auth. |
-| T-58-06 | Partial | Fallback deploy SHA and source SHA are recorded; stale output is classified rather than treated as current. |
-| T-58-07 | Mitigated | Verification summarizes outcomes only; raw logs, browser JSON, screenshots, tarballs, `.Rcheck` directories, and downloaded artifacts are not committed. |
-| T-58-08 | Accepted with blocker | Invalid `gh` auth is recorded as setup/manual blocker. |
+| T-58-05 | Mitigated | Commands, run ID, artifact ID, source SHA, deploy SHA, paths, and outcomes are recorded without raw logs. |
+| T-58-06 | Mitigated | Artifact and deploy output are tied to source `d5f77c6`; downloaded artifact inspection requires rendered sf evidence. |
+| T-58-07 | Mitigated | Downloaded artifacts remain under ignored `test_output/`; verification contains summaries only. |
+| T-58-08 | Mitigated | `gh auth status` works with keyring access; Codex sandbox keyring visibility is documented as the prior confusion. |
 
 ## Residual Risks
 
-- `gh auth status` must be repaired with `gh auth login -h github.com` or a maintainer must provide a downloaded `pkgdown-site-<run-id>` artifact path from the GitHub Actions UI.
-- Current local commits have not been proven in a downloaded `pkgdown-site-*` workflow artifact.
-- `origin/gh-pages` currently points to deploy source `29f69bade0c274126e1a60fd7638f61440f6cfe1`, which predates the Phase 58 publication inspection documentation and workflow-artifact additions.
-- Local sf remains `classified_skip`; rendered sf publication evidence still depends on a CI/website environment where `sf` and `geojsonsf` load.
+- GitHub warns that Node.js 20 actions are deprecated for `actions/upload-artifact@v4`; the current workflow passes, but the warning should be revisited before GitHub forces Node 24 defaults.
+- Local sf remains `classified_skip` until the local GDAL/spatial dynamic-library stack is repaired; CI provides the rendered sf publication evidence.
+- Browser visual smoke was carried forward from Phase 55 rather than rerun as part of Phase 58, because this milestone targeted pkgdown publication evidence.
 
 ## Next Step
 
-After `gh` auth is repaired or a current artifact is provided, run the documented publication flow:
-
-```sh
-gh workflow run pkgdown.yaml --ref master
-gh run list --workflow pkgdown.yaml --branch master --limit 5 --json databaseId,status,conclusion,headSha,url
-gh run download <run-id> --pattern "pkgdown-site-*" --dir test_output/github-run-<run-id>
-rtk Rscript --vanilla tools/inspect-pkgdown-publication.R --site-root test_output/github-run-<run-id>/pkgdown-site-<run-id>
-```
-
-Then update this file to `status: passed` and mark SITE-02/SITE-03 complete only if the artifact or deploy output is current for the source SHA under review.
+v1.14 requirements are complete. The next GSD action is `$gsd-complete-milestone`.

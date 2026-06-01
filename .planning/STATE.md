@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.14
 milestone_name: Pkgdown Site Verification
-status: in_progress
-stopped_at: Phase 58 plan 58-03 remote publication evidence gate
-last_updated: "2026-06-01T08:47:00.000Z"
-last_activity: 2026-06-01 -- Phase 58 local evidence complete; remote publication currentness blocked
+status: ready_to_complete_milestone
+stopped_at: Phase 58 complete; v1.14 ready to archive
+last_updated: "2026-06-01T09:30:00.000Z"
+last_activity: 2026-06-01 -- Phase 58 publication artifact/deploy evidence passed
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 8
-  percent: 89
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -25,28 +25,28 @@ See: .planning/PROJECT.md (updated 2026-05-31)
 
 ## Current Position
 
-Phase: 58 (Publication Evidence And Release Handoff) — IN PROGRESS
-Plan: 2 of 3 plans complete; 58-03 partial
-Status: Phase 58 executing — remote publication currentness evidence is gated on GitHub auth or a downloaded artifact
-Last activity: 2026-06-01 -- Phase 58 local evidence complete; remote publication currentness blocked
+Phase: 58 (Publication Evidence And Release Handoff) — COMPLETE
+Plan: 3 of 3 plans complete
+Status: v1.14 ready to complete — publication artifact and deploy evidence passed for pkgdown run 26746146558
+Last activity: 2026-06-01 -- Phase 58 publication artifact/deploy evidence passed
 
-Progress: [█████████░] 89%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 5 in v1.14
+- Total plans completed: 9 in v1.14
 - Average duration: 6 min
-- Total execution time: 18 min
+- Total execution time: 52 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 56 | 3 | 18 min | 6 min |
-| 57 | 0 | - | - |
-| 58 | 2 | 14 min | 7 min |
+| 57 | 3 | 20 min | 7 min |
+| 58 | 3 | 14 min | 5 min |
 
 *Updated after each plan completion*
 
@@ -63,7 +63,7 @@ Recent decisions affecting current work:
 - Source-first documentation remains the authoring model, but generated `docs/` and GitHub Pages output must be validated against source docs before release claims are considered complete.
 - `sf` and `geojsonsf` remain optional package dependencies; pkgdown should render sf examples when website dependencies are available and classify any skip/failure visibly.
 - Browser visual smoke artifacts and pkgdown site artifacts serve different purposes: smoke reports validate representative rendering behavior, while pkgdown validates public documentation and embedded widget rendering.
-- Phase 58 will add a validation-backed pkgdown site workflow artifact, a publication-root inspector, maintainer `gh`/manual fallback documentation, and final release-readiness evidence.
+- Phase 58 added a validation-backed pkgdown site workflow artifact, a publication-root inspector, maintainer `gh`/manual fallback documentation, and final release-readiness evidence.
 
 ### Pending Todos
 
@@ -71,9 +71,8 @@ None active.
 
 ### Blockers/Concerns
 
-- Local `gh` is installed, but `gh auth status` reports an invalid default token. Phase 58 remote artifact evidence needs re-authentication or a GitHub Actions UI-downloaded `pkgdown-site-<run-id>` artifact path.
-- `origin/gh-pages` deploy output inspected structurally but is stale relative to local Phase 58 commits (`origin/gh-pages` deploy source `29f69bade0c274126e1a60fd7638f61440f6cfe1`; local evidence head `79d675dd35c0a19432f5c3ff9a88445b6374f1dc`).
 - Local `sf` is installed but not loadable because its GDAL dynamic library is unavailable; Phase 56 generated evidence records the classified local skip path.
+- GitHub Actions reports a non-blocking Node.js 20 deprecation advisory for `actions/upload-artifact@v4`.
 
 ## Deferred Items
 
@@ -82,16 +81,16 @@ Items acknowledged and carried forward from previous milestone close:
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
 | Website | Generated pkgdown site does not yet reflect current sf functionality and source documentation | Completed in Phase 56 | v1.13 closeout |
-| Website | Verify whether pkgdown renders representative `gg2d3` widgets and sf chunks in the published site/artifact | Partially completed in Phase 56; CI/rendered-sf path continues in Phases 57-58 | v1.13 closeout |
+| Website | Verify whether pkgdown renders representative `gg2d3` widgets and sf chunks in the published site/artifact | Completed in Phase 58 with run 26746146558 artifact inspection | v1.13 closeout |
 | UAT | Phase 52 52-HUMAN-UAT.md | Acknowledged at close; status passed with 0 pending scenarios | v1.13 |
 
 ## Session Continuity
 
-Last session: 2026-06-01 -- Phase 58 local evidence complete; remote publication currentness blocked
-Stopped at: Phase 58 plan 58-03 remote publication evidence gate
-Resume file: .planning/phases/58-publication-evidence-and-release-handoff/58-03-PLAN.md
+Last session: 2026-06-01 -- Phase 58 publication artifact/deploy evidence passed
+Stopped at: Phase 58 complete; v1.14 ready to archive
+Resume file: .planning/phases/58-publication-evidence-and-release-handoff/58-VERIFICATION.md
 
-**Next Step:** Repair `gh auth status` or provide a downloaded `pkgdown-site-<run-id>` artifact path, then continue `$gsd-execute-phase 58`
+**Next Step:** `$gsd-complete-milestone`
 
 **Completed Milestone:** v1.13 Regression & Release Polish -- 2026-05-31
 
@@ -99,7 +98,9 @@ Resume file: .planning/phases/58-publication-evidence-and-release-handoff/58-03-
 
 **Planned Milestone:** v1.14 Pkgdown Site Verification -- 3 phases -- 2026-05-31
 
-**Partial Verification:** 58-03 local evidence passed; remote publication currentness blocked by invalid `gh` auth and stale `origin/gh-pages` — 2026-06-01T08:47:00Z
+**Completed Plan:** 58-03 (publication evidence and release-readiness handoff) — 2026-06-01T09:30:00Z
+**Remote Evidence:** pkgdown workflow run 26746146558 passed for `d5f77c6`; artifact `pkgdown-site-26746146558` inspected with `sf outcome: rendered`; `gh-pages` deployed at `f19ac66` — 2026-06-01T09:21:44Z
+**Completed Phase:** 58 (Publication Evidence And Release Handoff) — 3/3 plans — 2026-06-01T09:30:00Z
 **Completed Plan:** 58-02 (publication inspection docs) — 2026-06-01T08:26:23Z
 **Completed Plan:** 58-01 (publication artifact inspection) — 2026-06-01T08:23:26Z
 **Planned Phase:** 57 (generated-site-validation-gate) — 3 plans — 2026-06-01T06:50:40.840Z

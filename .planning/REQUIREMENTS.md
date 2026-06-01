@@ -26,8 +26,8 @@
 ### Site Validation And Publication
 
 - [x] **SITE-01**: Maintainers have a repeatable validation gate that detects stale generated-site content, missing sf support text, missing htmlwidget outputs, and missing widget dependencies/assets.
-- [ ] **SITE-02**: Maintainers can download or inspect the pkgdown/GitHub Pages build artifact and verify that it contains the current sf/widget documentation evidence.
-- [ ] **SITE-03**: Release-readiness evidence includes pkgdown source/build/deploy validation alongside package tests, generated help, browser visual smoke, and package check outcomes.
+- [x] **SITE-02**: Maintainers can download or inspect the pkgdown/GitHub Pages build artifact and verify that it contains the current sf/widget documentation evidence.
+- [x] **SITE-03**: Release-readiness evidence includes pkgdown source/build/deploy validation alongside package tests, generated help, browser visual smoke, and package check outcomes.
 
 ## Future Requirements
 
@@ -61,8 +61,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BUILD-02 | Phase 56 | Complete |
 | BUILD-03 | Phase 56 | Complete |
 | SITE-01 | Phase 57 | Complete |
-| SITE-02 | Phase 58 | Pending |
-| SITE-03 | Phase 58 | Pending |
+| SITE-02 | Phase 58 | Complete |
+| SITE-03 | Phase 58 | Complete |
 
 **Coverage:**
 - v1.14 requirements: 9 total
@@ -71,4 +71,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-31*
-*Last updated: 2026-05-31 after Phase 56 execution*
+*Last updated: 2026-06-01 after Phase 58 execution*
