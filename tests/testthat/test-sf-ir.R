@@ -106,6 +106,16 @@ test_that("aesthetic-mapped sf plot includes fill in data rows", {
   expect_true("fill" %in% names(first_row))
 })
 
+test_that("aesthetic-mapped sf rows keep source attributes for tooltips", {
+  ir2 <- as_d3_ir(ggplot2::ggplot(nc, ggplot2::aes(fill = AREA)) + ggplot2::geom_sf())
+  first_row <- ir2$layers[[1]]$data[[1]]
+
+  expect_equal(first_row$NAME, nc$NAME[[1]])
+  expect_equal(first_row$AREA, nc$AREA[[1]])
+  expect_match(first_row$fill, "^#")
+  expect_equal(ir2$aes_by_var$AREA, "fill")
+})
+
 test_that("data rows are parallel to geometries", {
   ir <- as_d3_ir(ggplot2::ggplot(nc) + ggplot2::geom_sf())
   expect_equal(length(ir$layers[[1]]$data), length(ir$layers[[1]]$geometries))

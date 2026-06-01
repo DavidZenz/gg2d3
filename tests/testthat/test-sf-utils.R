@@ -89,6 +89,28 @@ test_that("normalize_to_wgs84 returns non-sfc input unchanged", {
   expect_equal(result2, 42L)
 })
 
+test_that("sf source attributes are preserved for tooltip rows", {
+  built_data <- data.frame(
+    PANEL = c(1L, 1L),
+    fill = c("#111111", "#222222"),
+    row_id = c(2L, 1L)
+  )
+  source_data <- data.frame(
+    NAME = c("Ashe", "Alleghany"),
+    AREA = c(0.114, 0.061),
+    fill = c("source_fill_a", "source_fill_b")
+  )
+
+  enriched <- sf_attach_source_fields(built_data, source_data, source_rows = c(2L, 1L))
+  rows <- sf_layer_data_rows(enriched)
+
+  expect_equal(rows[[1]]$NAME, "Alleghany")
+  expect_equal(rows[[1]]$AREA, 0.061)
+  expect_equal(rows[[1]]$fill, "#111111")
+  expect_equal(rows[[2]]$NAME, "Ashe")
+  expect_equal(rows[[2]]$AREA, 0.114)
+})
+
 test_that("detect_dominant_geom_type returns MULTIPOLYGON for NC shapefile", {
   skip_if_not_installed("sf")
   skip_if_not_installed("geojsonsf")

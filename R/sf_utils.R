@@ -85,7 +85,8 @@ sf_geometry_family <- function(types) {
 
 prepare_sf_geometry_ir <- function(df,
                                    supported_types = sf_supported_geometry_types(),
-                                   warn = TRUE) {
+                                   warn = TRUE,
+                                   source_data = NULL) {
   if (!requireNamespace("sf", quietly = TRUE)) {
     stop(
       "The 'sf' package is required for geom_sf support. ",
@@ -157,6 +158,11 @@ prepare_sf_geometry_ir <- function(df,
   accepted_data[[geom_col_name]] <- accepted_geom
   accepted_data[["row_id"]] <- source_rows[accepted]
   accepted_data[[".sf_family"]] <- geometry_families[accepted]
+  accepted_data <- sf_attach_source_fields(
+    accepted_data,
+    source_data,
+    source_rows[accepted]
+  )
   attr(accepted_data, "sf_column") <- geom_col_name
 
   geometries <- if (length(accepted_geom) > 0L) {
@@ -223,6 +229,41 @@ prepare_sf_geometry_ir <- function(df,
 }
 
 
+sf_non_geometry_columns <- function(df) {
+  if (is.null(df) || !is.data.frame(df) || ncol(df) == 0L) {
+    return(character())
+  }
+
+  names(df)[!vapply(df, inherits, logical(1L), "sfc")]
+}
+
+
+sf_attach_source_fields <- function(accepted_data, source_data, source_rows) {
+  if (is.null(source_data) || !is.data.frame(source_data) || nrow(accepted_data) == 0L) {
+    return(accepted_data)
+  }
+  if (length(source_rows) != nrow(accepted_data) || anyNA(source_rows)) {
+    return(accepted_data)
+  }
+  if (nrow(source_data) < max(source_rows)) {
+    return(accepted_data)
+  }
+
+  source_cols <- sf_non_geometry_columns(source_data)
+  source_cols <- setdiff(source_cols, names(accepted_data))
+  if (length(source_cols) == 0L) {
+    return(accepted_data)
+  }
+
+  source_subset <- source_data[source_rows, source_cols, drop = FALSE]
+  for (col_name in source_cols) {
+    accepted_data[[col_name]] <- source_subset[[col_name]]
+  }
+
+  accepted_data
+}
+
+
 sf_layer_data_rows <- function(df) {
   if (is.null(df) || !nrow(df)) return(list())
 
@@ -237,6 +278,7 @@ sf_layer_data_rows <- function(df) {
     "weight", "stackpos", "binwidth", "countidx", "row_id", ".sf_family"
   )
 
+  keep_aes <- unique(c(keep_aes, sf_non_geometry_columns(df)))
   df <- df[, intersect(keep_aes, names(df)), drop = FALSE]
   col_names <- names(df)
   df[] <- lapply(col_names, function(colname) {
@@ -285,8 +327,8 @@ sf_panel_geometries <- function(sf_prepared) {
 }
 
 
-sf_layer_ir_payload <- function(df, aes, params, var_names) {
-  sf_prepared <- prepare_sf_geometry_ir(df)
+sf_layer_ir_payload <- function(df, aes, params, var_names, source_data = NULL) {
+  sf_prepared <- prepare_sf_geometry_ir(df, source_data = source_data)
 
   list(
     layer = list(
@@ -307,12 +349,12 @@ sf_layer_ir_payload <- function(df, aes, params, var_names) {
 }
 
 
-sf_annotation_layer_ir_payload <- function(df, aes, params, var_names, annotation_type) {
+sf_annotation_layer_ir_payload <- function(df, aes, params, var_names, annotation_type, source_data = NULL) {
   if (!annotation_type %in% c("text", "label")) {
     stop("sf annotation_type must be 'text' or 'label'", call. = FALSE)
   }
 
-  sf_prepared <- prepare_sf_geometry_ir(df)
+  sf_prepared <- prepare_sf_geometry_ir(df, source_data = source_data)
 
   list(
     layer = list(

@@ -68,11 +68,12 @@ as_d3_ir <- function(p, width = 640, height = 400,
     y_tn <- if (!is.null(yscale_obj$trans)) yscale_obj$trans$name else NULL
     df <- gg2d3_ir_apply_temporal_layer_columns(df, x_tn, y_tn)
     var_names <- gg2d3_ir_var_names(b$plot$mapping, layer_obj$mapping)
+    source_data <- gg2d3_ir_layer_source_data(b$plot$data, layer_obj)
 
     g_params <- gg2d3_ir_layer_params(layer_obj, gcl)
 
     if (gname == "sf") {
-      payload <- sf_layer_ir_payload(df, aes, g_params, var_names)
+      payload <- sf_layer_ir_payload(df, aes, g_params, var_names, source_data = source_data)
       if (length(payload$coord_geometry) > 0L) {
         sf_coord_geometries[[length(sf_coord_geometries) + 1L]] <<- payload$coord_geometry
         for (panel_key in names(payload$panel_geometries)) {
@@ -87,7 +88,14 @@ as_d3_ir <- function(p, width = 640, height = 400,
       payload$layer
     } else if (gname %in% c("sf_text", "sf_label")) {
       annotation_type <- sub("^sf_", "", gname)
-      payload <- sf_annotation_layer_ir_payload(df, aes, g_params, var_names, annotation_type)
+      payload <- sf_annotation_layer_ir_payload(
+        df,
+        aes,
+        g_params,
+        var_names,
+        annotation_type,
+        source_data = source_data
+      )
       if (length(payload$coord_geometry) > 0L) {
         sf_coord_geometries[[length(sf_coord_geometries) + 1L]] <<- payload$coord_geometry
         for (panel_key in names(payload$panel_geometries)) {

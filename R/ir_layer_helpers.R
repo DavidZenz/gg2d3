@@ -235,6 +235,25 @@ gg2d3_ir_layer_params <- function(layer_obj, gcl) {
 }
 
 
+gg2d3_ir_layer_source_data <- function(plot_data, layer_obj) {
+  layer_data <- layer_obj$data
+
+  if (is.null(layer_data) || inherits(layer_data, "waiver")) {
+    return(plot_data)
+  }
+
+  if (is.function(layer_data)) {
+    return(tryCatch(layer_data(plot_data), error = function(e) plot_data))
+  }
+
+  if (is.data.frame(layer_data)) {
+    return(layer_data)
+  }
+
+  plot_data
+}
+
+
 gg2d3_ir_non_sf_layer <- function(gname, df, aes, params, var_names) {
   list(
     geom = gname,
