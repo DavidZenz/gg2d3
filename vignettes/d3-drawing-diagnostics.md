@@ -116,6 +116,41 @@ source/generated evidence together. Downloaded GitHub Pages artifact inspection
 is a Phase 58 release-evidence step, not part of this Phase 57 local generated
 site gate.
 
+### Local sf/GDAL diagnostics
+
+When local generated-site validation reports `classified_skip` for the sf
+article example, first check whether the local spatial stack can load:
+
+```sh
+rtk Rscript --vanilla tools/diagnose-spatial-stack.R
+```
+
+To inspect a specific generated or downloaded site root, pass `--site-root`:
+
+```sh
+rtk Rscript --vanilla tools/diagnose-spatial-stack.R --site-root docs
+```
+
+The diagnostic output includes stable markers:
+
+- `sf:` reports whether the `sf` namespace is loadable and includes the load
+  error when a dynamic library such as GDAL is missing;
+- `geojsonsf:` reports whether the GeoJSON serializer dependency is loadable;
+- `pkgdown sf outcome:` reports `rendered`, `classified_skip`, `missing`, or
+  `site_root_unavailable`; and
+- `recommendation:` names the next action.
+
+A local `classified_skip` is acceptable in quick validation only when the
+diagnostic reports `sf` or `geojsonsf` as not loadable. In that case this is
+local environment repair, not a gg2d3 regression. Repair or reinstall the local
+spatial stack through the maintainer's package manager and R library setup, then
+rerun release validation to convert local evidence from `classified_skip` to
+rendered sf output:
+
+```sh
+rtk Rscript --vanilla tools/validate-pkgdown-site.R --mode release
+```
+
 ### Publication artifact inspection
 
 The generated-site validation gate proves the local `docs/` contents. The
