@@ -12,9 +12,15 @@ Any ggplot2 plot should render identically in D3 — same visual output, but now
 
 v1.14 Pkgdown Site Verification shipped on 2026-06-01. The generated local `docs/` site, GitHub Actions pkgdown artifact, and GitHub Pages deploy path now have repeatable validation for current sf/widget documentation, representative htmlwidget scaffolding/assets, rendered sf evidence when spatial dependencies are available, and linked Crosstalk examples. The final publication evidence includes pkgdown workflow run `26750918812` for `c4a21e0`, downloaded artifact inspection with `sf outcome: rendered` and `crosstalk outcome: rendered`, browser-observed linked Crosstalk behavior, and source-field preservation for `geom_sf()` tooltips (`NAME` and numeric `AREA` separate from rendered fill colors).
 
-## Planning State
+## Current Milestone: v1.15 Release Confidence And Maintenance
 
-No active milestone is defined. The next step is `$gsd-new-milestone` to define fresh requirements and phases.
+**Goal:** Turn the now-truthful publication surface into release-grade confidence by closing CI/release hygiene risks, deepening visual regression evidence, shipping bounded geometry polish, and continuing architecture cleanup around the highest-risk IR/rendering seams.
+
+**Target features:**
+- Release-readiness hygiene for the GitHub Actions Node 20 advisory, package-check evidence, and local `sf`/GDAL troubleshooting.
+- Stronger visual regression depth for pkgdown pages and representative browser-rendered widgets.
+- A bounded geometry polish tranche focused on evidence-backed gaps rather than broad new rendering categories.
+- Maintainability cleanup for `as_d3_ir()`, sf/source-field handling, renderer contracts, and private ggplot2 compatibility boundaries.
 
 ## Last Shipped Milestone: v1.14 Pkgdown Site Verification
 
@@ -159,7 +165,10 @@ No active milestone is defined. The next step is `$gsd-new-milestone` to define 
 
 ### Active
 
-- None yet. Next milestone requirements should be defined with `$gsd-new-milestone`.
+- Release-readiness hygiene must resolve or explicitly mitigate current CI advisories, local spatial setup friction, package-check evidence, and maintainer handoff gaps before a release candidate.
+- Visual regression depth must extend beyond marker/payload validation to representative screenshots or comparable browser evidence for pkgdown pages and core widgets.
+- Geometry polish must close a small, evidence-backed set of high-value rendering gaps without expanding gg2d3 into GIS topology repair, basemap, or rich-text systems.
+- Architecture cleanup must reduce maintenance risk around the high-risk IR/rendering boundaries while preserving existing public behavior and test contracts.
 
 ### Out of Scope
 
@@ -243,6 +252,7 @@ gg2d3 has a mature three-layer pipeline (R → IR → D3), production polygon/po
 | publication artifact before deploy | The pkgdown workflow should upload a validation-backed site artifact before Pages deploy so release evidence can inspect the exact generated site payload | ✓ Good — implemented and verified in Phase 58 |
 | pkgdown crosstalk behavioral UAT | Rendered Crosstalk widgets in documentation need browser-observed linked selection checks, because payload markers alone do not prove panel-to-panel behavior | ✓ Good — closeout fix and verification in v1.14 |
 | sf tooltip source fields | sf rows must preserve non-geometry source fields separately from rendered aesthetics so tooltip requests like `NAME` and `AREA` show source data rather than `undefined` or hex colors | ✓ Good — closeout fix and artifact verification in v1.14 |
+| release confidence and maintenance bundle | The next milestone should combine release hygiene, deeper visual evidence, bounded geometry polish, and architecture cleanup because each reduces release risk without changing the package's product direction | Active — v1.15 scope |
 
 ## Evolution
 
@@ -262,4 +272,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-01 after completing v1.14 Pkgdown Site Verification*
+*Last updated: 2026-06-02 after starting v1.15 Release Confidence And Maintenance*

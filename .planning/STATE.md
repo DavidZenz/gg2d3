@@ -1,52 +1,53 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.14
-milestone_name: Pkgdown Site Verification
-status: completed
-stopped_at: v1.14 archived; ready for new milestone planning
-last_updated: "2026-06-01T11:16:24.917Z"
-last_activity: 2026-06-01
+milestone: v1.15
+milestone_name: Release Confidence And Maintenance
+status: roadmap_created
+stopped_at: v1.15 initialized; ready for Phase 59 discussion
+last_updated: "2026-06-02T00:00:00.000Z"
+last_activity: 2026-06-02 -- Milestone v1.15 initialized
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 12
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-06-01)
+See: .planning/PROJECT.md (updated 2026-06-02)
 
 **Core value:** Any ggplot2 plot should render identically in D3 -- same visual output, but now interactive and web-native.
-**Current focus:** Planning next milestone
+**Current focus:** Phase 59 — Release Hygiene And Local Spatial Recovery
 
 ## Current Position
 
-Phase: none — v1.14 archived
-Plan: next milestone not started
-Status: v1.14 Pkgdown Site Verification milestone complete
-Last activity: 2026-06-01
+Phase: 59 (Release Hygiene And Local Spatial Recovery) — NOT STARTED
+Plan: —
+Status: v1.15 Release Confidence And Maintenance initialized
+Last activity: 2026-06-02 -- Milestone v1.15 initialized
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 9 in v1.14
-- Average duration: 6 min
-- Total execution time: 52 min
+- Total plans completed: 0 in v1.15
+- Average duration: —
+- Total execution time: —
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 56 | 3 | 18 min | 6 min |
-| 57 | 3 | 20 min | 7 min |
-| 58 | 3 | 14 min | 5 min |
+| 59 | 0/3 | - | - |
+| 60 | 0/3 | - | - |
+| 61 | 0/3 | - | - |
+| 62 | 0/3 | - | - |
 
 *Updated after each plan completion*
 
@@ -64,6 +65,7 @@ Recent decisions affecting current work:
 - `sf` and `geojsonsf` remain optional package dependencies; pkgdown should render sf examples when website dependencies are available and classify any skip/failure visibly.
 - Browser visual smoke artifacts and pkgdown site artifacts serve different purposes: smoke reports validate representative rendering behavior, while pkgdown validates public documentation and embedded widget rendering.
 - Phase 58 added a validation-backed pkgdown site workflow artifact, a publication-root inspector, maintainer `gh`/manual fallback documentation, evaluated linked Crosstalk examples, sf tooltip source-field preservation, and final release-readiness evidence.
+- v1.15 combines release hygiene, visual regression depth, bounded geometry polish, and architecture cleanup as one release-confidence and maintenance milestone.
 
 ### Pending Todos
 
@@ -86,14 +88,16 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-01 -- v1.14 archived after final pkgdown Crosstalk and sf tooltip artifact evidence
-Stopped at: v1.14 complete; ready to start next milestone
-Resume file: .planning/milestones/v1.14-phases/58-publication-evidence-and-release-handoff/58-VERIFICATION.md
+Last session: 2026-06-02 -- v1.15 initialized after selecting release confidence, visual regression, geometry polish, and architecture cleanup
+Stopped at: v1.15 initialized; ready for Phase 59 discussion
+Resume file: .planning/ROADMAP.md
 
-**Next Step:** `$gsd-new-milestone`
+**Next Step:** `$gsd-discuss-phase 59`
 
 **Completed Milestone:** v1.13 Regression & Release Polish -- 2026-05-31
 **Completed Milestone:** v1.14 Pkgdown Site Verification -- 2026-06-01
+**Started Milestone:** v1.15 Release Confidence And Maintenance -- 2026-06-02
+**Planned Milestone:** v1.15 Release Confidence And Maintenance -- 4 phases -- 2026-06-02
 
 **Started Milestone:** v1.14 Pkgdown Site Verification -- 2026-05-31
 
