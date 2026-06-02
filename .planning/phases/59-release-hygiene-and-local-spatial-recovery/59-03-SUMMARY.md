@@ -20,7 +20,7 @@ key-files:
   modified:
     - .planning/phases/59-release-hygiene-and-local-spatial-recovery/59-VALIDATION.md
 key-decisions:
-  - "Record remote workflow evidence as blocked, not passed, because `master` is ahead of `origin/master`."
+- "Record remote workflow evidence as blocked, not passed, because `master` has unpushed commits ahead of `origin/master`."
   - "Keep Phase 59 status partial until workflow runs inspect the pushed action changes."
 patterns-established:
   - "Verification ledgers classify local pass, local skip, and remote blocker states separately."
@@ -69,7 +69,7 @@ None - plan executed exactly as written.
 
 ## Issues Encountered
 
-- Remote workflow evidence could not be run honestly because local `master` is ahead of `origin/master` by 7 commits. Pushing is required before triggering `pkgdown.yaml` and `browser-visual-smoke.yaml` for the new action versions.
+- Remote workflow evidence could not be run honestly because local `master` has unpushed commits ahead of `origin/master`. Pushing is required before triggering `pkgdown.yaml` and `browser-visual-smoke.yaml` for the new action versions.
 
 ## User Setup Required
 

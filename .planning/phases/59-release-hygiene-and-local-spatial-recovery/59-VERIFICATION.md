@@ -20,7 +20,7 @@ remote_workflows: blocked_unpushed_branch
 | `rtk Rscript --vanilla tools/validate-pkgdown-site.R --mode quick` | Passed | Reported `sf outcome: classified_skip` and `crosstalk outcome: rendered`. |
 | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-pkgdown-site.R")'` | Passed | Focused pkgdown-site test completed with 76 passes, 0 failures, 0 skips. |
 | `rtk Rscript --vanilla -e 'testthat::test_file("tests/testthat/test-browser-visual-smoke.R")'` | Classified skip | Local run skipped because `GG2D3_BROWSER_VISUAL_SMOKE=true` was not set. This is expected for local default mode. |
-| `git status --short --branch` | Remote evidence blocked | Current branch is `master...origin/master [ahead 7]`; workflow runs for the new action changes cannot be triggered against pushed source yet. |
+| `git status --short --branch` | Remote evidence blocked | Current branch is ahead of `origin/master`; workflow runs for the new action changes cannot be triggered against pushed source yet. |
 
 ## Actions Advisory
 
@@ -30,10 +30,10 @@ remote_workflows: blocked_unpushed_branch
 - `.github/workflows/browser-visual-smoke.yaml` now uses `actions/upload-artifact@v6`.
 - `59-ACTIONS-ADVISORY.md` records the Node 20 to Node 24 context, workflow audit, source outcome, and remote evidence handoff.
 
-Actions advisory status: **blocked** for final remote evidence because the current branch is ahead of `origin/master` by 7 commits. The source mitigation is ready, but `pkgdown.yaml` and `browser-visual-smoke.yaml` must be run after pushing these commits before the advisory can be classified as resolved or mitigated by workflow evidence.
+Actions advisory status: **blocked** for final remote evidence because the current branch is ahead of `origin/master`. The source mitigation is ready, but `pkgdown.yaml` and `browser-visual-smoke.yaml` must be run after pushing these commits before the advisory can be classified as resolved or mitigated by workflow evidence.
 
-Current local HEAD: `450689854100ba01a4f19d955a8892374d176555`
-Current `origin/master`: `2e026878cfe093c6cf41b763671ab492a4b99656`
+Evidence source HEAD before the verification-ledger commit: `450689854100ba01a4f19d955a8892374d176555`
+`origin/master` at verification time: `2e026878cfe093c6cf41b763671ab492a4b99656`
 
 ## Spatial Stack
 
@@ -74,7 +74,7 @@ The focused pkgdown-site test passed. Local browser visual smoke was classified 
 
 ## Residual Risks
 
-- Remote workflow evidence is blocked until the 7 local commits ahead of `origin/master` are pushed. After push, run or inspect `pkgdown.yaml` and `browser-visual-smoke.yaml` and record run IDs, conclusions, SHAs, URLs, and advisory state.
+- Remote workflow evidence is blocked until local commits ahead of `origin/master` are pushed. After push, run or inspect `pkgdown.yaml` and `browser-visual-smoke.yaml` and record run IDs, conclusions, SHAs, URLs, and advisory state.
 - Local `sf` remains not loadable until the local GDAL/R spatial stack is repaired. Local generated-site evidence remains `classified_skip`; CI or a repaired local machine is needed for rendered local sf proof.
 - Local browser visual smoke remains opt-in and skipped by default. This is acceptable for Phase 59; Phase 60 will deepen visual regression evidence.
 
