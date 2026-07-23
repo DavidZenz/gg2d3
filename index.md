@@ -51,6 +51,11 @@ clone.
   `rtk Rscript --vanilla tools/inspect-pkgdown-publication.R --site-root <site-root>`;
   see `vignettes/d3-drawing-diagnostics.md` for the `gh workflow run`,
   artifact download, and `gh-pages` fallback flow.
+- Local sf/GDAL setup can be diagnosed with
+  `rtk Rscript --vanilla tools/diagnose-spatial-stack.R`; see
+  `vignettes/d3-drawing-diagnostics.md` for how to distinguish local
+  environment repair from gg2d3 regressions when pkgdown reports
+  `classified_skip`.
 - Renderer wiring is guarded by
   `inst/htmlwidgets/modules/geom-contracts.js` and source tests for
   module load order, render/update selectors, interactivity selectors,

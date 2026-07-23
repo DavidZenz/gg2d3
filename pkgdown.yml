@@ -1,10 +1,10 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   gg2d3-interactivity: gg2d3-interactivity.html
   gg2d3: gg2d3.html
-last_built: 2026-06-01T11:21Z
+last_built: 2026-07-23T09:45Z
 urls:
   reference: https://davidzenz.github.io/gg2d3/reference
   article: https://davidzenz.github.io/gg2d3/articles

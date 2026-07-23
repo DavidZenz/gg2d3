@@ -90,6 +90,7 @@
 <li>Browser visual validation has a dedicated GitHub Actions workflow and a CI-equivalent local mode. It writes inspectable <code>index.html</code>, <code>index.json</code>, fixture HTML, screenshot, DOM-summary, and browser-log artifacts under <code>test_output/browser-visual-smoke/</code> when enabled, while local runs may skip cleanly if optional browser tooling is unavailable.</li>
 <li>Pkgdown site evidence has a separate release role: source docs define the intended public support contract, generated <code>docs/</code> proves local/pkgdown rendering, GitHub Pages output proves publication, and browser visual smoke artifacts prove representative browser behavior.</li>
 <li>Generated-site validation is available with <code>rtk Rscript --vanilla tools/validate-pkgdown-site.R --mode quick</code>; use release mode before shipping when source docs may have changed. Publication artifacts or <code>gh-pages</code> checkouts can be inspected with <code>rtk Rscript --vanilla tools/inspect-pkgdown-publication.R --site-root &lt;site-root&gt;</code>; see <code>vignettes/d3-drawing-diagnostics.md</code> for the <code>gh workflow run</code>, artifact download, and <code>gh-pages</code> fallback flow.</li>
+<li>Local sf/GDAL setup can be diagnosed with <code>rtk Rscript --vanilla tools/diagnose-spatial-stack.R</code>; see <code>vignettes/d3-drawing-diagnostics.md</code> for how to distinguish local environment repair from gg2d3 regressions when pkgdown reports <code>classified_skip</code>.</li>
 <li>Renderer wiring is guarded by <code>inst/htmlwidgets/modules/geom-contracts.js</code> and source tests for module load order, render/update selectors, interactivity selectors, and public payload sanitization. Selected IR helper-boundary tests cover theme extraction and geom parameter routing while full <code><a href="reference/as_d3_ir.html">as_d3_ir()</a></code> modularization remains future work.</li>
 <li>Geometry support is bounded: ordinary <code><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_label()</a></code> renders SVG label boxes; ordinary <code><a href="https://ggplot2.tidyverse.org/reference/geom_polygon.html" class="external-link">geom_polygon()</a></code> keeps grouped closed-path behavior and explicitly does not infer topology or holes; <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_rect()</a></code> and <code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile()</a></code> filter non-finite transformed SVG bounds before emitting rect attributes.</li>
 <li>Deferred work remains explicit in diagnostics, including future pixel-diff thresholds, public hosted visual reports, full IR modularization, generated renderer documentation, repelled label placement, and broad GIS-style topology repair.</li>
@@ -291,7 +292,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>
