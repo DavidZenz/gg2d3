@@ -5,8 +5,9 @@ source:
   - 59-01-SUMMARY.md
   - 59-02-SUMMARY.md
   - 59-03-SUMMARY.md
+  - 59-VERIFICATION.md
 started: 2026-06-02T11:34:59Z
-updated: 2026-06-18T13:57:29Z
+updated: 2026-07-23T10:00:00Z
 ---
 
 ## Current Test
@@ -27,10 +28,18 @@ result: pass
 expected: Phase 59 verification records local pkgdown/site checks as passed or classified skips, records browser visual smoke as an expected opt-in local skip, and keeps remote workflow evidence blocked until the unpushed commits are pushed and GitHub Actions runs are inspected.
 result: pass
 
+### 4. pkgdown.yaml CI Run After Push
+expected: Open GitHub Actions for DavidZenz/gg2d3, find the pkgdown.yaml run triggered by commit 26a6899. Run conclusion = success. Artifact pkgdown-site-<run_id> uploaded. No fatal error from actions/upload-artifact@v6 step. Node 20 advisory absent or documented as upstream-known noise.
+result: pass
+
+### 5. browser-visual-smoke.yaml CI Run After Push
+expected: Locate the browser-visual-smoke.yaml run for commit 26a6899. The tryCatch-wrapped Rscript step exits cleanly (0, or deliberate non-zero with FATAL: message). Artifact upload step succeeds with warn level for missing output. No Node 20 advisory errors.
+result: pass
+
 ## Summary
 
-total: 3
-passed: 3
+total: 5
+passed: 5
 issues: 0
 pending: 0
 skipped: 0

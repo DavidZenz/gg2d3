@@ -1,7 +1,7 @@
 ---
 phase: 59-release-hygiene-and-local-spatial-recovery
 verified: 2026-07-23T00:00:00Z
-status: human_needed
+status: passed
 score: 3/4 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
@@ -14,17 +14,21 @@ re_verification:
   previous_status: partial
   previous_score: 3/4
   gaps_closed:
+
     - "Commits are now pushed to origin/master (local HEAD == origin/master at 26a6899)"
     - "WR-001: diagnose-spatial-stack.R now inlines pkgdown_site_sf_outcome() with no source() dependency"
     - "WR-002: browser-visual-smoke.yaml uses scalar || and tryCatch for correct exit-status propagation"
     - "WR-003: pkgdown.yaml deploy uses clean: true to prevent stale gh-pages accumulation"
   gaps_remaining:
+
     - "GitHub Actions run outcomes for pkgdown.yaml and browser-visual-smoke.yaml require human inspection"
   regressions: []
 human_verification:
+
   - test: "Open https://github.com/DavidZenz/gg2d3/actions/workflows/pkgdown.yaml and find the run triggered after commit 26a6899. Confirm the run conclusion is success and that no Node 20 runtime advisory warning appears in the workflow logs."
     expected: "pkgdown.yaml run completes with conclusion=success; artifact pkgdown-site-<run_id> uploaded; Node 20 advisory absent or documented as upstream-known noise."
     why_human: "CI run results are observable only in the GitHub Actions web UI or via gh CLI authenticated to the repo. The source code is correct; only a live run can confirm runtime compatibility of actions/upload-artifact@v6 with ubuntu-latest."
+
   - test: "Open https://github.com/DavidZenz/gg2d3/actions/workflows/browser-visual-smoke.yaml and find the run triggered after commit 26a6899. Confirm the run completes (pass or classified skip) without a fatal exit from the tryCatch-wrapped Rscript step, and that the browser-visual-smoke-<run_id> artifact is uploaded (even if test_output/ is empty, if-no-files-found: warn means the step succeeds)."
     expected: "browser-visual-smoke.yaml run completes without error in the Rscript step; no Node 20 advisory; artifact upload step succeeds with warn-level for missing output."
     why_human: "Same reason as above — requires live CI run inspection."
@@ -120,6 +124,7 @@ No `TBD`, `FIXME`, or `XXX` markers found in any phase-modified file.
 `REL-02` local diagnostics: **passed**.
 
 Diagnostic command reports (from SUMMARY self-check):
+
 - `sf: not_loadable: ...` (missing `libgdal.38.dylib` — local environment repair)
 - `geojsonsf: loadable version 2.0.5`
 - `pkgdown sf outcome: classified_skip`
@@ -132,6 +137,7 @@ This is classified as local environment repair, not a gg2d3 regression.
 ## Pkgdown And Browser Visual
 
 Local evidence (from SUMMARY + UAT):
+
 - `tools/validate-pkgdown-site.R --mode quick`: passed (`sf outcome: classified_skip`, `crosstalk outcome: rendered`)
 - `test-pkgdown-site.R`: 76 passes, 0 failures
 - `test-browser-visual-smoke.R`: expected local opt-in skip (GG2D3_BROWSER_VISUAL_SMOKE not set)
