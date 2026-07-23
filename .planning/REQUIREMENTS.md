@@ -7,8 +7,8 @@
 
 ### Release Hygiene
 
-- [ ] **REL-01**: Maintainers can run the pkgdown and browser-visual workflows without unresolved GitHub Actions runtime advisories, or with a documented, tested mitigation when upstream actions still emit advisory noise.
-- [ ] **REL-02**: Maintainers can diagnose and repair local `sf`/GDAL dynamic-library failures well enough to convert local sf validation from `classified_skip` to rendered evidence when the spatial stack is available.
+- [x] **REL-01**: Maintainers can run the pkgdown and browser-visual workflows without unresolved GitHub Actions runtime advisories, or with a documented, tested mitigation when upstream actions still emit advisory noise.
+- [x] **REL-02**: Maintainers can diagnose and repair local `sf`/GDAL dynamic-library failures well enough to convert local sf validation from `classified_skip` to rendered evidence when the spatial stack is available.
 - [ ] **REL-03**: Release-readiness evidence includes an updated package-check, generated-help, pkgdown artifact, browser visual, and residual-risk ledger for v1.15.
 
 ### Visual Regression
@@ -55,8 +55,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REL-01 | Phase 59 | Pending |
-| REL-02 | Phase 59 | Pending |
+| REL-01 | Phase 59 | Complete |
+| REL-02 | Phase 59 | Complete |
 | REL-03 | Phase 62 | Pending |
 | VIS-01 | Phase 60 | Pending |
 | VIS-02 | Phase 60 | Pending |
@@ -69,6 +69,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ARCH-03 | Phase 62 | Pending |
 
 **Coverage:**
+
 - v1.15 requirements: 12 total
 - Mapped to phases: 12
 - Unmapped: 0
