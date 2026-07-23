@@ -64,9 +64,50 @@ format_sf_external_libraries <- function() {
 }
 
 root <- find_project_root()
-setwd(root)
 
-source(file.path(root, "tests", "testthat", "helper-pkgdown-site.R"))
+# Standalone sf-outcome probe — no dependency on the testthat helper.
+# Reads the built pkgdown HTML and MD articles and returns one of:
+#   "rendered"         – gg2d3 widget with rendered sf payload found
+#   "classified_skip"  – PKGDOWN_SF_OPTIONAL_SKIP marker found
+#   "missing"          – sf heading found but payload absent
+#   "error: <msg>"     – file not found or read error
+pkgdown_site_sf_outcome <- function(root = ".", site_root = NULL) {
+  read_article <- function(rel_path) {
+    candidates <- character()
+    if (!is.null(site_root)) {
+      pub_path <- sub("^docs/", "", rel_path)
+      candidates <- c(
+        file.path(site_root, pub_path),
+        file.path(root, site_root, pub_path)
+      )
+    }
+    candidates <- c(candidates, file.path(root, rel_path), rel_path)
+    hit <- candidates[file.exists(candidates)][1]
+    if (is.na(hit)) {
+      stop("Cannot find: ", rel_path, call. = FALSE)
+    }
+    paste(readLines(hit, warn = FALSE), collapse = "\n")
+  }
+
+  html <- tryCatch(read_article("docs/articles/gg2d3.html"), error = function(e) stop(conditionMessage(e)))
+  md   <- tryCatch(read_article("docs/articles/gg2d3.md"),   error = function(e) stop(conditionMessage(e)))
+
+  if (regexpr("sf family maps with", html, fixed = TRUE)[[1]] <= 0) {
+    return("missing")
+  }
+
+  rendered_markers <- c('"geom":"sf"', '"sf_family":"', '"sf_diagnostics"')
+  if (all(vapply(rendered_markers, function(m) grepl(m, html, fixed = TRUE), logical(1)))) {
+    return("rendered")
+  }
+
+  if (grepl("PKGDOWN_SF_OPTIONAL_SKIP", html, fixed = TRUE) ||
+      grepl("PKGDOWN_SF_OPTIONAL_SKIP", md,   fixed = TRUE)) {
+    return("classified_skip")
+  }
+
+  "missing"
+}
 
 site_root_input <- value_after("--site-root", "docs")
 site_root <- if (dir.exists(site_root_input)) {
