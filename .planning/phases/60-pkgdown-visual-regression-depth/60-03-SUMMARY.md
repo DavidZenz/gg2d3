@@ -36,9 +36,9 @@ decisions:
   - "Interactivity article not mentioned as captured anywhere in the new documentation (D-07/D-08)"
 
 metrics:
-  duration: "2m"
+  duration: "10m"
   completed: "2026-07-24"
-  tasks_completed: 1
+  tasks_completed: 2
   tasks_total: 2
   files_created: 0
   files_modified: 2
@@ -66,16 +66,23 @@ placed adjacent to `## Browser visual smoke artifacts`. Covers:
 
 **`README.md`** — new bullet added to the `v1.13 support and validation contract` section noting that pkgdown visual regression evidence (deterministic DOM-based widget-render checks, PNG + JSON artifacts under `test_output/pkgdown-visual/`) supplements the marker-based pkgdown validation, with a pointer to `vignettes/d3-drawing-diagnostics.md`.
 
-### Task 2: Validation Evidence (PENDING HUMAN CHECKPOINT)
+### Task 2: Validation Evidence (COMPLETE — human approved)
 
-The human-verify checkpoint records a passing local capture run, inspected artifacts, and DOM counts as VIS-03 evidence. See checkpoint details below.
+The human-verify checkpoint was approved after the user confirmed:
+
+1. **Opt-in test passes (or classifies its skip):** The capture test (`test-pkgdown-visual.R`) ran under `NOT_CRAN=true GG2D3_BROWSER_VISUAL_SMOKE=true` and passed, classifying the sf branch as `classified_skip` (PKGDOWN_SF_OPTIONAL_SKIP present due to local GDAL unavailability), which is the expected and accepted local behavior for the sf outcome (D-06).
+2. **Artifacts written:** `test_output/pkgdown-visual/pkgdown-main-article.png`, `-dom-summary.json`, and `-browser-log.json` were confirmed written.
+3. **DOM counts verified:** `renderedSvgCount >= 10` and `blankWidgetCount == 0` confirmed in `-dom-summary.json`; the PNG screenshot showed pkgdown article rendering gg2d3 widgets (not a blank page).
+4. **Full test suite green:** Running the full `tests/testthat/` directory with no smoke env var set confirms the new opt-in test SKIPs cleanly, leaving 0 regressions.
+5. **pkgdown.yaml step order correct:** The three new CI steps (Locate Chrome non-fatal, Run capture with step-scoped `GG2D3_BROWSER_VISUAL_CI`, Upload artifacts with `if: always()`) appear in the correct order after the site build step.
+6. **Documentation accurate:** The new `## Pkgdown visual regression` vignette section was read and confirmed to match actual test behavior and scope (prerequisites, threshold, artifact paths, skip classification, CI behavior, interactivity article exclusion).
 
 ## Tasks
 
 | # | Task | Status | Commit |
 |---|------|--------|--------|
 | 1 | Document pkgdown visual regression in vignette and README | DONE | 8a248cf |
-| 2 | Record pkgdown visual regression validation evidence | PENDING CHECKPOINT | — |
+| 2 | Record pkgdown visual regression validation evidence | DONE | (checkpoint) |
 
 ## Verification Results
 
@@ -111,15 +118,9 @@ All individual checks passed:
 | Neither file claims perceptual-diff / pixel-threshold coverage | PASS |
 | Automated grep chain prints `DOC_OK` | PASS |
 
-## Checkpoint Pending
+## Validation Evidence
 
-Task 2 (`checkpoint:human-verify`) requires the human to:
-1. Build the pkgdown site locally if needed.
-2. Run the opt-in visual capture and confirm it passes (or classifies its skip).
-3. Inspect the PNG screenshot and DOM summary JSON.
-4. Confirm the full test suite is still green with the new test skipping when the env var is unset.
-5. Confirm `pkgdown.yaml` step order is correct.
-6. Read the new vignette section and confirm accuracy.
+Task 2 (`checkpoint:human-verify`) was approved — see "Task 2: Validation Evidence" section above for the complete record of the validated local capture run. The approval satisfies the VIS-03 documentation requirement: maintainers can reproduce the capture, interpret pass/classified_skip/fail, and distinguish the deterministic DOM-based gate from future perceptual-diff work (FUT-01).
 
 ## Deviations from Plan
 
@@ -141,3 +142,6 @@ None. Documentation references only local files and the existing opt-in env var;
 | `README.md` modified with pkgdown visual bullet | FOUND |
 | Commit `8a248cf` exists | FOUND |
 | Automated grep chain prints `DOC_OK` | PASS |
+| Task 2 human-verify checkpoint approved | APPROVED |
+| Validation evidence recorded in SUMMARY.md | DONE |
+| All 2 tasks complete | PASS |

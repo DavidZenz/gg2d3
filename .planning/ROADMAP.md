@@ -81,7 +81,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 60-03-PLAN.md — Document local/CI visual regression usage and skip classifications, then record validation evidence.
+- [x] 60-03-PLAN.md — Document local/CI visual regression usage and skip classifications, then record validation evidence.
 
 ### Phase 61: Bounded Geometry Polish Tranche
 
