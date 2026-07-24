@@ -173,7 +173,14 @@ test_that("BVIS-PKG-01 pkgdown article browser capture detects rendered widgets 
         label = "Crosstalk widgets must be present ([data-gg2d3-crosstalk-group]) when outcome is rendered"
       )
     } else if (ct_outcome == "classified_skip") {
-      # Accept: skip notice is in place; no DOM assertion required.
+      has_ct_skip <- eval_js_value(
+        session,
+        "document.body.innerText.includes('PKGDOWN_CROSSTALK_OPTIONAL_SKIP')"
+      )
+      testthat::expect_true(
+        has_ct_skip,
+        label = "Crosstalk skip notice (PKGDOWN_CROSSTALK_OPTIONAL_SKIP) must be visible in page body text"
+      )
     } else {
       testthat::fail(sprintf(
         "Crosstalk region outcome is 'missing' in pkgdown article; expected 'rendered', 'rendered_unlinked_assets', or 'classified_skip' (ct_outcome: %s)",
