@@ -71,9 +71,16 @@ Plans:
 
 **Plans**: 3 plans
 Plans:
+**Wave 1**
 
 - [ ] 60-01-PLAN.md — Tracer: chromote capture of the built pkgdown article with SVG-child blank/stale detection, sf/Crosstalk outcome branching, and PNG+JSON artifacts.
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 60-02-PLAN.md — Wire the visual capture into pkgdown.yaml CI after the site build (install chromote, non-fatal Chrome locate, step-scoped CI escalation, artifact upload).
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 60-03-PLAN.md — Document local/CI visual regression usage and skip classifications, then record validation evidence.
 
 ### Phase 61: Bounded Geometry Polish Tranche
