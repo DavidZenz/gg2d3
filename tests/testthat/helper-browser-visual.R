@@ -271,7 +271,11 @@ browser_visual_console_collector <- function(session) {
     logs$entries[[length(logs$entries) + 1L]] <- entry
   }
 
-  session$Runtime$enable()
+  # Enable Runtime domain and wait for acknowledgement before subscribing to
+  # events. Without wait_ = TRUE, events that fire during early page navigation
+  # may be dispatched before the enable acknowledgement completes (chromote uses
+  # an async WebSocket), causing early console output to be silently dropped.
+  session$Runtime$enable(wait_ = TRUE)
   session$Runtime$consoleAPICalled(
     callback_ = function(...) {
       event <- .browser_visual_event(...)
