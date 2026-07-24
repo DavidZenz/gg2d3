@@ -342,8 +342,9 @@ NOT_CRAN=true GG2D3_BROWSER_VISUAL_SMOKE=true Rscript --vanilla -e \
   'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-pkgdown-visual.R")'
 ```
 
-Expect `[ FAIL 0 | WARN 0 | SKIP 0 | PASS 7 ]` when Chrome is available
-and the site is built. The test skips cleanly when `GG2D3_BROWSER_VISUAL_SMOKE`
+Expect `[ FAIL 0 | WARN 0 | SKIP 0 | PASS 6-7 ]` when Chrome is available
+and the site is built (exact count depends on sf/Crosstalk render outcome).
+The test skips cleanly when `GG2D3_BROWSER_VISUAL_SMOKE`
 is not `true`, when Chrome is unavailable, or when `docs/articles/gg2d3.html`
 does not exist.
 
