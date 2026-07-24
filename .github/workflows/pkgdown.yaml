@@ -104,7 +104,7 @@ jobs:
 
       - name: Upload pkgdown visual artifacts
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: pkgdown-visual-${{ github.run_id }}
           path: test_output/pkgdown-visual/
@@ -112,7 +112,7 @@ jobs:
           retention-days: 14
 
       - name: Upload pkgdown site artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: pkgdown-site-${{ github.run_id }}
           path: docs/
