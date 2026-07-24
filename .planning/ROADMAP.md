@@ -72,9 +72,9 @@ Plans:
 **Plans**: 3 plans
 Plans:
 
-- [ ] 60-01-PLAN.md — Define pkgdown visual fixture targets and artifact format.
-- [ ] 60-02-PLAN.md — Implement browser capture and blank/stale widget detection.
-- [ ] 60-03-PLAN.md — Document visual regression usage and record validation evidence.
+- [ ] 60-01-PLAN.md — Tracer: chromote capture of the built pkgdown article with SVG-child blank/stale detection, sf/Crosstalk outcome branching, and PNG+JSON artifacts.
+- [ ] 60-02-PLAN.md — Wire the visual capture into pkgdown.yaml CI after the site build (install chromote, non-fatal Chrome locate, step-scoped CI escalation, artifact upload).
+- [ ] 60-03-PLAN.md — Document local/CI visual regression usage and skip classifications, then record validation evidence.
 
 ### Phase 61: Bounded Geometry Polish Tranche
 
