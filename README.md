@@ -53,6 +53,14 @@ clone.
   the intended public support contract, generated `docs/` proves
   local/pkgdown rendering, GitHub Pages output proves publication, and
   browser visual smoke artifacts prove representative browser behavior.
+- Pkgdown visual regression evidence supplements the marker-based pkgdown
+  validation with deterministic DOM-based widget-render checks: a
+  headless browser loads `docs/articles/gg2d3.html` after each pkgdown
+  build and asserts that no gg2d3 widget is blank (SVG child count
+  threshold), writing a viewport PNG and DOM-summary JSON to
+  `test_output/pkgdown-visual/`. See
+  `vignettes/d3-drawing-diagnostics.md` for the local run command,
+  detection mechanism, skip classifications, and CI behavior.
 - Generated-site validation is available with
   `rtk Rscript --vanilla tools/validate-pkgdown-site.R --mode quick`;
   use release mode before shipping when source docs may have changed.

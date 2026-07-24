@@ -302,6 +302,132 @@ and path-following annotation placement are not shipped.
 Ordinary text and label layers have bounded `angle` support; sf annotation
 rotation parity remains outside the current projected-anchor contract.
 
+## Pkgdown visual regression
+
+Pkgdown visual regression adds browser-rendered widget evidence for the
+generated pkgdown article, complementing the text/marker-based validation
+from `tools/validate-pkgdown-site.R`. Where the existing gate checks that
+source markers are present in generated HTML, this step loads the article
+in a real browser and asserts that gg2d3 widgets are not blank or stale.
+
+The test lives in `tests/testthat/test-pkgdown-visual.R` and reuses the
+same `helper-browser-visual.R` opt-in infrastructure as the browser visual
+smoke tests.
+
+### Prerequisite
+
+`pkgdown::build_site()` (or `build_site_github_pages()`) must have run to
+populate `docs/` so `docs/articles/gg2d3.html` exists. The test skips with
+"generated docs site is not available" when this file is absent. Build the
+site locally before running the capture:
+
+```sh
+Rscript --vanilla -e 'pkgdown::build_site(new_process = FALSE, preview = FALSE)'
+```
+
+### Local run
+
+The test uses the same `GG2D3_BROWSER_VISUAL_SMOKE=true` opt-in env var as
+the browser visual smoke tests — no new env var (D-10). The skip-friendly
+command loads the package without the browser:
+
+```bash
+Rscript --vanilla -e 'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-pkgdown-visual.R")'
+```
+
+The full opt-in command that runs the capture and writes artifacts:
+
+```bash
+NOT_CRAN=true GG2D3_BROWSER_VISUAL_SMOKE=true Rscript --vanilla -e \
+  'pkgload::load_all(quiet=TRUE); testthat::test_file("tests/testthat/test-pkgdown-visual.R")'
+```
+
+Expect `[ FAIL 0 | WARN 0 | SKIP 0 | PASS 7 ]` when Chrome is available
+and the site is built. The test skips cleanly when `GG2D3_BROWSER_VISUAL_SMOKE`
+is not `true`, when Chrome is unavailable, or when `docs/articles/gg2d3.html`
+does not exist.
+
+### Blank/stale detection mechanism
+
+After navigating to `docs/articles/gg2d3.html` in a headless 1280×900
+Chromote session and waiting for the page to settle, the test evaluates a
+JavaScript IIFE that counts SVG child elements (`path`, `circle`, `rect`,
+`line`, `g`) inside each `.gg2d3.html-widget svg`. A widget is considered
+rendered when it has **at least 3 SVG child elements** (`.PKGDOWN_VISUAL_SVG_CHILD_THRESHOLD`).
+The threshold is documented in `test-pkgdown-visual.R` and is intentionally
+adjustable without breaking the interface.
+
+The test then asserts:
+
+1. The page renders **at least 10** gg2d3 SVG widgets
+   (`renderedSvgCount >= 10`).
+2. **Zero** widgets fall below the SVG child count threshold
+   (`blankWidgetCount == 0`).
+
+This detection is **DOM-based and deterministic** — it counts SVG children,
+not pixel brightness, brightness histograms, or perceptual difference scores.
+Committed baseline images and pixel-threshold comparisons are future work
+(FUT-01) and are not part of this mechanism.
+
+### sf and Crosstalk outcome classification
+
+The sf widget region passes in one of two branches (D-06):
+
+- **`rendered`** — `pkgdown_site_sf_outcome()` returned `"rendered"` (sf
+  loaded, the polygon example in the article has `.geom-sf` elements). The
+  test requires `geomSfCount >= 1` in the DOM summary.
+- **`classified_skip`** — the article body carries the
+  `PKGDOWN_SF_OPTIONAL_SKIP` notice (sf or geojsonsf is unavailable locally
+  or the article example was skipped). The test verifies this notice is
+  present in the page text; no `.geom-sf` assertion is made.
+
+Any other outcome (e.g., `"missing"`) causes the test to fail with an
+informative message. The same pass-or-classified-skip semantics apply to the
+Crosstalk section: `ct_outcome %in% c("rendered", "rendered_unlinked_assets")`
+requires at least one `[data-gg2d3-crosstalk-group]` element; `classified_skip`
+is accepted without a DOM assertion.
+
+### Artifacts
+
+Written to `test_output/pkgdown-visual/` (gitignored, excluded from package
+builds via `.Rbuildignore`):
+
+- `pkgdown-main-article.png` — viewport screenshot (1280×900) of the
+  rendered article for human review.
+- `pkgdown-main-article-dom-summary.json` — programmatic widget counts:
+  `renderedSvgCount`, `blankWidgetCount`, `geomSfCount`,
+  `crosstalkGroupCount`, and per-widget SVG child counts. Use this JSON
+  for CI gating; check `renderedSvgCount >= 10` and `blankWidgetCount == 0`
+  to confirm a passing run.
+- `pkgdown-main-article-browser-log.json` — session metadata and browser
+  console log entries for debugging.
+
+### CI behavior
+
+Three steps are inserted in `.github/workflows/pkgdown.yaml` **after**
+`Build site` and `Validate generated pkgdown site` and **before**
+`Upload pkgdown site artifact`:
+
+1. **Locate Chrome for chromote (pkgdown visual)** — a non-fatal step that
+   discovers `google-chrome`, `chromium`, or similar and writes
+   `CHROMOTE_CHROME=<path>` to `GITHUB_ENV`. When no browser is found it
+   exits 0 (non-fatal), so a missing runner Chrome degrades to a test skip
+   rather than a workflow failure.
+2. **Run pkgdown visual capture** — runs `test-pkgdown-visual.R` with
+   `NOT_CRAN=true GG2D3_BROWSER_VISUAL_SMOKE=true GG2D3_BROWSER_VISUAL_CI=true`
+   scoped to this step's `env:` block only (not at the job level). A test
+   failure exits 1 and fails the workflow. In CI, a test skip escalates to
+   a failure when `GG2D3_BROWSER_VISUAL_CI=true` is active.
+3. **Upload pkgdown visual artifacts** — uploads `test_output/pkgdown-visual/`
+   as `pkgdown-visual-${{ github.run_id }}` with `if: always()` so the PNG
+   and JSON evidence is preserved even when the capture step fails.
+
+### Capture scope
+
+Only `docs/articles/gg2d3.html` (the main gg2d3 article) is captured.
+The interactivity article is out of scope for this phase (D-07, D-08) and
+is not captured.
+
 ## Text options
 
 `geom_text()` supports position, size, color, alpha, `hjust`, `vjust`, `angle`,
