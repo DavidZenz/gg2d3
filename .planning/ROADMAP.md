@@ -77,7 +77,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 60-02-PLAN.md — Wire the visual capture into pkgdown.yaml CI after the site build (install chromote, non-fatal Chrome locate, step-scoped CI escalation, artifact upload).
+- [x] 60-02-PLAN.md — Wire the visual capture into pkgdown.yaml CI after the site build (install chromote, non-fatal Chrome locate, step-scoped CI escalation, artifact upload).
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
