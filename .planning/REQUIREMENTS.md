@@ -13,9 +13,9 @@
 
 ### Visual Regression
 
-- [ ] **VIS-01**: Maintainers can capture representative pkgdown article screenshots or equivalent browser evidence for pages that include core widgets, sf examples, Crosstalk examples, and visual-smoke links.
-- [ ] **VIS-02**: The visual evidence gate detects blank, missing, or visibly stale widget regions in selected pkgdown pages before release.
-- [ ] **VIS-03**: Visual-regression artifacts remain deterministic, ignored from package builds, and documented with clear local/CI skip behavior.
+- [x] **VIS-01**: Maintainers can capture representative pkgdown article screenshots or equivalent browser evidence for pages that include core widgets, sf examples, Crosstalk examples, and visual-smoke links.
+- [x] **VIS-02**: The visual evidence gate detects blank, missing, or visibly stale widget regions in selected pkgdown pages before release.
+- [x] **VIS-03**: Visual-regression artifacts remain deterministic, ignored from package builds, and documented with clear local/CI skip behavior.
 
 ### Geometry Polish
 
@@ -58,9 +58,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REL-01 | Phase 59 | Complete |
 | REL-02 | Phase 59 | Complete |
 | REL-03 | Phase 62 | Pending |
-| VIS-01 | Phase 60 | Pending |
-| VIS-02 | Phase 60 | Pending |
-| VIS-03 | Phase 60 | Pending |
+| VIS-01 | Phase 60 | Complete |
+| VIS-02 | Phase 60 | Complete |
+| VIS-03 | Phase 60 | Complete |
 | GEOM-01 | Phase 61 | Pending |
 | GEOM-02 | Phase 61 | Pending |
 | GEOM-03 | Phase 61 | Pending |

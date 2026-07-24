@@ -73,7 +73,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 60-01-PLAN.md — Tracer: chromote capture of the built pkgdown article with SVG-child blank/stale detection, sf/Crosstalk outcome branching, and PNG+JSON artifacts.
+- [x] 60-01-PLAN.md — Tracer: chromote capture of the built pkgdown article with SVG-child blank/stale detection, sf/Crosstalk outcome branching, and PNG+JSON artifacts.
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.15
 milestone_name: Release Confidence And Maintenance
 current_phase: 60
-current_phase_name: Pkgdown Visual Regression Depth
+current_phase_name: pkgdown-visual-regression-depth
 status: executing
-stopped_at: Phase 60 context gathered
-last_updated: "2026-07-24T08:16:06.309Z"
-last_activity: 2026-07-23
-last_activity_desc: Phase 59 complete, transitioned to Phase 60
+stopped_at: Completed 60-01-PLAN.md
+last_updated: "2026-07-24T08:39:21.070Z"
+last_activity: 2026-07-24
+last_activity_desc: Phase 60 execution started
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 4
   percent: 25
 ---
 
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-02)
 
 **Core value:** Any ggplot2 plot should render identically in D3 -- same visual output, but now interactive and web-native.
-**Current focus:** Phase 59 — release-hygiene-and-local-spatial-recovery
+**Current focus:** Phase 60 — pkgdown-visual-regression-depth
 
 ## Current Position
 
-Phase: 60 — Pkgdown Visual Regression Depth
-Plan: Not started
+Phase: 60 (pkgdown-visual-regression-depth) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-07-23 — Phase 59 complete, transitioned to Phase 60
+Last activity: 2026-07-24 — Phase 60 execution started
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -53,6 +53,11 @@ Progress: [░░░░░░░░░░] 0%
 | 62 | 0/3 | - | - |
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 60 P01 | 22m | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -69,6 +74,9 @@ Recent decisions affecting current work:
 - Browser visual smoke artifacts and pkgdown site artifacts serve different purposes: smoke reports validate representative rendering behavior, while pkgdown validates public documentation and embedded widget rendering.
 - Phase 58 added a validation-backed pkgdown site workflow artifact, a publication-root inspector, maintainer `gh`/manual fallback documentation, evaluated linked Crosstalk examples, sf tooltip source-field preservation, and final release-readiness evidence.
 - v1.15 combines release hygiene, visual regression depth, bounded geometry polish, and architecture cleanup as one release-confidence and maintenance milestone.
+- [Phase ?]: SVG child count threshold set to 3L for blank widget detection (adjustable constant)
+- [Phase ?]: Viewport screenshot (no selector) used for pkgdown visual; full-page omitted (too tall)
+- [Phase ?]: sf outcome classified_skip locally (GDAL unavailable); test correctly accepts PKGDOWN_SF_OPTIONAL_SKIP
 
 ### Pending Todos
 
@@ -91,9 +99,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-23T13:41:40.759Z
-Stopped at: Phase 60 context gathered
-Resume file: .planning/phases/60-pkgdown-visual-regression-depth/60-CONTEXT.md
+Last session: 2026-07-24T08:39:21.061Z
+Stopped at: Completed 60-01-PLAN.md
+Resume file: None
 
 **Next Step:** `$gsd-discuss-phase 59`
 
