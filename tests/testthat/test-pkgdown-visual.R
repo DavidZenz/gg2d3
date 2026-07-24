@@ -10,6 +10,14 @@
 # Load package if not already loaded (supports both devtools::test() and testthat::test_file())
 if (!isNamespaceLoaded("gg2d3")) pkgload::load_all(quiet = TRUE)
 
+# Ensure %||% is available regardless of helper sourcing order.
+# helper-browser-visual.R defines %||% but may not be sourced yet when this file
+# is loaded in a partial-helper environment (e.g., test_file() with pre-loaded
+# skip_browser_visual_smoke but missing %||%).
+if (!exists("%||%", mode = "function")) {
+  `%||%` <- function(x, y) if (is.null(x)) y else x
+}
+
 if (!exists("skip_browser_visual_smoke", mode = "function")) {
   helper_candidates <- c(
     "tests/testthat/helper-browser-visual.R",
