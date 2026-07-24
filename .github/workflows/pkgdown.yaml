@@ -30,7 +30,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::pkgdown, local::.
+          extra-packages: any::pkgdown, any::chromote, local::.
           needs: website
 
       - name: Verify website dependencies
@@ -70,6 +70,46 @@ jobs:
 
       - name: Validate generated pkgdown site
         run: Rscript tools/validate-pkgdown-site.R --mode ci
+
+      - name: Locate Chrome for chromote (pkgdown visual)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for candidate in google-chrome google-chrome-stable chromium chromium-browser; do
+            if command -v "${candidate}" >/dev/null 2>&1; then
+              chrome_path="$(command -v "${candidate}")"
+              echo "CHROMOTE_CHROME=${chrome_path}" >> "${GITHUB_ENV}"
+              "${chrome_path}" --version
+              exit 0
+            fi
+          done
+          echo "No Chrome/Chromium found; pkgdown visual capture will be skipped"
+          # Non-fatal: test will skip via skip_browser_visual_smoke() if Chrome unavailable
+
+      - name: Run pkgdown visual capture
+        env:
+          NOT_CRAN: "true"
+          GG2D3_BROWSER_VISUAL_SMOKE: "true"
+          GG2D3_BROWSER_VISUAL_CI: "true"
+        shell: bash
+        run: |
+          Rscript --vanilla -e '
+            tryCatch({
+              pkgload::load_all(quiet = TRUE)
+              res <- testthat::test_file("tests/testthat/test-pkgdown-visual.R")
+              df <- as.data.frame(res)
+              if (any(df$failed > 0) || any(df$error)) quit(status = 1)
+            }, error = function(e) { message("FATAL: ", conditionMessage(e)); quit(status = 1) })
+          '
+
+      - name: Upload pkgdown visual artifacts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: pkgdown-visual-${{ github.run_id }}
+          path: test_output/pkgdown-visual/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Upload pkgdown site artifact
         uses: actions/upload-artifact@v6
