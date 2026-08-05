@@ -12,6 +12,11 @@ test_that("generated pkgdown article contains current sf support text", {
   pkgdown_site_validate_generated_article_text()
 })
 
+test_that("generated pkgdown diagnostics article is published", {
+  pkgdown_site_skip_if_generated_docs_unavailable()
+  pkgdown_site_validate_diagnostics_article()
+})
+
 test_that("generated pkgdown article embeds gg2d3 widget dependencies", {
   pkgdown_site_skip_if_generated_docs_unavailable()
   pkgdown_site_validate_widget_dependencies()
