@@ -47,7 +47,6 @@ gg2d3(x, width = NULL, height = NULL, elementId = NULL)
 
 Detailed caveats for polygon topology, rect/tile transformed-scale
 behavior, ordinary label placement, sf annotation placement,
-path-following text, and map anti-features are tracked in
-`vignettes/d3-drawing-diagnostics.md`. v1.13 browser validation is
-R/testthat/chromote based and may skip cleanly when optional local
-tooling is unavailable.
+path-following text, and map features are described in the package
+vignettes. v1.13 browser validation is R/testthat/chromote based and may
+skip cleanly when optional local tooling is unavailable.

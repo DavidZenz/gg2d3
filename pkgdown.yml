@@ -2,10 +2,9 @@ pandoc: 3.8.3
 pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
-  d3-drawing-diagnostics: d3-drawing-diagnostics.html
   gg2d3-interactivity: gg2d3-interactivity.html
   gg2d3: gg2d3.html
-last_built: 2026-08-05T09:43Z
+last_built: 2026-08-05T10:59Z
 urls:
   reference: https://davidzenz.github.io/gg2d3/reference
   article: https://davidzenz.github.io/gg2d3/articles

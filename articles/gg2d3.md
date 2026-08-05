@@ -40,7 +40,7 @@ and
 [`geom_sf_label()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
 annotations. All aesthetics that ggplot2 maps (color, fill, size, shape,
 alpha, linewidth) are carried through to D3. Detailed geometry caveats
-live in `vignettes/d3-drawing-diagnostics.md`.
+are described in the public support sections below.
 
 ## v1.13 validation and caveat summary
 
@@ -70,8 +70,6 @@ use ggplot2-built transformed bounds and filter non-finite transformed
 SVG bounds before drawing. Collision avoidance, rich text,
 path-following text, broad GIS-style topology repair, committed pixel
 thresholds, and generated renderer reference docs remain future work.
-See `vignettes/d3-drawing-diagnostics.md` for the detailed v1.13 release
-validation commands and FUT deferrals.
 
 ### Points, lines, and paths
 
@@ -166,8 +164,7 @@ poly <- data.frame(
 ```
 
 This is a grouped-path contract, not a GIS topology engine:
-topology/hole repair outside clean ggplot2 built groups is deferred. See
-`vignettes/d3-drawing-diagnostics.md` for detailed caveats.
+topology/hole repair outside clean ggplot2 built groups is deferred.
 
 ### Area and ribbon
 
@@ -314,9 +311,7 @@ support contract is intentionally explicit:
   JavaScript-side CRS reprojection, true geometry-overlap brushing, or
   large-map performance guarantees.
 - sf annotations do not provide ggrepel collision avoidance, rich text,
-  rotation parity, or path-following placement. See
-  `vignettes/d3-drawing-diagnostics.md` for the detailed residual-risk
-  list.
+  rotation parity, or path-following placement.
 
 ## Scales
 

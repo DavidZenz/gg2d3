@@ -34,8 +34,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/d3-drawing-diagnostics.html">Known limitations</a></li>
-    <li><a class="dropdown-item" href="../articles/gg2d3-interactivity.html">Interactivity with gg2d3</a></li>
+<li><a class="dropdown-item" href="../articles/gg2d3-interactivity.html">Interactivity with gg2d3</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -417,9 +416,9 @@ and Shiny-style clicks receive sanitized public payloads. Brush
 selection uses projected anchor coordinates, so label bounds are not
 treated as topology-aware geometry intersections.</li>
 <li>
-<strong>Geometry caveats</strong> — see
-<code>vignettes/d3-drawing-diagnostics.md</code> for detailed polygon,
-rect/tile, sf annotation, and map-feature limitations.</li>
+<strong>Geometry caveats</strong> — polygon, rect/tile, SF
+annotation, and map-feature limitations are summarized in the relevant
+sections of the main vignette.</li>
 <li>
 <strong>Zoom extent</strong> — <code>scale_extent[1]</code> must be
 &gt;= 1. Setting it below 1 would allow zooming further out than the

@@ -34,62 +34,15 @@ The v1.13 release track adds regression confidence and bounded geometry
 polish without broadening gg2d3 into a full ggplot2 or GIS topology
 clone.
 
-- Browser visual validation has a dedicated GitHub Actions workflow and
-  a CI-equivalent local mode. It writes inspectable `index.html`,
-  `index.json`, fixture HTML, screenshot, DOM-summary, and browser-log
-  artifacts under `test_output/browser-visual-smoke/` when enabled,
-  while local runs may skip cleanly if optional browser tooling is
-  unavailable.
-- Pkgdown site evidence has a separate release role: source docs define
-  the intended public support contract, generated `docs/` proves
-  local/pkgdown rendering, GitHub Pages output proves publication, and
-  browser visual smoke artifacts prove representative browser behavior.
-- Pkgdown visual regression evidence supplements the marker-based
-  pkgdown validation with deterministic DOM-based widget-render checks:
-  a headless browser loads `docs/articles/gg2d3.html` after each pkgdown
-  build and asserts that no gg2d3 widget is blank (SVG child count
-  threshold), writing a viewport PNG and DOM-summary JSON to
-  `test_output/pkgdown-visual/`. See
-  `vignettes/d3-drawing-diagnostics.md` for the local run command,
-  detection mechanism, skip classifications, and CI behavior.
-- Generated-site validation is available with
-  `rtk Rscript --vanilla tools/validate-pkgdown-site.R --mode quick`;
-  use release mode before shipping when source docs may have changed.
-  Publication artifacts or `gh-pages` checkouts can be inspected with
-  `rtk Rscript --vanilla tools/inspect-pkgdown-publication.R --site-root <site-root>`;
-  see `vignettes/d3-drawing-diagnostics.md` for the `gh workflow run`,
-  artifact download, and `gh-pages` fallback flow.
-- Local sf/GDAL setup can be diagnosed with
-  `rtk Rscript --vanilla tools/diagnose-spatial-stack.R`; see
-  `vignettes/d3-drawing-diagnostics.md` for how to distinguish local
-  environment repair from gg2d3 regressions when pkgdown reports
-  `classified_skip`.
-- Renderer wiring is guarded by
-  `inst/htmlwidgets/modules/geom-contracts.js` and source tests for
-  module load order, render/update selectors, interactivity selectors,
-  and public payload sanitization. Selected IR helper-boundary tests
-  cover theme extraction and geom parameter routing while full
-  [`as_d3_ir()`](https://davidzenz.github.io/gg2d3/reference/as_d3_ir.md)
-  modularization remains future work.
-- Geometry support is bounded: ordinary
-  [`geom_label()`](https://ggplot2.tidyverse.org/reference/geom_text.html)
-  renders SVG label boxes; ordinary
-  [`geom_polygon()`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)
-  keeps grouped closed-path behavior and explicitly does not infer
-  topology or holes;
-  [`geom_rect()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
-  and
-  [`geom_tile()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
-  filter non-finite transformed SVG bounds before emitting rect
-  attributes.
-- Deferred work remains explicit in diagnostics, including future
-  pixel-diff thresholds, public hosted visual reports, full IR
-  modularization, generated renderer documentation, repelled label
-  placement, and broad GIS-style topology repair.
-
-See `vignettes/d3-drawing-diagnostics.md` for validation commands,
-pkgdown artifact taxonomy, artifact paths, CI-mode behavior,
-architecture boundaries, geometry caveats, and future work IDs.
+- The main and interactivity vignettes provide public examples for
+  Cartesian geoms, ordinary polygons, SF maps and annotations, tooltips,
+  hover, zoom, brush selection, and linked Crosstalk views.
+- The support boundary is intentionally bounded: gg2d3 does not provide
+  tile basemaps, slippy controls, JavaScript-side CRS reprojection,
+  topology or hole repair, true geometry-overlap brushing, or
+  ggrepel-style placement.
+- The examples below describe the supported behavior and the relevant
+  caveats where users encounter them.
 
 ## Features
 
@@ -156,8 +109,7 @@ complete ggplot2 parity for polygon topology/hole repair beyond grouped
 closed paths, ordinary polygon `subgroup` / `rule` compound-path
 rendering, tile basemaps, slippy controls, JavaScript-side CRS
 reprojection, repelled label placement, rich text, or path-following
-annotation placement. See `vignettes/d3-drawing-diagnostics.md` for
-detailed geometry caveats.
+annotation placement.
 
 ### Scales & Coordinates
 
