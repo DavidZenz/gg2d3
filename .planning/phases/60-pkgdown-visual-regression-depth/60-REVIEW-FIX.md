@@ -22,11 +22,13 @@ status: all_fixed
 
 ## Fixed Issues
 
-### CR-01: `actions/checkout@v6` does not exist — CI will fail on every run
+### CR-01: Invalidated action-version finding
 
 **Files modified:** `.github/workflows/pkgdown.yaml`
 **Commit:** 8ebe695
-**Applied fix:** Changed `actions/checkout@v6` to `actions/checkout@v4` at line 25.
+**Correction:** Official GitHub tag checks on 2026-08-05 confirmed that
+`actions/checkout@v6` exists. The earlier v4 change was based on stale release
+information and is superseded by the Phase 59 correction restoring v6.
 
 ---
 
@@ -54,11 +56,13 @@ status: all_fixed
 
 ---
 
-### WR-03: `actions/upload-artifact@v6` does not exist (both upload steps)
+### WR-03: Invalidated artifact-action finding
 
 **Files modified:** `.github/workflows/pkgdown.yaml`
 **Commit:** eb7e337
-**Applied fix:** Changed both occurrences of `actions/upload-artifact@v6` to `actions/upload-artifact@v4` (the "Upload pkgdown visual artifacts" step at line 107 and the "Upload pkgdown site artifact" step at line 115).
+**Correction:** Official GitHub tag checks on 2026-08-05 confirmed that
+`actions/upload-artifact@v6` exists. The earlier v4 change was based on stale release
+information and is superseded by the Phase 59 correction restoring v6 in both steps.
 
 ---
 

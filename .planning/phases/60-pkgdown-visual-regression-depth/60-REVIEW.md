@@ -9,10 +9,10 @@ files_reviewed_list:
   - vignettes/d3-drawing-diagnostics.md
   - README.md
 findings:
-  critical: 2
+  critical: 1
   warning: 4
   info: 2
-  total: 8
+  total: 7
 status: issues_found
 ---
 
@@ -31,11 +31,9 @@ a JS IIFE for DOM counts, and writes a PNG + two JSON artifacts. The sf / Crosst
 branching logic is carefully structured and the GitHub Actions workflow inserts the three
 new steps in the right order.
 
-Two blockers are present:
+One blocker is present:
 
-1. `actions/checkout@v6` does not exist — v6 is fictional; the current stable release is
-   v4. This will cause every pkgdown CI run to fail with an action-resolution error.
-2. The Crosstalk `classified_skip` branch performs no DOM verification — the skip notice
+1. The Crosstalk `classified_skip` branch performs no DOM verification — the skip notice
    is never confirmed to be visible in the browser, creating a silent false-positive path
    that is asymmetric with the sf branch.
 
@@ -43,29 +41,20 @@ Four warnings cover: the `%||%` operator being used before it is guaranteed to b
 scope when helpers are missing; the `assert_no_browser_visual_errors` call silently
 passing when the log collector never fires (the `Runtime.enable()` race); the vignette
 claiming `PASS 7` which is wrong when `classified_skip` applies to the Crosstalk branch;
-and the `actions/upload-artifact@v6` version being non-existent for the same reason as
-checkout.
+and the invalid action-version findings recorded below. Official GitHub tag checks on
+2026-08-05 confirmed `actions/checkout@v6` and `actions/upload-artifact@v6` exist.
 
 ---
 
 ## Critical Issues
 
-### CR-01: `actions/checkout@v6` does not exist — CI will fail on every run
+### CR-01: Invalidated action-version finding
 
 **File:** `.github/workflows/pkgdown.yaml:25`
 
-**Issue:** The step `uses: actions/checkout@v6` references a version tag that does not
-exist in the `actions/checkout` repository. GitHub Actions will fail to resolve the
-action and every run of the pkgdown workflow will immediately error out before any R
-code executes. The current stable major version is `v4`.
-
-The same non-existent version is used in `browser-visual-smoke.yaml:17` (out of scope
-for this phase but introduced by the same pattern).
-
-**Fix:**
-```yaml
-      - uses: actions/checkout@v4
-```
+**Resolution:** Official GitHub tag checks on 2026-08-05 confirmed that
+`actions/checkout@v6` exists. The original finding was based on stale release
+information and is withdrawn; both workflows may retain the v6 tag.
 
 ---
 
@@ -182,20 +171,13 @@ collector immediately before navigation.
 
 ---
 
-### WR-03: `actions/upload-artifact@v6` does not exist
+### WR-03: Invalidated artifact-action finding
 
 **File:** `.github/workflows/pkgdown.yaml:107` and `115`
 
-**Issue:** Both `Upload pkgdown visual artifacts` and `Upload pkgdown site artifact`
-steps use `actions/upload-artifact@v6`, which does not exist. The current stable version
-is `v4`. This is distinct from CR-01 (checkout) but will also cause CI failures once
-checkout is fixed.
-
-**Fix:**
-```yaml
-      - uses: actions/upload-artifact@v4
-```
-Apply to both lines 107 and 115.
+**Resolution:** Official GitHub tag checks on 2026-08-05 confirmed that
+`actions/upload-artifact@v6` exists. The original finding was based on stale release
+information and is withdrawn; the Phase 59 v6 mitigation is restored.
 
 ---
 
