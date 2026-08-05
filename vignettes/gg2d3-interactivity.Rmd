@@ -300,8 +300,8 @@ Crosstalk behavior:
   receive sanitized public payloads. Brush selection uses projected anchor
   coordinates, so label bounds are not treated as topology-aware geometry
   intersections.
-- **Geometry caveats** — see `vignettes/d3-drawing-diagnostics.md` for detailed
-  polygon, rect/tile, sf annotation, and map-feature limitations.
+- **Geometry caveats** — polygon, rect/tile, SF annotation, and map-feature
+  limitations are summarized in the relevant sections of the main vignette.
 - **Zoom extent** — `scale_extent[1]` must be >= 1. Setting it below 1 would
   allow zooming further out than the original view, which distorts axis
   labels; the function raises an error instead.

@@ -12,9 +12,12 @@ test_that("generated pkgdown article contains current sf support text", {
   pkgdown_site_validate_generated_article_text()
 })
 
-test_that("generated pkgdown diagnostics article is published", {
+test_that("maintainer diagnostics are not published as a pkgdown article", {
   pkgdown_site_skip_if_generated_docs_unavailable()
-  pkgdown_site_validate_diagnostics_article()
+  testthat::expect_false(
+    pkgdown_site_has_path("docs/articles/d3-drawing-diagnostics.html"),
+    info = "Maintainer diagnostics should remain outside the public pkgdown articles"
+  )
 })
 
 test_that("generated pkgdown article embeds gg2d3 widget dependencies", {

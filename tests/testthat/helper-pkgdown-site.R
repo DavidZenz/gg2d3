@@ -381,24 +381,6 @@ pkgdown_site_validate_generated_article_text <- function(root = ".", site_root =
   )
 }
 
-pkgdown_site_validate_diagnostics_article <- function(root = ".", site_root = NULL) {
-  pkgdown_site_expect_existing_path(
-    "docs/articles/d3-drawing-diagnostics.html",
-    root = root,
-    site_root = site_root
-  )
-  pkgdown_site_expect_text_contains(
-    "docs/articles/d3-drawing-diagnostics.html",
-    c(
-      "Known limitations",
-      "Pkgdown visual regression",
-      "test-pkgdown-visual.R"
-    ),
-    root = root,
-    site_root = site_root
-  )
-}
-
 pkgdown_site_validate_widget_dependencies <- function(root = ".", site_root = NULL) {
   pkgdown_site_expect_text_contains(
     "docs/articles/gg2d3.html",
@@ -443,7 +425,6 @@ pkgdown_site_validate_quick <- function(root = ".",
                                         require_rendered_crosstalk = FALSE,
                                         site_root = NULL) {
   pkgdown_site_validate_generated_article_text(root = root, site_root = site_root)
-  pkgdown_site_validate_diagnostics_article(root = root, site_root = site_root)
   pkgdown_site_validate_widget_dependencies(root = root, site_root = site_root)
   pkgdown_site_expect_sf_outcome(
     root = root,

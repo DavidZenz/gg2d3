@@ -46,7 +46,7 @@ polygon-family, point-family, and line-family `geom_sf()`, plus projected-anchor
 `geom_sf_text()` and `geom_sf_label()` annotations.
 All aesthetics that ggplot2 maps (color, fill, size, shape, alpha, linewidth)
 are carried through to D3.
-Detailed geometry caveats live in `vignettes/d3-drawing-diagnostics.md`.
+Detailed geometry caveats are described in the public support sections below.
 
 ## v1.13 validation and caveat summary
 
@@ -65,9 +65,7 @@ support remains a grouped closed-path renderer, not topology or hole repair.
 `geom_rect()` and `geom_tile()` use ggplot2-built transformed bounds and filter
 non-finite transformed SVG bounds before drawing. Collision avoidance, rich
 text, path-following text, broad GIS-style topology repair, committed pixel
-thresholds, and generated renderer reference docs remain future work. See
-`vignettes/d3-drawing-diagnostics.md` for the detailed v1.13 release validation
-commands and FUT deferrals.
+thresholds, and generated renderer reference docs remain future work.
 
 ### Points, lines, and paths
 
@@ -140,8 +138,7 @@ poly <- data.frame(
 ```
 
 This is a grouped-path contract, not a GIS topology engine: topology/hole repair
-outside clean ggplot2 built groups is deferred. See
-`vignettes/d3-drawing-diagnostics.md` for detailed caveats.
+outside clean ggplot2 built groups is deferred.
 
 ### Area and ribbon
 
@@ -259,8 +256,7 @@ The `geom_sf()` support contract is intentionally explicit:
   CRS reprojection, true geometry-overlap brushing, or large-map performance
   guarantees.
 - sf annotations do not provide ggrepel collision avoidance, rich text, rotation
-  parity, or path-following placement. See
-  `vignettes/d3-drawing-diagnostics.md` for the detailed residual-risk list.
+  parity, or path-following placement.
 
 ## Scales
 
