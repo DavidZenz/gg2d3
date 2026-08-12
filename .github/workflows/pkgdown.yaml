@@ -85,6 +85,7 @@ jobs:
           done
           echo "No Chrome/Chromium found; pkgdown visual capture will be skipped"
           # Non-fatal: test will skip via skip_browser_visual_smoke() if Chrome unavailable
+          exit 0
 
       - name: Run pkgdown visual capture
         env:
