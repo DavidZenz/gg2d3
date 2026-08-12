@@ -52,6 +52,12 @@ clone.
   ggrepel-style placement.
 - The examples below describe the supported behavior and the relevant
   caveats where users encounter them.
+- pkgdown visual regression adds representative browser evidence through
+  named visual DOM region and live-payload checks, plus a D-05 full-page
+  PNG and JSON artifacts under `test_output/pkgdown-visual/`; see the
+  visual maintainer runbook
+  [d3-drawing-diagnostics.md](vignettes/d3-drawing-diagnostics.md) for
+  local/CI visual commands and skip interpretation.
 
 ## Features
 
