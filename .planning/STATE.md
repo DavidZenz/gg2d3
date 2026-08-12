@@ -4,17 +4,17 @@ milestone: v1.15
 milestone_name: Release Confidence And Maintenance
 current_phase: 60
 current_phase_name: pkgdown-visual-regression-depth
-status: verifying
-stopped_at: Completed 60-03-PLAN.md (all 3 plans of Phase 60 complete)
-last_updated: "2026-07-24T09:58:20.782Z"
-last_activity: 2026-07-24
+status: executing
+stopped_at: Completed 60-05-PLAN.md
+last_updated: "2026-08-12T10:29:59.096Z"
+last_activity: 2026-08-12
 last_activity_desc: Phase 60 execution started
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
-  percent: 50
+  completed_phases: 1
+  total_plans: 9
+  completed_plans: 8
+  percent: 25
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-06-02)
 ## Current Position
 
 Phase: 60 (pkgdown-visual-regression-depth) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-07-24 — Phase 60 execution started
+Plan: 6 of 6
+Status: Ready to execute
+Last activity: 2026-08-12 — Phase 60 execution started
 
-Progress: [██████████] 100%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -60,6 +60,8 @@ Progress: [██████████] 100%
 | Phase 60 P01 | 22m | 1 tasks | 1 files |
 | Phase 60 P02 | 525548m | 1 tasks | 1 files |
 | Phase 60 P03 | 10m | 2 tasks | 2 files |
+| Phase 60 P04 | 10m | 1 tasks | 1 files |
+| Phase 60 P05 | 4m | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -82,6 +84,11 @@ Recent decisions affecting current work:
 - [Phase ?]: GG2D3_BROWSER_VISUAL_CI scoped to capture step env only (not job-level) to prevent unrelated step escalation
 - [Phase ?]: Locate Chrome step exits 0 (non-fatal) in pkgdown.yaml so missing browser degrades to test skip, not workflow failure
 - [Phase ?]: Validation evidence recorded via human checkpoint: opt-in test passes (classified_skip for sf due to local GDAL absence), artifacts confirmed written, DOM counts renderedSvgCount>=10 and blankWidgetCount==0, pkgdown.yaml step order verified, documentation confirmed accurate
+- [Phase ?]: Plan 60-04 requires named pkgdown region contracts and live application/json freshness checks; optional sf/Crosstalk skips remain helper-classified.
+- [Phase ?]: Pkgdown Chrome discovery remains non-fatal with explicit exit 0; the capture step determines CI browser-gate outcome.
+- [Phase ?]: GG2D3_BROWSER_VISUAL_CI remains scoped only to Run pkgdown visual capture, with if: always() artifact upload preserved.
+- [Phase ?]: Pkgdown visual evidence is documented as named-region DOM and live-payload checks, not a perceptual-diff or pixel-fidelity guarantee.
+- [Phase ?]: The diagnostics vignette remains internal maintainer guidance and is not published as a pkgdown article.
 
 ### Pending Todos
 
@@ -104,8 +111,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-07-24T09:58:18.644Z
-Stopped at: Completed 60-03-PLAN.md (all 3 plans of Phase 60 complete)
+Last session: 2026-08-12T10:29:59.085Z
+Stopped at: Completed 60-05-PLAN.md
 Resume file: None
 
 **Next Step:** `$gsd-discuss-phase 59`
