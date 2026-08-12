@@ -47,6 +47,29 @@ if (!exists("pkgdown_site_sf_outcome", mode = "function")) {
 # documentation of why a valid widget can have fewer than 3 SVG children.
 .PKGDOWN_VISUAL_SVG_CHILD_THRESHOLD <- 3L
 
+# Representative regions and their current generated-article contracts. These
+# values intentionally describe the live article payloads, rather than relying
+# on a page-wide SVG minimum that could miss a detached or stale example.
+.PKGDOWN_VISUAL_REGION_CONTRACTS <- list(
+  `basic-usage` = list(widgetCount = 2L, svgCount = 2L),
+  `sf-family-maps-with-geom_sf` = list(widgetCount = 1L, svgCount = 1L),
+  `linked-views-with-crosstalk` = list(widgetCount = 2L, svgCount = 2L)
+)
+
+.PKGDOWN_VISUAL_EXPECTED_WIDGETS <- list(
+  `basic-usage` = list(
+    list(title = "Motor Trend Cars", x = "wt", y = "mpg", rows = 32L),
+    list(title = "Motor Trend Cars", x = "wt", y = "mpg", rows = 32L)
+  ),
+  `sf-family-maps-with-geom_sf` = list(
+    list(layerGeom = "sf", rows = 100L)
+  ),
+  `linked-views-with-crosstalk` = list(
+    list(x = "Sepal.Length", y = "Sepal.Width", rows = 150L),
+    list(x = "Petal.Length", y = "Petal.Width", rows = 150L)
+  )
+)
+
 # Artifact directory for pkgdown visual test outputs.
 # Parallel to browser_visual_artifact_dir() -> test_output/browser-visual-smoke/
 # but file-private: pkgdown-specific helpers live in this file, not in shared helper.
@@ -75,26 +98,146 @@ pkgdown_visual_artifact_dir <- function() {
   ))
 }
 
+# Read the PNG IHDR dimensions without introducing a new test dependency.
+.pkgdown_visual_png_dimensions <- function(path) {
+  bytes <- readBin(path, what = "raw", n = 24L)
+  signature <- c(137L, 80L, 78L, 71L, 13L, 10L, 26L, 10L)
+  if (length(bytes) < 24L || !identical(as.integer(bytes[1:8]), signature)) {
+    return(NULL)
+  }
+
+  decode_uint32 <- function(raw_bytes) {
+    sum(as.numeric(raw_bytes) * c(256^3, 256^2, 256, 1))
+  }
+
+  list(
+    width = as.integer(decode_uint32(bytes[17:20])),
+    height = as.integer(decode_uint32(bytes[21:24]))
+  )
+}
+
 # JS IIFE that returns a DOM summary for blank/stale widget detection on the pkgdown article.
 # Reports per-widget SVG child counts (path/circle/rect/line/g) to detect blank renderers.
 # threshold: minimum SVG child count for a widget to be considered non-blank (default 3L).
-.pkgdown_visual_dom_summary_script <- function(threshold = .PKGDOWN_VISUAL_SVG_CHILD_THRESHOLD) {
+.pkgdown_visual_dom_summary_script <- function(
+    threshold = .PKGDOWN_VISUAL_SVG_CHILD_THRESHOLD,
+    expected_widgets = .PKGDOWN_VISUAL_EXPECTED_WIDGETS
+) {
+  region_contracts <- jsonlite::toJSON(
+    .PKGDOWN_VISUAL_REGION_CONTRACTS,
+    auto_unbox = TRUE,
+    pretty = FALSE
+  )
+  expected_widgets <- jsonlite::toJSON(
+    expected_widgets,
+    auto_unbox = TRUE,
+    pretty = FALSE
+  )
+
   paste0(
     "(() => {",
     "const count = s => document.querySelectorAll(s).length;",
+    "const widgetSelector = '.gg2d3.html-widget';",
     "const widgets = document.querySelectorAll('.gg2d3.html-widget');",
     "const svgs = document.querySelectorAll('.gg2d3.html-widget svg');",
     "const svgChildCounts = Array.from(svgs).map(svg =>",
     "  svg.querySelectorAll('path, circle, rect, line, g').length",
     ");",
+    "const widgetSvgChildCounts = Array.from(widgets).map(widget => Array.from(widget.querySelectorAll('svg')).map(svg =>",
+    "  svg.querySelectorAll('path, circle, rect, line, g').length",
+    "));",
+    "const nearestSection = id => {",
+    "  const heading = document.getElementById(id);",
+    "  let node = heading;",
+    "  while (node && !(node.matches && node.matches('.section'))) node = node.parentElement;",
+    "  return node;",
+    "};",
+    "const regionContracts = ", region_contracts, ";",
+    "const expectedWidgets = ", expected_widgets, ";",
+    "const regionWidgetCounts = {};",
+    "const regionSvgCounts = {};",
+    "const regionGeometryCounts = {};",
+    "const regionGroupCounts = {};",
+    "const regionHeadingPresent = {};",
+    "const regionWidgets = {};",
+    "Object.keys(regionContracts).forEach(id => {",
+    "  const section = nearestSection(id);",
+    "  regionHeadingPresent[id] = !!section;",
+    "  regionWidgets[id] = section ? Array.from(section.querySelectorAll(widgetSelector)) : [];",
+    "  regionWidgetCounts[id] = regionWidgets[id].length;",
+    "  regionSvgCounts[id] = section ? section.querySelectorAll(widgetSelector + ' svg').length : 0;",
+    "  regionGeometryCounts[id] = section ? section.querySelectorAll('.geom-sf').length : 0;",
+    "  regionGroupCounts[id] = section ? section.querySelectorAll('.geom-sf-group').length : 0;",
+    "});",
+    "const markerSection = nearestSection('v1-13-validation-and-caveat-summary');",
+    "const browserVisualSmokeMarkerCount = markerSection ? Array.from(markerSection.querySelectorAll('code')).filter(code => code.textContent === 'test_output/browser-visual-smoke/').length : 0;",
+    "const payloadById = new Map();",
+    "Array.from(document.querySelectorAll('script[type=\"application/json\"][data-for]')).forEach(script => {",
+    "  const id = script.getAttribute('data-for');",
+    "  try { payloadById.set(id, JSON.parse(script.textContent || '{}')); }",
+    "  catch (error) { payloadById.set(id, null); }",
+    "});",
+    "const irFor = payload => payload && payload.x && payload.x.ir ? payload.x.ir : null;",
+    "const layerRows = (ir, geom) => ir && Array.isArray(ir.layers) ? ir.layers.filter(layer => layer && layer.geom === geom).reduce((total, layer) => total + (Array.isArray(layer.data) ? layer.data.length : 0), 0) : 0;",
+    "const allWidgetRecords = Array.from(widgets).map(widget => {",
+    "  const id = widget.id || '';",
+    "  const payload = payloadById.has(id) ? payloadById.get(id) : null;",
+    "  const ir = irFor(payload);",
+    "  return { id, payload, ir, widget, svgText: (widget.querySelector('svg') || {}).textContent || '', pointMarkCount: widget.querySelectorAll('circle.geom-point').length };",
+    "});",
+    "const payloadWidgetCount = allWidgetRecords.filter(record => record.payload !== null).length;",
+    "const payloadMismatchCount = allWidgetRecords.filter(record => record.payload === null).length;",
+    "const expectedContent = [];",
+    "let freshnessMismatchCount = 0;",
+    "Object.keys(expectedWidgets).forEach(region => {",
+    "  const widgetsInRegion = regionWidgets[region] || [];",
+    "  (expectedWidgets[region] || []).forEach((expected, index) => {",
+    "    const widget = widgetsInRegion[index] || null;",
+    "    const record = widget ? allWidgetRecords.find(item => item.widget === widget) : null;",
+    "    const ir = record ? record.ir : null;",
+    "    const reasons = [];",
+    "    const payloadRows = expected.layerGeom ? layerRows(ir, expected.layerGeom) : layerRows(ir, 'point');",
+    "    const liveText = record ? record.svgText : '';",
+    "    const live = {",
+    "      titlePresent: expected.title ? liveText.includes(expected.title) : null,",
+    "      xLabelPresent: expected.x ? liveText.includes(expected.x) : null,",
+    "      yLabelPresent: expected.y ? liveText.includes(expected.y) : null,",
+    "      pointMarkCount: record ? record.pointMarkCount : 0,",
+    "      sfGeometryCount: widget ? widget.querySelectorAll('.geom-sf').length : 0,",
+    "      sfGroupCount: widget ? widget.querySelectorAll('.geom-sf-group').length : 0",
+    "    };",
+    "    if (!record) reasons.push('missing representative widget');",
+    "    if (expected.title && (!ir || ir.title !== expected.title || !live.titlePresent)) reasons.push('title mismatch');",
+    "    if (expected.x && (!ir || !ir.axes || !ir.axes.x || ir.axes.x.label !== expected.x || !live.xLabelPresent)) reasons.push('x-axis label mismatch');",
+    "    if (expected.y && (!ir || !ir.axes || !ir.axes.y || ir.axes.y.label !== expected.y || !live.yLabelPresent)) reasons.push('y-axis label mismatch');",
+    "    if (expected.layerGeom && (!ir || !ir.layers || !ir.layers.some(layer => layer && layer.geom === expected.layerGeom))) reasons.push('expected layer mismatch');",
+    "    if (payloadRows !== expected.rows) reasons.push('payload row count mismatch');",
+    "    if (!expected.layerGeom && record && record.pointMarkCount < payloadRows) reasons.push('live point mark count below payload rows');",
+    "    if (expected.layerGeom && record && live.sfGeometryCount < 1) reasons.push('live sf geometry missing');",
+    "    if (expected.layerGeom && record && live.sfGroupCount < 1) reasons.push('live sf group missing');",
+    "    if (reasons.length) freshnessMismatchCount += 1;",
+    "    expectedContent.push({ region, domOrder: index, widgetId: record ? record.id : null, expected, payloadRows, live, mismatchReasons: reasons });",
+    "  });",
+    "});",
     "return {",
     "  title: document.title || '',",
     "  widgetCount: widgets.length,",
     "  renderedSvgCount: svgs.length,",
     "  svgChildCounts: svgChildCounts,",
-    "  blankWidgetCount: svgChildCounts.filter(n => n < ", threshold, ").length,",
+    "  widgetSvgChildCounts: widgetSvgChildCounts,",
+    "  blankWidgetCount: widgetSvgChildCounts.filter(counts => counts.length === 0 || counts.some(n => n < ", threshold, ")).length,",
     "  geomSfCount: count('.geom-sf'),",
     "  crosstalkGroupCount: count('[data-gg2d3-crosstalk-group]'),",
+    "  regionWidgetCounts: regionWidgetCounts,",
+    "  regionSvgCounts: regionSvgCounts,",
+    "  regionGeometryCounts: regionGeometryCounts,",
+    "  regionGroupCounts: regionGroupCounts,",
+    "  regionHeadingPresent: regionHeadingPresent,",
+    "  browserVisualSmokeMarkerCount: browserVisualSmokeMarkerCount,",
+    "  payloadWidgetCount: payloadWidgetCount,",
+    "  payloadMismatchCount: payloadMismatchCount,",
+    "  freshnessMismatchCount: freshnessMismatchCount,",
+    "  expectedContent: expectedContent,",
     "  bodyTextLength: document.body ? document.body.innerText.length : 0",
     "};",
     "})()"
@@ -112,8 +255,16 @@ test_that("BVIS-PKG-01 pkgdown article browser capture detects rendered widgets 
   # These read the HTML from disk (not from chromote) and must be called before or inside
   # the session; called here so outcome classification happens regardless of session success.
   article_path <- pkgdown_site_resolve_path("docs/articles/gg2d3.html")
-  sf_outcome <- pkgdown_site_sf_outcome()
-  ct_outcome <- pkgdown_site_crosstalk_outcome()
+    sf_outcome <- pkgdown_site_sf_outcome()
+    ct_outcome <- pkgdown_site_crosstalk_outcome()
+
+  expected_widgets <- .PKGDOWN_VISUAL_EXPECTED_WIDGETS
+  if (!identical(sf_outcome, "rendered")) {
+    expected_widgets[["sf-family-maps-with-geom_sf"]] <- NULL
+  }
+  if (!ct_outcome %in% c("rendered", "rendered_unlinked_assets")) {
+    expected_widgets[["linked-views-with-crosstalk"]] <- NULL
+  }
 
   with_chromote_session({
     logs <- browser_visual_console_collector(session)
@@ -129,7 +280,10 @@ test_that("BVIS-PKG-01 pkgdown article browser capture detects rendered widgets 
     .pkgdown_visual_wait_for_widgets(session, min_svg_count = 10, timeout = 30)
 
     # Collect DOM summary: widget counts, SVG child counts per widget, sf/Crosstalk counts.
-    dom_summary <- eval_js_value(session, .pkgdown_visual_dom_summary_script())
+    dom_summary <- eval_js_value(
+      session,
+      .pkgdown_visual_dom_summary_script(expected_widgets = expected_widgets)
+    )
 
     # Core assertions: at least 10 gg2d3 SVG widgets rendered, none blank.
     testthat::expect_gte(
@@ -147,6 +301,56 @@ test_that("BVIS-PKG-01 pkgdown article browser capture detects rendered widgets 
       )
     )
 
+    # Exact marker contract: the generated article must retain the source
+    # article's documented browser visual artifact path exactly once.
+    testthat::expect_equal(
+      as.integer(dom_summary$browserVisualSmokeMarkerCount),
+      1L,
+      label = "generated v1.13 summary must contain exactly one browser visual smoke marker"
+    )
+
+    # Named region contracts prevent unrelated page widgets from satisfying
+    # the gate when a representative article section is missing or detached.
+    for (region in names(.PKGDOWN_VISUAL_REGION_CONTRACTS)) {
+      contract <- .PKGDOWN_VISUAL_REGION_CONTRACTS[[region]]
+      testthat::expect_true(
+        isTRUE(dom_summary$regionHeadingPresent[[region]]),
+        label = paste0("generated article must contain heading/section #", region)
+      )
+      if (region == "basic-usage" ||
+          (region == "linked-views-with-crosstalk" &&
+           ct_outcome %in% c("rendered", "rendered_unlinked_assets"))) {
+        testthat::expect_equal(
+          as.integer(dom_summary$regionWidgetCounts[[region]]),
+          contract$widgetCount,
+          label = paste0("named region #", region, " must contain its current widget count")
+        )
+        testthat::expect_equal(
+          as.integer(dom_summary$regionSvgCounts[[region]]),
+          contract$svgCount,
+          label = paste0("named region #", region, " must contain its current rendered SVG count")
+        )
+      }
+    }
+
+    # Every page widget must be associated with a current generated payload;
+    # non-empty SVGs alone are not sufficient evidence of freshness.
+    testthat::expect_equal(
+      as.integer(dom_summary$payloadWidgetCount),
+      as.integer(dom_summary$widgetCount),
+      label = "every gg2d3 widget must have a matching application/json payload"
+    )
+    testthat::expect_equal(
+      as.integer(dom_summary$payloadMismatchCount),
+      0L,
+      label = "widget-to-generated-payload association must have zero mismatches"
+    )
+    testthat::expect_equal(
+      as.integer(dom_summary$freshnessMismatchCount),
+      0L,
+      label = "expected-content/live-DOM freshness comparison must have zero mismatches"
+    )
+
     # sf outcome branch (D-06): require geom-sf elements when rendered; accept skip notice
     # when sf/GDAL is unavailable locally; fail on "missing" (neither rendered nor classified).
     if (sf_outcome == "rendered") {
@@ -154,6 +358,26 @@ test_that("BVIS-PKG-01 pkgdown article browser capture detects rendered widgets 
         dom_summary$geomSfCount,
         1L,
         label = "sf widget must have rendered .geom-sf elements when sf outcome is rendered"
+      )
+      testthat::expect_equal(
+        as.integer(dom_summary$regionWidgetCounts[["sf-family-maps-with-geom_sf"]]),
+        .PKGDOWN_VISUAL_REGION_CONTRACTS[["sf-family-maps-with-geom_sf"]]$widgetCount,
+        label = "rendered sf region must contain exactly one widget"
+      )
+      testthat::expect_equal(
+        as.integer(dom_summary$regionSvgCounts[["sf-family-maps-with-geom_sf"]]),
+        .PKGDOWN_VISUAL_REGION_CONTRACTS[["sf-family-maps-with-geom_sf"]]$svgCount,
+        label = "rendered sf region must contain exactly one SVG"
+      )
+      testthat::expect_gte(
+        as.integer(dom_summary$regionGeometryCounts[["sf-family-maps-with-geom_sf"]]),
+        1L,
+        label = "rendered sf region must contain .geom-sf geometry"
+      )
+      testthat::expect_gte(
+        as.integer(dom_summary$regionGroupCounts[["sf-family-maps-with-geom_sf"]]),
+        1L,
+        label = "rendered sf region must contain a .geom-sf-group"
       )
     } else if (sf_outcome == "classified_skip") {
       has_skip <- eval_js_value(
@@ -180,6 +404,16 @@ test_that("BVIS-PKG-01 pkgdown article browser capture detects rendered widgets 
         1L,
         label = "Crosstalk widgets must be present ([data-gg2d3-crosstalk-group]) when outcome is rendered"
       )
+      testthat::expect_equal(
+        as.integer(dom_summary$regionWidgetCounts[["linked-views-with-crosstalk"]]),
+        .PKGDOWN_VISUAL_REGION_CONTRACTS[["linked-views-with-crosstalk"]]$widgetCount,
+        label = "rendered Crosstalk region must contain exactly two widgets"
+      )
+      testthat::expect_equal(
+        as.integer(dom_summary$regionSvgCounts[["linked-views-with-crosstalk"]]),
+        .PKGDOWN_VISUAL_REGION_CONTRACTS[["linked-views-with-crosstalk"]]$svgCount,
+        label = "rendered Crosstalk region must contain exactly two SVGs"
+      )
     } else if (ct_outcome == "classified_skip") {
       has_ct_skip <- eval_js_value(
         session,
@@ -205,11 +439,30 @@ test_that("BVIS-PKG-01 pkgdown article browser capture detects rendered widgets 
     json_path <- file.path(out_dir, "pkgdown-main-article-dom-summary.json")
     log_path  <- file.path(out_dir, "pkgdown-main-article-browser-log.json")
 
-    # Viewport screenshot (no selector argument): captures the visible 1280x900 viewport.
-    # Full-page scroll capture is omitted per RESEARCH Open Question 2 (page is very tall;
-    # viewport evidence is sufficient for human review per D-05).
-    session$screenshot(filename = png_path, delay = 0.5)
+    # Full-page screenshot evidence for D-05. The explicit html selector and
+    # captureBeyondViewport option are part of the visual-regression contract.
+    session$screenshot(
+      filename = png_path,
+      selector = "html",
+      options = list(captureBeyondViewport = TRUE),
+      delay = 0.5
+    )
     testthat::expect_true(file.exists(png_path), label = "screenshot PNG artifact must exist")
+
+    png_dimensions <- .pkgdown_visual_png_dimensions(png_path)
+    testthat::expect_true(
+      !is.null(png_dimensions),
+      label = "full-page screenshot must have a readable PNG header"
+    )
+    if (!is.null(png_dimensions)) {
+      testthat::expect_gt(
+        png_dimensions$height,
+        900L,
+        label = "full-page screenshot height must exceed the 900px browser viewport"
+      )
+      dom_summary$pngWidth <- png_dimensions$width
+      dom_summary$pngHeight <- png_dimensions$height
+    }
 
     # DOM summary JSON: programmatic evidence for CI gating (SVG counts, blank count, etc.).
     jsonlite::write_json(dom_summary, path = json_path, auto_unbox = TRUE, pretty = TRUE, null = "null")
