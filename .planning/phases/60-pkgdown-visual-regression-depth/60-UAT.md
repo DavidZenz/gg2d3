@@ -1,54 +1,40 @@
 ---
-status: partial
+status: complete
 phase: 60-pkgdown-visual-regression-depth
 source:
   - 60-01-SUMMARY.md
   - 60-02-SUMMARY.md
   - 60-03-SUMMARY.md
+  - 60-06-SUMMARY.md
 started: 2026-08-12T06:52:44Z
-updated: 2026-09-30T00:00:00Z
+updated: 2026-09-30T18:15:26Z
+tests_total: 5
+tests_passed: 5
+tests_failed: 0
+tests_skipped: 0
+tests_blocked: 0
 ---
 
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-[testing paused — 2 items blocked]
+number: 5
+name: Public site keeps maintainer diagnostics internal
+expected: |
+  The generated public site does not publish `d3-drawing-diagnostics.html` or
+  expose a maintainer diagnostics navbar entry. Public SF and Crosstalk caveats
+  remain in the main user-facing vignettes.
 
 ## Tests
 
-### 1. Skip behavior when env var is unset
-expected: Running the pkgdown visual test without `GG2D3_BROWSER_VISUAL_SMOKE` exits successfully and reports one intentional skip explaining how to opt in.
-result: pass
+| # | Name | Result | Notes |
+|---|------|--------|-------|
+| 1 | Skip behavior when env var is unset | pass | The opt-out path exits successfully with the intentional browser-visual skip. |
+| 2 | Opt-in capture runs and produces artifacts | pass | Local Chromote classified the unavailable-browser path as the documented skip (`Cannot find an available port`); CI run 30992820343 produced PNG, DOM summary, and browser-log artifacts, and the cache-busted in-app browser review passed. |
+| 3 | DOM counts show all widgets rendered | pass | CI DOM summary recorded `widgetCount: 49`, `renderedSvgCount: 49`, `blankWidgetCount: 0`, `geomSfCount: 100`, and `crosstalkGroupCount: 2`; the approved browser review showed the sf tooltip `NAME: Ashe` and `AREA: 0.114`. |
+| 4 | pkgdown.yaml CI wiring is correct | pass | The workflow keeps Chrome discovery non-fatal, scopes `GG2D3_BROWSER_VISUAL_CI=true` to capture, and uploads visual artifacts with `if: always()`; run 30992820343 completed capture/uploads/Pages deployment. |
+| 5 | Public site keeps maintainer diagnostics internal | pass | Generated-site validation completed with 80 passes; sf and Crosstalk were rendered/interactive, the diagnostics article path was absent, and cleanup deployment run 30999489653 passed. |
 
-### 2. Opt-in capture runs and produces artifacts
-expected: With the opt-in environment variable enabled and the generated pkgdown site available, the browser capture exits successfully and writes a PNG, DOM summary, and browser log under `test_output/pkgdown-visual/`.
-result: blocked
-blocked_by: other
-reason: "Automated opt-in run exited 0 but skipped before capture because chromote could not launch Chrome: Cannot find an available port. Existing artifacts were not treated as fresh evidence."
+## Issues
 
-### 3. DOM counts show all widgets rendered
-expected: The DOM summary reports the representative widgets rendered, `blankWidgetCount: 0`, and the expected sf/Crosstalk outcomes without blank or stale widget regions.
-result: blocked
-blocked_by: other
-reason: "The only available DOM artifact is dated 2026-07-24 and lacks the current freshness/payload fields; a fresh capture could not be produced because chromote could not launch Chrome."
-
-### 4. pkgdown.yaml CI wiring is correct
-expected: The workflow installs chromote, locates Chrome non-fatally, runs the visual capture with step-scoped `GG2D3_BROWSER_VISUAL_CI`, and uploads visual artifacts with an always-run guard in the documented order.
-result: pass
-
-### 5. Public site keeps maintainer diagnostics internal
-expected: The generated public site does not publish `d3-drawing-diagnostics.html` or expose a maintainer diagnostics navbar entry, while public sf and Crosstalk caveats remain in the user-facing documentation.
-result: pass
-
-## Summary
-
-total: 5
-passed: 3
-issues: 0
-pending: 0
-skipped: 0
-blocked: 2
-
-## Gaps
-
-(none yet)
+(none; local Chrome/chromote availability remains an environment caveat, not a product failure)
