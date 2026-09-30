@@ -4,17 +4,17 @@ milestone: v1.15
 milestone_name: Release Confidence And Maintenance
 current_phase: 60
 current_phase_name: pkgdown-visual-regression-depth
-status: executing
-stopped_at: Completed 60-05-PLAN.md
-last_updated: "2026-08-12T10:29:59.096Z"
+status: verifying
+stopped_at: Completed 60-06-PLAN.md
+last_updated: "2026-09-30T18:18:21.944Z"
 last_activity: 2026-08-12
 last_activity_desc: Phase 60 execution started
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 8
-  percent: 25
+  completed_plans: 9
+  percent: 50
 ---
 
 # Project State
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-06-02)
 
 Phase: 60 (pkgdown-visual-regression-depth) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-12 — Phase 60 execution started
 
-Progress: [█████████░] 89%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [█████████░] 89%
 | Phase 60 P03 | 10m | 2 tasks | 2 files |
 | Phase 60 P04 | 10m | 1 tasks | 1 files |
 | Phase 60 P05 | 4m | 2 tasks | 2 files |
+| Phase 60 P06 | 15m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,9 @@ Recent decisions affecting current work:
 - [Phase ?]: GG2D3_BROWSER_VISUAL_CI remains scoped only to Run pkgdown visual capture, with if: always() artifact upload preserved.
 - [Phase ?]: Pkgdown visual evidence is documented as named-region DOM and live-payload checks, not a perceptual-diff or pixel-fidelity guarantee.
 - [Phase ?]: The diagnostics vignette remains internal maintainer guidance and is not published as a pkgdown article.
+- [Phase ?]: Phase 60-06 human browser approval records the exact cache-busted URL and sf tooltip values NAME: Ashe and AREA: 0.114.
+- [Phase ?]: Local Chromote unavailability remains an environment classification; CI run 30992820343 supplies successful DOM and artifact evidence without treating older local artifacts as fresh proof.
+- [Phase ?]: The maintainer diagnostics document remains internal and the generated public site/navbar omit its article while the README pointer remains source documentation.
 
 ### Pending Todos
 
@@ -111,8 +115,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-12T10:29:59.085Z
-Stopped at: Completed 60-05-PLAN.md
+Last session: 2026-09-30T18:18:21.933Z
+Stopped at: Completed 60-06-PLAN.md
 Resume file: None
 
 **Next Step:** `$gsd-discuss-phase 59`

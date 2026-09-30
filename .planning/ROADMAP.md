@@ -69,7 +69,7 @@ Plans:
   3. Visual artifacts are deterministic enough for review, stored under ignored paths, and excluded from package builds.
   4. Documentation explains local/CI behavior, artifact locations, and expected skip classifications.
 
-**Plans**: 3 plans
+**Plans**: 6 plans
 Plans:
 **Wave 1**
 
@@ -78,10 +78,16 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 60-02-PLAN.md — Wire the visual capture into pkgdown.yaml CI after the site build (install chromote, non-fatal Chrome locate, step-scoped CI escalation, artifact upload).
+- [x] 60-04-PLAN.md — Strengthen the pkgdown visual gate with named regions, live-payload freshness checks, and full-page artifact validation.
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
 - [x] 60-03-PLAN.md — Document local/CI visual regression usage and skip classifications, then record validation evidence.
+- [x] 60-05-PLAN.md — Correct Chrome discovery/CI escalation semantics and the maintainer diagnostics runbook.
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [x] 60-06-PLAN.md — Restore the source-first README pointer and close browser, CI, screenshot, and public-site validation.
 
 ### Phase 61: Bounded Geometry Polish Tranche
 
@@ -129,7 +135,7 @@ Phases execute in numeric order: 59 → 60 → 61 → 62
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
 | 59. Release Hygiene And Local Spatial Recovery | REL-01, REL-02 | 3/3 | Complete    | 2026-07-23 |
-| 60. Pkgdown Visual Regression Depth | VIS-01, VIS-02, VIS-03 | 0/3 | Not started | - |
+| 60. Pkgdown Visual Regression Depth | VIS-01, VIS-02, VIS-03 | 6/6 | In Progress | - |
 | 61. Bounded Geometry Polish Tranche | GEOM-01, GEOM-02, GEOM-03 | 0/3 | Not started | - |
 | 62. Architecture Cleanup And Release Handoff | REL-03, ARCH-01, ARCH-02, ARCH-03 | 0/3 | Not started | - |
 
