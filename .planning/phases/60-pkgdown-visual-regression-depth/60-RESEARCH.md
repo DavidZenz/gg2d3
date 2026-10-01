@@ -509,17 +509,17 @@ test_that("BVIS-PKG-01 pkgdown article browser capture detects rendered widgets 
 
 ---
 
-## Open Questions
+## Resolved Questions
 
-1. **chromote installation in pkgdown.yaml CI**
-   - What we know: chromote is in DESCRIPTION Suggests; `setup-r-dependencies` with `needs: website` does not install Suggests automatically; `browser-visual-smoke.yaml` uses `extra-packages: local::.` with `needs: check` (which installs test dependencies).
-   - What's unclear: Whether adding `any::chromote` to `extra-packages` in the pkgdown job is sufficient, or if it creates a dependency conflict with the website `needs:`.
-   - Recommendation: Add `any::chromote` to the existing `extra-packages:` line: `extra-packages: any::pkgdown, any::chromote, local::.`. If this creates issues, add a separate install step instead.
+1. **chromote installation in pkgdown.yaml CI — RESOLVED**
+   - Repository evidence: `chromote (>= 0.5.1)` is already in `DESCRIPTION` under `Suggests`, and `.github/workflows/pkgdown.yaml` already supplies `any::chromote` in the website job's `extra-packages` list.
+   - Prior validation: `60-02-SUMMARY.md` records the exact dependency setup and its YAML assertion passing; `60-01-SUMMARY.md` records a successful opt-in local Chromote capture with seven passing expectations. No dependency conflict was observed in the existing setup.
+   - Decision: Preserve the direct `any::chromote` entry in `extra-packages`; no separate install step or new DESCRIPTION needs entry is required for Plans 04–06. The remaining CI question is browser availability, which is handled by the documented four-candidate discovery step and the shared CI skip escalation.
 
-2. **Full-page screenshot size on CI**
-   - What we know: The pkgdown article is 13MB HTML and very long. A full-page screenshot of the entire rendered page could be very large.
-   - What's unclear: Whether `selector = "html"` captures the full scrollable page height or just the viewport.
-   - Recommendation: Use viewport screenshot (no selector, or `selector = "body"`) rather than full-page scroll capture. The PNG is for human review only (D-05); a viewport screenshot is sufficient evidence.
+2. **Screenshot dimensions and selector behavior — RESOLVED**
+   - Repository evidence: `tests/testthat/test-pkgdown-visual.R` calls `session$screenshot(filename = png_path, delay = 0.5)` with no selector, while the existing `test_output/pkgdown-visual/pkgdown-main-article.png` is a 1280x900 PNG. `60-01-SUMMARY.md` records the same prior successful artifact as a 111 KB viewport screenshot.
+   - Prior validation: the Plan 01 opt-in run produced the PNG alongside the DOM summary and browser log, and the summary recorded the page-wide widget counts independently of the screenshot.
+   - Decision: Keep the established no-selector viewport capture for the human-review PNG; the DOM summary remains the programmatic whole-article gate. Do not introduce an unverified full-scroll screenshot mode or alter the completed Plan 01 capture contract.
 
 ---
 
@@ -628,7 +628,7 @@ No new threat patterns are introduced.
 - Standard stack: HIGH — no new packages; all reused from existing codebase
 - Architecture: HIGH — all patterns verified against existing working test infrastructure
 - Pitfalls: HIGH — all pitfalls derived from direct codebase inspection (selector names, file sizes, sf outcome)
-- CI integration: MEDIUM — follows exact existing pattern from browser-visual-smoke.yaml; chromote installation path is an open question
+- CI integration: HIGH — follows the existing browser-visual-smoke.yaml pattern, with `any::chromote` already validated in the pkgdown dependency setup; browser availability remains explicitly handled by the workflow discovery and capture steps
 
 **Research date:** 2026-07-24
 **Valid until:** 2026-08-24 (stable infrastructure; only invalidated if helper-browser-visual.R or pkgdown article structure changes significantly)

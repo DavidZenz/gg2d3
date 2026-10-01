@@ -32,7 +32,7 @@
 - Decimal phases (59.1, 59.2): Urgent insertions, if needed
 
 - [x] **Phase 59: Release Hygiene And Local Spatial Recovery** - Resolve or mitigate release-readiness advisories and make local spatial validation repairable. (completed 2026-07-23)
-- [ ] **Phase 60: Pkgdown Visual Regression Depth** - Add representative browser visual evidence for pkgdown pages and widget regions beyond marker checks.
+- [x] **Phase 60: Pkgdown Visual Regression Depth** - Add representative browser visual evidence for pkgdown pages and widget regions beyond marker checks. (completed 2026-09-30)
 - [ ] **Phase 61: Bounded Geometry Polish Tranche** - Select and close evidence-backed geometry polish gaps without expanding the public support contract too broadly.
 - [ ] **Phase 62: Architecture Cleanup And Release Handoff** - Extract one more high-risk helper boundary, re-audit contracts, and assemble final v1.15 release evidence.
 
@@ -135,7 +135,7 @@ Phases execute in numeric order: 59 → 60 → 61 → 62
 | Phase | Requirements | Plans Complete | Status | Completed |
 |-------|--------------|----------------|--------|-----------|
 | 59. Release Hygiene And Local Spatial Recovery | REL-01, REL-02 | 3/3 | Complete    | 2026-07-23 |
-| 60. Pkgdown Visual Regression Depth | VIS-01, VIS-02, VIS-03 | 6/6 | In Progress | - |
+| 60. Pkgdown Visual Regression Depth | VIS-01, VIS-02, VIS-03 | 6/6 | Complete    | 2026-09-30 |
 | 61. Bounded Geometry Polish Tranche | GEOM-01, GEOM-02, GEOM-03 | 0/3 | Not started | - |
 | 62. Architecture Cleanup And Release Handoff | REL-03, ARCH-01, ARCH-02, ARCH-03 | 0/3 | Not started | - |
 

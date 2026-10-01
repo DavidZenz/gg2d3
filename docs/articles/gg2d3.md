@@ -8,25 +8,21 @@ page.
 
 ## Basic usage
 
-``` r
-
-library(ggplot2)
-library(gg2d3)
-
-p <- ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) +
-  geom_point() +
-  ggtitle("Motor Trend Cars")
-
-gg2d3(p)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`ggplot2`](https://ggplot2.tidyverse.org)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`gg2d3`](https://github.com/DavidZenz/gg2d3)`)`\
+\
+`p`` ``<-`` `[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mtcars``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``wt``, ``mpg``, color ``=`` `[`factor`](https://rdrr.io/r/base/factor.html)`(``cyl``)``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``)`` ``+`\
+`  `[`ggtitle`](https://ggplot2.tidyverse.org/reference/labs.html)`(``"Motor Trend Cars"``)`\
+\
+[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p``)`
 
 The widget size defaults to the viewer/container size. Override with
 `width` and `height` (in pixels or CSS units):
 
-``` r
-
-gg2d3(p, width = 800, height = 500)
-```
+\
+[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p``, width ``=`` ``800``, height ``=`` ``500``)`
 
 ## Supported geoms
 
@@ -73,72 +69,58 @@ thresholds, and generated renderer reference docs remain future work.
 
 ### Points, lines, and paths
 
-``` r
+\
+`# Scatter plot`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``iris``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``Sepal.Length``, ``Sepal.Width``, color ``=`` ``Species``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``size ``=`` ``3``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
-# Scatter plot
-(ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
-  geom_point(size = 3)) |>
-  gg2d3()
-```
+\
+\
+`# Line chart (connects points in x order)`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``economics``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``date``, ``unemploy``)``)`` ``+`\
+`  `[`geom_line`](https://ggplot2.tidyverse.org/reference/geom_path.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
-``` r
-
-
-# Line chart (connects points in x order)
-(ggplot(economics, aes(date, unemploy)) +
-  geom_line()) |>
-  gg2d3()
-```
-
-``` r
-
-
-# Path (connects points in data order)
-(ggplot(data.frame(x = cos(seq(0, 2 * pi, length.out = 60)),
-                    y = sin(seq(0, 2 * pi, length.out = 60))),
-        aes(x, y)) +
-  geom_path() +
-  coord_fixed()) |>
-  gg2d3()
-```
+\
+\
+`# Path (connects points in data order)`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(`[`data.frame`](https://rdrr.io/r/base/data.frame.html)`(``x ``=`` `[`cos`](https://rdrr.io/r/base/Trig.html)`(`[`seq`](https://rdrr.io/r/base/seq.html)`(``0``, ``2`` ``*`` ``pi``, length.out ``=`` ``60``)``)``,`\
+`                    y ``=`` `[`sin`](https://rdrr.io/r/base/Trig.html)`(`[`seq`](https://rdrr.io/r/base/seq.html)`(``0``, ``2`` ``*`` ``pi``, length.out ``=`` ``60``)``)``)``,`\
+`        `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``x``, ``y``)``)`` ``+`\
+`  `[`geom_path`](https://ggplot2.tidyverse.org/reference/geom_path.html)`(``)`` ``+`\
+`  `[`coord_fixed`](https://ggplot2.tidyverse.org/reference/coord_fixed.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 ### Bars and columns
 
-``` r
+\
+`# geom_bar (counts)`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mpg``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``class``, fill ``=`` ``class``)``)`` ``+`\
+`  `[`geom_bar`](https://ggplot2.tidyverse.org/reference/geom_bar.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
-# geom_bar (counts)
-(ggplot(mpg, aes(class, fill = class)) +
-  geom_bar()) |>
-  gg2d3()
-```
-
-``` r
-
-
-# geom_col (values) with stacking
-(ggplot(mpg, aes(class, fill = drv)) +
-  geom_bar(position = "stack")) |>
-  gg2d3()
-```
+\
+\
+`# geom_col (values) with stacking`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mpg``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``class``, fill ``=`` ``drv``)``)`` ``+`\
+`  `[`geom_bar`](https://ggplot2.tidyverse.org/reference/geom_bar.html)`(``position ``=`` ``"stack"``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 ### Rectangles, tiles, and text
 
-``` r
+\
+`# Heatmap with geom_tile`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``faithfuld``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``waiting``, ``eruptions``, fill ``=`` ``density``)``)`` ``+`\
+`  `[`geom_tile`](https://ggplot2.tidyverse.org/reference/geom_tile.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
-# Heatmap with geom_tile
-(ggplot(faithfuld, aes(waiting, eruptions, fill = density)) +
-  geom_tile()) |>
-  gg2d3()
-```
-
-``` r
-
-
-# Text labels
-(ggplot(mtcars, aes(wt, mpg, label = rownames(mtcars))) +
-  geom_text(size = 3)) |>
-  gg2d3()
-```
+\
+\
+`# Text labels`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mtcars``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``wt``, ``mpg``, label ``=`` `[`rownames`](https://rdrr.io/r/base/colnames.html)`(``mtcars``)``)``)`` ``+`\
+`  `[`geom_text`](https://ggplot2.tidyverse.org/reference/geom_text.html)`(``size ``=`` ``3``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 ### Ordinary polygons
 
@@ -149,54 +131,46 @@ ggplot2’s built row order. Fill, stroke, alpha, linewidth, linetype,
 facets, zoom/update behavior, and the existing tooltip, hover, brush,
 handler, and linked-view hooks are supported at the polygon path level.
 
-``` r
-
-poly <- data.frame(
-  id = rep(c("a", "b"), each = 4),
-  x = c(0, 1, 1.2, 0, 1.5, 2.6, 2.2, 1.3),
-  y = c(0, 0.2, 1, 0.8, 0.1, 0.4, 1.2, 0.9)
-)
-
-(ggplot(poly, aes(x, y, group = id, fill = id)) +
-  geom_polygon(color = "white", linewidth = 0.4, alpha = 0.8) +
-  coord_fixed()) |>
-  gg2d3()
-```
+\
+`poly`` ``<-`` `[`data.frame`](https://rdrr.io/r/base/data.frame.html)`(`\
+`  id ``=`` `[`rep`](https://rdrr.io/r/base/rep.html)`(`[`c`](https://rdrr.io/r/base/c.html)`(``"a"``, ``"b"``)``, each ``=`` ``4``)``,`\
+`  x ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``0``, ``1``, ``1.2``, ``0``, ``1.5``, ``2.6``, ``2.2``, ``1.3``)``,`\
+`  y ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``0``, ``0.2``, ``1``, ``0.8``, ``0.1``, ``0.4``, ``1.2``, ``0.9``)`\
+`)`\
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``poly``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``x``, ``y``, group ``=`` ``id``, fill ``=`` ``id``)``)`` ``+`\
+`  `[`geom_polygon`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)`(``color ``=`` ``"white"``, linewidth ``=`` ``0.4``, alpha ``=`` ``0.8``)`` ``+`\
+`  `[`coord_fixed`](https://ggplot2.tidyverse.org/reference/coord_fixed.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 This is a grouped-path contract, not a GIS topology engine:
 topology/hole repair outside clean ggplot2 built groups is deferred.
 
 ### Area and ribbon
 
-``` r
+\
+`# Area chart`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``economics``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``date``, ``unemploy``)``)`` ``+`\
+`  `[`geom_area`](https://ggplot2.tidyverse.org/reference/geom_ribbon.html)`(``fill ``=`` ``"steelblue"``, alpha ``=`` ``0.5``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
-# Area chart
-(ggplot(economics, aes(date, unemploy)) +
-  geom_area(fill = "steelblue", alpha = 0.5)) |>
-  gg2d3()
-```
-
-``` r
-
-
-# Ribbon (confidence band)
-(ggplot(economics, aes(date, unemploy)) +
-  geom_ribbon(aes(ymin = unemploy - 500, ymax = unemploy + 500),
-              alpha = 0.3) +
-  geom_line()) |>
-  gg2d3()
-```
+\
+\
+`# Ribbon (confidence band)`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``economics``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``date``, ``unemploy``)``)`` ``+`\
+`  `[`geom_ribbon`](https://ggplot2.tidyverse.org/reference/geom_ribbon.html)`(`[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``ymin ``=`` ``unemploy`` ``-`` ``500``, ymax ``=`` ``unemploy`` ``+`` ``500``)``,`\
+`              alpha ``=`` ``0.3``)`` ``+`\
+`  `[`geom_line`](https://ggplot2.tidyverse.org/reference/geom_path.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 ### Segments and reference lines
 
-``` r
-
-(ggplot(mtcars, aes(wt, mpg)) +
-  geom_point() +
-  geom_hline(yintercept = 20, linetype = "dashed", color = "red") +
-  geom_vline(xintercept = 3, linetype = "dotted", color = "blue")) |>
-  gg2d3()
-```
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mtcars``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``wt``, ``mpg``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``)`` ``+`\
+`  `[`geom_hline`](https://ggplot2.tidyverse.org/reference/geom_abline.html)`(``yintercept ``=`` ``20``, linetype ``=`` ``"dashed"``, color ``=`` ``"red"``)`` ``+`\
+`  `[`geom_vline`](https://ggplot2.tidyverse.org/reference/geom_abline.html)`(``xintercept ``=`` ``3``, linetype ``=`` ``"dotted"``, color ``=`` ``"blue"``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 `geom_segment` and `geom_abline` are also supported.
 
@@ -205,42 +179,34 @@ topology/hole repair outside clean ggplot2 built groups is deferred.
 These geoms are pre-computed in R (via ggplot2’s stat system) and
 rendered by D3. No JavaScript statistics are needed.
 
-``` r
+\
+`# Boxplot`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mpg``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``class``, ``hwy``)``)`` ``+`\
+`  `[`geom_boxplot`](https://ggplot2.tidyverse.org/reference/geom_boxplot.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
-# Boxplot
-(ggplot(mpg, aes(class, hwy)) +
-  geom_boxplot()) |>
-  gg2d3()
-```
+\
+\
+`# Violin`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mpg``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``class``, ``hwy``, fill ``=`` ``class``)``)`` ``+`\
+`  `[`geom_violin`](https://ggplot2.tidyverse.org/reference/geom_violin.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
-``` r
+\
+\
+`# Density`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``diamonds``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``price``, fill ``=`` ``cut``)``)`` ``+`\
+`  `[`geom_density`](https://ggplot2.tidyverse.org/reference/geom_density.html)`(``alpha ``=`` ``0.5``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
-
-# Violin
-(ggplot(mpg, aes(class, hwy, fill = class)) +
-  geom_violin()) |>
-  gg2d3()
-```
-
-``` r
-
-
-# Density
-(ggplot(diamonds, aes(price, fill = cut)) +
-  geom_density(alpha = 0.5)) |>
-  gg2d3()
-```
-
-``` r
-
-
-# Smooth (loess or lm)
-(ggplot(mpg, aes(displ, hwy)) +
-  geom_point() +
-  geom_smooth(method = "loess")) |>
-  gg2d3()
-#> `geom_smooth()` using formula = 'y ~ x'
-```
+\
+\
+`# Smooth (loess or lm)`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mpg``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``displ``, ``hwy``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``)`` ``+`\
+`  `[`geom_smooth`](https://ggplot2.tidyverse.org/reference/geom_smooth.html)`(``method ``=`` ``"loess"``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`\
+`` #> `geom_smooth()` using formula = 'y ~ x' ``
 
 ### sf family maps with `geom_sf`
 
@@ -256,36 +222,34 @@ render labels at projected anchors aligned with those accepted sf
 families. This example uses the `nc` shapefile bundled with `sf` and
 renders county boundaries as D3 `path` marks.
 
-``` r
-
-has_sf <- requireNamespace("sf", quietly = TRUE)
-has_geojsonsf <- requireNamespace("geojsonsf", quietly = TRUE)
-missing_sf_packages <- c(
-  if (!has_sf) "sf",
-  if (!has_geojsonsf) "geojsonsf"
-)
-
-if (length(missing_sf_packages) > 0) {
-  cat(
-    "PKGDOWN_SF_OPTIONAL_SKIP: sf example not rendered; missing ",
-    paste(missing_sf_packages, collapse = ", "),
-    ".\n",
-    sep = ""
-  )
-} else {
-  sf_pkg <- asNamespace("sf")
-  nc <- sf_pkg$st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
-
-  (ggplot(nc, aes(fill = AREA)) +
-    geom_sf(color = "white", linewidth = 0.2) +
-    scale_fill_gradient(low = "#eff3ff", high = "#08519c") +
-    labs(fill = "Area")) |>
-    gg2d3() |>
-    d3_tooltip(fields = c("NAME", "AREA")) |>
-    d3_hover(opacity = 0.35, stroke = "#111827", stroke_width = 1.5) |>
-    d3_brush(fill = "#f59e0b", opacity = 0.2)
-}
-```
+\
+`has_sf`` ``<-`` `[`requireNamespace`](https://rdrr.io/r/base/ns-load.html)`(``"sf"``, quietly ``=`` ``TRUE``)`\
+`has_geojsonsf`` ``<-`` `[`requireNamespace`](https://rdrr.io/r/base/ns-load.html)`(``"geojsonsf"``, quietly ``=`` ``TRUE``)`\
+`missing_sf_packages`` ``<-`` `[`c`](https://rdrr.io/r/base/c.html)`(`\
+`  ``if`` ``(``!``has_sf``)`` ``"sf"``,`\
+`  ``if`` ``(``!``has_geojsonsf``)`` ``"geojsonsf"`\
+`)`\
+\
+`if`` ``(`[`length`](https://rdrr.io/r/base/length.html)`(``missing_sf_packages``)`` ``>`` ``0``)`` ``{`\
+`  `[`cat`](https://rdrr.io/r/base/cat.html)`(`\
+`    ``"PKGDOWN_SF_OPTIONAL_SKIP: sf example not rendered; missing "``,`\
+`    `[`paste`](https://rdrr.io/r/base/paste.html)`(``missing_sf_packages``, collapse ``=`` ``", "``)``,`\
+`    ``".\n"``,`\
+`    sep ``=`` ``""`\
+`  ``)`\
+`}`` ``else`` ``{`\
+`  ``sf_pkg`` ``<-`` `[`asNamespace`](https://rdrr.io/r/base/ns-internal.html)`(``"sf"``)`\
+`  ``nc`` ``<-`` ``sf_pkg``$``st_read``(`[`system.file`](https://rdrr.io/r/base/system.file.html)`(``"shape/nc.shp"``, package ``=`` ``"sf"``)``, quiet ``=`` ``TRUE``)`\
+\
+`  ``(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``nc``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``fill ``=`` ``AREA``)``)`` ``+`\
+`    `[`geom_sf`](https://ggplot2.tidyverse.org/reference/ggsf.html)`(``color ``=`` ``"white"``, linewidth ``=`` ``0.2``)`` ``+`\
+`    `[`scale_fill_gradient`](https://ggplot2.tidyverse.org/reference/scale_gradient.html)`(``low ``=`` ``"#eff3ff"``, high ``=`` ``"#08519c"``)`` ``+`\
+`    `[`labs`](https://ggplot2.tidyverse.org/reference/labs.html)`(``fill ``=`` ``"Area"``)``)`` ``|>`\
+`    `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`` ``|>`\
+`    `[`d3_tooltip`](https://davidzenz.github.io/gg2d3/reference/d3_tooltip.md)`(``fields ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"NAME"``, ``"AREA"``)``)`` ``|>`\
+`    `[`d3_hover`](https://davidzenz.github.io/gg2d3/reference/d3_hover.md)`(``opacity ``=`` ``0.35``, stroke ``=`` ``"#111827"``, stroke_width ``=`` ``1.5``)`` ``|>`\
+`    `[`d3_brush`](https://davidzenz.github.io/gg2d3/reference/d3_brush.md)`(``fill ``=`` ``"#f59e0b"``, opacity ``=`` ``0.2``)`\
+`}`
 
 The [`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html)
 support contract is intentionally explicit:
@@ -319,13 +283,11 @@ support contract is intentionally explicit:
 
 Log, sqrt, and reverse transforms work as expected:
 
-``` r
-
-(ggplot(diamonds, aes(carat, price)) +
-  geom_point(alpha = 0.1) +
-  scale_y_log10()) |>
-  gg2d3()
-```
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``diamonds``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``carat``, ``price``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``alpha ``=`` ``0.1``)`` ``+`\
+`  `[`scale_y_log10`](https://ggplot2.tidyverse.org/reference/scale_continuous.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 ### Date and datetime scales
 
@@ -333,34 +295,30 @@ Date and POSIXct columns are automatically detected and rendered with
 temporal D3 scales. Axis tick labels use the format from ggplot2’s
 `date_labels` argument:
 
-``` r
-
-df <- data.frame(
-  date = seq(as.Date("2024-01-01"), as.Date("2024-12-31"), by = "month"),
-  value = cumsum(rnorm(12))
-)
-
-(ggplot(df, aes(date, value)) +
-  geom_line() +
-  geom_point() +
-  scale_x_date(date_labels = "%b %Y")) |>
-  gg2d3()
-```
+\
+`df`` ``<-`` `[`data.frame`](https://rdrr.io/r/base/data.frame.html)`(`\
+`  date ``=`` `[`seq`](https://rdrr.io/r/base/seq.html)`(`[`as.Date`](https://rdrr.io/r/base/as.Date.html)`(``"2024-01-01"``)``, `[`as.Date`](https://rdrr.io/r/base/as.Date.html)`(``"2024-12-31"``)``, by ``=`` ``"month"``)``,`\
+`  value ``=`` `[`cumsum`](https://rdrr.io/r/base/cumsum.html)`(`[`rnorm`](https://rdrr.io/r/stats/Normal.html)`(``12``)``)`\
+`)`\
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``df``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``date``, ``value``)``)`` ``+`\
+`  `[`geom_line`](https://ggplot2.tidyverse.org/reference/geom_path.html)`(``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``)`` ``+`\
+`  `[`scale_x_date`](https://ggplot2.tidyverse.org/reference/scale_date.html)`(``date_labels ``=`` ``"%b %Y"``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 POSIXct (datetime) works the same way:
 
-``` r
-
-df <- data.frame(
-  time = as.POSIXct("2024-01-01") + (0:23) * 3600,
-  temp = 15 + 5 * sin(seq(0, 2 * pi, length.out = 24)) + rnorm(24, sd = 0.5)
-)
-
-(ggplot(df, aes(time, temp)) +
-  geom_line() +
-  scale_x_datetime(date_labels = "%H:%M")) |>
-  gg2d3()
-```
+\
+`df`` ``<-`` `[`data.frame`](https://rdrr.io/r/base/data.frame.html)`(`\
+`  time ``=`` `[`as.POSIXct`](https://rdrr.io/r/base/as.POSIXlt.html)`(``"2024-01-01"``)`` ``+`` ``(``0``:``23``)`` ``*`` ``3600``,`\
+`  temp ``=`` ``15`` ``+`` ``5`` ``*`` `[`sin`](https://rdrr.io/r/base/Trig.html)`(`[`seq`](https://rdrr.io/r/base/seq.html)`(``0``, ``2`` ``*`` ``pi``, length.out ``=`` ``24``)``)`` ``+`` `[`rnorm`](https://rdrr.io/r/stats/Normal.html)`(``24``, sd ``=`` ``0.5``)`\
+`)`\
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``df``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``time``, ``temp``)``)`` ``+`\
+`  `[`geom_line`](https://ggplot2.tidyverse.org/reference/geom_path.html)`(``)`` ``+`\
+`  `[`scale_x_datetime`](https://ggplot2.tidyverse.org/reference/scale_date.html)`(``date_labels ``=`` ``"%H:%M"``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 Timezone information from `scale_x_datetime(timezone = ...)` is
 preserved in tooltips.
@@ -372,17 +330,15 @@ from
 [`sec_axis()`](https://ggplot2.tidyverse.org/reference/sec_axis.html)
 all appear on the opposite side of the panel.
 
-``` r
-
-# Secondary axis showing unemployment in millions
-(ggplot(economics, aes(date, unemploy)) +
-  geom_line() +
-  scale_y_continuous(
-    name = "Unemployment (thousands)",
-    sec.axis = sec_axis(~ . / 1000, name = "Millions")
-  )) |>
-  gg2d3()
-```
+\
+`# Secondary axis showing unemployment in millions`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``economics``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``date``, ``unemploy``)``)`` ``+`\
+`  `[`geom_line`](https://ggplot2.tidyverse.org/reference/geom_path.html)`(``)`` ``+`\
+`  `[`scale_y_continuous`](https://ggplot2.tidyverse.org/reference/scale_continuous.html)`(`\
+`    name ``=`` ``"Unemployment (thousands)"``,`\
+`    sec.axis ``=`` `[`sec_axis`](https://ggplot2.tidyverse.org/reference/sec_axis.html)`(``~`` ``.`` ``/`` ``1000``, name ``=`` ``"Millions"``)`\
+`  ``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 ## Color scales
 
@@ -391,32 +347,26 @@ gradient with axis ticks), not a stack of discrete keys. Discrete
 palettes — viridis, brewer, manual — produce identical hex codes to
 ggplot2’s own output.
 
-``` r
+\
+`# Viridis continuous → colorbar legend`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``faithfuld``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``waiting``, ``eruptions``, fill ``=`` ``density``)``)`` ``+`\
+`  `[`geom_tile`](https://ggplot2.tidyverse.org/reference/geom_tile.html)`(``)`` ``+`\
+`  `[`scale_fill_viridis_c`](https://ggplot2.tidyverse.org/reference/scale_viridis.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
-# Viridis continuous → colorbar legend
-(ggplot(faithfuld, aes(waiting, eruptions, fill = density)) +
-  geom_tile() +
-  scale_fill_viridis_c()) |>
-  gg2d3()
-```
+\
+`# Brewer discrete`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mpg``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``displ``, ``hwy``, color ``=`` ``class``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``)`` ``+`\
+`  `[`scale_color_brewer`](https://ggplot2.tidyverse.org/reference/scale_brewer.html)`(``palette ``=`` ``"Set2"``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
-``` r
-
-# Brewer discrete
-(ggplot(mpg, aes(displ, hwy, color = class)) +
-  geom_point() +
-  scale_color_brewer(palette = "Set2")) |>
-  gg2d3()
-```
-
-``` r
-
-# Manual
-(ggplot(mtcars, aes(wt, mpg, color = factor(cyl))) +
-  geom_point(size = 3) +
-  scale_color_manual(values = c("4" = "#1b9e77", "6" = "#d95f02", "8" = "#7570b3"))) |>
-  gg2d3()
-```
+\
+`# Manual`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mtcars``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``wt``, ``mpg``, color ``=`` `[`factor`](https://rdrr.io/r/base/factor.html)`(``cyl``)``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``size ``=`` ``3``)`` ``+`\
+`  `[`scale_color_manual`](https://ggplot2.tidyverse.org/reference/scale_manual.html)`(``values ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"4"`` ``=`` ``"#1b9e77"``, ``"6"`` ``=`` ``"#d95f02"``, ``"8"`` ``=`` ``"#7570b3"``)``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 ## Coordinates
 
@@ -424,25 +374,21 @@ ggplot2’s own output.
 
 Swaps x and y axes. All geoms and scales adapt automatically:
 
-``` r
-
-(ggplot(mpg, aes(class, hwy)) +
-  geom_boxplot() +
-  coord_flip()) |>
-  gg2d3()
-```
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mpg``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``class``, ``hwy``)``)`` ``+`\
+`  `[`geom_boxplot`](https://ggplot2.tidyverse.org/reference/geom_boxplot.html)`(``)`` ``+`\
+`  `[`coord_flip`](https://ggplot2.tidyverse.org/reference/coord_flip.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 ### coord_fixed
 
 Enforces a fixed aspect ratio between x and y units:
 
-``` r
-
-(ggplot(mtcars, aes(wt, mpg)) +
-  geom_point() +
-  coord_fixed(ratio = 1)) |>
-  gg2d3()
-```
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mtcars``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``wt``, ``mpg``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``)`` ``+`\
+`  `[`coord_fixed`](https://ggplot2.tidyverse.org/reference/coord_fixed.html)`(``ratio ``=`` ``1``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 ## Faceting
 
@@ -450,45 +396,37 @@ Enforces a fixed aspect ratio between x and y units:
 
 Wraps panels into rows by one or more variables:
 
-``` r
-
-(ggplot(mpg, aes(displ, hwy)) +
-  geom_point() +
-  facet_wrap(~class)) |>
-  gg2d3()
-```
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mpg``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``displ``, ``hwy``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``)`` ``+`\
+`  `[`facet_wrap`](https://ggplot2.tidyverse.org/reference/facet_wrap.html)`(``~``class``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 With free scales:
 
-``` r
-
-(ggplot(mpg, aes(displ, hwy)) +
-  geom_point() +
-  facet_wrap(~class, scales = "free")) |>
-  gg2d3()
-```
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mpg``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``displ``, ``hwy``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``)`` ``+`\
+`  `[`facet_wrap`](https://ggplot2.tidyverse.org/reference/facet_wrap.html)`(``~``class``, scales ``=`` ``"free"``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 ### facet_grid
 
 Lays out panels in a grid defined by row and column variables:
 
-``` r
-
-(ggplot(mpg, aes(displ, hwy)) +
-  geom_point() +
-  facet_grid(drv ~ cyl)) |>
-  gg2d3()
-```
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mpg``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``displ``, ``hwy``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``)`` ``+`\
+`  `[`facet_grid`](https://ggplot2.tidyverse.org/reference/facet_grid.html)`(``drv`` ``~`` ``cyl``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 Free scales work per-row (`"free_y"`) or per-column (`"free_x"`):
 
-``` r
-
-(ggplot(mpg, aes(displ, hwy)) +
-  geom_point() +
-  facet_grid(drv ~ cyl, scales = "free")) |>
-  gg2d3()
-```
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mpg``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``displ``, ``hwy``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``)`` ``+`\
+`  `[`facet_grid`](https://ggplot2.tidyverse.org/reference/facet_grid.html)`(``drv`` ``~`` ``cyl``, scales ``=`` ``"free"``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 ## Legends
 
@@ -504,13 +442,11 @@ legend types are supported:
 
 Legends can be positioned with `theme(legend.position = ...)`:
 
-``` r
-
-(ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
-  geom_point() +
-  theme(legend.position = "bottom")) |>
-  gg2d3()
-```
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``iris``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``Sepal.Length``, ``Sepal.Width``, color ``=`` ``Species``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``)`` ``+`\
+`  `[`theme`](https://ggplot2.tidyverse.org/reference/theme.html)`(``legend.position ``=`` ``"bottom"``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 Use `theme(legend.position = "none")` to hide legends entirely.
 
@@ -521,15 +457,13 @@ a single legend automatically.
 
 gg2d3 translates ggplot2 theme elements to SVG styling:
 
-``` r
-
-(ggplot(mtcars, aes(wt, mpg)) +
-  geom_point() +
-  theme_minimal() +
-  ggtitle("Minimal theme") +
-  labs(subtitle = "Rendered with D3", caption = "Source: mtcars")) |>
-  gg2d3()
-```
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mtcars``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``wt``, ``mpg``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``)`` ``+`\
+`  `[`theme_minimal`](https://ggplot2.tidyverse.org/reference/ggtheme.html)`(``)`` ``+`\
+`  `[`ggtitle`](https://ggplot2.tidyverse.org/reference/labs.html)`(``"Minimal theme"``)`` ``+`\
+`  `[`labs`](https://ggplot2.tidyverse.org/reference/labs.html)`(``subtitle ``=`` ``"Rendered with D3"``, caption ``=`` ``"Source: mtcars"``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
 Theme elements that are translated include:
 
@@ -545,16 +479,14 @@ gg2d3 provides a composable pipe-based API for adding interactivity.
 Each function takes a widget and returns a widget, so they chain
 naturally:
 
-``` r
-
-(ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
-  geom_point(size = 3)) |>
-  gg2d3() |>
-  d3_tooltip() |>
-  d3_hover() |>
-  d3_zoom() |>
-  d3_brush()
-```
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``iris``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``Sepal.Length``, ``Sepal.Width``, color ``=`` ``Species``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``size ``=`` ``3``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`` ``|>`\
+`  `[`d3_tooltip`](https://davidzenz.github.io/gg2d3/reference/d3_tooltip.md)`(``)`` ``|>`\
+`  `[`d3_hover`](https://davidzenz.github.io/gg2d3/reference/d3_hover.md)`(``)`` ``|>`\
+`  `[`d3_zoom`](https://davidzenz.github.io/gg2d3/reference/d3_zoom.md)`(``)`` ``|>`\
+`  `[`d3_brush`](https://davidzenz.github.io/gg2d3/reference/d3_brush.md)`(``)`
 
 You can use any combination — they are all optional and independent.
 
@@ -564,25 +496,19 @@ You can use any combination — they are all optional and independent.
 shows data values on hover. By default it displays all mapped
 aesthetics.
 
-``` r
+\
+`# Default: show all aesthetics`\
+[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p``)`` ``|>`` `[`d3_tooltip`](https://davidzenz.github.io/gg2d3/reference/d3_tooltip.md)`(``)`
 
-# Default: show all aesthetics
-gg2d3(p) |> d3_tooltip()
-```
+\
+\
+`# Show specific fields only`\
+[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p``)`` ``|>`` `[`d3_tooltip`](https://davidzenz.github.io/gg2d3/reference/d3_tooltip.md)`(``fields ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"wt"``, ``"mpg"``)``)`
 
-``` r
-
-
-# Show specific fields only
-gg2d3(p) |> d3_tooltip(fields = c("wt", "mpg"))
-```
-
-``` r
-
-
-# Custom JavaScript formatter
-gg2d3(p) |> d3_tooltip(formatter = "function(d) { return d.mpg + ' mpg'; }")
-```
+\
+\
+`# Custom JavaScript formatter`\
+[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p``)`` ``|>`` `[`d3_tooltip`](https://davidzenz.github.io/gg2d3/reference/d3_tooltip.md)`(``formatter ``=`` ``"function(d) { return d.mpg + ' mpg'; }"``)`
 
 Tooltips automatically format date/datetime values using the browser’s
 locale.
@@ -592,18 +518,14 @@ locale.
 [`d3_hover()`](https://davidzenz.github.io/gg2d3/reference/d3_hover.md)
 dims non-hovered elements so the hovered group stands out.
 
-``` r
+\
+`# Default: dim others to 30% opacity`\
+[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p``)`` ``|>`` `[`d3_hover`](https://davidzenz.github.io/gg2d3/reference/d3_hover.md)`(``)`
 
-# Default: dim others to 30% opacity
-gg2d3(p) |> d3_hover()
-```
-
-``` r
-
-
-# Softer dimming + highlight stroke
-gg2d3(p) |> d3_hover(opacity = 0.5, stroke = "black", stroke_width = 2)
-```
+\
+\
+`# Softer dimming + highlight stroke`\
+[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p``)`` ``|>`` `[`d3_hover`](https://davidzenz.github.io/gg2d3/reference/d3_hover.md)`(``opacity ``=`` ``0.5``, stroke ``=`` ``"black"``, stroke_width ``=`` ``2``)`
 
 When a brush selection is active, hover highlighting is automatically
 disabled to avoid visual conflicts.
@@ -614,18 +536,14 @@ disabled to avoid visual conflicts.
 enables scroll-to-zoom and drag-to-pan. Double-click resets to the
 original view.
 
-``` r
+\
+`# Default: zoom both axes, 1x to 8x`\
+[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p``)`` ``|>`` `[`d3_zoom`](https://davidzenz.github.io/gg2d3/reference/d3_zoom.md)`(``)`
 
-# Default: zoom both axes, 1x to 8x
-gg2d3(p) |> d3_zoom()
-```
-
-``` r
-
-
-# Zoom x-axis only, up to 20x
-gg2d3(p) |> d3_zoom(direction = "x", scale_extent = c(1, 20))
-```
+\
+\
+`# Zoom x-axis only, up to 20x`\
+[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p``)`` ``|>`` `[`d3_zoom`](https://davidzenz.github.io/gg2d3/reference/d3_zoom.md)`(``direction ``=`` ``"x"``, scale_extent ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``1``, ``20``)``)`
 
 Axes update dynamically during zoom. Temporal axes preserve their date
 formatting.
@@ -636,27 +554,21 @@ formatting.
 lets users drag to select a rectangular region. Selected elements stay
 at full opacity while others dim.
 
-``` r
+\
+`# Default: 2D brush with blue overlay`\
+[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p``)`` ``|>`` `[`d3_brush`](https://davidzenz.github.io/gg2d3/reference/d3_brush.md)`(``)`
 
-# Default: 2D brush with blue overlay
-gg2d3(p) |> d3_brush()
-```
+\
+\
+`# Horizontal brush only`\
+[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p``)`` ``|>`` `[`d3_brush`](https://davidzenz.github.io/gg2d3/reference/d3_brush.md)`(``direction ``=`` ``"x"``)`
 
-``` r
-
-
-# Horizontal brush only
-gg2d3(p) |> d3_brush(direction = "x")
-```
-
-``` r
-
-
-# Custom callback receiving selected data
-gg2d3(p) |> d3_brush(
-  on_brush = "function(data) { console.log(data.length + ' points selected'); }"
-)
-```
+\
+\
+`# Custom callback receiving selected data`\
+[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p``)`` ``|>`` `[`d3_brush`](https://davidzenz.github.io/gg2d3/reference/d3_brush.md)`(`\
+`  on_brush ``=`` ``"function(data) { console.log(data.length + ' points selected'); }"`\
+`)`
 
 Double-click clears the brush selection.
 
@@ -666,53 +578,51 @@ gg2d3 supports [crosstalk](https://rstudio.github.io/crosstalk/) for
 linking multiple widgets. Brushing in one widget highlights the same
 observations in all linked widgets.
 
-``` r
-
-has_crosstalk <- requireNamespace("crosstalk", quietly = TRUE)
-has_htmltools <- requireNamespace("htmltools", quietly = TRUE)
-
-if (!has_crosstalk || !has_htmltools) {
-  missing_crosstalk_packages <- c(
-    if (!has_crosstalk) "crosstalk",
-    if (!has_htmltools) "htmltools"
-  )
-  cat(
-    "PKGDOWN_CROSSTALK_OPTIONAL_SKIP: linked-view example not rendered; missing ",
-    paste(missing_crosstalk_packages, collapse = ", "),
-    ".\n",
-    sep = ""
-  )
-} else {
-  shared <- crosstalk::SharedData$new(
-    iris,
-    key = rownames(iris),
-    group = "pkgdown_crosstalk_iris"
-  )
-
-  p1 <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
-    geom_point(size = 2)
-  p1$data <- shared
-
-  p2 <- ggplot(iris, aes(Petal.Length, Petal.Width, color = Species)) +
-    geom_point(size = 2)
-  p2$data <- shared
-
-  w1 <- gg2d3(p1) |> d3_tooltip() |> d3_brush()
-  w2 <- gg2d3(p2) |> d3_tooltip() |> d3_brush()
-
-  htmltools::tagList(
-    htmltools::div(
-      style = paste(
-        "display: grid;",
-        "grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));",
-        "gap: 1rem;"
-      ),
-      w1,
-      w2
-    )
-  )
-}
-```
+\
+`has_crosstalk`` ``<-`` `[`requireNamespace`](https://rdrr.io/r/base/ns-load.html)`(``"crosstalk"``, quietly ``=`` ``TRUE``)`\
+`has_htmltools`` ``<-`` `[`requireNamespace`](https://rdrr.io/r/base/ns-load.html)`(``"htmltools"``, quietly ``=`` ``TRUE``)`\
+\
+`if`` ``(``!``has_crosstalk`` ``||`` ``!``has_htmltools``)`` ``{`\
+`  ``missing_crosstalk_packages`` ``<-`` `[`c`](https://rdrr.io/r/base/c.html)`(`\
+`    ``if`` ``(``!``has_crosstalk``)`` ``"crosstalk"``,`\
+`    ``if`` ``(``!``has_htmltools``)`` ``"htmltools"`\
+`  ``)`\
+`  `[`cat`](https://rdrr.io/r/base/cat.html)`(`\
+`    ``"PKGDOWN_CROSSTALK_OPTIONAL_SKIP: linked-view example not rendered; missing "``,`\
+`    `[`paste`](https://rdrr.io/r/base/paste.html)`(``missing_crosstalk_packages``, collapse ``=`` ``", "``)``,`\
+`    ``".\n"``,`\
+`    sep ``=`` ``""`\
+`  ``)`\
+`}`` ``else`` ``{`\
+`  ``shared`` ``<-`` ``crosstalk``::`[`SharedData`](https://rdrr.io/pkg/crosstalk/man/SharedData.html)`$``new``(`\
+`    ``iris``,`\
+`    key ``=`` `[`rownames`](https://rdrr.io/r/base/colnames.html)`(``iris``)``,`\
+`    group ``=`` ``"pkgdown_crosstalk_iris"`\
+`  ``)`\
+\
+`  ``p1`` ``<-`` `[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``iris``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``Sepal.Length``, ``Sepal.Width``, color ``=`` ``Species``)``)`` ``+`\
+`    `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``size ``=`` ``2``)`\
+`  ``p1``$``data`` ``<-`` ``shared`\
+\
+`  ``p2`` ``<-`` `[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``iris``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``Petal.Length``, ``Petal.Width``, color ``=`` ``Species``)``)`` ``+`\
+`    `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``size ``=`` ``2``)`\
+`  ``p2``$``data`` ``<-`` ``shared`\
+\
+`  ``w1`` ``<-`` `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p1``)`` ``|>`` `[`d3_tooltip`](https://davidzenz.github.io/gg2d3/reference/d3_tooltip.md)`(``)`` ``|>`` `[`d3_brush`](https://davidzenz.github.io/gg2d3/reference/d3_brush.md)`(``)`\
+`  ``w2`` ``<-`` `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``p2``)`` ``|>`` `[`d3_tooltip`](https://davidzenz.github.io/gg2d3/reference/d3_tooltip.md)`(``)`` ``|>`` `[`d3_brush`](https://davidzenz.github.io/gg2d3/reference/d3_brush.md)`(``)`\
+\
+`  ``htmltools``::`[`tagList`](https://rstudio.github.io/htmltools/reference/tagList.html)`(`\
+`    ``htmltools``::`[`div`](https://rstudio.github.io/htmltools/reference/builder.html)`(`\
+`      style ``=`` `[`paste`](https://rdrr.io/r/base/paste.html)`(`\
+`        ``"display: grid;"``,`\
+`        ``"grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));"``,`\
+`        ``"gap: 1rem;"`\
+`      ``)``,`\
+`      ``w1``,`\
+`      ``w2`\
+`    ``)`\
+`  ``)`\
+`}`
 
 Crosstalk works in static HTML documents — no Shiny server required.
 
@@ -720,28 +630,26 @@ Crosstalk works in static HTML documents — no Shiny server required.
 
 A realistic example combining multiple features:
 
-``` r
-
-# warning = FALSE: loess emits "neighborhood too small" / "pseudoinverse"
-# notes when fit per (class × year) — some classes have <4 points per
-# facet. The fit still renders; the messages are expected for this demo.
-(ggplot(mpg, aes(displ, hwy, color = class)) +
-  geom_point(size = 2) +
-  geom_smooth(method = "loess", se = TRUE) +
-  facet_wrap(~year) +
-  scale_color_brewer(palette = "Set2") +
-  labs(
-    title = "Engine displacement vs highway MPG",
-    subtitle = "By vehicle class and model year",
-    x = "Displacement (L)",
-    y = "Highway MPG"
-  ) +
-  theme_minimal()) |>
-  gg2d3() |>
-  d3_tooltip() |>
-  d3_hover() |>
-  d3_zoom()
-```
+\
+`# warning = FALSE: loess emits "neighborhood too small" / "pseudoinverse"`\
+`# notes when fit per (class × year) — some classes have <4 points per`\
+`# facet. The fit still renders; the messages are expected for this demo.`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``mpg``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``displ``, ``hwy``, color ``=`` ``class``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``size ``=`` ``2``)`` ``+`\
+`  `[`geom_smooth`](https://ggplot2.tidyverse.org/reference/geom_smooth.html)`(``method ``=`` ``"loess"``, se ``=`` ``TRUE``)`` ``+`\
+`  `[`facet_wrap`](https://ggplot2.tidyverse.org/reference/facet_wrap.html)`(``~``year``)`` ``+`\
+`  `[`scale_color_brewer`](https://ggplot2.tidyverse.org/reference/scale_brewer.html)`(``palette ``=`` ``"Set2"``)`` ``+`\
+`  `[`labs`](https://ggplot2.tidyverse.org/reference/labs.html)`(`\
+`    title ``=`` ``"Engine displacement vs highway MPG"``,`\
+`    subtitle ``=`` ``"By vehicle class and model year"``,`\
+`    x ``=`` ``"Displacement (L)"``,`\
+`    y ``=`` ``"Highway MPG"`\
+`  ``)`` ``+`\
+`  `[`theme_minimal`](https://ggplot2.tidyverse.org/reference/ggtheme.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`` ``|>`\
+`  `[`d3_tooltip`](https://davidzenz.github.io/gg2d3/reference/d3_tooltip.md)`(``)`` ``|>`\
+`  `[`d3_hover`](https://davidzenz.github.io/gg2d3/reference/d3_hover.md)`(``)`` ``|>`\
+`  `[`d3_zoom`](https://davidzenz.github.io/gg2d3/reference/d3_zoom.md)`(``)`
 
 ## Error handling and edge cases
 
@@ -760,43 +668,35 @@ outside normal rendering scope:
     itself errors (e.g., incompatible stat/geom combinations), the error
     is surfaced as an R condition before any D3 rendering is attempted.
 
-``` r
+\
+`# Non-finite values: filtered with a single warning per layer;`\
+`# remaining points render with visible gaps`\
+`df`` ``<-`` `[`data.frame`](https://rdrr.io/r/base/data.frame.html)`(``x ``=`` ``1``:``10``, y ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``1``:``4``, ``NA``, ``6``:``9``, ``NaN``)``)`\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``df``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``x``, ``y``)``)`` ``+`\
+`  `[`geom_point`](https://ggplot2.tidyverse.org/reference/geom_point.html)`(``)`` ``+`\
+`  `[`geom_line`](https://ggplot2.tidyverse.org/reference/geom_path.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
-# Non-finite values: filtered with a single warning per layer;
-# remaining points render with visible gaps
-df <- data.frame(x = 1:10, y = c(1:4, NA, 6:9, NaN))
-(ggplot(df, aes(x, y)) +
-  geom_point() +
-  geom_line()) |>
-  gg2d3()
-```
+\
+`# Warning: Removed 2 rows containing non-finite values (geom_point).`\
+`# The geom_line connects the finite segments and shows a visible gap.`
 
-``` r
+\
+`# Ordinary polygons: grouped closed paths with row-order preservation`\
+`poly_edges`` ``<-`` `[`data.frame`](https://rdrr.io/r/base/data.frame.html)`(`\
+`  group ``=`` `[`rep`](https://rdrr.io/r/base/rep.html)`(`[`c`](https://rdrr.io/r/base/c.html)`(``"left"``, ``"right"``)``, each ``=`` ``4``)``,`\
+`  x ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``0``, ``1``, ``1``, ``0``, ``1.4``, ``2.4``, ``2.1``, ``1.2``)``,`\
+`  y ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``0``, ``0``, ``1``, ``0.8``, ``0.1``, ``0.2``, ``1``, ``0.9``)`\
+`)`\
+\
+`(`[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``poly_edges``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``x``, ``y``, group ``=`` ``group``, fill ``=`` ``group``)``)`` ``+`\
+`  `[`geom_polygon`](https://ggplot2.tidyverse.org/reference/geom_polygon.html)`(``color ``=`` ``"grey35"``, linewidth ``=`` ``0.4``, alpha ``=`` ``0.75``)`` ``+`\
+`  `[`coord_fixed`](https://ggplot2.tidyverse.org/reference/coord_fixed.html)`(``)``)`` ``|>`\
+`  `[`gg2d3`](https://davidzenz.github.io/gg2d3/reference/gg2d3.md)`(``)`
 
-# Warning: Removed 2 rows containing non-finite values (geom_point).
-# The geom_line connects the finite segments and shows a visible gap.
-```
-
-``` r
-
-# Ordinary polygons: grouped closed paths with row-order preservation
-poly_edges <- data.frame(
-  group = rep(c("left", "right"), each = 4),
-  x = c(0, 1, 1, 0, 1.4, 2.4, 2.1, 1.2),
-  y = c(0, 0, 1, 0.8, 0.1, 0.2, 1, 0.9)
-)
-
-(ggplot(poly_edges, aes(x, y, group = group, fill = group)) +
-  geom_polygon(color = "grey35", linewidth = 0.4, alpha = 0.75) +
-  coord_fixed()) |>
-  gg2d3()
-```
-
-``` r
-
-# topology/hole repair beyond grouped closed paths remains outside the shipped
-# support contract.
-```
+\
+`# topology/hole repair beyond grouped closed paths remains outside the shipped`\
+`# support contract.`
 
 ## Tips
 

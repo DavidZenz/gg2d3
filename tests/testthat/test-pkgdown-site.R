@@ -30,6 +30,28 @@ test_that("generated pkgdown article records an sf render or skip outcome", {
   pkgdown_site_expect_sf_outcome(require_rendered_sf = FALSE)
 })
 
+test_that("generated sf widget preserves source fields for tooltip values", {
+  pkgdown_site_skip_if_generated_docs_unavailable()
+  testthat::skip_if(
+    !identical(pkgdown_site_sf_outcome(), "rendered"),
+    "generated sf article is optional and was classified as skipped"
+  )
+
+  html <- pkgdown_site_read_text("docs/articles/gg2d3.html")
+  testthat::expect_true(
+    grepl('"NAME":"Ashe"', html, fixed = TRUE),
+    info = "sf payload should preserve the source NAME field"
+  )
+  testthat::expect_true(
+    grepl('"AREA":0.114', html, fixed = TRUE),
+    info = "sf payload should preserve numeric AREA rather than the fill colour"
+  )
+  testthat::expect_true(
+    grepl('"aes_by_var":{"AREA":"fill"}', html, fixed = TRUE),
+    info = "sf payload should retain the AREA-to-fill mapping separately"
+  )
+})
+
 test_that("generated pkgdown NEWS and reference pages reflect current support", {
   pkgdown_site_skip_if_generated_docs_unavailable()
   pkgdown_site_validate_news_and_reference()
